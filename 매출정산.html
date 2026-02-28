@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>iLBiA 매출 정산 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:#0d1117;color:#e2e8f0;font-size:14px;min-height:100vh;}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#1a1d27}
+::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0f766e 0%,#0284c7 100%);padding:18px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.4);}
+header h1{font-size:1.2rem;font-weight:700;color:#fff;}
+header p{font-size:.78rem;color:rgba(255,255,255,.7);margin-top:2px;}
+.header-badge{background:rgba(255,255,255,.15);border-radius:20px;padding:4px 12px;font-size:.75rem;color:#fff;margin-left:auto;}
+
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 62px);}
+
+/* SIDEBAR */
+.sidebar{width:220px;min-width:220px;background:#10151f;border-right:1px solid #1e293b;padding:16px 0;}
+.sidebar-section{padding:0 12px 8px;}
+.sidebar-label{font-size:.7rem;color:#475569;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:8px 8px 4px;}
+.ch-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;cursor:pointer;margin-bottom:2px;transition:background .15s;}
+.ch-item:hover{background:#1e293b;}
+.ch-item.active{background:#0f766e22;border:1px solid #0f766e44;}
+.ch-icon{width:28px;height:28px;border-radius:6px;background:#1e293b;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;}
+.ch-name{font-size:.8rem;font-weight:500;color:#cbd5e1;flex:1;}
+.ch-status{width:8px;height:8px;border-radius:50%;background:#334155;flex-shrink:0;}
+.ch-status.done{background:#10b981;}
+.ch-status.warn{background:#f59e0b;}
+.ch-status.error{background:#ef4444;}
+
+.sidebar-total{margin:12px 12px 0;background:#1a1d27;border-radius:10px;padding:12px;}
+.sidebar-total .label{font-size:.7rem;color:#64748b;margin-bottom:4px;}
+.sidebar-total .val{font-size:1.1rem;font-weight:700;color:#10b981;}
+.sidebar-total .sub{font-size:.72rem;color:#475569;margin-top:2px;}
+
+/* MAIN */
+.main{flex:1;padding:20px 24px;overflow-x:auto;}
+
+/* STEP CARD */
+.step-card{background:#161b27;border-radius:14px;border:1px solid #1e293b;margin-bottom:16px;overflow:hidden;}
+.step-header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid #1e293b;cursor:pointer;}
+.step-num{width:26px;height:26px;border-radius:50%;background:#0f766e;color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-num.done{background:#10b981;}
+.step-title{font-size:.95rem;font-weight:600;color:#e2e8f0;}
+.step-sub{font-size:.75rem;color:#64748b;margin-left:auto;}
+.step-body{padding:16px 18px;display:none;}
+.step-body.open{display:block;}
+
+/* FILE DROP */
+.drop-zone{border:2px dashed #334155;border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.drop-zone:hover,.drop-zone.dragover{border-color:#0f766e;background:#0f766e11;}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.drop-zone .icon{font-size:2rem;margin-bottom:8px;}
+.drop-zone p{color:#64748b;font-size:.85rem;}
+.drop-zone p strong{color:#94a3b8;}
+.drop-zone.loaded{border-color:#10b981;background:#10b98111;}
+.drop-zone.loaded p{color:#10b981;}
+
+/* CHANNEL GRID */
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.ch-card{background:#0d1117;border:1px solid #1e293b;border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;position:relative;}
+.ch-card:hover{border-color:#334155;}
+.ch-card.loaded{border-color:#10b981;}
+.ch-card.has-unmapped{border-color:#f59e0b;}
+.ch-card.error{border-color:#ef4444;}
+.ch-card-top{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.ch-card-icon{font-size:1.2rem;}
+.ch-card-name{font-size:.85rem;font-weight:600;color:#cbd5e1;}
+.ch-card-status{margin-left:auto;font-size:.7rem;padding:2px 8px;border-radius:20px;}
+.st-wait{background:#1e293b;color:#64748b;}
+.st-ok{background:#10b98122;color:#10b981;}
+.st-warn{background:#f59e0b22;color:#f59e0b;}
+.st-err{background:#ef444422;color:#ef4444;}
+.ch-card-drop{border:1px dashed #334155;border-radius:6px;padding:10px;text-align:center;font-size:.75rem;color:#475569;position:relative;cursor:pointer;}
+.ch-card-drop:hover{border-color:#0f766e;color:#0f766e;}
+.ch-card-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.ch-card-stat{font-size:.72rem;color:#64748b;margin-top:6px;}
+.ch-card-stat span{color:#94a3b8;font-weight:600;}
+
+/* RESULT TABLES */
+.result-section{margin-top:16px;}
+.result-title{font-size:.85rem;font-weight:600;color:#94a3b8;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.result-title .badge{font-size:.7rem;padding:2px 8px;border-radius:20px;font-weight:400;}
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid #1e293b;}
+table{width:100%;border-collapse:collapse;font-size:.8rem;}
+thead tr{background:#1a1d27;}
+th{padding:10px 12px;text-align:left;color:#64748b;font-weight:600;font-size:.75rem;border-bottom:1px solid #1e293b;white-space:nowrap;}
+th.num{text-align:right;}
+td{padding:9px 12px;border-bottom:1px solid #111827;vertical-align:middle;}
+td.num{text-align:right;font-variant-numeric:tabular-nums;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#1a1d2788;}
+.unmapped-badge{background:#f59e0b22;color:#f59e0b;font-size:.7rem;padding:2px 6px;border-radius:4px;}
+.profit-pos{color:#10b981;font-weight:600;}
+.profit-neg{color:#ef4444;font-weight:600;}
+
+/* UNMAPPED MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:#161b27;border:1px solid #334155;border-radius:14px;width:100%;max-width:700px;max-height:80vh;display:flex;flex-direction:column;}
+.modal-header{padding:16px 20px;border-bottom:1px solid #1e293b;display:flex;align-items:center;gap:10px;}
+.modal-header h3{font-size:1rem;font-weight:600;}
+.modal-close{margin-left:auto;cursor:pointer;color:#64748b;font-size:1.2rem;padding:4px;}
+.modal-body{padding:16px 20px;overflow-y:auto;flex:1;}
+.modal-footer{padding:12px 20px;border-top:1px solid #1e293b;display:flex;gap:8px;justify-content:flex-end;}
+.unmapped-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #111827;}
+.unmapped-row:last-child{border-bottom:none;}
+.unmapped-key{flex:1;font-size:.78rem;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.unmapped-row select,.unmapped-row input{background:#0d1117;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font-size:.78rem;font-family:inherit;width:160px;}
+.unmapped-row input{width:140px;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.btn-primary{background:#0f766e;color:#fff;}
+.btn-primary:hover{background:#0d9488;}
+.btn-secondary{background:#1e293b;color:#94a3b8;}
+.btn-secondary:hover{background:#334155;color:#e2e8f0;}
+.btn-success{background:#065f46;color:#10b981;border:1px solid #10b98133;}
+.btn-success:hover{background:#10b98133;}
+.btn-sm{padding:5px 10px;font-size:.75rem;}
+
+/* CONSOLIDATED */
+.consolidated{background:#161b27;border-radius:14px;border:1px solid #1e293b;padding:18px;margin-top:16px;}
+.consolidated h2{font-size:1rem;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+/* SUMMARY CARDS */
+.sum-cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.sum-card{background:#0d1117;border-radius:10px;border:1px solid #1e293b;padding:14px 18px;flex:1;min-width:150px;}
+.sum-card .val{font-size:1.3rem;font-weight:700;color:#10b981;}
+.sum-card .lbl{font-size:.72rem;color:#64748b;margin-top:3px;}
+
+/* PROGRESS */
+.progress-bar{height:4px;background:#1e293b;border-radius:2px;overflow:hidden;margin-top:8px;}
+.progress-fill{height:100%;background:#0f766e;border-radius:2px;transition:width .3s;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#1a1d27;border:1px solid #334155;border-radius:10px;padding:12px 18px;font-size:.82rem;z-index:300;transform:translateY(100px);opacity:0;transition:all .3s;max-width:320px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-color:#10b98155;color:#10b981;}
+.toast.error{border-color:#ef444455;color:#ef4444;}
+.toast.warn{border-color:#f59e0b55;color:#f59e0b;}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📊 iLBiA 매출 정산 대시보드</h1>
+    <p>채널별 정산 파일을 업로드하면 자동으로 집계해드려요</p>
+  </div>
+  <div class="header-badge" id="headerMonth">정산 월 미설정</div>
+</header>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">채널 현황</div>
+    <div class="sidebar-section" id="sidebarChannels"></div>
+    <div class="sidebar-label" style="margin-top:8px;">정산 합계</div>
+    <div class="sidebar-total">
+      <div class="label">총 정산금액</div>
+      <div class="val" id="sidebarTotal">₩ 0</div>
+      <div class="sub" id="sidebarProfit">이익 ₩ 0</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- STEP 1: 원가 파일 -->
+    <div class="step-card">
+      <div class="step-header" onclick="toggleStep(1)">
+        <div class="step-num" id="stepNum1">1</div>
+        <div>
+          <div class="step-title">원가 파일 업로드</div>
+          <div style="font-size:.75rem;color:#64748b;margin-top:2px;">「온라인 매출정산.xlsx」의 원가 시트를 불러옵니다</div>
+        </div>
+        <div class="step-sub" id="costStatus">⏳ 대기 중</div>
+      </div>
+      <div class="step-body open" id="stepBody1">
+        <div class="drop-zone" id="costDrop">
+          <input type="file" accept=".xlsx,.xls" onchange="loadCostFile(this)"/>
+          <div class="icon">📂</div>
+          <p><strong>온라인 매출정산.xlsx</strong> 파일을 여기에 드롭하거나 클릭해서 선택하세요</p>
+          <p style="margin-top:6px;font-size:.72rem;">원가 시트의 제품명 → 판관비포함원가(부가세포함) 데이터를 읽습니다</p>
+        </div>
+        <div id="costResult" style="display:none;margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: 채널 파일 -->
+    <div class="step-card">
+      <div class="step-header" onclick="toggleStep(2)">
+        <div class="step-num" id="stepNum2">2</div>
+        <div>
+          <div class="step-title">채널별 정산 파일 업로드</div>
+          <div style="font-size:.75rem;color:#64748b;margin-top:2px;">각 채널의 원본 파일을 올리면 자동으로 상품명 매핑 + 정산금 계산</div>
+        </div>
+        <div class="step-sub" id="channelStatus">0 / 9 완료</div>
+      </div>
+      <div class="step-body open" id="stepBody2">
+        <!-- 정산 월 설정 -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <span style="font-size:.82rem;color:#94a3b8;">정산 월:</span>
+          <input type="month" id="settlementMonth" value="2026-01" style="background:#0d1117;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 10px;font-size:.82rem;font-family:inherit;" onchange="updateMonth()"/>
+        </div>
+        <div class="ch-grid" id="channelGrid"></div>
+      </div>
+    </div>
+
+    <!-- STEP 3: 미매핑 처리 -->
+    <div class="step-card" id="step3Card" style="display:none;">
+      <div class="step-header" onclick="toggleStep(3)">
+        <div class="step-num" id="stepNum3">3</div>
+        <div>
+          <div class="step-title">미매핑 상품 처리</div>
+          <div style="font-size:.75rem;color:#f59e0b;margin-top:2px;">품명리스트에 없는 새 상품명을 지정해주세요</div>
+        </div>
+        <div class="step-sub" id="unmappedStatus"></div>
+      </div>
+      <div class="step-body" id="stepBody3">
+        <p style="font-size:.8rem;color:#94a3b8;margin-bottom:12px;">아래 상품들은 품명리스트에서 찾지 못했어요. 최종상품명을 직접 입력하거나 기존 상품에서 선택해주세요.</p>
+        <div id="unmappedList"></div>
+        <div style="margin-top:12px;">
+          <button class="btn btn-primary" onclick="applyUnmapped()">✅ 적용하기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: 결과 -->
+    <div class="consolidated" id="resultSection" style="display:none;">
+      <h2>📈 정산 종합 결과 <span style="font-size:.75rem;color:#64748b;font-weight:400;" id="resultMonth"></span></h2>
+
+      <div class="sum-cards" id="sumCards"></div>
+
+      <!-- 채널별 탭 -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="resultTabs"></div>
+
+      <!-- 결과 테이블 -->
+      <div id="resultTableWrap"></div>
+
+      <!-- 다운로드 -->
+      <div style="margin-top:16px;display:flex;gap:8px;">
+        <button class="btn btn-success" onclick="downloadExcel()">⬇️ Excel 다운로드</button>
+        <button class="btn btn-secondary" onclick="resetAll()">🔄 초기화</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- UNMAPPED MODAL -->
+<div class="modal-bg" id="modalBg" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="step-num" style="background:#f59e0b;">!</div>
+      <h3>미매핑 상품 처리</h3>
+      <span class="modal-close" onclick="closeModal()">✕</span>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal()">나중에</button>
+      <button class="btn btn-primary btn-sm" onclick="applyModalUnmapped()">✅ 적용</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const state = {
+  costMap: {},       // 최종상품명 → 원가(VAT포함)
+  channels: {},      // channelId → { name, results, unmapped, aggregated }
+  allProductNames: new Set(), // known 최종상품명 for dropdown
+  currentTab: 'all',
+};
+
+// Channel definitions
+const CHANNEL_DEFS = [
+  { id: 'smartstore', name: '스마트스토어', icon: '🟢', detect: detectSmartStore, parse: parseSmartStore },
+  { id: '11st',       name: '11번가',      icon: '🔴', detect: detect11st,       parse: parse11st },
+  { id: 'kakaoGift',  name: '카카오선물',  icon: '🎁', detect: detectKakaoGift,  parse: parseKakao },
+  { id: 'kakao',      name: '카카오쇼핑',  icon: '🟡', detect: detectKakao,      parse: parseKakao },
+  { id: 'coupang',    name: '로켓배송',    icon: '🚀', detect: detectCoupang,    parse: parseCoupang },
+  { id: 'gmarket',    name: '지마켓',      icon: '🛒', detect: detectGmarket,    parse: parseGmarket },
+  { id: 'auction',    name: '옥션',        icon: '🔨', detect: detectAuction,    parse: parseAuction },
+  { id: 'ohouse',     name: '오늘의집',    icon: '🏠', detect: detectOhouse,     parse: parseOhouse },
+  { id: 'cafe24',     name: '카페24',      icon: '🏪', detect: detectCafe24,     parse: parseCafe24 },
+];
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function init() {
+  renderSidebar();
+  renderChannelGrid();
+  updateMonth();
+}
+
+function updateMonth() {
+  const m = document.getElementById('settlementMonth').value;
+  document.getElementById('headerMonth').textContent = m ? m + ' 정산' : '정산 월 미설정';
+}
+
+// ═══════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════
+function toggleStep(n) {
+  const body = document.getElementById('stepBody' + n);
+  body.classList.toggle('open');
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('ko-KR');
+}
+
+function fmtRate(n) {
+  return (n * 100).toFixed(1) + '%';
+}
+
+function renderSidebar() {
+  const container = document.getElementById('sidebarChannels');
+  container.innerHTML = CHANNEL_DEFS.map(ch => {
+    const d = state.channels[ch.id];
+    let cls = '', label = '대기';
+    if (d) {
+      const hasUnmapped = d.unmapped && d.unmapped.length > 0;
+      cls = hasUnmapped ? 'warn' : 'done';
+      label = hasUnmapped ? `미매핑 ${d.unmapped.length}` : '완료';
+    }
+    return `<div class="ch-item" onclick="focusChannel('${ch.id}')">
+      <div class="ch-icon">${ch.icon}</div>
+      <div class="ch-name">${ch.name}</div>
+      <div class="ch-status ${cls}" title="${label}"></div>
+    </div>`;
+  }).join('');
+}
+
+function renderChannelGrid() {
+  const grid = document.getElementById('channelGrid');
+  grid.innerHTML = CHANNEL_DEFS.map(ch => {
+    const d = state.channels[ch.id];
+    let statusCls = 'st-wait', statusLabel = '대기';
+    let statHtml = '';
+    if (d) {
+      const hasU = d.unmapped && d.unmapped.length > 0;
+      statusCls = hasU ? 'st-warn' : 'st-ok';
+      statusLabel = hasU ? `미매핑 ${d.unmapped.length}건` : '완료';
+      const agg = d.aggregated || [];
+      const totalQty = agg.reduce((s,r) => s + r.수량, 0);
+      const totalSet = agg.reduce((s,r) => s + r.정산금액, 0);
+      statHtml = `<div class="ch-card-stat">수량 <span>${fmt(totalQty)}</span>개 · 정산 <span>₩${fmt(totalSet)}</span></div>`;
+    }
+    return `<div class="ch-card ${d ? (d.unmapped&&d.unmapped.length?'has-unmapped':'loaded') : ''}" id="chCard_${ch.id}">
+      <div class="ch-card-top">
+        <div class="ch-card-icon">${ch.icon}</div>
+        <div class="ch-card-name">${ch.name}</div>
+        <div class="ch-card-status ${statusCls}">${statusLabel}</div>
+      </div>
+      <div class="ch-card-drop" id="chDrop_${ch.id}" title="클릭해서 파일 선택">
+        <input type="file" accept=".xlsx,.xls" onchange="loadChannelFile(this,'${ch.id}')"/>
+        ${d ? '✅ 재업로드' : '📂 파일 선택'}
+      </div>
+      ${statHtml}
+    </div>`;
+  }).join('');
+}
+
+function updateSummary() {
+  let total = 0, totalCost = 0, totalQty = 0;
+  for (const ch of Object.values(state.channels)) {
+    for (const r of (ch.aggregated || [])) {
+      total += r.정산금액;
+      totalCost += r.원가합계 || 0;
+      totalQty += r.수량;
+    }
+  }
+  document.getElementById('sidebarTotal').textContent = '₩ ' + fmt(total);
+  document.getElementById('sidebarProfit').textContent = '이익 ₩ ' + fmt(total - totalCost);
+  updateChannelStatus();
+}
+
+function updateChannelStatus() {
+  const done = Object.keys(state.channels).length;
+  const total = CHANNEL_DEFS.length;
+  document.getElementById('channelStatus').textContent = `${done} / ${total} 완료`;
+}
+
+// ═══════════════════════════════════════════════════════
+// COST FILE LOADER
+// ═══════════════════════════════════════════════════════
+function loadCostFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      if (!wb.Sheets['원가']) { showToast('원가 시트를 찾을 수 없어요', 'error'); return; }
+      buildCostMap(wb);
+      document.getElementById('costDrop').classList.add('loaded');
+      document.getElementById('costDrop').querySelector('p').textContent = '✅ ' + file.name + ' 로드 완료';
+      document.getElementById('costStatus').textContent = '✅ ' + Object.keys(state.costMap).length + '개 제품';
+      document.getElementById('stepNum1').classList.add('done');
+      // show result
+      const res = document.getElementById('costResult');
+      res.style.display = 'block';
+      res.innerHTML = `<div class="tbl-wrap"><table>
+        <thead><tr><th>제품명</th><th class="num">원가(VAT포함)</th></tr></thead>
+        <tbody>${Object.entries(state.costMap).map(([k,v]) =>
+          `<tr><td>${k}</td><td class="num">₩${fmt(v)}</td></tr>`).join('')}</tbody>
+      </table></div>`;
+      showToast('원가 파일 로드 완료! ' + Object.keys(state.costMap).length + '개 제품', 'success');
+    } catch(ex) {
+      showToast('파일 읽기 오류: ' + ex.message, 'error');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function buildCostMap(wb) {
+  state.costMap = {};
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['원가'], {header:1});
+  for (const row of rows) {
+    const name = row[1];
+    const cost = row[3]; // 판관비포함원가(부가세포함)
+    if (name && cost && typeof name === 'string' && typeof cost === 'number') {
+      state.costMap[name.trim()] = cost;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// CHANNEL FILE LOADER
+// ═══════════════════════════════════════════════════════
+function loadChannelFile(input, channelId) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'array', cellDates:true});
+
+      // Auto-detect channel
+      let def = CHANNEL_DEFS.find(d => d.id === channelId);
+      // If not matching, try auto-detect
+      const detected = CHANNEL_DEFS.find(d => d.detect(wb));
+      if (detected && detected.id !== channelId) {
+        const useDetected = confirm(`채널 감지: ${detected.name}\n선택한 채널(${def.name}) 대신 ${detected.name}으로 처리할까요?`);
+        if (useDetected) def = detected;
+      }
+
+      const { results, unmapped } = def.parse(wb);
+
+      // Collect known product names
+      for (const r of results) {
+        if (r.매핑) state.allProductNames.add(r.최종상품명);
+      }
+
+      // Aggregate
+      const aggregated = aggregateResults(results);
+      applyCosting(aggregated);
+
+      state.channels[def.id] = { name: def.name, icon: def.icon || '📦', results, unmapped, aggregated };
+
+      renderChannelGrid();
+      renderSidebar();
+      updateSummary();
+      renderResults();
+
+      if (unmapped.length > 0) {
+        showUnmappedModal(def.id, unmapped);
+        showToast(`${def.name}: 미매핑 상품 ${unmapped.length}건 확인 필요`, 'warn');
+      } else {
+        showToast(`${def.name} 정산 완료! ${results.length}건`, 'success');
+      }
+    } catch(ex) {
+      console.error(ex);
+      showToast('처리 오류: ' + ex.message, 'error');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ═══════════════════════════════════════════════════════
+// NAME MAP BUILDER
+// ═══════════════════════════════════════════════════════
+function buildNameMap(wb, sheetNames) {
+  const map = {};
+  for (const sn of sheetNames) {
+    if (!wb.Sheets[sn]) continue;
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sn], {header:1});
+    for (const row of rows) {
+      const key = row[1];
+      const val = row[2];
+      if (key && val && typeof key === 'string' && typeof val === 'string'
+          && key !== '품명' && key !== '상품명') {
+        map[key.trim()] = val.trim();
+      }
+    }
+  }
+  return map;
+}
+
+// ═══════════════════════════════════════════════════════
+// CHANNEL DETECTORS
+// ═══════════════════════════════════════════════════════
+function getSheets(wb) { return Object.keys(wb.Sheets); }
+
+function detectSmartStore(wb) {
+  return getSheets(wb).includes('결제정산 - 일별상세');
+}
+function detect11st(wb) {
+  const sheets = getSheets(wb);
+  if (!sheets.includes('Sheet')) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet'], {header:1});
+  return rows.length > 5 && rows[5] && rows[5][14] === '상품명';
+}
+function detectKakaoGift(wb) {
+  if (!getSheets(wb).includes('Sheet0')) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet0'], {header:1});
+  return rows.length > 1 && String(rows[1][14]||'').includes('선물하기');
+}
+function detectKakao(wb) {
+  if (!getSheets(wb).includes('Sheet0')) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet0'], {header:1});
+  if (rows.length < 2 || rows[0][0] !== '결제번호' || rows[0][16] !== '상품명') return false;
+  // 카카오쇼핑하기 = 선물하기가 아닌 것
+  const ch = String(rows[1][14] || '');
+  return !ch.includes('선물하기');
+}
+function detectCoupang(wb) {
+  if (!getSheets(wb).includes('data')) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['data'], {header:1});
+  return rows.length > 0 && rows[0][0] === '구분' && rows[0][2] === 'SKU번호';
+}
+function detectGmarket(wb) {
+  return getSheets(wb).includes('매출기준_상품판매_상세내역');
+}
+function detectAuction(wb) {
+  if (!getSheets(wb).includes('Sheet1')) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet1'], {header:1});
+  return rows.length > 0 && rows[0][1] === '결제번호' && rows[0][4] === '상품명';
+}
+function detectOhouse(wb) {
+  return getSheets(wb).includes('정산내역_상세');
+}
+function detectCafe24(wb) {
+  return getSheets(wb).includes('원본') && !getSheets(wb).includes('결제정산 - 일별상세');
+}
+
+// ═══════════════════════════════════════════════════════
+// PARSERS
+// ═══════════════════════════════════════════════════════
+
+// 스마트스토어 (join 결제정산 + 구매확정내역)
+function parseSmartStore(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트', '품명리스트 추가']);
+
+  // 구매확정내역 → map by 상품주문번호
+  const detailMap = {};
+  const detRows = XLSX.utils.sheet_to_json(wb.Sheets['구매확정내역'], {header:1});
+  for (let i = 1; i < detRows.length; i++) {
+    const r = detRows[i];
+    const id = String(r[0] || '');
+    if (id) detailMap[id] = { option: String(r[15] || ''), qty: Number(r[16] || 1), revenue: Number(r[21] || 0) };
+  }
+
+  const settRows = XLSX.utils.sheet_to_json(wb.Sheets['결제정산 - 일별상세'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  for (let i = 1; i < settRows.length; i++) {
+    const r = settRows[i];
+    const type = String(r[2] || '');
+    const orderId = String(r[1] || '');
+    const A = Number(r[9] || 0), B = Number(r[10] || 0), C = Number(r[11] || 0), D = Number(r[12] || 0);
+    const settlement = A + B + C + D;
+
+    if (type === '배송비') {
+      results.push({ 최종상품명:'(배송비)', 수량:1, 정산금액:settlement, 매출액:Number(r[9]||0), 매핑:true });
+      continue;
+    }
+    if (type !== '상품주문') continue;
+
+    const prodName = String(r[3] || '');
+    const det = detailMap[orderId] || {};
+    const option = det.option || '';
+    const qty = det.qty || 1;
+    const revenue = det.revenue || Number(r[9] || 0);
+
+    let finalName = nameMap[prodName + option] || nameMap[prodName] || null;
+    const key = prodName + option;
+
+    if (!finalName && !unmappedKeys.has(key)) {
+      unmappedKeys.add(key);
+      unmapped.push({ key, prodName, option, qty: 0, settlement: 0, count: 0 });
+    }
+    if (!finalName) {
+      // Find in unmapped and accumulate
+      const u = unmapped.find(x => x.key === key);
+      if (u) { u.qty += qty; u.settlement += settlement; u.count++; }
+    }
+
+    results.push({ 최종상품명: finalName || key, 수량: qty, 정산금액: settlement, 매출액: revenue, 매핑: !!finalName });
+  }
+  return { results, unmapped };
+}
+
+// 11번가 (headers at row index 5)
+function parse11st(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  for (let i = 6; i < rows.length; i++) {  // data starts at index 6
+    const r = rows[i];
+    if (!r[14]) continue;
+    const status = String(r[4] || '');
+    if (status !== '구매확정') continue;
+
+    const prodName = String(r[14] || '');
+    const option = String(r[15] || '');
+    const qty = Number(r[16] || 0);
+    const settlement = Number(r[17] || 0);
+    const revenue = Number(r[22] || 0); // 판매가 × qty
+
+    const key = prodName + option;
+    let finalName = nameMap[key] || nameMap[prodName] || null;
+
+    if (!finalName && !unmappedKeys.has(key)) {
+      unmappedKeys.add(key);
+      unmapped.push({ key, prodName, option, qty, settlement, count: 1 });
+    }
+    results.push({ 최종상품명: finalName || key, 수량: qty, 정산금액: settlement, 매출액: revenue * qty, 매핑: !!finalName });
+  }
+  return { results, unmapped };
+}
+
+// 카카오쇼핑하기 / 카카오선물하기
+function parseKakao(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet0'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const type = String(r[3] || '');
+    if (type !== '일반상품') continue;
+
+    const prodName = String(r[16] || '');
+    const option = String(r[18] || '');
+    const qty = Number(r[33] || 0);
+    const settlement = Number(r[45] || 0);
+    const revenue = Number(r[22] || 0); // 상품주문금액
+
+    const key = prodName + option;
+    let finalName = nameMap[key] || nameMap[prodName] || null;
+
+    if (!finalName && prodName && !unmappedKeys.has(key)) {
+      unmappedKeys.add(key);
+      unmapped.push({ key, prodName, option, qty, settlement, count: 1 });
+    }
+    if (prodName) {
+      results.push({ 최종상품명: finalName || key, 수량: qty, 정산금액: settlement, 매출액: revenue, 매핑: !!finalName });
+    }
+  }
+  return { results, unmapped };
+}
+
+// 로켓배송
+function parseCoupang(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['data'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const type = String(r[0] || '');
+    if (type === '반품입고' || type === '반품반출') continue; // skip returns for now
+
+    const skuName = String(r[3] || '');
+    const qty = Number(r[7] || 0);
+    const unitCost = Number(r[9] || 0);  // 공급가액(VAT제외)
+    const totalCost = unitCost * qty;    // 총공급가액
+    const totalVat = Number(r[11] || 0) * qty; // 총세액
+
+    let finalName = nameMap[skuName] || null;
+    if (!finalName && skuName && !unmappedKeys.has(skuName)) {
+      unmappedKeys.add(skuName);
+      unmapped.push({ key: skuName, prodName: skuName, option: '', qty, settlement: totalCost, count: 1 });
+    }
+    if (skuName) {
+      results.push({ 최종상품명: finalName || skuName, 수량: qty, 정산금액: totalCost, 매출액: totalCost + totalVat, 매핑: !!finalName });
+    }
+  }
+  return { results, unmapped };
+}
+
+// 지마켓
+function parseGmarket(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트', '추가품명리스트 참고']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['매출기준_상품판매_상세내역'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r[4]) continue;
+    const prodName = String(r[4] || '');
+    const qty = Number(r[15] || 0);
+    const settlement = Number(r[29] || 0); // 판매자 최종정산금
+    const revenue = Number(r[23] || 0);    // 고객결제금
+
+    let finalName = nameMap[prodName] || null;
+    if (!finalName && !unmappedKeys.has(prodName)) {
+      unmappedKeys.add(prodName);
+      unmapped.push({ key: prodName, prodName, option: '', qty, settlement, count: 1 });
+    }
+    results.push({ 최종상품명: finalName || prodName, 수량: qty, 정산금액: settlement, 매출액: revenue, 매핑: !!finalName });
+  }
+  return { results, unmapped };
+}
+
+// 옥션
+function parseAuction(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트', '품명리스트 추가 참고']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet1'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r[4]) continue;
+    const prodName = String(r[4] || '');
+    const qty = Number(r[16] || 0);
+    const settlement = Number(r[27] || 0); // 판매자 최종정산금
+    const revenue = Number(r[22] || 0);    // 결제금액
+
+    let finalName = nameMap[prodName] || null;
+    if (!finalName && !unmappedKeys.has(prodName)) {
+      unmappedKeys.add(prodName);
+      unmapped.push({ key: prodName, prodName, option: '', qty, settlement, count: 1 });
+    }
+    results.push({ 최종상품명: finalName || prodName, 수량: qty, 정산금액: settlement, 매출액: revenue, 매핑: !!finalName });
+  }
+  return { results, unmapped };
+}
+
+// 오늘의집 (최종상품명이 이미 있음!)
+function parseOhouse(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['정산내역_상세'], {header:1});
+  const results = [], unmapped = [];
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const type = String(r[1] || '');
+    const status = String(r[2] || '');
+    if (type !== '주문정산' || status === '취소') continue;
+
+    // col8 is already 최종상품명!
+    let finalName = String(r[8] || '');
+    const prodName = String(r[7] || r[5] || '');
+    const qty = Number(r[10] || 0);
+    const settlement = Number(r[11] || 0);
+
+    if (!finalName && prodName) {
+      finalName = nameMap[prodName] || prodName;
+    }
+
+    if (finalName) {
+      results.push({ 최종상품명: finalName, 수량: qty, 정산금액: settlement, 매출액: settlement, 매핑: true });
+    }
+  }
+  return { results, unmapped };
+}
+
+// 카페24
+function parseCafe24(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트', '품명리스트추가']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['원본'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+  const DONE_STATUSES = ['결제완료', '배송완료', '배송중', '배송준비중', '구매확정'];
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const status = String(r[46] || '');
+    if (!DONE_STATUSES.some(s => status.includes(s))) continue;
+
+    const prodName = String(r[49] || '');
+    const option = String(r[33] || '');
+    const qty = Number(r[35] || 0);
+    const settlement = Number(r[67] || 0); // 품목별 결제금액
+
+    const key = prodName + option;
+    let finalName = nameMap[key] || nameMap[prodName] || null;
+
+    if (!finalName && prodName && !unmappedKeys.has(key)) {
+      unmappedKeys.add(key);
+      unmapped.push({ key, prodName, option, qty, settlement, count: 1 });
+    }
+    if (prodName) {
+      results.push({ 최종상품명: finalName || key, 수량: qty, 정산금액: settlement, 매출액: settlement, 매핑: !!finalName });
+    }
+  }
+  return { results, unmapped };
+}
+
+// ═══════════════════════════════════════════════════════
+// AGGREGATION & COSTING
+// ═══════════════════════════════════════════════════════
+function aggregateResults(results) {
+  const map = {};
+  for (const r of results) {
+    const k = r.최종상품명;
+    if (!map[k]) map[k] = { 최종상품명: k, 수량: 0, 정산금액: 0, 매출액: 0, 매핑: r.매핑 };
+    map[k].수량 += r.수량;
+    map[k].정산금액 += r.정산금액;
+    map[k].매출액 += r.매출액;
+    if (!r.매핑) map[k].매핑 = false;
+  }
+  return Object.values(map).sort((a, b) => b.정산금액 - a.정산금액);
+}
+
+function applyCosting(aggregated) {
+  for (const r of aggregated) {
+    const unitCost = state.costMap[r.최종상품명] || 0;
+    r.원가단가 = unitCost;
+    r.원가합계 = unitCost * r.수량;
+    r.이익 = r.정산금액 - r.원가합계;
+    r.이익률 = r.정산금액 > 0 ? r.이익 / r.정산금액 : 0;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// UNMAPPED MODAL
+// ═══════════════════════════════════════════════════════
+let currentModalChannel = null;
+
+function showUnmappedModal(channelId, unmapped) {
+  currentModalChannel = channelId;
+  const knownNames = [...state.allProductNames].sort();
+  const body = document.getElementById('modalBody');
+
+  body.innerHTML = `<p style="font-size:.8rem;color:#94a3b8;margin-bottom:12px;">
+    <strong style="color:#f59e0b;">${unmapped.length}개</strong>의 상품이 품명리스트에 없어요. 최종상품명을 지정해주세요.</p>
+  ${unmapped.map((u, idx) => `
+    <div class="unmapped-row">
+      <div class="unmapped-key" title="${u.key}">${u.prodName}<br/><small style="color:#64748b;">${u.option||''}</small></div>
+      <div style="font-size:.72rem;color:#64748b;text-align:right;min-width:70px;">${fmt(u.qty||0)}개<br/>₩${fmt(u.settlement||0)}</div>
+      <input list="nameList_${idx}" id="unmap_${idx}" data-key="${u.key}" placeholder="최종상품명 입력" value="${u.key.length < 20 ? u.key : ''}"/>
+      <datalist id="nameList_${idx}">${knownNames.map(n => `<option value="${n}">`).join('')}</datalist>
+    </div>`).join('')}`;
+
+  document.getElementById('modalBg').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modalBg').style.display = 'none';
+}
+
+function applyModalUnmapped() {
+  const inputs = document.querySelectorAll('#modalBody input[data-key]');
+  const mapping = {};
+  inputs.forEach(inp => {
+    const key = inp.dataset.key;
+    const val = inp.value.trim();
+    if (val) mapping[key] = val;
+  });
+
+  if (currentModalChannel && state.channels[currentModalChannel]) {
+    const ch = state.channels[currentModalChannel];
+    // Apply mapping to results
+    for (const r of ch.results) {
+      if (!r.매핑 && mapping[r.최종상품명]) {
+        r.최종상품명 = mapping[r.최종상품명];
+        r.매핑 = true;
+        state.allProductNames.add(r.최종상품명);
+      }
+    }
+    // Remove mapped from unmapped
+    ch.unmapped = ch.unmapped.filter(u => !mapping[u.key]);
+    // Re-aggregate
+    ch.aggregated = aggregateResults(ch.results);
+    applyCosting(ch.aggregated);
+  }
+
+  closeModal();
+  renderChannelGrid();
+  renderSidebar();
+  updateSummary();
+  renderResults();
+  showToast('매핑 적용 완료!', 'success');
+}
+
+function applyUnmapped() {
+  applyModalUnmapped();
+}
+
+// ═══════════════════════════════════════════════════════
+// RESULTS RENDERING
+// ═══════════════════════════════════════════════════════
+function renderResults() {
+  const section = document.getElementById('resultSection');
+  const channels = Object.values(state.channels);
+  if (channels.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+
+  // Summary cards
+  let totalSett = 0, totalCost = 0, totalQty = 0, totalRevenue = 0;
+  for (const ch of channels) {
+    for (const r of ch.aggregated || []) {
+      totalSett += r.정산금액;
+      totalCost += r.원가합계 || 0;
+      totalQty += r.수량;
+      totalRevenue += r.매출액 || 0;
+    }
+  }
+  const totalProfit = totalSett - totalCost;
+  const profitRate = totalSett > 0 ? totalProfit / totalSett : 0;
+
+  document.getElementById('sumCards').innerHTML = `
+    <div class="sum-card"><div class="val">₩${fmt(totalSett)}</div><div class="lbl">총 정산금액</div></div>
+    <div class="sum-card"><div class="val" style="color:#0284c7;">${fmt(totalQty)}개</div><div class="lbl">총 판매수량</div></div>
+    <div class="sum-card"><div class="val" style="color:${totalProfit>=0?'#10b981':'#ef4444'};">₩${fmt(totalProfit)}</div><div class="lbl">총 이익 (정산기준)</div></div>
+    <div class="sum-card"><div class="val" style="color:${profitRate>=0.2?'#10b981':profitRate>=0?'#f59e0b':'#ef4444'};">${fmtRate(profitRate)}</div><div class="lbl">이익률</div></div>
+  `;
+
+  const month = document.getElementById('settlementMonth').value;
+  document.getElementById('resultMonth').textContent = month ? `(${month})` : '';
+
+  // Tabs
+  const tabs = [{ id:'all', name:'📊 전체 종합' }, ...channels.map(ch => ({ id:ch.name, name:ch.icon+' '+ch.name }))];
+  document.getElementById('resultTabs').innerHTML = tabs.map(t =>
+    `<button class="btn ${state.currentTab===t.id?'btn-primary':'btn-secondary'} btn-sm" onclick="switchTab('${t.id}')">${t.name}</button>`
+  ).join('');
+
+  renderTable();
+}
+
+function switchTab(tabId) {
+  state.currentTab = tabId;
+  document.getElementById('resultTabs').querySelectorAll('button').forEach((btn, i) => {
+    const tabs = [{ id:'all' }, ...Object.values(state.channels).map(ch => ({ id:ch.name }))];
+    btn.className = 'btn ' + (state.currentTab === tabs[i].id ? 'btn-primary' : 'btn-secondary') + ' btn-sm';
+  });
+  renderTable();
+}
+
+function renderTable() {
+  const wrap = document.getElementById('resultTableWrap');
+  let data = [];
+
+  if (state.currentTab === 'all') {
+    // Aggregate across all channels by 최종상품명
+    const map = {};
+    for (const ch of Object.values(state.channels)) {
+      for (const r of ch.aggregated || []) {
+        if (!map[r.최종상품명]) map[r.최종상품명] = { 최종상품명:r.최종상품명, 수량:0, 정산금액:0, 매출액:0, 원가단가:r.원가단가||0, 원가합계:0, 이익:0, 매핑:r.매핑 };
+        map[r.최종상품명].수량 += r.수량;
+        map[r.최종상품명].정산금액 += r.정산금액;
+        map[r.최종상품명].매출액 += r.매출액;
+        map[r.최종상품명].원가합계 += r.원가합계 || 0;
+        map[r.최종상품명].이익 += r.이익 || 0;
+        if (!r.매핑) map[r.최종상품명].매핑 = false;
+      }
+    }
+    data = Object.values(map).sort((a,b) => b.정산금액 - a.정산금액);
+    for (const d of data) d.이익률 = d.정산금액 > 0 ? d.이익 / d.정산금액 : 0;
+  } else {
+    const ch = Object.values(state.channels).find(c => c.name === state.currentTab);
+    data = ch ? (ch.aggregated || []) : [];
+  }
+
+  const rowsHtml = data.map(r => {
+    const profitCls = r.이익 >= 0 ? 'profit-pos' : 'profit-neg';
+    const rateCls = (r.이익률||0) >= 0.2 ? 'profit-pos' : (r.이익률||0) >= 0 ? '' : 'profit-neg';
+    return `<tr>
+      <td>${r.최종상품명}${!r.매핑 ? ' <span class="unmapped-badge">미매핑</span>' : ''}</td>
+      <td class="num">${fmt(r.수량)}</td>
+      <td class="num">₩${fmt(r.정산금액)}</td>
+      <td class="num">${r.원가단가 ? '₩'+fmt(r.원가단가) : '-'}</td>
+      <td class="num">${r.원가합계 ? '₩'+fmt(r.원가합계) : '-'}</td>
+      <td class="num ${profitCls}">${r.이익 !== undefined ? '₩'+fmt(r.이익) : '-'}</td>
+      <td class="num ${rateCls}">${r.이익률 !== undefined ? fmtRate(r.이익률) : '-'}</td>
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `<div class="tbl-wrap"><table>
+    <thead><tr>
+      <th>최종상품명</th>
+      <th class="num">수량</th>
+      <th class="num">정산금액</th>
+      <th class="num">원가/개</th>
+      <th class="num">원가합계</th>
+      <th class="num">이익</th>
+      <th class="num">이익률</th>
+    </tr></thead>
+    <tbody>${rowsHtml}</tbody>
+  </table></div>`;
+}
+
+function focusChannel(channelId) {
+  const ch = CHANNEL_DEFS.find(d => d.id === channelId);
+  if (ch && state.channels[channelId]) {
+    switchTab(state.channels[channelId].name);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// EXCEL EXPORT
+// ═══════════════════════════════════════════════════════
+function downloadExcel() {
+  const wb = XLSX.utils.book_new();
+  const month = document.getElementById('settlementMonth').value || '정산';
+
+  // 채널별 시트
+  for (const ch of Object.values(state.channels)) {
+    const rows = [['최종상품명','수량','정산금액','원가/개','원가합계','이익','이익률']];
+    for (const r of ch.aggregated || []) {
+      rows.push([r.최종상품명, r.수량, r.정산금액, r.원가단가||0, r.원가합계||0, r.이익||0, r.이익률||0]);
+    }
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, ch.name.substring(0,31));
+  }
+
+  // 종합 시트
+  const allMap = {};
+  for (const ch of Object.values(state.channels)) {
+    for (const r of ch.aggregated || []) {
+      if (!allMap[r.최종상품명]) allMap[r.최종상품명] = { 최종상품명:r.최종상품명, 수량:0, 정산금액:0, 원가합계:0, 이익:0 };
+      allMap[r.최종상품명].수량 += r.수량;
+      allMap[r.최종상품명].정산금액 += r.정산금액;
+      allMap[r.최종상품명].원가합계 += r.원가합계||0;
+      allMap[r.최종상품명].이익 += r.이익||0;
+    }
+  }
+  const allRows = [['최종상품명','수량','정산금액합계','원가합계','이익','이익률']];
+  for (const r of Object.values(allMap).sort((a,b) => b.정산금액-a.정산금액)) {
+    const rate = r.정산금액 > 0 ? r.이익 / r.정산금액 : 0;
+    allRows.push([r.최종상품명, r.수량, r.정산금액, r.원가합계, r.이익, rate]);
+  }
+  const wsAll = XLSX.utils.aoa_to_sheet(allRows);
+  XLSX.utils.book_append_sheet(wb, wsAll, '종합');
+
+  XLSX.writeFile(wb, `iLBiA_매출정산_${month}.xlsx`);
+  showToast('Excel 다운로드 완료!', 'success');
+}
+
+// ═══════════════════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════════════════
+function resetAll() {
+  if (!confirm('모든 데이터를 초기화할까요?')) return;
+  state.channels = {};
+  state.allProductNames.clear();
+  state.currentTab = 'all';
+  renderChannelGrid();
+  renderSidebar();
+  updateSummary();
+  document.getElementById('resultSection').style.display = 'none';
+  showToast('초기화 완료', 'success');
+}
+
+// ═══════════════════════════════════════════════════════
+// START
+// ═══════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
