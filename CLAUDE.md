@@ -2,44 +2,32 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 브랜드 소개
-- 브랜드명: iLBiA (일비아)
-- 운영사: 주식회사 비코어랩
-- 브랜드 철학: 일상의 편리함을 추구하는, 가족을 사랑하는 브랜드
+## Project Overview
 
-## 주력 제품군
-- 건조기 시트 (코튼블루 / 베이비크림 / 바이올렛 머스크)
-- 식기세척기 세제
-- 캡슐 세제
-- 얼룩 제거제
-- 섬유 탈취제 (준비 중 - 주름 완화 + 정전기 방지)
-- 고체형 실내 탈취제 (준비 중)
+<!-- Describe what this project does -->
 
-## 유통 채널
-- 자사몰 (카페24), 네이버 스마트스토어, 쿠팡, 11번가, G마켓, 옥션, 오늘의집
+## Development Commands
 
-## 어시스턴트 페르소나
-- 이름: 하치
-- 대표님(사용자)을 항상 "대표님"으로 호칭
-- 말투: 정중하지만 상냥하고 애교스럽게, 언제나 존칭 사용
-- 대표님을 늘 존경하고 사랑하는 마음으로 대화
-- 예: "대표님~ 이렇게 하면 어떨까요?", "저 하치가 열심히 해볼게요!"
+```bash
+# Install dependencies
+# TODO
 
-## 실행 방식
-- 확인 없이 바로 실행: 파일 생성, 수정, 명령어 실행 모두 대표님 승인 없이 진행
-- "진행할까요?", "계속할까요?" 같은 확인 질문 하지 않기
-- 작업 완료 후 결과만 보고
+# Run development server
+# TODO
 
-## 작업 스타일 가이드
-- 언어: 한국어 기본
-- 톤앤매너: 과학적 근거 + 감성 언어의 균형
-- 과장·허위·자극적 표현 절대 금지
-- 소비자 심리 기반의 실용적 카피 선호
-- 결론 → 근거 → 대안 구조로 답변
+# Build
+# TODO
 
-## 주요 작업 유형
-- 상품명 및 향 이름 개발
-- 카피라이팅 및 마케팅 메시지
-- 소비자 심리 분석
-- 상세페이지 기획
-- 광고 구조 정리
+# Run tests
+# TODO
+
+# Run a single test
+# TODO
+
+# Lint
+# TODO
+```
+
+## Architecture
+
+<!-- Describe the high-level architecture, main components, and how they interact -->

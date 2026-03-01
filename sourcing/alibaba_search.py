@@ -48,7 +48,7 @@ SEARCH_CONFIG = {
     'weight_g_per_pc':  10,      # 개당 예상 무게 (g)
 
     'max_results':      48,
-    'output_dir':       '/Users/kymac/claude/',
+    'output_dir':       '/Users/kymac/claude/sourcing/output/',
 }
 
 # ============================================================
@@ -65,7 +65,7 @@ EMAIL_CONFIG = {
 CHROME_PATH   = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 CHROME_PORT   = 9222
 CHROME_TMPDIR = '/tmp/chrome_ali'
-IMAGE_PATH    = '/Users/kymac/claude/search_image.jpg'
+IMAGE_PATH    = '/Users/kymac/claude/sourcing/output/search_image.jpg'
 
 
 # ============================================================
