@@ -125,7 +125,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .bar-label{font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:right;}
 .bar-track{height:12px;background:var(--surface3);border-radius:100px;position:relative;overflow:visible;}
 .bar-fill{height:100%;border-radius:100px;width:0;transition:width .9s cubic-bezier(.4,0,.2,1);}
-.bar-sales-fill{background:linear-gradient(90deg,var(--sky),var(--mint));}
+.bar-sales-fill{background:linear-gradient(90deg,#4a657d,#567a8a);}
+.bar-sales-fill-top{background:linear-gradient(90deg,var(--sky),var(--mint));}
 .bar-stock-fill-ok{background:linear-gradient(90deg,var(--mint),#34d399);}
 .bar-stock-fill-warn{background:linear-gradient(90deg,var(--warn),#fbbf24);}
 .bar-stock-fill-danger{background:linear-gradient(90deg,var(--danger),#f87171);}
@@ -185,6 +186,13 @@ tr:last-child td{border-bottom:none;}
 .analysis-legend span{display:flex;align-items:center;gap:5px;}
 .stock-bar-wrap{background:var(--surface3);border-radius:4px;height:6px;width:100px;overflow:hidden;}
 .stock-bar-fill{height:100%;border-radius:4px;}
+
+/* ── FETCH BUTTON ── */
+.fetch-spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--border2);border-top-color:var(--mint);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#btn-fetch:disabled{opacity:.5;cursor:not-allowed;}
+.fetch-status{font-size:.68rem;color:var(--muted);margin-top:8px;line-height:1.6;display:none;align-items:center;gap:4px;}
+.fetch-status.active{display:flex;}
 
 /* ── EMPTY ── */
 .empty{padding:50px;text-align:center;color:var(--muted);}
@@ -251,6 +259,19 @@ tr:last-child td{border-bottom:none;}
       <div style="font-size:.68rem;color:var(--muted);margin-top:6px;line-height:1.6;">
         재고: 기준점 저장 후 주문 차감 방식<br/>
         입고 발생 시 → 발주 관리에서 처리
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">자동 수집</div>
+      <button class="btn btn-mint btn-block" id="btn-fetch" onclick="fetchEzAdmin()">🔄 이지어드민 데이터 가져오기</button>
+      <div class="fetch-status" id="fetch-status">
+        <div class="fetch-spinner"></div>
+        <span id="fetch-step">연결 중...</span>
+      </div>
+      <div style="font-size:.65rem;color:var(--muted);margin-top:6px;line-height:1.5;">
+        브라우저가 열리면 보안코드만 입력하세요.<br/>
+        이후 재고+주문 자동 수집됩니다.
       </div>
     </div>
 
@@ -481,11 +502,12 @@ function calcData(){
   const orders=LS.orders(), moq=LS.moq();
   const lead=gp('param-lead'), safety=gp('param-safety'), target=gp('param-target');
   const reorderDays=lead+safety;
-  let periodDays=gp('param-window')||90;
+  const paramWindow=gp('param-window')||90;
+  let periodDays=paramWindow;
   if(orders.length>0){
     const dates=orders.map(r=>r.date).sort();
-    periodDays=Math.max(diffDays(dates[dates.length-1],dates[0])+1,1);
-    document.getElementById('info-period-label').textContent=`${dates[0]} ~ ${dates[dates.length-1]} (${periodDays}일 기준)`;
+    const actualDays=Math.max(diffDays(dates[dates.length-1],dates[0])+1,1);
+    document.getElementById('info-period-label').textContent=`${dates[0]} ~ ${dates[dates.length-1]} (${actualDays}일 데이터 / ${paramWindow}일 기준 평균)`;
   }
   const salesMap={};
   orders.forEach(r=>salesMap[r.code]=(salesMap[r.code]||0)+r.qty);
@@ -562,7 +584,7 @@ function renderAll(){
       <div class="pr-bars">
         <div class="bar-label">판매량</div>
         <div class="bar-track">
-          <div class="bar-fill bar-sales-fill" data-w="${salesPct}"></div>
+          <div class="bar-fill ${i<3?'bar-sales-fill-top':'bar-sales-fill'}" data-w="${salesPct}"></div>
         </div>
         <div class="bar-value"><strong>${p.dailyAvg.toFixed(1)}</strong> 개/일 · ${p.totalSold.toLocaleString()}개</div>
       </div>
@@ -663,7 +685,7 @@ function saveMoqUI(){ const m={}; PRODUCTS.forEach(p=>m[p.code]=parseInt(documen
 
 function clearData(){
   if(!confirm('모든 저장 데이터를 삭제할까요?')) return;
-  ['ilbia_orders','ilbia_inv_base','ilbia_purchases'].forEach(k=>localStorage.removeItem(k));
+  ['ilbia_orders','ilbia_inv_base','ilbia_purchases','ilbia_last_fetch'].forEach(k=>localStorage.removeItem(k));
   ['zone-inv','zone-ord'].forEach(id=>document.getElementById(id).classList.remove('done'));
   document.getElementById('inv-title').textContent='📋 재고현황 파일';
   document.getElementById('ord-title').textContent='📊 주문내역 파일';
@@ -765,11 +787,77 @@ function showToast(msg){ const t=document.getElementById('toast'); t.textContent
 
 document.getElementById('order-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 
+// ── 이지어드민 자동 수집 ──
+async function fetchEzAdmin(){
+  const btn=document.getElementById('btn-fetch');
+  const statusDiv=document.getElementById('fetch-status');
+  const stepEl=document.getElementById('fetch-step');
+  btn.disabled=true;
+  btn.textContent='⏳ 수집 중...';
+  statusDiv.classList.add('active');
+  stepEl.textContent='브라우저 실행 중...';
+  const LABELS={starting:'브라우저 실행 중...',logging_in:'이지어드민 로그인 중...',captcha_wait:'보안코드를 입력해주세요!',scraping_inventory:'재고 데이터 수집 중...',scraping_orders:'주문 데이터 수집 중...',done:'완료!'};
+  try{
+    const res=await fetch('/api/fetch-data',{method:'POST'});
+    const{task_id}=await res.json();
+    for(let i=0;i<180;i++){
+      await new Promise(r=>setTimeout(r,2000));
+      const poll=await fetch(`/api/fetch-status/${task_id}`);
+      const data=await poll.json();
+      stepEl.textContent=LABELS[data.step]||data.step;
+      if(data.status==='done'){
+        const inv={};
+        const td=today();
+        Object.entries(data.result.inventory).forEach(([code,info])=>{
+          inv[code]={stock:info.stock,updated:td};
+        });
+        LS.saveInv(inv);
+        const merged={};
+        LS.orders().forEach(r=>merged[`${r.date}|${r.code}`]={...r});
+        data.result.orders.forEach(o=>{
+          if(!o.date||!o.qty) return;
+          const key=`${o.date}|${o.code}`;
+          merged[key]=merged[key]?{...merged[key],qty:Math.max(merged[key].qty,o.qty)}:o;
+        });
+        const cutoff=addDays(today(),-(gp('param-window')||90));
+        LS.saveOrders(Object.values(merged).filter(r=>r.date>=cutoff));
+        document.getElementById('zone-inv').classList.add('done');
+        document.getElementById('inv-title').textContent='✅ 재고 자동수집 완료';
+        document.getElementById('zone-ord').classList.add('done');
+        document.getElementById('ord-title').textContent='✅ 주문 자동수집 완료';
+        updateHeader();renderAll();
+        localStorage.setItem('ilbia_last_fetch', Date.now().toString());
+        showToast(`✅ 재고 ${Object.keys(inv).length}품목, 주문 ${data.result.orders.length}건 수집 완료`);
+        break;
+      }
+      if(data.status==='error'){
+        showToast(`❌ 수집 실패: ${data.error}`);
+        break;
+      }
+    }
+  }catch(e){showToast(`❌ 서버 연결 실패 — localhost:8090에서 실행 중인지 확인하세요`);}
+  finally{
+    btn.disabled=false;
+    btn.textContent='🔄 이지어드민 데이터 가져오기';
+    statusDiv.classList.remove('active');
+  }
+}
+
 // ── Init ──
 document.getElementById('hdr-today').textContent=today();
 buildMoqEditor();
 updateHeader();
 renderAll();
+
+// ── 주간 자동 수집 체크 ──
+(function checkWeeklyFetch(){
+  const last=parseInt(localStorage.getItem('ilbia_last_fetch')||'0');
+  const daysSince=last?(Date.now()-last)/86400000:999;
+  if(daysSince>=7){
+    showToast('📡 7일 경과 — 이지어드민 데이터 자동 수집을 시작합니다');
+    setTimeout(()=>fetchEzAdmin(),2000);
+  }
+})();
 </script>
 </body>
 </html>
