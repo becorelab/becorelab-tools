@@ -24,6 +24,7 @@ sourcing/output/
 
 # 인스타그램 세션 (로그인 정보 — 절대 커밋 금지)
 instagram/session.json
+instagram/api_session.json
 
 # 엑셀/데이터 파일
 *.xls
