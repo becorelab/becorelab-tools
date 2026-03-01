@@ -16,15 +16,56 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 # ──────────────────────────────────────────
-# DM 템플릿 (랜덤 선택으로 패턴 회피)
+# 1차 DM — 매번 조합 생성 (수백 가지 변형)
 # ──────────────────────────────────────────
-# 1차 DM — 자동 발송 (A형 변형 4종, 봇 패턴 회피용 랜덤)
-DM_TEMPLATES = [
-    "{username}님 피드 보다가 멈췄어요.\n저희가 만드는 세제랑 분위기가 너무 잘 맞아서요.\n혹시 공동구매 해보신 적 있으신가요?\niLBiA 일비아 드려요 😊",
-    "{username}님 피드 구경하다가 연락드려요.\n저희 세제 브랜드랑 느낌이 딱이라 멈출 수가 없었어요.\n공동구매 경험 있으세요?\niLBiA 일비아입니다 😊",
-    "{username}님 계정 보다가 저희 브랜드랑 너무 잘 어울려서요.\n생활세제 공동구매 혹시 관심 있으실까요?\niLBiA 일비아 드려요 😊",
-    "{username}님 피드 분위기가 너무 좋아서 용기 내서 연락드려요.\n저희 생활세제 브랜드인데, 혹시 공구 해보신 적 있으세요?\niLBiA 일비아입니다 😊",
+# 각 파트를 랜덤 조합 → 매번 다른 메시지
+DM_OPENERS = [
+    "{username}님 피드 보다가 멈췄어요.",
+    "{username}님 피드 구경하다가 연락드려요.",
+    "{username}님 계정 보다가 눈에 딱 들어왔어요.",
+    "{username}님 피드 분위기가 너무 좋아서 용기 내서 연락드려요.",
+    "{username}님 게시물 보다가 저도 모르게 팔로우 눌렀어요.",
+    "{username}님 피드 보면서 이 분이다 싶었어요.",
+    "{username}님 계정 우연히 발견했는데 분위기가 너무 좋아서요.",
 ]
+
+DM_REASONS = [
+    "저희가 만드는 세제랑 분위기가 너무 잘 맞아서요.",
+    "저희 브랜드랑 느낌이 딱이라 멈출 수가 없었어요.",
+    "저희 브랜드 감성이랑 정말 잘 어울릴 것 같아서요.",
+    "생활용품 공구하시면 반응 좋을 것 같은 느낌이 확 와서요.",
+    "팔로워분들이 좋아하실 것 같은 제품이 있어서요.",
+    "저희 세제 브랜드랑 피드 톤이 잘 맞는 것 같아서요.",
+]
+
+DM_HOOKS = [
+    "혹시 공동구매 해보신 적 있으신가요?",
+    "공동구매 경험 있으세요?",
+    "생활세제 공동구매 혹시 관심 있으실까요?",
+    "혹시 공구 해보신 적 있으세요?",
+    "생활용품 공구 관심 있으실까 해서요.",
+    "혹시 공구에 관심 있으실지 여쭤보고 싶었어요.",
+]
+
+DM_CLOSERS = [
+    "iLBiA 일비아 드려요 😊",
+    "iLBiA 일비아입니다 😊",
+    "일비아(iLBiA)예요 🙂",
+    "iLBiA 일비아라고 해요 😊",
+    "생활세제 브랜드 일비아예요 🙂",
+]
+
+# 이모지 변형 (마지막에 랜덤 추가 or 생략)
+DM_EXTRA_EMOJIS = ["", " ☁️", " 🧺", " 🫧", " ✨", ""]
+
+
+def generate_dm(username):
+    """매번 고유한 DM 생성 (7×6×6×5×6 = 7,560가지 조합)"""
+    opener = random.choice(DM_OPENERS).replace('{username}', f'@{username}')
+    reason = random.choice(DM_REASONS)
+    hook = random.choice(DM_HOOKS)
+    closer = random.choice(DM_CLOSERS) + random.choice(DM_EXTRA_EMOJIS)
+    return f"{opener}\n{reason}\n{hook}\n{closer}"
 
 # 2차 DM — 답장 후 수동 발송용 (대시보드에서 복사)
 FOLLOWUP_TEMPLATE = """관심 가져주셔서 감사해요!
@@ -350,9 +391,7 @@ class InstagramBot:
         return usernames
 
     def _get_message(self, username):
-        idx = get_setting('dm_template_idx') or 'random'
-        tmpl = random.choice(DM_TEMPLATES) if idx == 'random' else DM_TEMPLATES[int(idx) % len(DM_TEMPLATES)]
-        return tmpl.replace('{username}', f'@{username}')
+        return generate_dm(username)
 
     async def send_dm(self, username, message):
         """DM 발송"""
