@@ -297,8 +297,17 @@ def scrape_orders(page, days=90, progress=None):
         page.wait_for_timeout(4000)
         clear_popups(page)
 
-    log.info(f"주문 데이터 {len(all_orders)}건 수집")
-    return all_orders
+    # 날짜+상품코드별 수량 합산 (개별 주문 → 일별 집계)
+    agg = {}
+    for o in all_orders:
+        key = f"{o['date']}|{o['code']}"
+        if key in agg:
+            agg[key]["qty"] += o["qty"]
+        else:
+            agg[key] = {**o}
+    result = list(agg.values())
+    log.info(f"주문 데이터 {len(all_orders)}건 → 집계 {len(result)}건")
+    return result
 
 
 def fetch_all_data(progress=None):
