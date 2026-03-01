@@ -16,7 +16,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from instagram_bot import (
     init_db, get_db, get_setting, get_dm_count_today,
-    run_bot, InstagramBot, SESSION_PATH, FOLLOWUP_TEMPLATE
+    run_bot, DMSender, SESSION_PATH, FOLLOWUP_TEMPLATE
 )
 
 app = Flask(__name__)
@@ -226,11 +226,11 @@ def api_login():
         return jsonify({'ok': False, 'message': '아이디/비밀번호를 입력해주세요'})
 
     async def _login():
-        bot = InstagramBot()
-        await bot.start()
-        result = await bot.login(username, password)
-        await bot.stop()
-        return result
+        sender = DMSender()
+        await sender.start()
+        # Playwright 로그인은 login_manual.py 사용 권장
+        await sender.stop()
+        return False
 
     try:
         success = asyncio.run(_login())
