@@ -155,7 +155,7 @@ def scrape_inventory(page, progress=None):
     )
     page.wait_for_timeout(3000)
 
-    # jqGrid — aria-describedby 기반 데이터 추출
+    # jqGrid — 상품코드(_key) + 재고(_stock) 추출
     inventory = page.evaluate(
         """
         (() => {
@@ -185,6 +185,8 @@ def scrape_inventory(page, progress=None):
     result = {}
     for item in inventory:
         result[item["code"]] = {"stock": item["stock"], "updated": today_str}
+    # 디버깅: 매핑 샘플 출력
+    sample_items = inventory[:5] if len(inventory) >= 5 else inventory
     return result
 
 
@@ -246,9 +248,9 @@ def scrape_orders(page, days=90, progress=None):
                 const data = [];
                 rows.forEach(tr => {
                     // aria-describedby 패턴으로 셀 찾기
-                    const dateCell = tr.querySelector('td[aria-describedby$="_order_date"], td[aria-describedby$="_po_date"]');
-                    const codeCell = tr.querySelector('td[aria-describedby$="_key"], td[aria-describedby$="_product_id"]');
-                    const qtyCell = tr.querySelector('td[aria-describedby$="_product_qty"], td[aria-describedby$="_qty"]');
+                    const dateCell = tr.querySelector('td[aria-describedby$="_collect_date"]');
+                    const codeCell = tr.querySelector('td[aria-describedby$="_product_id"]');
+                    const qtyCell = tr.querySelector('td[aria-describedby$="_order_products_qty"]');
                     if (!dateCell || !qtyCell) return;
                     const rawDate = dateCell.textContent.trim();
                     const dateText = rawDate.substring(0, 10);
@@ -274,20 +276,24 @@ def scrape_orders(page, days=90, progress=None):
         else:
             break
 
-        # jqGrid 다음 페이지
+        # jqGrid 다음 페이지 (ui-icon-seek-next)
         has_next = page.evaluate(
             """
             (() => {
-                const nextBtn = document.querySelector('.ui-pg-button [class*="end-e"]');
+                const nextBtn = document.querySelector('.ui-pg-button [class*="seek-next"]');
                 if (!nextBtn) return false;
                 const parent = nextBtn.closest('.ui-pg-button, td');
-                if (parent) { parent.click(); return true; }
+                if (parent && !parent.classList.contains('ui-state-disabled')) {
+                    parent.click(); return true;
+                }
                 return false;
             })()
             """
         )
         if not has_next:
+            log.info(f"페이지 {pg+1} — 마지막 페이지 도달")
             break
+        log.info(f"페이지 {pg+1} 완료 ({len(all_orders)}건) — 다음 페이지로...")
         page.wait_for_timeout(4000)
         clear_popups(page)
 
