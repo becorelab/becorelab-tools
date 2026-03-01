@@ -796,7 +796,7 @@ async function fetchEzAdmin(){
   btn.textContent='⏳ 수집 중...';
   statusDiv.classList.add('active');
   stepEl.textContent='브라우저 실행 중...';
-  const LABELS={starting:'브라우저 실행 중...',logging_in:'이지어드민 로그인 중...',captcha_wait:'보안코드를 입력해주세요!',scraping_inventory:'재고 데이터 수집 중...',scraping_orders:'주문 데이터 수집 중...',done:'완료!'};
+  const LABELS={starting:'브라우저 실행 중...',logging_in:'이지어드민 로그인 중...',captcha_wait:'보안코드를 입력해주세요!',scraping_inventory:'재고 데이터 수집 중...',scraping_outbound:'출고+배송 데이터 수집 중...',scraping_orders:'주문 데이터 수집 중...',done:'완료!'};
   try{
     const res=await fetch('/api/fetch-data',{method:'POST'});
     const{task_id}=await res.json();
@@ -812,15 +812,10 @@ async function fetchEzAdmin(){
           inv[code]={stock:info.stock,updated:td};
         });
         LS.saveInv(inv);
-        const merged={};
-        LS.orders().forEach(r=>merged[`${r.date}|${r.code}`]={...r});
-        data.result.orders.forEach(o=>{
-          if(!o.date||!o.qty) return;
-          const key=`${o.date}|${o.code}`;
-          merged[key]=merged[key]?{...merged[key],qty:Math.max(merged[key].qty,o.qty)}:o;
-        });
+        // 자동수집은 3개월 전체 데이터이므로 기존 데이터 교체 (병합X)
         const cutoff=addDays(today(),-(gp('param-window')||90));
-        LS.saveOrders(Object.values(merged).filter(r=>r.date>=cutoff));
+        const freshOrders=data.result.orders.filter(o=>o.date&&o.qty&&o.date>=cutoff);
+        LS.saveOrders(freshOrders);
         document.getElementById('zone-inv').classList.add('done');
         document.getElementById('inv-title').textContent='✅ 재고 자동수집 완료';
         document.getElementById('zone-ord').classList.add('done');

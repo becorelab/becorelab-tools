@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
 이지어드민 데이터 자동 수집 스크래퍼
-- 로그인 + 보안코드 대기 + 재고현황/주문내역 수집
+- 로그인 + 보안코드 대기 + 재고현황(I100) + 재고수불부(I500) 출고량 수집
 """
 import logging
 import time
 import os
-import tempfile
 from datetime import date, timedelta
 from playwright.sync_api import sync_playwright
 
@@ -82,7 +81,6 @@ def clear_popups(page):
     """dim + 팝업 제거"""
     page.evaluate("document.querySelectorAll('.dim').forEach(el => el.remove())")
     page.wait_for_timeout(500)
-    # 남은 팝업 닫기
     for _ in range(5):
         closed = page.evaluate(
             """
@@ -106,16 +104,14 @@ def clear_popups(page):
 
 
 def click_search(page):
-    """검색(F2) 버튼 클릭 — span.flip 또는 텍스트 매칭"""
+    """검색(F2) 버튼 클릭"""
     page.evaluate(
         """
         (() => {
-            // EzAdmin 검색 버튼은 span.flip
             const spans = document.querySelectorAll('span.flip');
             for (const s of spans) {
                 if (s.textContent.trim() === '검색') { s.click(); return; }
             }
-            // fallback
             const all = document.querySelectorAll('button, input[type="button"], input[type="submit"], a, span');
             for (const b of all) {
                 const t = (b.textContent || b.value || '').trim();
@@ -126,21 +122,8 @@ def click_search(page):
     )
 
 
-def scrape_inventory(page, progress=None):
-    """재고현황 (I100) 페이지에서 상품코드 + 정상재고 수집"""
-    if progress:
-        progress("scraping_inventory")
-    log.info("재고현황 페이지 이동 (I100)...")
-    page.goto(f"{BASE}/template35.htm?template=I100", timeout=30000, wait_until="domcontentloaded")
-    page.wait_for_timeout(4000)
-    clear_popups(page)
-
-    # 검색 실행
-    click_search(page)
-    page.wait_for_timeout(6000)
-    clear_popups(page)
-
-    # jqGrid 페이지 사이즈를 최대로
+def set_max_page_size(page):
+    """jqGrid 페이지 사이즈를 최대로 설정"""
     page.evaluate(
         """
         (() => {
@@ -153,9 +136,41 @@ def scrape_inventory(page, progress=None):
         })()
         """
     )
+
+
+def go_next_page(page):
+    """jqGrid 다음 페이지 이동. 성공 시 True"""
+    return page.evaluate(
+        """
+        (() => {
+            const nextBtn = document.querySelector('.ui-pg-button [class*="seek-next"]');
+            if (!nextBtn) return false;
+            const parent = nextBtn.closest('.ui-pg-button, td');
+            if (parent && !parent.classList.contains('ui-state-disabled')) {
+                parent.click(); return true;
+            }
+            return false;
+        })()
+        """
+    )
+
+
+def scrape_inventory(page, progress=None):
+    """재고현황 (I100) — 상품코드 + 정상재고"""
+    if progress:
+        progress("scraping_inventory")
+    log.info("재고현황 페이지 이동 (I100)...")
+    page.goto(f"{BASE}/template35.htm?template=I100", timeout=30000, wait_until="domcontentloaded")
+    page.wait_for_timeout(4000)
+    clear_popups(page)
+
+    click_search(page)
+    page.wait_for_timeout(6000)
+    clear_popups(page)
+
+    set_max_page_size(page)
     page.wait_for_timeout(3000)
 
-    # jqGrid — 상품코드(_key) + 재고(_stock) 추출
     inventory = page.evaluate(
         """
         (() => {
@@ -182,131 +197,136 @@ def scrape_inventory(page, progress=None):
 
     log.info(f"재고 데이터 {len(inventory)}건 수집")
     today_str = date.today().isoformat()
-    result = {}
-    for item in inventory:
-        result[item["code"]] = {"stock": item["stock"], "updated": today_str}
-    # 디버깅: 매핑 샘플 출력
-    sample_items = inventory[:5] if len(inventory) >= 5 else inventory
-    return result
+    return {item["code"]: {"stock": item["stock"], "updated": today_str} for item in inventory}
 
 
-def scrape_orders(page, days=90, progress=None):
-    """주문내역 (DS00) 페이지에서 발주일 + 상품코드 + 상품수량 수집"""
+def scrape_outbound(page, days=90, progress=None):
+    """재고수불부 (I500) — 상품별 일자별 (출고+배송) 수량 수집
+    컬럼 매핑 (검증 완료):
+      grid1_product_id = 상품코드
+      grid1_crdate = 일자
+      grid1_stockout = 출고 (로켓배송 직송)
+      grid1_trans = 배송 (일반 배송)
+    판매량 = 출고 + 배송
+    """
     if progress:
-        progress("scraping_orders")
-    log.info("주문내역 페이지 이동 (DS00)...")
-    page.goto(f"{BASE}/template35.htm?template=DS00", timeout=30000, wait_until="domcontentloaded")
-    page.wait_for_timeout(4000)
+        progress("scraping_outbound")
+    log.info("재고수불부 페이지 이동 (I500)...")
+    page.goto(f"{BASE}/template35.htm?template=I500", timeout=30000, wait_until="domcontentloaded")
+    page.wait_for_timeout(5000)
     clear_popups(page)
 
-    # 검색 기간 설정: N일 전 ~ 오늘
+    # 날짜 필드 탐색 및 설정
     start_date = (date.today() - timedelta(days=days)).isoformat()
     end_date = date.today().isoformat()
-    page.evaluate(
+    date_result = page.evaluate(
         f"""
         (() => {{
-            const sd = document.getElementById('start_date') || document.querySelector('input[name="start_date"]');
-            const ed = document.getElementById('end_date') || document.querySelector('input[name="end_date"]');
-            if (sd) sd.value = '{start_date}';
-            if (ed) ed.value = '{end_date}';
+            // 모든 텍스트 input 중 날짜 형식(yyyy-mm-dd) 값을 가진 필드 찾기
+            const allInputs = [...document.querySelectorAll('input')];
+            const datePattern = /^\\d{{4}}-\\d{{2}}-\\d{{2}}$/;
+            const dateInputs = allInputs.filter(el => datePattern.test(el.value.trim()));
+            const info = dateInputs.map(el => ({{
+                id: el.id, name: el.name, value: el.value, type: el.type
+            }}));
+            if (dateInputs.length >= 2) {{
+                dateInputs[0].value = '{start_date}';
+                dateInputs[1].value = '{end_date}';
+                return {{ok: true, found: info}};
+            }}
+            // 폴백: 모든 input 정보 반환
+            return {{ok: false, all: allInputs.slice(0, 30).map(el => ({{
+                id: el.id, name: el.name, type: el.type, value: el.value.substring(0, 30)
+            }}))}};
         }})()
         """
     )
-    page.wait_for_timeout(500)
+    log.info(f"날짜 필드 탐색: {date_result}")
 
     # 검색 실행
     click_search(page)
     page.wait_for_timeout(8000)
     clear_popups(page)
 
-    # jqGrid 페이지 사이즈 최대로
-    page.evaluate(
-        """
-        (() => {
-            const sels = document.querySelectorAll('.ui-pg-selbox');
-            sels.forEach(sel => {
-                const opts = [...sel.options];
-                const maxOpt = opts[opts.length - 1];
-                if (maxOpt) { sel.value = maxOpt.value; sel.dispatchEvent(new Event('change')); }
-            });
-        })()
-        """
-    )
+    set_max_page_size(page)
     page.wait_for_timeout(5000)
 
-    # jqGrid — aria-describedby 기반 데이터 수집
-    all_orders = []
+    # 전체 데이터 수집 (하드코딩된 컬럼명 사용)
+    CODE_COL = "grid1_product_id"
+    DATE_COL = "grid1_crdate"
+    OUT_COL = "grid1_stockout"
+    SHIP_COL = "grid1_trans"
+
+    all_data = []
     max_pages = 50
 
     for pg in range(max_pages):
-        orders_page = page.evaluate(
+        page_data = page.evaluate(
             """
             (() => {
                 const tbl = document.getElementById('grid1') || document.querySelector('.ui-jqgrid-btable');
-                if (!tbl) return {error: 'no_grid'};
+                if (!tbl) return [];
                 const rows = [...tbl.querySelectorAll('tr')];
                 const data = [];
                 rows.forEach(tr => {
-                    // aria-describedby 정확 매칭 (shop_product_id와 혼동 방지)
-                    const dateCell = tr.querySelector('td[aria-describedby="grid1_collect_date"]');
                     const codeCell = tr.querySelector('td[aria-describedby="grid1_product_id"]');
-                    const qtyCell = tr.querySelector('td[aria-describedby="grid1_order_products_qty"]');
-                    if (!dateCell || !qtyCell) return;
-                    const rawDate = dateCell.textContent.trim();
-                    const dateText = rawDate.substring(0, 10);
-                    const code = codeCell ? codeCell.textContent.trim() : '';
-                    const qty = parseInt(qtyCell.textContent.trim().replace(/,/g, '')) || 0;
-                    if (dateText && dateText.length === 10 && qty > 0) {
-                        data.push({date: dateText, code, qty});
+                    const dateCell = tr.querySelector('td[aria-describedby="grid1_crdate"]');
+                    const outCell = tr.querySelector('td[aria-describedby="grid1_stockout"]');
+                    const shipCell = tr.querySelector('td[aria-describedby="grid1_trans"]');
+                    if (!codeCell || !dateCell) return;
+                    const code = codeCell.textContent.trim();
+                    const d = dateCell.textContent.trim().substring(0, 10);
+                    const outQty = outCell ? (parseInt(outCell.textContent.trim().replace(/,/g, '')) || 0) : 0;
+                    const shipQty = shipCell ? (parseInt(shipCell.textContent.trim().replace(/,/g, '')) || 0) : 0;
+                    const totalQty = outQty + shipQty;
+                    if (code && code.length > 2 && d.length === 10 && totalQty > 0) {
+                        data.push({code, date: d, qty: totalQty, out: outQty, ship: shipQty});
                     }
                 });
-                return {data, total: rows.length};
+                return data;
             })()
             """
         )
 
-        if isinstance(orders_page, dict) and orders_page.get("error"):
-            log.warning(f"주문 테이블 파싱 실패 (page {pg+1}): {orders_page}")
+        if not page_data:
+            if pg == 0:
+                log.warning("I500 첫 페이지 데이터 없음 — 날짜 설정 실패 가능성")
             break
 
-        if isinstance(orders_page, dict) and "data" in orders_page:
-            all_orders.extend(orders_page["data"])
-            if orders_page.get("total", 0) < 100:
-                break
-        else:
-            break
+        all_data.extend(page_data)
 
-        # jqGrid 다음 페이지 (ui-icon-seek-next)
-        has_next = page.evaluate(
-            """
-            (() => {
-                const nextBtn = document.querySelector('.ui-pg-button [class*="seek-next"]');
-                if (!nextBtn) return false;
-                const parent = nextBtn.closest('.ui-pg-button, td');
-                if (parent && !parent.classList.contains('ui-state-disabled')) {
-                    parent.click(); return true;
-                }
-                return false;
-            })()
-            """
-        )
-        if not has_next:
-            log.info(f"페이지 {pg+1} — 마지막 페이지 도달")
+        if pg == 0:
+            for item in page_data[:3]:
+                log.info(f"  샘플: {item['code']} {item['date']} 출고={item['out']} 배송={item['ship']} 합계={item['qty']}")
+
+        if not go_next_page(page):
+            log.info(f"페이지 {pg+1} — 마지막 도달 ({len(all_data)}건)")
             break
-        log.info(f"페이지 {pg+1} 완료 ({len(all_orders)}건) — 다음 페이지로...")
+        log.info(f"페이지 {pg+1} 완료 ({len(all_data)}건) — 다음 페이지로...")
         page.wait_for_timeout(4000)
         clear_popups(page)
 
-    # 날짜+상품코드별 수량 합산 (개별 주문 → 일별 집계)
+    log.info(f"재고수불부 출고+배송 총 {len(all_data)}건 수집")
+
+    # 날짜+상품코드별 집계
     agg = {}
-    for o in all_orders:
+    for o in all_data:
         key = f"{o['date']}|{o['code']}"
         if key in agg:
             agg[key]["qty"] += o["qty"]
         else:
-            agg[key] = {**o}
+            agg[key] = {"date": o["date"], "code": o["code"], "qty": o["qty"]}
     result = list(agg.values())
-    log.info(f"주문 데이터 {len(all_orders)}건 → 집계 {len(result)}건")
+    log.info(f"일별 집계 {len(result)}건")
+
+    # 상위 상품 요약
+    product_totals = {}
+    for r in result:
+        product_totals[r["code"]] = product_totals.get(r["code"], 0) + r["qty"]
+    top5 = sorted(product_totals.items(), key=lambda x: -x[1])[:5]
+    for code, total in top5:
+        log.info(f"  {code}: 총 {total}개 ({total/max(days,1):.1f}개/일)")
+
     return result
 
 
@@ -325,7 +345,7 @@ def fetch_all_data(progress=None):
             clear_popups(page)
 
             inventory = scrape_inventory(page, progress=progress)
-            orders = scrape_orders(page, days=90, progress=progress)
+            orders = scrape_outbound(page, days=90, progress=progress)
 
             if progress:
                 progress("done")
