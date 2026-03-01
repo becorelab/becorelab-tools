@@ -321,6 +321,19 @@
   </div>
 </div>
 
+<!-- 2차 DM 복사 모달 -->
+<div class="modal-overlay" id="modal-followup">
+  <div class="modal">
+    <h3>📋 2차 DM (공구 조건 안내)</h3>
+    <p style="font-size:13px;color:#86868b;margin-bottom:14px;">답장 온 계정에 보낼 메시지예요. 복사해서 인스타 DM에 붙여넣기 해주세요!</p>
+    <textarea id="followup-text" readonly style="width:100%;height:220px;padding:14px;border:1.5px solid #e0e0e5;border-radius:10px;font-size:13px;line-height:1.7;resize:none;font-family:inherit;background:#f9f9fb;"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-followup')">닫기</button>
+      <button class="btn btn-primary" onclick="copyFollowup()">복사하기</button>
+    </div>
+  </div>
+</div>
+
 <script>
 let currentTab = 'dm';
 let dmPage = 1;
@@ -414,7 +427,8 @@ async function loadDmLog(page = 1) {
       <td style="font-size:12px;color:#86868b;">${r.sent_at ? r.sent_at.slice(0,16) : '-'}</td>
       <td style="max-width:280px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escHtml(r.message || '')}">${escHtml((r.message||'').slice(0,50))}${(r.message||'').length>50?'…':''}</td>
       <td>
-        ${r.status === 'sent' ? `<button class="btn btn-outline btn-sm" onclick="openReply(${r.id})">답장 기록</button>` : (r.reply ? `<span style="font-size:11px;color:#86868b;">${escHtml(r.reply)}</span>` : '')}
+        ${r.status === 'sent' ? `<button class="btn btn-outline btn-sm" onclick="openReply(${r.id})">답장 기록</button>` : ''}
+        ${r.status === 'replied' ? `<button class="btn btn-primary btn-sm" onclick="openFollowup('${r.username}')">2차 DM 복사</button>` : ''}
       </td>
     </tr>
   `).join('');
@@ -570,6 +584,25 @@ async function submitReply() {
   closeModal('modal-reply');
   loadDmLog(dmPage);
   loadStats();
+}
+
+// ─────────────────────────────────────────
+// 2차 DM (공구 조건 안내)
+// ─────────────────────────────────────────
+async function openFollowup(username) {
+  const res = await fetch(`/api/followup/${username}`);
+  const d = await res.json();
+  document.getElementById('followup-text').value = d.message;
+  openModal('modal-followup');
+}
+
+function copyFollowup() {
+  const textarea = document.getElementById('followup-text');
+  textarea.select();
+  navigator.clipboard.writeText(textarea.value);
+  const btn = event.target;
+  btn.textContent = '복사 완료!';
+  setTimeout(() => { btn.textContent = '복사하기'; }, 1500);
 }
 
 // ─────────────────────────────────────────

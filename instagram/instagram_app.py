@@ -16,7 +16,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from instagram_bot import (
     init_db, get_db, get_setting, get_dm_count_today,
-    run_bot, InstagramBot, SESSION_PATH
+    run_bot, InstagramBot, SESSION_PATH, FOLLOWUP_TEMPLATE
 )
 
 app = Flask(__name__)
@@ -266,6 +266,13 @@ def api_mark_replied(log_id):
     conn.commit()
     conn.close()
     return jsonify({'ok': True})
+
+
+@app.route('/api/followup/<username>')
+def api_followup_msg(username):
+    """2차 DM 메시지 생성 (복사용)"""
+    msg = FOLLOWUP_TEMPLATE.replace('{username}', f'@{username}')
+    return jsonify({'message': msg})
 
 
 @app.route('/api/account/<username>/skip', methods=['POST'])
