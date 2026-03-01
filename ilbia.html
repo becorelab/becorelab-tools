@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iLBiA — 일상이 편해지면, 가족이 행복해집니다</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --mint: #3ecfb2;
+      --mint-light: #e8faf6;
+      --mint-mid: #b2efe3;
+      --sky: #4ab8e8;
+      --sky-light: #e8f6fd;
+      --dark: #1a2332;
+      --gray: #64748b;
+      --gray-light: #f1f5f9;
+      --white: #ffffff;
+      --max-w: 1100px;
+      --radius: 16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: var(--dark);
+      background: var(--white);
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(62,207,178,0.15);
+    }
+
+    .header-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 1.6rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--mint), var(--sky));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+
+    nav { display: flex; gap: 32px; }
+
+    nav a {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--gray);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    nav a:hover { color: var(--mint); }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--mint), var(--sky));
+      color: var(--white) !important;
+      padding: 8px 20px;
+      border-radius: 100px;
+      font-weight: 600 !important;
+      transition: opacity 0.2s !important;
+    }
+
+    .nav-cta:hover { opacity: 0.85; color: var(--white) !important; }
+
+    /* ── HERO ── */
+    #hero {
+      padding: 140px 24px 100px;
+      background: linear-gradient(160deg, var(--white) 0%, var(--mint-light) 60%, var(--sky-light) 100%);
+      text-align: center;
+    }
+
+    .hero-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: var(--mint-light);
+      color: var(--mint);
+      border: 1px solid var(--mint-mid);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+    }
+
+    .hero-headline {
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 900;
+      line-height: 1.25;
+      letter-spacing: -1px;
+      color: var(--dark);
+      margin-bottom: 20px;
+    }
+
+    .hero-headline span {
+      background: linear-gradient(135deg, var(--mint), var(--sky));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--gray);
+      max-width: 540px;
+      margin: 0 auto 40px;
+      font-weight: 400;
+      line-height: 1.75;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--mint), var(--sky));
+      color: var(--white);
+      border: none;
+      padding: 16px 36px;
+      border-radius: 100px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 6px 24px rgba(62,207,178,0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(62,207,178,0.45);
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--dark);
+      border: 1.5px solid #dde3e9;
+      padding: 16px 36px;
+      border-radius: 100px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-secondary:hover { border-color: var(--mint); color: var(--mint); }
+
+    .hero-visual {
+      margin-top: 72px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-pill {
+      background: var(--white);
+      border: 1px solid var(--mint-mid);
+      border-radius: 100px;
+      padding: 10px 22px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gray);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 12px rgba(62,207,178,0.1);
+    }
+
+    .hero-pill .dot {
+      width: 8px; height: 8px;
+      background: linear-gradient(135deg, var(--mint), var(--sky));
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── SECTION COMMON ── */
+    section { padding: 100px 24px; }
+
+    .section-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mint);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 800;
+      line-height: 1.3;
+      letter-spacing: -0.5px;
+      color: var(--dark);
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      font-size: 1rem;
+      color: var(--gray);
+      max-width: 560px;
+      line-height: 1.8;
+      margin-bottom: 56px;
+    }
+
+    /* ── BRAND STORY ── */
+    #brand { background: var(--white); }
+
+    .brand-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .brand-text .quote {
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--gray);
+      border-left: 3px solid var(--mint);
+      padding-left: 20px;
+      line-height: 1.8;
+      margin-bottom: 32px;
+    }
+
+    .brand-text p {
+      font-size: 0.95rem;
+      color: var(--gray);
+      line-height: 1.9;
+      margin-bottom: 16px;
+    }
+
+    .keyword-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .keyword-card {
+      background: var(--gray-light);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+
+    .keyword-card:hover {
+      transform: translateX(6px);
+      box-shadow: 0 4px 20px rgba(62,207,178,0.15);
+    }
+
+    .kw-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--mint), var(--sky));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .kw-body { flex: 1; }
+
+    .kw-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 4px;
+    }
+
+    .kw-desc {
+      font-size: 0.85rem;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    /* ── PRODUCTS ── */
+    #products { background: var(--gray-light); }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .product-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      position: relative;
+      transition: transform 0.25s, box-shadow 0.25s;
+      border: 1px solid transparent;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(62,207,178,0.18);
+      border-color: var(--mint-mid);
+    }
+
+    .badge-coming {
+      position: absolute;
+      top: 16px; right: 16px;
+      background: #fff3e0;
+      color: #e67e22;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 100px;
+    }
+
+    .product-icon {
+      width: 60px; height: 60px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--mint-light), var(--sky-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+    }
+
+    .product-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+
+    .product-desc {
+      font-size: 0.85rem;
+      color: var(--gray);
+      line-height: 1.65;
+      margin-bottom: 16px;
+    }
+
+    .product-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 100px;
+      background: var(--mint-light);
+      color: var(--mint);
+      border: 1px solid var(--mint-mid);
+    }
+
+    /* ── CHANNELS ── */
+    #channels { background: var(--white); }
+
+    .channels-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .channel-card {
+      background: var(--gray-light);
+      border-radius: var(--radius);
+      padding: 28px 16px;
+      text-align: center;
+      transition: transform 0.25s, background 0.25s;
+      border: 1px solid transparent;
+    }
+
+    .channel-card:hover {
+      background: var(--mint-light);
+      border-color: var(--mint-mid);
+      transform: translateY(-3px);
+    }
+
+    .channel-icon {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    .channel-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .channel-sub {
+      font-size: 0.75rem;
+      color: var(--gray);
+      margin-top: 4px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark);
+      color: rgba(255,255,255,0.55);
+      padding: 56px 24px;
+    }
+
+    .footer-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 32px;
+    }
+
+    .footer-logo {
+      font-size: 1.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--mint), var(--sky));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .footer-company {
+      font-size: 0.82rem;
+      margin-bottom: 4px;
+    }
+
+    .footer-copy {
+      font-size: 0.78rem;
+      opacity: 0.7;
+    }
+
+    .footer-right {
+      text-align: right;
+    }
+
+    .footer-tagline {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.4);
+      font-style: italic;
+    }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.5s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      section { padding: 72px 20px; }
+
+      nav { gap: 16px; }
+      nav a:not(.nav-cta) { display: none; }
+
+      .brand-layout {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .products-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .channels-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .footer-right { text-align: left; }
+    }
+
+    @media (max-width: 480px) {
+      .products-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-headline { letter-spacing: -0.5px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header>
+    <div class="header-inner">
+      <a href="#hero" class="logo">iLBiA</a>
+      <nav>
+        <a href="#brand">브랜드</a>
+        <a href="#products">제품</a>
+        <a href="#channels" class="nav-cta">구매처</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ── HERO ── -->
+  <section id="hero">
+    <div class="hero-inner">
+      <div class="hero-badge reveal">일상을 바꾸는 생활용품 브랜드</div>
+      <h1 class="hero-headline reveal reveal-delay-1">
+        일상이 편해지면,<br/>
+        <span>가족이 행복해집니다</span>
+      </h1>
+      <p class="hero-sub reveal reveal-delay-2">
+        iLBiA는 매일 반복되는 집안일을 더 쉽고 깨끗하게 만드는<br/>
+        생활용품을 연구합니다. 과학적 성분과 사용 편의성, 두 가지를 모두.
+      </p>
+      <div class="hero-buttons reveal reveal-delay-3">
+        <a href="#products" class="btn-primary">제품 보기</a>
+        <a href="#brand" class="btn-secondary">브랜드 스토리</a>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-pill reveal reveal-delay-3"><span class="dot"></span>건조기 시트 3종</div>
+        <div class="hero-pill reveal reveal-delay-4"><span class="dot"></span>식기세척기 세제</div>
+        <div class="hero-pill reveal reveal-delay-4"><span class="dot"></span>캡슐 세제</div>
+        <div class="hero-pill reveal reveal-delay-5"><span class="dot"></span>얼룩 제거제</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── BRAND STORY ── -->
+  <section id="brand">
+    <div class="section-inner">
+      <div class="brand-layout">
+        <div class="brand-text reveal">
+          <span class="section-label">Brand Story</span>
+          <h2 class="section-title">가족을 위한<br/>더 나은 선택</h2>
+          <blockquote class="quote">
+            "매일 하는 집안일이 조금만 더 쉬워진다면,<br/>
+            그 시간에 더 소중한 것들을 할 수 있습니다."
+          </blockquote>
+          <p>
+            iLBiA(일비아)는 '일상의 비우기와 채우기'라는 철학에서 출발했습니다.
+            불필요한 수고는 줄이고, 소중한 시간은 늘리는 제품을 만듭니다.
+          </p>
+          <p>
+            모든 제품은 실제 가정에서 쓰이는 방식을 기준으로 개발합니다.
+            화학 성분의 안전성, 사용 편의성, 그리고 효과—세 가지를 동시에 갖춘
+            제품만을 출시합니다.
+          </p>
+        </div>
+
+        <div class="keyword-cards">
+          <div class="keyword-card reveal reveal-delay-1">
+            <div class="kw-icon">🏠</div>
+            <div class="kw-body">
+              <div class="kw-title">일상</div>
+              <div class="kw-desc">반복되는 집안일을 더 간단하게.<br/>매일 쓰는 제품일수록 더 세심하게 만듭니다.</div>
+            </div>
+          </div>
+          <div class="keyword-card reveal reveal-delay-2">
+            <div class="kw-icon">👨‍👩‍👧</div>
+            <div class="kw-body">
+              <div class="kw-title">가족</div>
+              <div class="kw-desc">아이부터 어른까지 함께 쓸 수 있는 안전한 성분.<br/>가족의 건강을 먼저 생각합니다.</div>
+            </div>
+          </div>
+          <div class="keyword-card reveal reveal-delay-3">
+            <div class="kw-icon">✨</div>
+            <div class="kw-body">
+              <div class="kw-title">청결</div>
+              <div class="kw-desc">눈에 보이는 오염과 눈에 보이지 않는 냄새까지.<br/>진짜 깨끗함을 추구합니다.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PRODUCTS ── -->
+  <section id="products">
+    <div class="section-inner">
+      <span class="section-label reveal">Products</span>
+      <h2 class="section-title reveal">iLBiA 제품 라인업</h2>
+      <p class="section-desc reveal">
+        일상에서 가장 자주 쓰는 순간에 등장하는 제품들.<br/>
+        사용할수록 차이가 느껴지도록 설계했습니다.
+      </p>
+
+      <div class="products-grid">
+
+        <div class="product-card reveal reveal-delay-1">
+          <div class="product-icon">🌿</div>
+          <div class="product-name">건조기 시트 — 코튼블루</div>
+          <p class="product-desc">
+            깨끗한 면 향기처럼 상쾌하고 가볍습니다. 정전기 방지와 섬유 유연 효과로 건조 후 빨래를 보다 부드럽게.
+          </p>
+          <div class="product-tags">
+            <span class="tag">정전기 방지</span>
+            <span class="tag">섬유 유연</span>
+            <span class="tag">청량 향</span>
+          </div>
+        </div>
+
+        <div class="product-card reveal reveal-delay-2">
+          <div class="product-icon">🍼</div>
+          <div class="product-name">건조기 시트 — 베이비크림</div>
+          <p class="product-desc">
+            부드럽고 포근한 향. 아기 옷감에도 사용할 수 있을 만큼 순한 성분을 우선으로 설계했습니다.
+          </p>
+          <div class="product-tags">
+            <span class="tag">저자극 성분</span>
+            <span class="tag">포근한 향</span>
+            <span class="tag">섬유 유연</span>
+          </div>
+        </div>
+
+        <div class="product-card reveal reveal-delay-3">
+          <div class="product-icon">💜</div>
+          <div class="product-name">건조기 시트 — 바이올렛 머스크</div>
+          <p class="product-desc">
+            은은하고 고급스러운 머스크 향. 세탁 후에도 오래 지속되는 향기를 원하는 분들을 위해.
+          </p>
+          <div class="product-tags">
+            <span class="tag">지속 향기</span>
+            <span class="tag">정전기 방지</span>
+            <span class="tag">고급 향</span>
+          </div>
+        </div>
+
+        <div class="product-card reveal reveal-delay-1">
+          <div class="product-icon">🍽️</div>
+          <div class="product-name">식기세척기 세제</div>
+          <p class="product-desc">
+            기름기와 음식물 찌꺼기를 효과적으로 분해. 식기에 남는 잔여물 없이 깨끗한 마무리.
+          </p>
+          <div class="product-tags">
+            <span class="tag">잔여물 없음</span>
+            <span class="tag">강력 세정</span>
+          </div>
+        </div>
+
+        <div class="product-card reveal reveal-delay-2">
+          <div class="product-icon">💊</div>
+          <div class="product-name">캡슐 세제</div>
+          <p class="product-desc">
+            계량 없이 한 알로 끝내는 세탁. 정확한 성분 함량과 간편한 사용성을 동시에 갖췄습니다.
+          </p>
+          <div class="product-tags">
+            <span class="tag">원터치 사용</span>
+            <span class="tag">정확한 계량</span>
+          </div>
+        </div>
+
+        <div class="product-card reveal reveal-delay-3">
+          <div class="product-icon">🧹</div>
+          <div class="product-name">얼룩 제거제</div>
+          <p class="product-desc">
+            커피, 김치, 혈흔 등 다양한 생활 얼룩에 대응. 빠른 침투로 얼룩을 효과적으로 분해합니다.
+          </p>
+          <div class="product-tags">
+            <span class="tag">다용도</span>
+            <span class="tag">빠른 침투</span>
+          </div>
+        </div>
+
+        <div class="product-card reveal reveal-delay-1">
+          <span class="badge-coming">준비 중</span>
+          <div class="product-icon">🌬️</div>
+          <div class="product-name">섬유 탈취제</div>
+          <p class="product-desc">
+            뿌리면 주름까지 완화되는 섬유 전용 탈취제. 정전기 방지 효과로 더 오래 깨끗한 상태를 유지.
+          </p>
+          <div class="product-tags">
+            <span class="tag">탈취</span>
+            <span class="tag">주름 완화</span>
+            <span class="tag">정전기 방지</span>
+          </div>
+        </div>
+
+        <div class="product-card reveal reveal-delay-2">
+          <span class="badge-coming">준비 중</span>
+          <div class="product-icon">🪨</div>
+          <div class="product-name">고체형 실내 탈취제</div>
+          <p class="product-desc">
+            두고 쓰는 간편한 고체 타입. 냉장고, 신발장, 화장실 등 밀폐 공간의 냄새를 지속적으로 중화.
+          </p>
+          <div class="product-tags">
+            <span class="tag">장기 지속</span>
+            <span class="tag">밀폐 공간</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CHANNELS ── -->
+  <section id="channels">
+    <div class="section-inner">
+      <span class="section-label reveal">Where to Buy</span>
+      <h2 class="section-title reveal">어디서든 만날 수 있습니다</h2>
+      <p class="section-desc reveal">
+        자사몰부터 주요 오픈마켓까지 다양한 채널에서 iLBiA 제품을 구매하실 수 있습니다.
+      </p>
+
+      <div class="channels-grid">
+        <div class="channel-card reveal reveal-delay-1">
+          <div class="channel-icon">🏪</div>
+          <div class="channel-name">iLBiA 공식몰</div>
+          <div class="channel-sub">카페24 자사몰</div>
+        </div>
+        <div class="channel-card reveal reveal-delay-1">
+          <div class="channel-icon">🟢</div>
+          <div class="channel-name">네이버 스마트스토어</div>
+          <div class="channel-sub">네이버페이 가능</div>
+        </div>
+        <div class="channel-card reveal reveal-delay-2">
+          <div class="channel-icon">🛒</div>
+          <div class="channel-name">쿠팡</div>
+          <div class="channel-sub">로켓배송</div>
+        </div>
+        <div class="channel-card reveal reveal-delay-2">
+          <div class="channel-icon">1️⃣</div>
+          <div class="channel-name">11번가</div>
+          <div class="channel-sub">SK페이 가능</div>
+        </div>
+        <div class="channel-card reveal reveal-delay-3">
+          <div class="channel-icon">🌐</div>
+          <div class="channel-name">G마켓</div>
+          <div class="channel-sub">스마일배송</div>
+        </div>
+        <div class="channel-card reveal reveal-delay-3">
+          <div class="channel-icon">🔨</div>
+          <div class="channel-name">옥션</div>
+          <div class="channel-sub">G마켓 계열</div>
+        </div>
+        <div class="channel-card reveal reveal-delay-4">
+          <div class="channel-icon">🏠</div>
+          <div class="channel-name">오늘의집</div>
+          <div class="channel-sub">라이프스타일 플랫폼</div>
+        </div>
+        <div class="channel-card reveal reveal-delay-4" style="border: 1.5px dashed var(--mint-mid); background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: default;">
+          <div class="channel-icon" style="opacity:0.4;">＋</div>
+          <div class="channel-name" style="color: var(--gray);">채널 확대 중</div>
+          <div class="channel-sub">계속 업데이트됩니다</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">iLBiA</div>
+        <p class="footer-company">주식회사 비코어랩 운영</p>
+        <p class="footer-copy">© 2025 iLBiA. All rights reserved.</p>
+      </div>
+      <div class="footer-right">
+        <p class="footer-tagline">"일상이 편해지면,<br/>가족이 행복해집니다"</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── SCROLL REVEAL (Intersection Observer) ── -->
+  <script>
+    const revealEls = document.querySelectorAll('.reveal');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    revealEls.forEach(el => observer.observe(el));
+
+    // Hero elements visible on load
+    document.querySelectorAll('#hero .reveal').forEach(el => {
+      setTimeout(() => el.classList.add('visible'), 80);
+    });
+
+    // Smooth nav scroll with header offset
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        const target = document.querySelector(link.getAttribute('href'));
+        if (!target) return;
+        e.preventDefault();
+        const top = target.getBoundingClientRect().top + window.scrollY - 72;
+        window.scrollTo({ top, behavior: 'smooth' });
+      });
+    });
+  </script>
+
+</body>
+</html>
