@@ -6,3 +6,19 @@
 
 # macOS
 .DS_Store
+
+# 설정 파일 (비밀번호 포함 — 절대 커밋 금지)
+rocket_config.py
+
+# 소싱 DB (로컬 데이터)
+sourcing.db
+
+# 엑셀/데이터 파일
+*.xls
+*.xlsx
+*.csv
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
