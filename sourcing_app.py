@@ -9,7 +9,9 @@ iLBiA 소싱 매니저 — 알리바바 문의 발송 + 히스토리 관리
 import sqlite3
 import threading
 import os
-from flask import Flask, request, jsonify, render_template_string
+import csv
+import io
+from flask import Flask, request, jsonify, render_template_string, Response
 
 # alibaba_search에서 핵심 함수 가져오기
 from alibaba_search import (
@@ -204,6 +206,38 @@ def api_status(inquiry_id):
     if not row:
         return jsonify({'error': 'not found'}), 404
     return jsonify(dict(row))
+
+
+@app.route('/api/export/csv')
+def api_export_csv():
+    with get_db() as conn:
+        rows = conn.execute(
+            'SELECT * FROM inquiries ORDER BY created_at DESC'
+        ).fetchall()
+
+    STATUS_KR = {'pending':'대기중','sent':'발송완료','replied':'회신받음',
+                 'ordered':'발주완료','failed':'실패','cancelled':'취소'}
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['#','날짜','업체명','제품URL','스토어URL','타겟단가','수량','규격','상태','추가요청','오류'])
+    for r in rows:
+        r = dict(r)
+        writer.writerow([
+            r['id'], r['created_at'], r['company'] or '',
+            r['alibaba_url'], r['storefront_url'] or '',
+            r['target_price'] or '', r['quantity'] or '',
+            r['spec'] or '', STATUS_KR.get(r['status'], r['status']),
+            r['extra_notes'] or '', r['error_msg'] or '',
+        ])
+
+    output.seek(0)
+    bom = '\ufeff'  # 엑셀/구글시트 한글 깨짐 방지
+    return Response(
+        bom + output.getvalue(),
+        mimetype='text/csv; charset=utf-8',
+        headers={'Content-Disposition': 'attachment; filename="sourcing_history.csv"'}
+    )
 
 
 @app.route('/api/update_status', methods=['POST'])
@@ -416,7 +450,10 @@ pre.msg-preview { background:#f8fafb; border:1px solid var(--border);
     <div class="card">
       <div class="toolbar">
         <div class="section-title" style="margin-bottom:0;">문의 히스토리</div>
-        <button class="btn btn-outline btn-sm" onclick="loadHistory()">새로고침</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="loadHistory()">새로고침</button>
+          <a class="btn btn-outline btn-sm" href="/api/export/csv" download="소싱히스토리.csv">CSV 내보내기</a>
+        </div>
       </div>
       <div id="history-content">
         <div class="empty">로딩 중...</div>
