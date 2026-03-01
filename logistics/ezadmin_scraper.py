@@ -247,10 +247,10 @@ def scrape_orders(page, days=90, progress=None):
                 const rows = [...tbl.querySelectorAll('tr')];
                 const data = [];
                 rows.forEach(tr => {
-                    // aria-describedby 패턴으로 셀 찾기
-                    const dateCell = tr.querySelector('td[aria-describedby$="_collect_date"]');
-                    const codeCell = tr.querySelector('td[aria-describedby$="_product_id"]');
-                    const qtyCell = tr.querySelector('td[aria-describedby$="_order_products_qty"]');
+                    // aria-describedby 정확 매칭 (shop_product_id와 혼동 방지)
+                    const dateCell = tr.querySelector('td[aria-describedby="grid1_collect_date"]');
+                    const codeCell = tr.querySelector('td[aria-describedby="grid1_product_id"]');
+                    const qtyCell = tr.querySelector('td[aria-describedby="grid1_order_products_qty"]');
                     if (!dateCell || !qtyCell) return;
                     const rawDate = dateCell.textContent.trim();
                     const dateText = rawDate.substring(0, 10);
