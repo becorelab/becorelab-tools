@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iLBiA 인스타그램 공동구매 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #f5f5f7; color: #1d1d1f; }
+
+  /* 헤더 */
+  .header { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); padding: 20px 28px; color: white; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .header .subtitle { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .status-dot.active { background: #39ff14; box-shadow: 0 0 6px #39ff14; animation: pulse 1.5s infinite; }
+  .status-dot.inactive { background: rgba(255,255,255,0.4); }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+  /* 카드 */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .card { background: white; border-radius: 14px; padding: 18px 16px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+  .card .label { font-size: 11px; color: #86868b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .card .value { font-size: 32px; font-weight: 700; color: #1d1d1f; margin: 6px 0 2px; line-height: 1; }
+  .card .sub { font-size: 12px; color: #86868b; }
+  .card.highlight .value { color: #833ab4; }
+  .card.green .value { color: #34c759; }
+  .card.red .value { color: #ff3b30; }
+
+  /* 컨트롤 패널 */
+  .panel { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 24px; }
+  .panel h2 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: #1d1d1f; }
+  .panel-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  /* 버튼 */
+  .btn { padding: 10px 20px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: linear-gradient(135deg, #833ab4, #fd1d1d); color: white; }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-success { background: #34c759; color: white; }
+  .btn-success:hover { opacity: 0.85; }
+  .btn-danger { background: #ff3b30; color: white; }
+  .btn-danger:hover { opacity: 0.85; }
+  .btn-outline { background: transparent; border: 1.5px solid #d1d1d6; color: #1d1d1f; }
+  .btn-outline:hover { border-color: #833ab4; color: #833ab4; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 8px; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* 탭 */
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; background: #f5f5f7; padding: 4px; border-radius: 10px; width: fit-content; }
+  .tab { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: #86868b; transition: all .15s; }
+  .tab.active { background: white; color: #1d1d1f; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+
+  /* 차트 */
+  .chart-wrap { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 24px; }
+  .chart-wrap h2 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+
+  /* 테이블 */
+  .table-wrap { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 24px; overflow-x: auto; }
+  .table-wrap h2 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1.5px solid #f0f0f5; }
+  td { padding: 11px 12px; border-bottom: 1px solid #f5f5f7; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f9f9fb; }
+
+  /* 배지 */
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-sent { background: #e3f2fd; color: #1976d2; }
+  .badge-failed { background: #fce4ec; color: #c62828; }
+  .badge-replied { background: #e8f5e9; color: #2e7d32; }
+  .badge-pending { background: #fff3e0; color: #e65100; }
+  .badge-filtered { background: #f3e5f5; color: #6a1b9a; }
+  .badge-dm_sent { background: #e3f2fd; color: #1976d2; }
+
+  /* 모달 */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border-radius: 18px; padding: 28px; width: 90%; max-width: 460px; }
+  .modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 18px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: #86868b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1.5px solid #e0e0e5; border-radius: 10px; font-size: 14px; outline: none; transition: border-color .15s; }
+  .form-group input:focus, .form-group select:focus { border-color: #833ab4; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+
+  /* 인풋 그룹 */
+  .input-row { display: flex; gap: 10px; align-items: center; }
+  .input-row input { padding: 10px 14px; border: 1.5px solid #e0e0e5; border-radius: 10px; font-size: 14px; outline: none; width: 90px; }
+
+  /* 페이지네이션 */
+  .pagination { display: flex; gap: 6px; justify-content: center; margin-top: 16px; }
+  .pagination button { padding: 6px 12px; border: 1.5px solid #e0e0e5; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; }
+  .pagination button.active { background: #833ab4; color: white; border-color: #833ab4; }
+
+  /* 링크 */
+  a.ig-link { color: #833ab4; text-decoration: none; font-weight: 600; }
+  a.ig-link:hover { text-decoration: underline; }
+
+  /* 로딩 */
+  .loading { text-align: center; padding: 40px; color: #86868b; }
+
+  /* 빈 상태 */
+  .empty { text-align: center; padding: 40px; color: #86868b; font-size: 14px; }
+
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-header h2 { font-size: 15px; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>iLBiA 인스타그램 공동구매</h1>
+    <div class="subtitle">DM 자동화 대시보드</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span id="bot-status-label" style="font-size:13px;font-weight:600;"></span>
+    <button class="btn btn-outline" style="color:white;border-color:rgba(255,255,255,.5);" onclick="openSettings()">⚙️ 설정</button>
+    <button class="btn" id="btn-toggle" onclick="toggleBot()">...</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 통계 카드 -->
+  <div class="cards">
+    <div class="card highlight">
+      <div class="label">오늘 발송</div>
+      <div class="value" id="stat-today">-</div>
+      <div class="sub" id="stat-today-sub">목표 설정 중</div>
+    </div>
+    <div class="card">
+      <div class="label">총 발송</div>
+      <div class="value" id="stat-total">-</div>
+      <div class="sub">누적</div>
+    </div>
+    <div class="card green">
+      <div class="label">답장</div>
+      <div class="value" id="stat-replied">-</div>
+      <div class="sub" id="stat-reply-rate">응답률 -</div>
+    </div>
+    <div class="card">
+      <div class="label">발송 대기</div>
+      <div class="value" id="stat-pending">-</div>
+      <div class="sub">진성 계정</div>
+    </div>
+    <div class="card">
+      <div class="label">탐색 계정</div>
+      <div class="value" id="stat-accounts">-</div>
+      <div class="sub">전체 수집</div>
+    </div>
+    <div class="card red">
+      <div class="label">실패</div>
+      <div class="value" id="stat-failed">-</div>
+      <div class="sub">발송 오류</div>
+    </div>
+  </div>
+
+  <!-- 컨트롤 -->
+  <div class="panel">
+    <h2>봇 제어</h2>
+    <div class="panel-row">
+      <button class="btn btn-primary" onclick="runNow()" id="btn-run-now">지금 바로 실행</button>
+      <button class="btn btn-outline" onclick="openLoginModal()">🔐 인스타 로그인</button>
+      <div style="margin-left:auto;font-size:13px;color:#86868b;" id="bot-detail"></div>
+    </div>
+  </div>
+
+  <!-- 차트 -->
+  <div class="chart-wrap">
+    <h2>최근 7일 발송 추이</h2>
+    <canvas id="weeklyChart" height="80"></canvas>
+  </div>
+
+  <!-- 탭 테이블 -->
+  <div class="table-wrap">
+    <div class="section-header">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('dm')">DM 발송 내역</div>
+        <div class="tab" onclick="switchTab('accounts')">수집 계정</div>
+      </div>
+      <div id="filter-accounts" style="display:none;">
+        <select onchange="accountStatusFilter=this.value;loadAccounts(1)" style="padding:8px 12px;border:1.5px solid #e0e0e5;border-radius:10px;font-size:13px;outline:none;">
+          <option value="">전체</option>
+          <option value="pending">대기</option>
+          <option value="dm_sent">발송됨</option>
+          <option value="replied">답장</option>
+          <option value="filtered">필터링됨</option>
+          <option value="discovered">발견됨</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- DM 로그 -->
+    <div id="tab-dm">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>계정</th><th>상태</th><th>발송일시</th><th>메시지</th><th>액션</th>
+          </tr>
+        </thead>
+        <tbody id="dm-tbody">
+          <tr><td colspan="6" class="empty">불러오는 중...</td></tr>
+        </tbody>
+      </table>
+      <div class="pagination" id="dm-pagination"></div>
+    </div>
+
+    <!-- 계정 목록 -->
+    <div id="tab-accounts" style="display:none;">
+      <table>
+        <thead>
+          <tr>
+            <th>계정</th><th>팔로워</th><th>좋아요율</th><th>댓글율</th><th>상태</th><th>수집일</th><th>액션</th>
+          </tr>
+        </thead>
+        <tbody id="accounts-tbody">
+          <tr><td colspan="7" class="empty">불러오는 중...</td></tr>
+        </tbody>
+      </table>
+      <div class="pagination" id="accounts-pagination"></div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- 설정 모달 -->
+<div class="modal-overlay" id="modal-settings">
+  <div class="modal">
+    <h3>⚙️ 봇 설정</h3>
+    <div class="form-group">
+      <label>일일 발송량 (최소 / 최대)</label>
+      <div class="input-row">
+        <input type="number" id="set-daily-min" value="20" min="1" max="50">
+        <span style="color:#86868b;">~</span>
+        <input type="number" id="set-daily-max" value="30" min="1" max="50">
+        <span style="color:#86868b;font-size:13px;">개/일</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>팔로워 범위</label>
+      <div class="input-row">
+        <input type="number" id="set-min-followers" value="10000" step="1000">
+        <span style="color:#86868b;">~</span>
+        <input type="number" id="set-max-followers" value="100000" step="1000">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>좋아요율 범위 (% 입력)</label>
+      <div class="input-row">
+        <input type="number" id="set-min-like" value="0.5" step="0.1">
+        <span style="color:#86868b;">~</span>
+        <input type="number" id="set-max-like" value="2.0" step="0.1">
+        <span style="color:#86868b;font-size:13px;">%</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>댓글율 범위 (% 입력)</label>
+      <div class="input-row">
+        <input type="number" id="set-min-comment" value="0.2" step="0.1">
+        <span style="color:#86868b;">~</span>
+        <input type="number" id="set-max-comment" value="1.0" step="0.1">
+        <span style="color:#86868b;font-size:13px;">%</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>DM 템플릿</label>
+      <select id="set-template">
+        <option value="random">랜덤 (추천)</option>
+        <option value="0">템플릿 1 — 깔끔·직접형</option>
+        <option value="1">템플릿 2 — 공감형</option>
+        <option value="2">템플릿 3 — 초간결형</option>
+        <option value="3">템플릿 4 — 친근형</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-settings')">취소</button>
+      <button class="btn btn-primary" onclick="saveSettings()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 로그인 모달 -->
+<div class="modal-overlay" id="modal-login">
+  <div class="modal">
+    <h3>🔐 인스타그램 로그인</h3>
+    <p style="font-size:13px;color:#86868b;margin-bottom:18px;">iLBiA 브랜드 계정으로 로그인해주세요. 세션이 자동 저장됩니다.</p>
+    <div class="form-group">
+      <label>아이디</label>
+      <input type="text" id="ig-username" placeholder="Instagram 아이디">
+    </div>
+    <div class="form-group">
+      <label>비밀번호</label>
+      <input type="password" id="ig-password" placeholder="비밀번호">
+    </div>
+    <div id="login-msg" style="font-size:13px;margin-top:8px;min-height:20px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-login')">취소</button>
+      <button class="btn btn-primary" id="btn-login" onclick="doLogin()">로그인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 답장 모달 -->
+<div class="modal-overlay" id="modal-reply">
+  <div class="modal">
+    <h3>✉️ 답장 내용 기록</h3>
+    <div class="form-group">
+      <label>답장 내용 (선택)</label>
+      <input type="text" id="reply-text" placeholder="답장 내용을 입력하세요">
+      <input type="hidden" id="reply-log-id">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-reply')">취소</button>
+      <button class="btn btn-success" onclick="submitReply()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentTab = 'dm';
+let dmPage = 1;
+let accountsPage = 1;
+let accountStatusFilter = '';
+let weeklyChart = null;
+let statsData = {};
+
+// ─────────────────────────────────────────
+// 통계
+// ─────────────────────────────────────────
+async function loadStats() {
+  const res = await fetch('/api/stats');
+  const d = await res.json();
+  statsData = d;
+
+  document.getElementById('stat-today').textContent = d.sent_today;
+  document.getElementById('stat-today-sub').textContent = `목표 ${d.daily_min}~${d.daily_max}개/일`;
+  document.getElementById('stat-total').textContent = d.total_sent;
+  document.getElementById('stat-replied').textContent = d.total_replied;
+  document.getElementById('stat-reply-rate').textContent = `응답률 ${d.reply_rate}%`;
+  document.getElementById('stat-pending').textContent = d.pending_accounts;
+  document.getElementById('stat-accounts').textContent = d.total_accounts;
+  document.getElementById('stat-failed').textContent = d.total_failed;
+
+  // 봇 상태
+  const active = d.bot_active;
+  const running = d.bot_running;
+  const dot = `<span class="status-dot ${active ? 'active' : 'inactive'}"></span>`;
+  document.getElementById('bot-status-label').innerHTML = dot + (active ? '자동화 ON' : '자동화 OFF');
+  const toggleBtn = document.getElementById('btn-toggle');
+  toggleBtn.textContent = active ? '⏸ 자동화 끄기' : '▶ 자동화 켜기';
+  toggleBtn.className = 'btn ' + (active ? 'btn-danger' : 'btn-success');
+
+  document.getElementById('bot-detail').textContent =
+    running ? '🔄 봇 실행 중...' : (active ? '⏰ 1시간마다 자동 실행' : '봇이 꺼져 있습니다');
+
+  // 차트
+  const labels = d.weekly.map(w => w.date.slice(5)); // MM-DD
+  const values = d.weekly.map(w => w.count);
+  if (weeklyChart) {
+    weeklyChart.data.labels = labels;
+    weeklyChart.data.datasets[0].data = values;
+    weeklyChart.update();
+  } else {
+    const ctx = document.getElementById('weeklyChart').getContext('2d');
+    weeklyChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'DM 발송 수',
+          data: values,
+          backgroundColor: 'rgba(131,58,180,.25)',
+          borderColor: '#833ab4',
+          borderWidth: 2,
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+}
+
+// ─────────────────────────────────────────
+// DM 로그
+// ─────────────────────────────────────────
+async function loadDmLog(page = 1) {
+  dmPage = page;
+  const res = await fetch(`/api/dm_log?page=${page}`);
+  const d = await res.json();
+  const tbody = document.getElementById('dm-tbody');
+
+  if (!d.logs.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">발송 내역이 없어요 😊</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = d.logs.map(r => `
+    <tr>
+      <td style="color:#86868b;font-size:12px;">${r.id}</td>
+      <td><a class="ig-link" href="https://instagram.com/${r.username}" target="_blank">@${r.username}</a></td>
+      <td><span class="badge badge-${r.status}">${statusLabel(r.status)}</span></td>
+      <td style="font-size:12px;color:#86868b;">${r.sent_at ? r.sent_at.slice(0,16) : '-'}</td>
+      <td style="max-width:280px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escHtml(r.message || '')}">${escHtml((r.message||'').slice(0,50))}${(r.message||'').length>50?'…':''}</td>
+      <td>
+        ${r.status === 'sent' ? `<button class="btn btn-outline btn-sm" onclick="openReply(${r.id})">답장 기록</button>` : (r.reply ? `<span style="font-size:11px;color:#86868b;">${escHtml(r.reply)}</span>` : '')}
+      </td>
+    </tr>
+  `).join('');
+
+  renderPagination('dm-pagination', d.page, d.pages, p => loadDmLog(p));
+}
+
+// ─────────────────────────────────────────
+// 계정 목록
+// ─────────────────────────────────────────
+async function loadAccounts(page = 1) {
+  accountsPage = page;
+  const qs = accountStatusFilter ? `&status=${accountStatusFilter}` : '';
+  const res = await fetch(`/api/accounts?page=${page}${qs}`);
+  const d = await res.json();
+  const tbody = document.getElementById('accounts-tbody');
+
+  if (!d.accounts.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">수집된 계정이 없어요</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = d.accounts.map(a => `
+    <tr>
+      <td><a class="ig-link" href="https://instagram.com/${a.username}" target="_blank">@${a.username}</a></td>
+      <td>${a.followers ? a.followers.toLocaleString() : '-'}</td>
+      <td>${a.like_rate ? (a.like_rate*100).toFixed(2)+'%' : '-'}</td>
+      <td>${a.comment_rate ? (a.comment_rate*100).toFixed(2)+'%' : '-'}</td>
+      <td><span class="badge badge-${a.status}">${accountStatusLabel(a.status)}</span></td>
+      <td style="font-size:12px;color:#86868b;">${a.discovered_at ? a.discovered_at.slice(0,10) : '-'}</td>
+      <td>
+        ${a.status === 'pending' ? `<button class="btn btn-outline btn-sm" onclick="skipAccount('${a.username}', this)">스킵</button>` : ''}
+      </td>
+    </tr>
+  `).join('');
+
+  renderPagination('accounts-pagination', page, Math.ceil(d.total/20), p => loadAccounts(p));
+}
+
+// ─────────────────────────────────────────
+// 탭
+// ─────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-dm').style.display = tab === 'dm' ? '' : 'none';
+  document.getElementById('tab-accounts').style.display = tab === 'accounts' ? '' : 'none';
+  document.getElementById('filter-accounts').style.display = tab === 'accounts' ? '' : 'none';
+  if (tab === 'accounts') loadAccounts(1);
+}
+
+// ─────────────────────────────────────────
+// 봇 제어
+// ─────────────────────────────────────────
+async function toggleBot() {
+  const res = await fetch('/api/bot/toggle', { method: 'POST' });
+  const d = await res.json();
+  loadStats();
+}
+
+async function runNow() {
+  const btn = document.getElementById('btn-run-now');
+  btn.disabled = true;
+  btn.textContent = '실행 중...';
+  const res = await fetch('/api/bot/run_now', { method: 'POST' });
+  const d = await res.json();
+  alert(d.message);
+  btn.disabled = false;
+  btn.textContent = '지금 바로 실행';
+  setTimeout(loadStats, 2000);
+}
+
+// ─────────────────────────────────────────
+// 설정
+// ─────────────────────────────────────────
+async function openSettings() {
+  const res = await fetch('/api/settings');
+  const d = await res.json();
+  document.getElementById('set-daily-min').value = d.daily_min || 20;
+  document.getElementById('set-daily-max').value = d.daily_max || 30;
+  document.getElementById('set-min-followers').value = d.min_followers || 10000;
+  document.getElementById('set-max-followers').value = d.max_followers || 100000;
+  document.getElementById('set-min-like').value = ((parseFloat(d.min_like_rate)||0.005)*100).toFixed(1);
+  document.getElementById('set-max-like').value = ((parseFloat(d.max_like_rate)||0.02)*100).toFixed(1);
+  document.getElementById('set-min-comment').value = ((parseFloat(d.min_comment_rate)||0.002)*100).toFixed(1);
+  document.getElementById('set-max-comment').value = ((parseFloat(d.max_comment_rate)||0.01)*100).toFixed(1);
+  document.getElementById('set-template').value = d.dm_template_idx || 'random';
+  openModal('modal-settings');
+}
+
+async function saveSettings() {
+  const data = {
+    daily_min: document.getElementById('set-daily-min').value,
+    daily_max: document.getElementById('set-daily-max').value,
+    min_followers: document.getElementById('set-min-followers').value,
+    max_followers: document.getElementById('set-max-followers').value,
+    min_like_rate: (parseFloat(document.getElementById('set-min-like').value)/100).toFixed(4),
+    max_like_rate: (parseFloat(document.getElementById('set-max-like').value)/100).toFixed(4),
+    min_comment_rate: (parseFloat(document.getElementById('set-min-comment').value)/100).toFixed(4),
+    max_comment_rate: (parseFloat(document.getElementById('set-max-comment').value)/100).toFixed(4),
+    dm_template_idx: document.getElementById('set-template').value,
+  };
+  await fetch('/api/settings', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+  closeModal('modal-settings');
+  loadStats();
+}
+
+// ─────────────────────────────────────────
+// 로그인
+// ─────────────────────────────────────────
+function openLoginModal() { openModal('modal-login'); }
+
+async function doLogin() {
+  const btn = document.getElementById('btn-login');
+  const msg = document.getElementById('login-msg');
+  btn.disabled = true;
+  msg.textContent = '로그인 중...';
+  msg.style.color = '#86868b';
+
+  const res = await fetch('/api/login', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      username: document.getElementById('ig-username').value,
+      password: document.getElementById('ig-password').value,
+    })
+  });
+  const d = await res.json();
+  msg.textContent = d.message;
+  msg.style.color = d.ok ? '#34c759' : '#ff3b30';
+  btn.disabled = false;
+  if (d.ok) setTimeout(() => closeModal('modal-login'), 1500);
+}
+
+// ─────────────────────────────────────────
+// 답장 기록
+// ─────────────────────────────────────────
+function openReply(logId) {
+  document.getElementById('reply-log-id').value = logId;
+  document.getElementById('reply-text').value = '';
+  openModal('modal-reply');
+}
+
+async function submitReply() {
+  const logId = document.getElementById('reply-log-id').value;
+  const reply = document.getElementById('reply-text').value;
+  await fetch(`/api/dm_log/${logId}/replied`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ reply })
+  });
+  closeModal('modal-reply');
+  loadDmLog(dmPage);
+  loadStats();
+}
+
+// ─────────────────────────────────────────
+// 계정 스킵
+// ─────────────────────────────────────────
+async function skipAccount(username, btn) {
+  btn.disabled = true;
+  await fetch(`/api/account/${username}/skip`, { method: 'POST' });
+  loadAccounts(accountsPage);
+}
+
+// ─────────────────────────────────────────
+// 유틸
+// ─────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function statusLabel(s) {
+  return { sent:'발송됨', failed:'실패', replied:'답장옴', pending:'대기' }[s] || s;
+}
+function accountStatusLabel(s) {
+  return { pending:'대기', dm_sent:'발송됨', replied:'답장', filtered:'필터링', discovered:'발견', skipped:'스킵', replied:'답장' }[s] || s;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderPagination(containerId, current, total, onPage) {
+  const container = document.getElementById(containerId);
+  if (total <= 1) { container.innerHTML = ''; return; }
+  let html = '';
+  for (let i = 1; i <= Math.min(total, 10); i++) {
+    html += `<button class="${i===current?'active':''}" onclick="(${onPage})(${i})">${i}</button>`;
+  }
+  container.innerHTML = html;
+}
+
+// 모달 외부 클릭 닫기
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// ─────────────────────────────────────────
+// 초기화 & 자동 새로고침
+// ─────────────────────────────────────────
+loadStats();
+loadDmLog(1);
+setInterval(loadStats, 30000); // 30초마다 통계 갱신
+setInterval(() => { if (currentTab === 'dm') loadDmLog(dmPage); }, 60000); // 1분마다 DM 로그
+</script>
+</body>
+</html>
