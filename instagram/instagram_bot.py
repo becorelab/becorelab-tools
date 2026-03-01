@@ -448,8 +448,10 @@ class InstagramBot:
 
         ig_user = get_setting('ig_username')
         ig_pass = get_setting('ig_password')
-        if not ig_user or not ig_pass:
-            logger.error("인스타 계정 미설정")
+        has_session = os.path.exists(SESSION_PATH)
+
+        if not has_session and (not ig_user or not ig_pass):
+            logger.error("인스타 계정 미설정 — login_manual.py로 먼저 로그인해주세요")
             return
 
         daily_target = random.randint(
@@ -468,7 +470,12 @@ class InstagramBot:
         await self.start()
         try:
             if not await self.is_logged_in():
-                if not await self.login(ig_user, ig_pass):
+                if ig_user and ig_pass:
+                    if not await self.login(ig_user, ig_pass):
+                        logger.error("세션 만료 & 재로그인 실패 — login_manual.py로 다시 로그인해주세요")
+                        return
+                else:
+                    logger.error("세션 만료 — login_manual.py로 다시 로그인해주세요")
                     return
 
             # 대기 계정 확인
