@@ -137,8 +137,9 @@ def _get_page(p):
 
 
 def _get_headless_page_with_cookies(p):
-    """대표님 Chrome에서 알리바바 쿠키만 빌려 → 숨겨진 Headless에서 실행
-    화면에 창이 뜨지 않아 대표님 작업에 방해 없음.
+    """대표님 Chrome에서 알리바바 쿠키만 빌려 → 화면 밖 브라우저에서 실행
+    headless=False 이지만 창을 화면 바깥(-10000px)으로 이동 → 눈에 안 보임
+    headless=True 는 알리바바 봇 감지에 걸려 캡차 발생하므로 사용 안 함.
     """
     # 1) 기존 Chrome에서 쿠키 추출
     cookies = []
@@ -156,10 +157,15 @@ def _get_headless_page_with_cookies(p):
     except Exception as e:
         print(f"   ⚠️  쿠키 추출 실패: {e}")
 
-    # 2) 숨겨진 Headless Chromium 실행
+    # 2) 화면 밖 브라우저 실행 (headed지만 눈에 안 보임)
     headless_browser = p.chromium.launch(
-        headless=True,
-        args=['--no-sandbox', '--disable-blink-features=AutomationControlled'],
+        headless=False,
+        args=[
+            '--no-sandbox',
+            '--disable-blink-features=AutomationControlled',
+            '--window-position=-10000,0',   # 화면 밖으로 이동
+            '--window-size=1280,900',
+        ],
     )
     headless_ctx = headless_browser.new_context(
         viewport={'width': 1280, 'height': 900},
@@ -1408,7 +1414,7 @@ def send_alibaba_contact_messages(results, config):
     sent_log = []
 
     with sync_playwright() as p:
-        print("   🕶️  숨겨진 브라우저로 실행 중 (화면에 창 없음)...")
+        print("   🕶️  화면 밖 브라우저로 실행 중 (창이 화면 밖에 있어 보이지 않음)...")
         browser, ctx, page = _get_headless_page_with_cookies(p)
         if page is None:
             return sent_log
