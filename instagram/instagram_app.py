@@ -35,6 +35,12 @@ def scheduled_job():
     global bot_running
     if get_setting('bot_active') != 'true':
         return
+    # 오전 9시 ~ 오후 10시만 발송 (새벽 발송 방지)
+    from datetime import datetime as dt
+    hour = dt.now().hour
+    if hour < 9 or hour >= 22:
+        logger.info(f"현재 {hour}시 — 발송 시간 아님 (09~22시만 발송)")
+        return
     if not bot_lock.acquire(blocking=False):
         logger.info("봇이 이미 실행 중 — 스킵")
         return
