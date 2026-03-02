@@ -1794,12 +1794,14 @@ async function autoSaveChannelToCloud(channelId) {
     for (const r of ch.aggregated || []) { chQty+=r.수량; chSett+=r.정산금액; chCost+=r.원가합계||0; chProfit+=r.이익||0; }
 
     const docRef = db.collection('settlements').doc(currentUser.uid).collection('months').doc(month);
-    const updateData = { savedAt: firebase.firestore.FieldValue.serverTimestamp() };
-    updateData[`channels.${ch.name}`] = {
+    const channelData = {
       aggregated: agg,
       summary: { qty:chQty, settlement:chSett, cost:chCost, profit:chProfit, profitRate: chSett>0?chProfit/chSett:0 }
     };
-    await docRef.set(updateData, { merge: true });
+    await docRef.set({
+      savedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      channels: { [ch.name]: channelData }
+    }, { merge: true });
 
     // 총합 갱신
     const allChs = Object.values(state.channels);
