@@ -131,6 +131,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .bar-stock-fill-warn{background:linear-gradient(90deg,var(--warn),#fbbf24);}
 .bar-stock-fill-danger{background:linear-gradient(90deg,var(--danger),#f87171);}
 .bar-reorder-marker{position:absolute;top:-4px;width:1.5px;height:20px;background:var(--muted);border-radius:2px;z-index:2;}
+.bar-pending{position:absolute;top:0;height:100%;border-radius:0 100px 100px 0;background:repeating-linear-gradient(110deg,rgba(56,189,248,.35),rgba(56,189,248,.35) 3px,rgba(56,189,248,.12) 3px,rgba(56,189,248,.12) 6px);transition:width .9s cubic-bezier(.4,0,.2,1),left .9s cubic-bezier(.4,0,.2,1);}
 .bar-value{font-size:.72rem;color:var(--muted2);padding-left:6px;white-space:nowrap;}
 .bar-value strong{color:var(--text);font-weight:600;}
 
@@ -273,6 +274,10 @@ tr:last-child td{border-bottom:none;}
         브라우저가 열리면 보안코드만 입력하세요.<br/>
         이후 재고+주문 자동 수집됩니다.
       </div>
+      <div id="cache-info" style="font-size:.65rem;color:var(--muted);margin-top:8px;padding:6px 8px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);display:none;">
+        <span style="color:var(--mint);font-weight:600;">서버 캐시</span>
+        <span id="cache-time" style="margin-left:4px;">—</span>
+      </div>
     </div>
 
     <div class="sb-section">
@@ -388,6 +393,12 @@ const PRODUCTS = [
   {code:'S13591', name:'섬유탈취제 100ml',           moq:5000},
   {code:'S13590', name:'섬유탈취제 400ml',           moq:5000},
   {code:'10964',  name:'수세미 36매',                moq:1500},
+  {code:'12594',  name:'캡슐세탁세제 버블코튼',     moq:3000},
+  {code:'S10897', name:'하트 집게 (A)',              moq:1000},
+  {code:'10894',  name:'하트 틴케이스',              moq:1000},
+  {code:'S10896', name:'하트 집게 (B)',              moq:1000},
+  {code:'13628',  name:'캡슐세제 틴케이스',          moq:1000},
+  {code:'10378',  name:'다목적세정제',               moq:3000},
 ];
 const PM = {};
 PRODUCTS.forEach(p => PM[p.code] = p);
@@ -558,8 +569,10 @@ function renderAll(){
   const rows=data.map((p,i)=>{
     const salesPct=(p.dailyAvg/maxAvg*100).toFixed(1);
     const sc=p.currentStock??0;
-    const gaugeMax=Math.max(p.reorderPoint*2.5,sc*1.1,1);
+    const withPending=sc+p.pendingQty;
+    const gaugeMax=Math.max(p.reorderPoint*2.5,withPending*1.1,sc*1.1,1);
     const stockPct=Math.min(100,sc/gaugeMax*100).toFixed(1);
+    const pendingPct=p.pendingQty>0?Math.min(100-parseFloat(stockPct),(p.pendingQty/gaugeMax*100)).toFixed(1):'0';
     const markerPct=Math.min(95,p.reorderPoint/gaugeMax*100).toFixed(1);
     const stockColor=p.status==='urgent'?'bar-stock-fill-danger':p.status==='warning'?'bar-stock-fill-warn':'bar-stock-fill-ok';
     const rank=medals[i]||`<span class="pr-rank-n">${i+1}</span>`;
@@ -592,9 +605,10 @@ function renderAll(){
         <div class="bar-label">재고</div>
         <div class="bar-track">
           <div class="bar-fill ${stockColor}" data-w="${stockPct}"></div>
+          ${p.pendingQty>0?`<div class="bar-pending" data-w="${pendingPct}" data-l="${stockPct}" title="발주중 +${p.pendingQty.toLocaleString()}개"></div>`:''}
           ${p.currentStock!==null&&p.dailyAvg>0?`<div class="bar-reorder-marker" style="left:${markerPct}%" title="재주문점 ${Math.round(p.reorderPoint).toLocaleString()}개"></div>`:''}
         </div>
-        <div class="bar-value">${stockDisplay}개 · ${daysDisplay}</div>
+        <div class="bar-value">${stockDisplay}개${p.pendingQty>0?` <span style="color:var(--sky)">+${p.pendingQty.toLocaleString()}</span>`:''} · ${daysDisplay}</div>
       </div>
     </div>`;
   }).join('');
@@ -603,6 +617,7 @@ function renderAll(){
 
   requestAnimationFrame(()=>{
     document.querySelectorAll('.bar-fill[data-w]').forEach(el=>{el.style.width=el.dataset.w+'%';});
+    document.querySelectorAll('.bar-pending[data-w]').forEach(el=>{el.style.width=el.dataset.w+'%';el.style.left=el.dataset.l+'%';});
   });
 }
 
@@ -822,6 +837,12 @@ async function fetchEzAdmin(){
         document.getElementById('ord-title').textContent='✅ 주문 자동수집 완료';
         updateHeader();renderAll();
         localStorage.setItem('ilbia_last_fetch', Date.now().toString());
+        // 캐시 시각 갱신
+        const cacheInfo=document.getElementById('cache-info');
+        const cacheTime=document.getElementById('cache-time');
+        const now=new Date();
+        cacheTime.textContent=now.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+        cacheInfo.style.display='block';
         showToast(`✅ 재고 ${Object.keys(inv).length}품목, 주문 ${data.result.orders.length}건 수집 완료`);
         break;
       }
@@ -844,13 +865,57 @@ buildMoqEditor();
 updateHeader();
 renderAll();
 
-// ── 주간 자동 수집 체크 ──
-(function checkWeeklyFetch(){
-  const last=parseInt(localStorage.getItem('ilbia_last_fetch')||'0');
-  const daysSince=last?(Date.now()-last)/86400000:999;
-  if(daysSince>=7){
-    showToast('📡 7일 경과 — 이지어드민 데이터 자동 수집을 시작합니다');
-    setTimeout(()=>fetchEzAdmin(),2000);
+// ── 서버 캐시 로드 ──
+async function loadServerCache(){
+  try{
+    const res=await fetch('/api/cached-data');
+    if(res.status===204) return false;
+    const json=await res.json();
+    if(json.status!=='ok'||!json.data) return false;
+    const d=json.data;
+    const td=today();
+    // 재고 → localStorage
+    const inv={};
+    Object.entries(d.inventory).forEach(([code,info])=>{
+      inv[code]={stock:info.stock,updated:td};
+    });
+    LS.saveInv(inv);
+    // 주문 → localStorage (기존 데이터 교체)
+    const cutoff=addDays(today(),-(gp('param-window')||90));
+    const freshOrders=(d.orders||[]).filter(o=>o.date&&o.qty&&o.date>=cutoff);
+    LS.saveOrders(freshOrders);
+    // UI 갱신
+    document.getElementById('zone-inv').classList.add('done');
+    document.getElementById('inv-title').textContent='✅ 재고 (서버 캐시)';
+    document.getElementById('zone-ord').classList.add('done');
+    document.getElementById('ord-title').textContent='✅ 주문 (서버 캐시)';
+    localStorage.setItem('ilbia_last_fetch', Date.now().toString());
+    updateHeader();renderAll();
+    // 캐시 시각 표시
+    const cacheInfo=document.getElementById('cache-info');
+    const cacheTime=document.getElementById('cache-time');
+    if(d.timestamp){
+      const dt=new Date(d.timestamp);
+      cacheTime.textContent=dt.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      cacheInfo.style.display='block';
+    }
+    showToast(`✅ 서버 캐시 로드됨 — 재고 ${Object.keys(inv).length}품목, 주문 ${freshOrders.length}건`);
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+// ── 초기 로드: 서버 캐시 → 폴백 7일 체크 ──
+(async function initLoad(){
+  const cached=await loadServerCache();
+  if(!cached){
+    const last=parseInt(localStorage.getItem('ilbia_last_fetch')||'0');
+    const daysSince=last?(Date.now()-last)/86400000:999;
+    if(daysSince>=7){
+      showToast('📡 7일 경과 — 이지어드민 데이터 자동 수집을 시작합니다');
+      setTimeout(()=>fetchEzAdmin(),2000);
+    }
   }
 })();
 </script>

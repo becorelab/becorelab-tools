@@ -73,8 +73,7 @@ def wait_for_captcha(page, progress=None, timeout_sec=120):
             log.info("보안코드 통과!")
             return True
         time.sleep(1)
-    log.warning("보안코드 대기 시간 초과")
-    return False
+    raise TimeoutError("보안코드 대기 시간 초과 (120초)")
 
 
 def clear_popups(page):
@@ -270,17 +269,19 @@ def scrape_outbound(page, days=90, progress=None):
                 const data = [];
                 rows.forEach(tr => {
                     const codeCell = tr.querySelector('td[aria-describedby="grid1_product_id"]');
+                    const nameCell = tr.querySelector('td[aria-describedby="grid1_name"]');
                     const dateCell = tr.querySelector('td[aria-describedby="grid1_crdate"]');
                     const outCell = tr.querySelector('td[aria-describedby="grid1_stockout"]');
                     const shipCell = tr.querySelector('td[aria-describedby="grid1_trans"]');
                     if (!codeCell || !dateCell) return;
                     const code = codeCell.textContent.trim();
+                    const name = nameCell ? nameCell.textContent.trim() : '';
                     const d = dateCell.textContent.trim().substring(0, 10);
                     const outQty = outCell ? (parseInt(outCell.textContent.trim().replace(/,/g, '')) || 0) : 0;
                     const shipQty = shipCell ? (parseInt(shipCell.textContent.trim().replace(/,/g, '')) || 0) : 0;
                     const totalQty = outQty + shipQty;
                     if (code && code.length > 2 && d.length === 10 && totalQty > 0) {
-                        data.push({code, date: d, qty: totalQty, out: outQty, ship: shipQty});
+                        data.push({code, name, date: d, qty: totalQty, out: outQty, ship: shipQty});
                     }
                 });
                 return data;
@@ -308,6 +309,12 @@ def scrape_outbound(page, days=90, progress=None):
 
     log.info(f"재고수불부 출고+배송 총 {len(all_data)}건 수집")
 
+    # 상품코드→상품명 매핑 (첫 등장 기준)
+    name_map = {}
+    for o in all_data:
+        if o["code"] not in name_map and o.get("name"):
+            name_map[o["code"]] = o["name"]
+
     # 날짜+상품코드별 집계
     agg = {}
     for o in all_data:
@@ -319,13 +326,14 @@ def scrape_outbound(page, days=90, progress=None):
     result = list(agg.values())
     log.info(f"일별 집계 {len(result)}건")
 
-    # 상위 상품 요약
+    # 전체 상품 요약 (상품명 포함)
     product_totals = {}
     for r in result:
         product_totals[r["code"]] = product_totals.get(r["code"], 0) + r["qty"]
-    top5 = sorted(product_totals.items(), key=lambda x: -x[1])[:5]
-    for code, total in top5:
-        log.info(f"  {code}: 총 {total}개 ({total/max(days,1):.1f}개/일)")
+    ranked = sorted(product_totals.items(), key=lambda x: -x[1])
+    for code, total in ranked:
+        name = name_map.get(code, "?")
+        log.info(f"  {code} [{name}]: 총 {total}개 ({total/max(days,1):.1f}개/일)")
 
     return result
 
