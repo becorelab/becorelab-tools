@@ -7,10 +7,12 @@ REPO_DIR="$(dirname "$SCRIPT_DIR")"
 
 echo "=== iLBiA Claude Code 환경 셋업 ==="
 
-# 1. 전역 CLAUDE.md 복사
+# 1. 전역 CLAUDE.md + settings.json 복사
 mkdir -p ~/.claude
 cp "$SCRIPT_DIR/global_CLAUDE.md" ~/.claude/CLAUDE.md
+cp "$SCRIPT_DIR/settings.json" ~/.claude/settings.json
 echo "[OK] ~/.claude/CLAUDE.md"
+echo "[OK] ~/.claude/settings.json (권한 설정)"
 
 # 2. 메모리 파일 복사 (프로젝트 경로 자동 감지)
 #    Claude Code는 프로젝트 경로를 기반으로 메모리 폴더를 만듦
