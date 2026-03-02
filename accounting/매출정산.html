@@ -439,16 +439,25 @@ const state = {
 };
 
 // Channel definitions
+// 매출순 정렬 (1월 기준)
 const CHANNEL_DEFS = [
+  { id: 'cafe24',     name: '카페24',      icon: '🏪', detect: detectCafe24,     parse: parseCafe24 },
   { id: 'smartstore', name: '스마트스토어', icon: '🟢', detect: detectSmartStore, parse: parseSmartStore },
-  { id: '11st',       name: '11번가',      icon: '🔴', detect: detect11st,       parse: parse11st },
-  { id: 'kakaoGift',  name: '카카오선물',  icon: '🎁', detect: detectKakaoGift,  parse: parseKakao },
-  { id: 'kakao',      name: '카카오쇼핑',  icon: '🟡', detect: detectKakao,      parse: parseKakao },
   { id: 'coupang',    name: '로켓배송',    icon: '🚀', detect: detectCoupang,    parse: parseCoupang },
+  { id: '11st',       name: '11번가',      icon: '🔴', detect: detect11st,       parse: parse11st },
   { id: 'gmarket',    name: '지마켓',      icon: '🛒', detect: detectGmarket,    parse: parseGmarket },
   { id: 'auction',    name: '옥션',        icon: '🔨', detect: detectAuction,    parse: parseAuction },
+  { id: 'kakaoGift',  name: '카카오선물',  icon: '🎁', detect: detectKakaoGift,  parse: parseKakao },
+  { id: 'goodtree',   name: '굿트리',     icon: '🌳', detect: detectGoodtree,   parse: parseGroupBuy },
+  { id: 'kakao',      name: '카카오쇼핑',  icon: '🟡', detect: detectKakao,      parse: parseKakao },
+  { id: 'duber',      name: '두버',       icon: '🛍️', detect: detectDuber,      parse: parseGroupBuy },
   { id: 'ohouse',     name: '오늘의집',    icon: '🏠', detect: detectOhouse,     parse: parseOhouse },
-  { id: 'cafe24',     name: '카페24',      icon: '🏪', detect: detectCafe24,     parse: parseCafe24 },
+  { id: 'gmholdings', name: '지엠홀딩스', icon: '🏢', detect: detectGmholdings, parse: parseGroupBuy },
+  { id: 'gs',         name: 'GS',         icon: '🟠', detect: detectGS,         parse: parseGS },
+  { id: 'gogrow',     name: '고그로우',   icon: '🌸', detect: detectGogrow,     parse: parseGogrow },
+  { id: 'ably',       name: '에이블리',   icon: '🎀', detect: detectAbly,       parse: parseAbly },
+  { id: 'edgar',      name: '에드가',     icon: '📦', detect: detectEdgar,      parse: parseGroupBuy },
+  { id: 'ssg',        name: '신세계',     icon: '🏬', detect: detectSSG,        parse: parseSSG },
 ];
 
 // ═══════════════════════════════════════════════════════
@@ -760,6 +769,62 @@ function detectCafe24(wb) {
   if (rows.length < 1) return false;
   const headers = rows[0].map(h => String(h||''));
   return headers.includes('주문상품명(옵션포함)') && headers.includes('품목별 결제금액') && headers.includes('품목별 주문번호');
+}
+// 공동구매 (굿트리/두버/지엠홀딩스/에드가)
+function detectGoodtree(wb) {
+  const sheet = getSheets(wb).find(s => s.includes('정산내역') && s.includes('굿트리'));
+  if (!sheet) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheet], {header:1});
+  return rows.length > 2 && rows[2] && String(rows[2][7] || '').trim() === '공급가 합계';
+}
+function detectDuber(wb) {
+  const sheet = getSheets(wb).find(s => s.includes('정산내역') && s.includes('두버'));
+  if (!sheet) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheet], {header:1});
+  return rows.length > 2 && rows[2] && String(rows[2][7] || '').trim() === '공급가 합계';
+}
+function detectGmholdings(wb) {
+  const sheet = getSheets(wb).find(s => s.includes('정산내역') && s.includes('지엠홀딩스'));
+  if (!sheet) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheet], {header:1});
+  return rows.length > 2 && rows[2] && String(rows[2][7] || '').trim() === '공급가 합계';
+}
+function detectEdgar(wb) {
+  const sheet = getSheets(wb).find(s => s.includes('정산내역') && s.includes('에드가'));
+  if (!sheet) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheet], {header:1});
+  return rows.length > 2 && rows[2] && String(rows[2][7] || '').trim() === '공급가 합계';
+}
+// GS
+function detectGS(wb) {
+  return getSheets(wb).some(s => s.startsWith('주문매출실적_상세'));
+}
+// 고그로우 미아르나
+function detectGogrow(wb) {
+  const sheets = getSheets(wb);
+  if (sheets.some(s => s.includes('미아르나') && s.includes('정산내역'))) return true;
+  const settlSheet = sheets.find(s => s.includes('정산내역'));
+  if (!settlSheet) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[settlSheet], {header:1});
+  const header = rows[1] || [];
+  return header.includes('공동구매 매출');
+}
+// 에이블리
+function detectAbly(wb) {
+  const sheets = getSheets(wb);
+  if (sheets.some(s => s.includes('에이블리'))) return true;
+  const firstSheet = sheets[0];
+  if (!firstSheet) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[firstSheet], {header:1});
+  if (!rows[0]) return false;
+  return rows[0][0] === '마켓명' && rows[0][12] === '정산금';
+}
+// 신세계(SSG)
+function detectSSG(wb) {
+  if (!getSheets(wb).includes('Sheet0')) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet0'], {header:1});
+  if (rows.length < 1) return false;
+  return rows[0][0] === '순번' && rows[0][1] === '정산일자' && String(rows[0][19]||'').includes('정산금액');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1093,6 +1158,143 @@ function parseCafe24(wb) {
       매핑: !!finalName
     });
   }
+  return { results, unmapped };
+}
+
+// 공동구매 통합 파서 (굿트리/두버/지엠홀딩스/에드가)
+function parseGroupBuy(wb) {
+  const sheet = getSheets(wb).find(s => s.includes('정산내역'));
+  if (!sheet) return { results: [], unmapped: [] };
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheet], {header:1});
+  const results = [];
+  for (let i = 3; i < rows.length; i++) {
+    const r = rows[i];
+    const prodName = String(r[3] || '').trim();
+    if (!prodName) continue;
+    const qty = Number(r[6] || 0);
+    const supplyTotal = Number(r[7] || 0);
+    if (qty === 0 && supplyTotal === 0) continue;
+    const settlement = Number(r[10] || 0);
+    results.push({ 최종상품명: prodName, 수량: qty, 정산금액: settlement, 매출액: settlement, 매핑: true });
+  }
+  return { results, unmapped: [] };
+}
+
+// GS
+function parseGS(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트']);
+  const sheetName = getSheets(wb).find(s => s.startsWith('주문매출실적_상세'));
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r[0]) continue;
+    if (String(r[4] || '') !== '정상주문') continue;
+    const prodName = String(r[11] || '').trim();
+    const option = String(r[12] || '').trim();
+    const key = option ? prodName + option : prodName;
+    const qty = Number(r[17] || 0);
+    const settlement = Number(r[23] || 0);
+    const revenue = Number(r[22] || 0);
+    let finalName = nameMap[key] || nameMap[prodName] || null;
+    if (!finalName && !unmappedKeys.has(key)) {
+      unmappedKeys.add(key);
+      unmapped.push({ key, prodName, option, qty, settlement, count: 1 });
+    }
+    results.push({ 최종상품명: finalName || key, 수량: qty, 정산금액: settlement, 매출액: revenue, 매핑: !!finalName });
+  }
+  const deliverySheet = wb.Sheets['배송비'];
+  if (deliverySheet) {
+    const dRows = XLSX.utils.sheet_to_json(deliverySheet, {header:1});
+    let deliveryTotal = 0;
+    for (let i = 1; i < dRows.length; i++) {
+      if (String(dRows[i][0] || '').trim() === '배송비') deliveryTotal += Number(dRows[i][12] || 0);
+    }
+    if (deliveryTotal) results.push({ 최종상품명: '(배송비)', 수량: 1, 정산금액: deliveryTotal, 매출액: deliveryTotal, 매핑: true });
+  }
+  return { results, unmapped };
+}
+
+// 고그로우 미아르나
+function parseGogrow(wb) {
+  const sheetName = getSheets(wb).find(s => s.includes('정산내역'));
+  if (!sheetName) return { results: [], unmapped: [] };
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {header:1});
+  const results = [];
+  for (let i = 2; i < rows.length; i++) {
+    const r = rows[i];
+    const prodName = String(r[3] || '').trim();
+    if (!prodName) continue;
+    const qty = Number(r[7] || 0);
+    const settlement = Number(r[10] || 0);
+    results.push({ 최종상품명: prodName, 수량: qty, 정산금액: settlement, 매출액: settlement, 매핑: true });
+  }
+  return { results, unmapped: [] };
+}
+
+// 에이블리
+function parseAbly(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트']);
+  const sheets = getSheets(wb);
+  const confirmMap = {};
+  if (wb.Sheets['구매확정내역']) {
+    const cRows = XLSX.utils.sheet_to_json(wb.Sheets['구매확정내역'], {header:1});
+    for (let i = 1; i < cRows.length; i++) {
+      const r = cRows[i];
+      if (!r[2]) continue;
+      confirmMap[String(r[2]).trim()] = { prodName: String(r[4]||'').trim(), option: String(r[6]||'').trim(), qty: Number(r[7]||1) };
+    }
+  }
+  const settleSheet = wb.Sheets[sheets[0]];
+  const rows = XLSX.utils.sheet_to_json(settleSheet, {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (r[12] === undefined || r[12] === null || r[12] === '') continue;
+    const orderNo = String(r[6] || '').trim();
+    const settlement = Number(r[12] || 0);
+    const revenue = Number(r[7] || 0);
+    const confirm = confirmMap[orderNo];
+    const prodName = confirm ? confirm.prodName : orderNo;
+    const option = confirm ? confirm.option : '';
+    const qty = confirm ? confirm.qty : 1;
+    const key = option ? prodName + '/' + option : prodName;
+    let finalName = nameMap[key] || nameMap[prodName] || null;
+    if (!finalName && !unmappedKeys.has(key)) {
+      unmappedKeys.add(key);
+      unmapped.push({ key, prodName, option, qty, settlement, count: 1 });
+    }
+    results.push({ 최종상품명: finalName || prodName, 수량: qty, 정산금액: settlement, 매출액: revenue, 매핑: !!finalName });
+  }
+  return { results, unmapped };
+}
+
+// 신세계(SSG)
+function parseSSG(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet0'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+  let shippingTotal = 0;
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r[0] && r[0] !== 0) continue;
+    const prodName = String(r[16] || '').trim();
+    if (!prodName) continue;
+    const qty = Number(r[18] || 0);
+    const settlement = Number(r[19] || 0);
+    const revenue = Number(r[21] || 0) || Number(r[20] || 0) * qty;
+    shippingTotal += Number(r[31] || 0);
+    let finalName = nameMap[prodName] || null;
+    if (!finalName && !unmappedKeys.has(prodName)) {
+      unmappedKeys.add(prodName);
+      unmapped.push({ key: prodName, prodName, option: '', qty, settlement, count: 1 });
+    }
+    results.push({ 최종상품명: finalName || prodName, 수량: qty, 정산금액: settlement, 매출액: revenue, 매핑: !!finalName });
+  }
+  if (shippingTotal) results.push({ 최종상품명: '(배송비)', 수량: 1, 정산금액: shippingTotal, 매출액: shippingTotal, 매핑: true });
   return { results, unmapped };
 }
 
