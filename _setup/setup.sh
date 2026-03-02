@@ -16,11 +16,18 @@ echo "[OK] ~/.claude/CLAUDE.md"
 #    Claude Code는 프로젝트 경로를 기반으로 메모리 폴더를 만듦
 #    예: /Users/kymac/claude → -Users-kymac-claude
 #       /home/user/claude  → -home-user-claude
-MEMORY_DIR="$HOME/.claude/projects/$(echo "$REPO_DIR" | sed 's|^/||; s|/|-|g')/memory"
-mkdir -p "$MEMORY_DIR"
-cp "$SCRIPT_DIR/MEMORY.md" "$MEMORY_DIR/MEMORY.md"
-cp "$SCRIPT_DIR/alibaba_notes.md" "$MEMORY_DIR/alibaba_notes.md"
-echo "[OK] $MEMORY_DIR/"
+# 루트 메모리 (~/claude/)
+ROOT_MEMORY="$HOME/.claude/projects/$(echo "$REPO_DIR" | sed 's|^/||; s|/|-|g')/memory"
+mkdir -p "$ROOT_MEMORY"
+cp "$SCRIPT_DIR/MEMORY.md" "$ROOT_MEMORY/MEMORY.md"
+cp "$SCRIPT_DIR/alibaba_notes.md" "$ROOT_MEMORY/alibaba_notes.md"
+echo "[OK] $ROOT_MEMORY/"
+
+# 폴더별 메모리 (logistics)
+LOGISTICS_MEMORY="$HOME/.claude/projects/$(echo "$REPO_DIR/logistics" | sed 's|^/||; s|/|-|g')/memory"
+mkdir -p "$LOGISTICS_MEMORY"
+cp "$SCRIPT_DIR/logistics_MEMORY.md" "$LOGISTICS_MEMORY/MEMORY.md"
+echo "[OK] $LOGISTICS_MEMORY/"
 
 echo ""
 echo "=== 셋업 완료! ==="
