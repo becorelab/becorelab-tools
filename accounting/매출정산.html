@@ -471,6 +471,15 @@ function updateCostUI() {
 function updateMonth() {
   const m = document.getElementById('settlementMonth').value;
   document.getElementById('headerMonth').textContent = m ? m + ' 정산' : '정산 월 미설정';
+  // 월 변경 시: 로컬 데이터 초기화 + 해당 월 클라우드 데이터 불러오기
+  state.channels = {};
+  state.allProductNames = new Set();
+  state.currentTab = 'all';
+  renderChannelGrid();
+  renderSidebar();
+  updateSummary();
+  renderResults();
+  autoLoadChannelsFromCloud();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -665,6 +674,8 @@ function loadChannelFile(input, channelId) {
       } else {
         showToast(`${def.name} 정산 완료! ${results.length}건`, 'success');
       }
+      // 자동 클라우드 저장
+      autoSaveChannelToCloud(def.id);
     } catch(ex) {
       console.error(ex);
       showToast('처리 오류: ' + ex.message, 'error');
@@ -1191,6 +1202,8 @@ function applyModalUnmapped() {
   updateSummary();
   renderResults();
   showToast('매핑 적용 완료!', 'success');
+  // 미매핑 처리 후 자동 저장
+  if (currentModalChannel) autoSaveChannelToCloud(currentModalChannel);
 }
 
 function applyUnmapped() {
@@ -1669,8 +1682,9 @@ if (auth) {
       profileEl.innerHTML = `<img src="${user.photoURL || ''}" alt="" onerror="this.style.display='none'"/><span>${user.displayName || user.email}</span>`;
       btnEl.textContent = '로그아웃';
       if (saveBtn) saveBtn.style.display = 'inline-flex';
-      // 로그인 시 Firestore에서 원가 데이터 로드
+      // 로그인 시 Firestore에서 원가 데이터 로드 + 채널 데이터 자동 불러오기
       loadCostMapFromCloud();
+      autoLoadChannelsFromCloud();
     } else {
       profileEl.style.display = 'none';
       profileEl.innerHTML = '';
@@ -1728,7 +1742,89 @@ async function loadCostMapFromCloud() {
 }
 
 // ═══════════════════════════════════════════════════════
-// FIRESTORE: SAVE
+// FIRESTORE: AUTO-SAVE (채널 업로드 시 자동 저장)
+// ═══════════════════════════════════════════════════════
+async function autoSaveChannelToCloud(channelId) {
+  if (!currentUser || !firebaseReady) return;
+  const month = document.getElementById('settlementMonth').value;
+  if (!month) return;
+  const ch = state.channels[channelId];
+  if (!ch) return;
+
+  try {
+    const agg = (ch.aggregated || []).map(r => ({
+      name: r.최종상품명, qty: r.수량, settlement: r.정산금액, revenue: r.매출액 || 0,
+      unitCost: r.원가단가 || 0, totalCost: r.원가합계 || 0, profit: r.이익 || 0,
+      profitRate: r.이익률 || 0, mapped: r.매핑 !== false
+    }));
+    let chQty=0, chSett=0, chCost=0, chProfit=0;
+    for (const r of ch.aggregated || []) { chQty+=r.수량; chSett+=r.정산금액; chCost+=r.원가합계||0; chProfit+=r.이익||0; }
+
+    const docRef = db.collection('settlements').doc(currentUser.uid).collection('months').doc(month);
+    const updateData = { savedAt: firebase.firestore.FieldValue.serverTimestamp() };
+    updateData[`channels.${ch.name}`] = {
+      aggregated: agg,
+      summary: { qty:chQty, settlement:chSett, cost:chCost, profit:chProfit, profitRate: chSett>0?chProfit/chSett:0 }
+    };
+    await docRef.set(updateData, { merge: true });
+
+    // 총합 갱신
+    const allChs = Object.values(state.channels);
+    let tQty=0,tSett=0,tCost=0,tProfit=0;
+    for (const c of allChs) { for (const r of c.aggregated||[]) { tQty+=r.수량; tSett+=r.정산금액; tCost+=r.원가합계||0; tProfit+=r.이익||0; } }
+    await docRef.set({ totalSummary: { qty:tQty, settlement:tSett, cost:tCost, profit:tProfit, profitRate:tSett>0?tProfit/tSett:0 } }, { merge: true });
+
+    console.log(`☁️ ${ch.name} 자동 저장 완료`);
+  } catch(err) {
+    console.warn('채널 자동 저장 실패:', err);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// FIRESTORE: AUTO-LOAD (페이지 로드 시 자동 불러오기)
+// ═══════════════════════════════════════════════════════
+async function autoLoadChannelsFromCloud() {
+  if (!currentUser || !firebaseReady) return;
+  const month = document.getElementById('settlementMonth').value;
+  if (!month) return;
+  // 이미 로컬에 데이터 있으면 스킵
+  if (Object.keys(state.channels).length > 0) return;
+
+  try {
+    const docRef = db.collection('settlements').doc(currentUser.uid).collection('months').doc(month);
+    const doc = await docRef.get();
+    if (!doc.exists || !doc.data().channels) return;
+
+    const data = doc.data();
+    let loadedCount = 0;
+    for (const [chName, chData] of Object.entries(data.channels)) {
+      const def = CHANNEL_DEFS.find(d => d.name === chName);
+      if (!def) continue;
+      const aggregated = (chData.aggregated || []).map(r => ({
+        최종상품명: r.name, 수량: r.qty, 정산금액: r.settlement, 매출액: r.revenue||0,
+        원가단가: r.unitCost||0, 원가합계: r.totalCost||0, 이익: r.profit||0,
+        이익률: r.profitRate||0, 매핑: r.mapped !== false
+      }));
+      // 원가 재계산 (최신 원가맵 반영)
+      applyCosting(aggregated);
+      for (const r of aggregated) { if (r.매핑) state.allProductNames.add(r.최종상품명); }
+      state.channels[def.id] = { name: chName, icon: def.icon, results: [], unmapped: [], aggregated, fromCloud: true };
+      loadedCount++;
+    }
+    if (loadedCount > 0) {
+      renderChannelGrid();
+      renderSidebar();
+      updateSummary();
+      renderResults();
+      showToast(`☁️ ${month} 정산 데이터 ${loadedCount}개 채널 불러왔어요!`, 'success');
+    }
+  } catch(err) {
+    console.warn('채널 자동 불러오기 실패:', err);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// FIRESTORE: SAVE (수동 전체 저장)
 // ═══════════════════════════════════════════════════════
 async function saveToCloud() {
   if (!currentUser) { showToast('로그인이 필요해요', 'warn'); return; }
