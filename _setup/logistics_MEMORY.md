@@ -61,6 +61,14 @@ S13591(섬유탈취제100), S13590(400), 10964(수세미36매)
 - Flask 캐시 방지: Cache-Control no-cache 헤더 추가
 - 페이지네이션: seek-next 버튼 + disabled 체크, 최대 50페이지
 
+## Windows PC 셋업 (2026-03-02)
+- config.py는 .gitignore라 새 PC마다 수동 생성 필요
+- config.py 키 이름: `url`, `domain`, `id`, `pw` (스크래퍼 코드 기준)
+- Windows에서 `pkill`이 안 먹음 → `taskkill //F //PID {pid}` 사용
+- 포트 충돌 시 `netstat -ano | grep {port}`로 PID 확인 후 kill
+- Python 패키지: flask, waitress, playwright, apscheduler, requests
+- Playwright 브라우저: `playwright install chromium` 필수
+
 ## Git
 - Repo: becorelab/becorelab-tools (private)
 - Branch: main
