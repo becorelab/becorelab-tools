@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>iLBiA 매출 정산 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4/dist/jspreadsheet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsuites@5/dist/jsuites.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4/dist/jspreadsheet.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites@5/dist/jsuites.css"/>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&family=Spoqa+Han+Sans+Neo:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard','Spoqa Han Sans Neo',sans-serif;background:#0d1117;color:#e2e8f0;font-size:14px;min-height:100vh;}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#1a1d27}
+::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0f766e 0%,#0284c7 100%);padding:18px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.4);}
+header h1{font-size:1.2rem;font-weight:700;color:#fff;}
+header p{font-size:.78rem;color:rgba(255,255,255,.7);margin-top:2px;}
+.header-badge{background:rgba(255,255,255,.15);border-radius:20px;padding:4px 12px;font-size:.75rem;color:#fff;margin-left:auto;}
+
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 62px);}
+
+/* SIDEBAR */
+.sidebar{width:220px;min-width:220px;background:#10151f;border-right:1px solid #1e293b;padding:16px 0;}
+.sidebar-section{padding:0 12px 8px;}
+.sidebar-label{font-size:.7rem;color:#475569;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:8px 8px 4px;}
+.ch-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;cursor:pointer;margin-bottom:2px;transition:background .15s;}
+.ch-item:hover{background:#1e293b;}
+.ch-item.active{background:#0f766e22;border:1px solid #0f766e44;}
+.ch-icon{width:28px;height:28px;border-radius:6px;background:#1e293b;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;}
+.ch-name{font-size:.8rem;font-weight:500;color:#cbd5e1;flex:1;}
+.ch-status{width:8px;height:8px;border-radius:50%;background:#334155;flex-shrink:0;}
+.ch-status.done{background:#10b981;}
+.ch-status.warn{background:#f59e0b;}
+.ch-status.error{background:#ef4444;}
+
+.sidebar-total{margin:12px 12px 0;background:#1a1d27;border-radius:10px;padding:12px;}
+.sidebar-total .label{font-size:.7rem;color:#64748b;margin-bottom:4px;}
+.sidebar-total .val{font-size:1.1rem;font-weight:700;color:#10b981;}
+.sidebar-total .sub{font-size:.72rem;color:#475569;margin-top:2px;}
+
+/* MAIN */
+.main{flex:1;padding:20px 24px;overflow-x:auto;}
+
+/* STEP CARD */
+.step-card{background:#161b27;border-radius:14px;border:1px solid #1e293b;margin-bottom:16px;overflow:hidden;}
+.step-header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid #1e293b;cursor:pointer;}
+.step-num{width:26px;height:26px;border-radius:50%;background:#0f766e;color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-num.done{background:#10b981;}
+.step-title{font-size:.95rem;font-weight:600;color:#e2e8f0;}
+.step-sub{font-size:.75rem;color:#64748b;margin-left:auto;}
+.step-body{padding:16px 18px;display:none;}
+.step-body.open{display:block;}
+
+/* FILE DROP */
+.drop-zone{border:2px dashed #334155;border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.drop-zone:hover,.drop-zone.dragover{border-color:#0f766e;background:#0f766e11;}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.drop-zone .icon{font-size:2rem;margin-bottom:8px;}
+.drop-zone p{color:#64748b;font-size:.85rem;}
+.drop-zone p strong{color:#94a3b8;}
+.drop-zone.loaded{border-color:#10b981;background:#10b98111;}
+.drop-zone.loaded p{color:#10b981;}
+
+/* CHANNEL GRID */
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.ch-card{background:#0d1117;border:1px solid #1e293b;border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;position:relative;}
+.ch-card:hover{border-color:#334155;}
+.ch-card.loaded{border-color:#10b981;}
+.ch-card.has-unmapped{border-color:#f59e0b;}
+.ch-card.error{border-color:#ef4444;}
+.ch-card-top{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.ch-card-icon{font-size:1.2rem;}
+.ch-card-name{font-size:.85rem;font-weight:600;color:#cbd5e1;}
+.ch-card-status{margin-left:auto;font-size:.7rem;padding:2px 8px;border-radius:20px;}
+.st-wait{background:#1e293b;color:#64748b;}
+.st-ok{background:#10b98122;color:#10b981;}
+.st-warn{background:#f59e0b22;color:#f59e0b;}
+.st-err{background:#ef444422;color:#ef4444;}
+.ch-card-drop{border:1px dashed #334155;border-radius:6px;padding:10px;text-align:center;font-size:.75rem;color:#475569;position:relative;cursor:pointer;}
+.ch-card-drop:hover{border-color:#0f766e;color:#0f766e;}
+.ch-card-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.ch-card-stat{font-size:.72rem;color:#64748b;margin-top:6px;}
+.ch-card-stat span{color:#94a3b8;font-weight:600;}
+
+/* RESULT TABLES */
+.result-section{margin-top:16px;}
+.result-title{font-size:.85rem;font-weight:600;color:#94a3b8;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.result-title .badge{font-size:.7rem;padding:2px 8px;border-radius:20px;font-weight:400;}
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid #1e293b;}
+table{width:100%;border-collapse:collapse;font-size:.8rem;}
+thead tr{background:#1a1d27;}
+th{padding:10px 12px;text-align:left;color:#64748b;font-weight:600;font-size:.75rem;border-bottom:1px solid #1e293b;white-space:nowrap;}
+th.num{text-align:right;}
+td{padding:9px 12px;border-bottom:1px solid #111827;vertical-align:middle;}
+td.num{text-align:right;font-variant-numeric:tabular-nums;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#1a1d2788;}
+.unmapped-badge{background:#f59e0b22;color:#f59e0b;font-size:.7rem;padding:2px 6px;border-radius:4px;}
+.profit-pos{color:#10b981;font-weight:600;}
+.profit-neg{color:#ef4444;font-weight:600;}
+
+/* UNMAPPED MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:#161b27;border:1px solid #334155;border-radius:14px;width:100%;max-width:700px;max-height:80vh;display:flex;flex-direction:column;}
+.modal-header{padding:16px 20px;border-bottom:1px solid #1e293b;display:flex;align-items:center;gap:10px;}
+.modal-header h3{font-size:1rem;font-weight:600;}
+.modal-close{margin-left:auto;cursor:pointer;color:#64748b;font-size:1.2rem;padding:4px;}
+.modal-body{padding:16px 20px;overflow-y:auto;flex:1;}
+.modal-footer{padding:12px 20px;border-top:1px solid #1e293b;display:flex;gap:8px;justify-content:flex-end;}
+.unmapped-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #111827;}
+.unmapped-row:last-child{border-bottom:none;}
+.unmapped-key{flex:1;font-size:.78rem;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.unmapped-row select,.unmapped-row input{background:#0d1117;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 8px;font-size:.78rem;font-family:inherit;width:160px;}
+.unmapped-row input{width:140px;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.btn-primary{background:#0f766e;color:#fff;}
+.btn-primary:hover{background:#0d9488;}
+.btn-secondary{background:#1e293b;color:#94a3b8;}
+.btn-secondary:hover{background:#334155;color:#e2e8f0;}
+.btn-success{background:#065f46;color:#10b981;border:1px solid #10b98133;}
+.btn-success:hover{background:#10b98133;}
+.btn-sm{padding:5px 10px;font-size:.75rem;}
+
+/* CONSOLIDATED */
+.consolidated{background:#161b27;border-radius:14px;border:1px solid #1e293b;padding:18px;margin-top:16px;}
+.consolidated h2{font-size:1rem;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+/* SUMMARY CARDS */
+.sum-cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.sum-card{background:#0d1117;border-radius:10px;border:1px solid #1e293b;padding:14px 18px;flex:1;min-width:150px;}
+.sum-card .val{font-size:1.3rem;font-weight:700;color:#10b981;}
+.sum-card .lbl{font-size:.72rem;color:#64748b;margin-top:3px;}
+
+/* PROGRESS */
+.progress-bar{height:4px;background:#1e293b;border-radius:2px;overflow:hidden;margin-top:8px;}
+.progress-fill{height:100%;background:#0f766e;border-radius:2px;transition:width .3s;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#1a1d27;border:1px solid #334155;border-radius:10px;padding:12px 18px;font-size:.82rem;z-index:300;transform:translateY(100px);opacity:0;transition:all .3s;max-width:320px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-color:#10b98155;color:#10b981;}
+.toast.error{border-color:#ef444455;color:#ef4444;}
+.toast.warn{border-color:#f59e0b55;color:#f59e0b;}
+
+/* JSPREADSHEET DARK THEME OVERRIDE */
+.jexcel_container{background:#161b27 !important;border:1px solid #1e293b !important;border-radius:6px !important;overflow:hidden;}
+.jexcel{background:#0d1117 !important;color:#e2e8f0 !important;font-family:'Pretendard','Spoqa Han Sans Neo',sans-serif !important;font-size:.8rem !important;}
+.jexcel td{background:#0d1117 !important;color:#e2e8f0 !important;border-color:#1e293b !important;padding:6px 10px !important;}
+.jexcel td.highlight{background:#0f766e22 !important;}
+.jexcel td.selected{background:#0f766e33 !important;border:1px solid #0f766e !important;}
+.jexcel thead td{background:#1a1d27 !important;color:#64748b !important;font-weight:600 !important;font-size:.75rem !important;border-color:#1e293b !important;}
+.jexcel tbody tr td:first-child{background:#1a1d27 !important;color:#475569 !important;}
+.jexcel_toolbar{background:#10151f !important;border-color:#1e293b !important;}
+.jexcel_toolbar i{color:#94a3b8 !important;}
+.jexcel_pagination{background:#10151f !important;color:#94a3b8 !important;border-color:#1e293b !important;}
+.jexcel .jexcel_content{scrollbar-color:#334155 #0d1117;}
+.jexcel_container .jexcel_content::-webkit-scrollbar{width:6px;height:6px;}
+.jexcel_container .jexcel_content::-webkit-scrollbar-track{background:#0d1117;}
+.jexcel_container .jexcel_content::-webkit-scrollbar-thumb{background:#334155;border-radius:3px;}
+.jexcel_contextmenu{background:#161b27 !important;border:1px solid #334155 !important;color:#e2e8f0 !important;}
+.jexcel_contextmenu a:hover{background:#1e293b !important;}
+.jexcel_filter{background:#0d1117 !important;border-color:#334155 !important;color:#e2e8f0 !important;}
+
+/* SPREADSHEET MODE TOGGLE */
+.view-toggle{display:flex;gap:4px;margin-bottom:12px;}
+.view-toggle button{padding:5px 12px;border-radius:4px;font-size:.75rem;font-weight:600;border:1px solid #1e293b;background:#0d1117;color:#64748b;cursor:pointer;font-family:inherit;transition:all .15s;}
+.view-toggle button.active{background:#0f766e;color:#fff;border-color:#0f766e;}
+.view-toggle button:hover:not(.active){background:#1e293b;color:#94a3b8;}
+
+/* SKILL BADGES */
+.skill-badges{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;}
+.skill-badge{font-size:.68rem;padding:3px 8px;border-radius:3px;font-weight:500;}
+.skill-badge.excel{background:#21754522;color:#217545;border:1px solid #21754533;}
+.skill-badge.edit{background:#0f766e22;color:#0f766e;border:1px solid #0f766e33;}
+.skill-badge.formula{background:#7c3aed22;color:#7c3aed;border:1px solid #7c3aed33;}
+
+/* AUTH */
+.auth-area{display:flex;align-items:center;gap:10px;margin-left:auto;}
+.auth-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:6px 14px;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:6px;}
+.auth-btn:hover{background:rgba(255,255,255,.25);}
+.auth-profile{display:flex;align-items:center;gap:8px;}
+.auth-profile img{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.3);}
+.auth-profile span{font-size:.78rem;color:#fff;font-weight:500;}
+
+/* MAIN TABS */
+.main-tabs{display:flex;gap:0;border-bottom:2px solid #1e293b;margin-bottom:18px;}
+.main-tab{padding:10px 22px;font-size:.88rem;font-weight:600;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;}
+.main-tab:hover{color:#94a3b8;}
+.main-tab.active{color:#0f766e;border-bottom-color:#0f766e;}
+
+/* MONTHLY RECORDS */
+.records-section{display:none;}
+.records-section.visible{display:block;}
+.record-card{background:#161b27;border:1px solid #1e293b;border-radius:10px;margin-bottom:10px;overflow:hidden;transition:all .15s;}
+.record-card:hover{border-color:#334155;}
+.record-header{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;}
+.record-month{font-size:1rem;font-weight:700;color:#e2e8f0;}
+.record-date{font-size:.72rem;color:#475569;margin-left:auto;}
+.record-delete{background:#ef444422;color:#ef4444;border:1px solid #ef444433;border-radius:4px;padding:3px 8px;font-size:.7rem;cursor:pointer;font-family:inherit;margin-left:8px;transition:all .15s;}
+.record-delete:hover{background:#ef444444;}
+.record-body{display:none;padding:0 18px 16px;}
+.record-body.open{display:block;}
+.record-summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.record-stat{background:#0d1117;border-radius:6px;padding:8px 14px;border:1px solid #1e293b;flex:1;min-width:120px;}
+.record-stat .rv{font-size:1.05rem;font-weight:700;color:#10b981;}
+.record-stat .rl{font-size:.68rem;color:#475569;margin-top:2px;}
+.cloud-save-btn{background:#0284c7;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:all .15s;}
+.cloud-save-btn:hover{background:#0369a1;}
+.cloud-save-btn:disabled{opacity:.5;cursor:not-allowed;}
+.no-records{text-align:center;padding:60px 20px;color:#475569;font-size:.88rem;}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📊 iLBiA 매출 정산 대시보드</h1>
+    <p>채널별 정산 파일을 업로드하면 자동으로 집계해드려요</p>
+  </div>
+  <div class="header-badge" id="headerMonth">정산 월 미설정</div>
+  <div class="auth-area">
+    <div id="authProfile" class="auth-profile" style="display:none;"></div>
+    <button id="authBtn" class="auth-btn" onclick="handleAuth()">🔑 Google 로그인</button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">채널 현황</div>
+    <div class="sidebar-section" id="sidebarChannels"></div>
+    <div class="sidebar-label" style="margin-top:8px;">정산 합계</div>
+    <div class="sidebar-total">
+      <div class="label">총 정산금액</div>
+      <div class="val" id="sidebarTotal">₩ 0</div>
+      <div class="sub" id="sidebarProfit">이익 ₩ 0</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- MAIN TABS -->
+    <div class="main-tabs">
+      <button class="main-tab active" onclick="switchMainTab('input')">📊 정산 입력</button>
+      <button class="main-tab" onclick="switchMainTab('records')">📋 월별 기록</button>
+    </div>
+
+    <!-- INPUT SECTION -->
+    <div id="inputSection">
+
+    <!-- STEP 1: 원가 파일 -->
+    <div class="step-card">
+      <div class="step-header" onclick="toggleStep(1)">
+        <div class="step-num" id="stepNum1">1</div>
+        <div>
+          <div class="step-title">원가 파일 업로드</div>
+          <div style="font-size:.75rem;color:#64748b;margin-top:2px;">「온라인 매출정산.xlsx」의 원가 시트를 불러옵니다</div>
+        </div>
+        <div class="step-sub" id="costStatus">⏳ 대기 중</div>
+      </div>
+      <div class="step-body open" id="stepBody1">
+        <div class="drop-zone" id="costDrop">
+          <input type="file" accept=".xlsx,.xls" onchange="loadCostFile(this)"/>
+          <div class="icon">📂</div>
+          <p><strong>온라인 매출정산.xlsx</strong> 파일을 여기에 드롭하거나 클릭해서 선택하세요</p>
+          <p style="margin-top:6px;font-size:.72rem;">원가 시트의 제품명 → 판관비포함원가(부가세포함) 데이터를 읽습니다</p>
+        </div>
+        <div id="costResult" style="display:none;margin-top:12px;">
+          <div id="costSummary" style="display:flex;align-items:center;gap:10px;"></div>
+          <div id="costDetailWrap" style="display:none;max-height:260px;overflow-y:auto;border-radius:6px;margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: 채널 파일 -->
+    <div class="step-card">
+      <div class="step-header" onclick="toggleStep(2)">
+        <div class="step-num" id="stepNum2">2</div>
+        <div>
+          <div class="step-title">채널별 정산 파일 업로드</div>
+          <div style="font-size:.75rem;color:#64748b;margin-top:2px;">각 채널의 원본 파일을 올리면 자동으로 상품명 매핑 + 정산금 계산</div>
+        </div>
+        <div class="step-sub" id="channelStatus">0 / 9 완료</div>
+      </div>
+      <div class="step-body open" id="stepBody2">
+        <!-- 정산 월 설정 -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <span style="font-size:.82rem;color:#94a3b8;">정산 월:</span>
+          <input type="month" id="settlementMonth" value="2026-01" style="background:#0d1117;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 10px;font-size:.82rem;font-family:inherit;" onchange="updateMonth()"/>
+        </div>
+        <div class="ch-grid" id="channelGrid"></div>
+      </div>
+    </div>
+
+    <!-- STEP 3: 미매핑 처리 -->
+    <div class="step-card" id="step3Card" style="display:none;">
+      <div class="step-header" onclick="toggleStep(3)">
+        <div class="step-num" id="stepNum3">3</div>
+        <div>
+          <div class="step-title">미매핑 상품 처리</div>
+          <div style="font-size:.75rem;color:#f59e0b;margin-top:2px;">품명리스트에 없는 새 상품명을 지정해주세요</div>
+        </div>
+        <div class="step-sub" id="unmappedStatus"></div>
+      </div>
+      <div class="step-body" id="stepBody3">
+        <p style="font-size:.8rem;color:#94a3b8;margin-bottom:12px;">아래 상품들은 품명리스트에서 찾지 못했어요. 최종상품명을 직접 입력하거나 기존 상품에서 선택해주세요.</p>
+        <div id="unmappedList"></div>
+        <div style="margin-top:12px;">
+          <button class="btn btn-primary" onclick="applyUnmapped()">✅ 적용하기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: 결과 -->
+    <div class="consolidated" id="resultSection" style="display:none;">
+      <h2>📈 정산 종합 결과 <span style="font-size:.75rem;color:#64748b;font-weight:400;" id="resultMonth"></span></h2>
+      <div class="skill-badges">
+        <span class="skill-badge excel">ExcelJS 서식 내보내기</span>
+        <span class="skill-badge edit">Jspreadsheet 인라인 편집</span>
+        <span class="skill-badge formula">수식 · 복붙 · Undo/Redo</span>
+      </div>
+
+      <div class="sum-cards" id="sumCards"></div>
+
+      <!-- 채널별 탭 -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="resultTabs"></div>
+
+      <!-- 뷰 모드 토글 -->
+      <div class="view-toggle">
+        <button class="active" id="viewTable" onclick="setViewMode('table')">📋 테이블</button>
+        <button id="viewSheet" onclick="setViewMode('sheet')">📊 스프레드시트</button>
+      </div>
+
+      <!-- 결과 테이블 -->
+      <div id="resultTableWrap"></div>
+      <!-- 스프레드시트 뷰 -->
+      <div id="spreadsheetWrap" style="display:none;"></div>
+
+      <!-- 다운로드 -->
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="cloud-save-btn" id="cloudSaveBtn" onclick="saveToCloud()" style="display:none;">💾 클라우드 저장</button>
+        <button class="btn btn-success" onclick="downloadExcelStyled()">⬇️ Excel 다운로드 (서식 포함)</button>
+        <button class="btn btn-secondary" onclick="downloadExcel()">⬇️ Excel 다운로드 (기본)</button>
+        <button class="btn btn-secondary" onclick="resetAll()">🔄 초기화</button>
+      </div>
+    </div>
+
+    </div><!-- /inputSection -->
+
+    <!-- MONTHLY RECORDS SECTION -->
+    <div id="recordsSection" class="records-section">
+      <div id="recordsList"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- UNMAPPED MODAL -->
+<div class="modal-bg" id="modalBg" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="step-num" style="background:#f59e0b;">!</div>
+      <h3>미매핑 상품 처리</h3>
+      <span class="modal-close" onclick="closeModal()">✕</span>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal()">나중에</button>
+      <button class="btn btn-primary btn-sm" onclick="applyModalUnmapped()">✅ 적용</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// FIREBASE CONFIG — 대표님이 Firebase Console에서 발급받은 설정으로 교체
+// ═══════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyDa5SBJpKa85kDmfWH3z8CnPpcbyn-lJ7U",
+  authDomain: "becorelab-tools.firebaseapp.com",
+  projectId: "becorelab-tools",
+  storageBucket: "becorelab-tools.firebasestorage.app",
+  messagingSenderId: "310162626904",
+  appId: "1:310162626904:web:ea851efac9241053646d2d"
+};
+
+let firebaseReady = false;
+let db = null;
+let auth = null;
+let currentUser = null;
+
+try {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db = firebase.firestore();
+  firebaseReady = firebaseConfig.apiKey !== "YOUR_API_KEY";
+} catch(e) {
+  console.warn('Firebase 초기화 실패:', e);
+}
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// 디폴트 원가 매핑 (444건) — 260302 기준
+// 새 상품/구성 추가 시 여기에 추가
+// ═══════════════════════════════════════════════════════
+const DEFAULT_COST_MAP = {"소프트블랙 27M 30롤 1팩":8400,"소프트블랙 30M 30롤 1팩":8900,"소프트블랙 30M 30롤 2팩":17800,"숨 25M 30롤 1팩":8000,"숨 25M 30롤 2팩":16000,"숨 27M 30롤 1팩":8400,"숨 27M 30롤 2팩":16800,"숨 30M 30롤 1팩":8900,"숨 30M 30롤 2팩":17800,"숨 키친타올 6롤 2팩":4200,"숨 키친타올 6롤 4팩":8400,"오늘 화장지 3겹 30m 30롤 3팩":28050,"오늘 화장지 3겹 30m 30롤 2팩":18700,"오늘 각티슈 2겹 3팩_4묶음":11880,"오늘 키친타올 3팩":2079,"오늘 키친타올 9팩":6237,"퓨어실키 27M 12롤 1팩":4180,"퓨어실키 27M 9롤 1팩":3850,"퓨어실키 30M 30롤 1팩":9790,"퓨어실키 30M 30롤 2팩":19580,"퓨어실키 각티슈 2겹 3팩_4묶음":13640,"236 식기세척기":4096,"236 식기세척기 2개":8193,"236 식기세척기 3개":12289,"236 식기세척기 4개":16386,"건조기샘플":660,"건조기시트":4325,"건조기시트 2개":8650,"건조기시트 2개(쿠팡)":9557,"건조기시트 3개":12976,"건조기시트 3개+이염방지시트":15698,"건조기시트 4개":17301,"건조기시트 5개":21626,"건조기시트 7개":30276,"건조기시트 8개":34602,"건조기시트+샘플":4985,"건조기시트+캡슐세제":8118,"건조기시트+이염방지시트":7048,"건조기시트2개+샘플":9310,"건조기시트2개+수세미":10321,"건조기시트2개+하트세탁세제":13555,"건조기시트3개+샘플":13636,"건조기시트3개+세탁세제":18258,"건조기시트3개+수세미":14647,"건조기시트3개+이염방지시트":15698,"건조기시트3개+이염방지시트3개":21143,"건조기시트4개+이염방지시트":20023,"다목적세정제":3013,"다목적세정제 2개":6026,"다목적세정제 3개":9039,"다목적세정제 4개":12052,"다목적세정제 6개":18077,"다목적세정제 2개+수세미 2개":9368,"건조기시트 42매":5095,"건조기시트 42매 2개":10190,"건조기시트 42매 3개":15286,"섬유탈취제 100":1713,"섬유탈취제 100 2개":3425,"섬유탈취제 100 3개":5138,"섬유탈취제 400":3011,"섬유탈취제 400 2개":6021,"섬유탈취제 400 3개":9032,"섬유탈취제 400 4개":12043,"섬유탈취제 400 6개":18064,"섬유탈취제 400 2개+100":7734,"섬유탈취제 400 1개+100 2개":6436,"섬유탈취제 400 3개+100":10745,"섬유탈취제 400+100":4723,"섬유유연제":4421,"섬유유연제 2개":8842,"섬유유연제 3개":13263,"섬유유연제 4개":17684,"섬유유연제 6개":26525,"섬유유연제+건조기시트":8746,"섬유유연제4개+세제보관함":19304,"세제보관함":1620,"세탁세제":5282,"세탁세제 2개":10564,"세탁세제 3개":15847,"세탁세제 4개":21129,"세탁세제 6개":31693,"세탁세제+섬유유연제":9407,"세탁세제+섬유유연제+세탁조":14244,"세탁세제+세제보관함":6903,"세탁세제+세제보관함+집게":7445,"세탁세제+세탁조클리너":9823,"세탁세제+유연제+세탁조크리너":14244,"세탁세제2개+세제보관함":12185,"세탁세제2개+세제보관함+집게":12727,"세탁세제3개+섬유유연제":19380,"세탁조클리너":4837,"세탁조클리너 2개":9673,"세탁조클리너 3개":14510,"세탁조클리너 4개":19347,"수세미":1671,"수세미 10개":16709,"수세미 12개":20051,"수세미 2개":3342,"수세미 3개":5013,"수세미 4개":6684,"수세미 5개":8354,"수세미 6개":10025,"수세미 7개":11696,"수세미 8개":13367,"수세미5개+다목적세정제3개":17393,"식기세척기":3634,"식기세척기 2개":7269,"식기세척기 2개+세제보관함+집게":9431,"식기세척기 3개":10903,"식기세척기 4개":14538,"식기세척기 4개+세제보관함":16158,"식기세척기 6개":21806,"식기세척기+세제보관함":5255,"식기세척기+세제보관함+집게":5797,"식기세척기+수세미+틴케이스+집게":7321,"식기세척기2개+세제보관함":8889,"식기세척기2개+수세미":8940,"식기세척기3개+수세미+틴케이스+집게":14589,"식기세척기3개+틴케이스+집게":12918,"식기세척기4개+수세미+용기+집게":18371,"식기세척기4개+틴케이스+집게":16553,"식기세척기6개+수세미":23477,"식세기6개+세제보관함":23427,"식세기샘플":810,"얼룩제거제100":1883,"얼룩제거제100 2개":3766,"얼룩제거제100 3개":5650,"얼룩제거제350":3313,"얼룩제거제350 2개":6626,"얼룩제거제350 2개+100 1개":8510,"얼룩제거제350 3개":9940,"얼룩제거제350 4개":13253,"얼룩제거제350+100":5196,"얼룩제거제350+350":6626,"이염방지시트":2722,"이염방지시트 2개":5445,"이염방지시트 2개+수세미1개":7116,"이염방지시트 3개":8168,"이염방지시트 4개":10890,"이염방지시트 6개":16335,"이염방지시트 8개":21780,"캡슐세제":3793,"캡슐세제 1개+건조기시트 1개":8118,"캡슐세제 2개+건조기시트 2개":16236,"캡슐세제 2개+건조기시트 3개":20561,"캡슐세제 3개+건조기시트 3개":24354,"캡슐세제 2개":7586,"캡슐세제 2개(쿠팡)":8136,"캡슐세제 2개+건조기시트 2개+얼룩제거제 350+100":21803,"캡슐세제 2개+이염방지시트 2개":16119,"캡슐세제 2개+이염방지시트 2개+건조기시트":20445,"캡슐세제 2개+이염방지시트 2개+얼룩제거제 350+100":21316,"캡슐세제 3개":11378,"캡슐세제 3개+얼룩제거제 350":14897,"캡슐세제 3개+이염방지시트":18734,"캡슐세제 3개+이염방지시트 3개":24704,"캡슐세제 4개":15171,"캡슐세제 4개+이염방지시트":24071,"캡슐세제 5개":18964,"캡슐세제 6개":22757,"캡슐세제+건조기시트":8118,"캡슐세제+이염방지시트":8235,"캡슐세제2개+건조기시트1개+이염방지시트1개+얼룩제거제100":19605,"캡슐세제2개+건조기시트2개+이염방지시트+세탁조클리너":27273,"캡슐세제2개+건조기시트2개+이염방지시트2개+얼룩제거제100":26653,"캡슐세제2개+수세미":12345,"캡슐패키지":13644,"캡슐패키지+캡슐세제":18982,"틴케이스":1473,"하트세탁":4905,"하트세탁 2개":9810,"하트세탁 3개":14715,"하트세탁 4개":19620,"하트세탁 6개":29429,"하트세탁2개+세제보관함":11430,"하트세탁세제+틴케이스+집게":6992,"하트세탁패키지":18466,"하트세탁패키지+샘플":19202,"하트식세기":2985,"하트식세기 2개":5971,"하트식세기 2개+다목적세정제 2개+수세미 3개":12326,"하트식세기 2개+샘플":6741,"하트식세기 2개+틴케이스+집게":7986,"하트식세기 3개":8956,"하트식세기 3개+샘플":9726,"하트식세기 3개+집게":9498,"하트식세기 3개+틴케이스+집게":10971,"하트식세기 4개":11942,"하트식세기 4개+샘플":12712,"하트식세기 5개":14927,"하트식세기 6개":17912,"하트식세기 6개+틴케이스":19385,"하트식세기+샘플":3755,"하트식세기+세제보관함+집게":5148,"하트식세기+수세미 2개+틴케이스+집게":8342,"하트식세기+틴케이스":4458,"하트식세기+틴케이스+집게":5001,"하트식세기2개+샘플":6741,"하트식세기2개+세제보관함":7591,"하트식세기2개+수세미":7642,"하트식세기2개+집게+용기":7986,"하트식세기2개+틴케이스+집게":7986,"하트식세기2개+틴케이스+집게+수세미":9657,"하트식세기3개+다목적+샘플":12739,"하트식세기3개+샘플":9726,"하트식세기3개+수세미2개":12298,"하트식세기3개+틴케이스+집게":10971,"하트식세기3개+틴케이스+집게+수세미":12642,"하트식세기4개+수세미":13613,"하트식세기4개+틴케이스":13415,"하트식세기4개+틴케이스+샘플":14185,"하트식세기5개+샘플":15697,"하트식세기5개+샘플+틴케이스":17170,"하트식세기6개+다목적+샘플":21695,"하트식세기 6개+틴케이스+집게":19928,"하트식세기6개+샘플":18682,"하트식세기6개+수세미":19583,"하트식세기8개+샘플":24653,"하트식세기샘플":810,"하트식세기패키지":13802,"하트집게":543,"하트틴케이스":1473,"투명그릇거치대_소형":2090,"투명그릇거치대_대형":3850,"2단탕비실정리함_1단":13750,"2단탕비실정리함_2단":20350,"3단수저통":4400,"3칸책꽂이":7920,"3칸책꽂이 2개":15840,"4칸종이컵홀더":5280,"6구 칼꽂이":2530,"가죽티슈케이스":4180,"가죽티슈케이스 2개":8360,"가죽티슈케이스 3개":12540,"감자칩집게 10개":2200,"감자칩집게 5개":1100,"걸이형주방선반":4950,"계란보관함":5830,"고데기수납":1320,"고데기수납 2개":2640,"고데기수납 6개":7920,"고리형스퀴지":330,"곰돌이러그_대":12100,"곰돌이러그_소":4070,"곰돌이러그_중":7260,"곰돌이후크":1540,"구급함_2단 대형":11000,"구급함_2단 소형":7700,"나쵸칩집게 5개":1100,"냄비뚜껑거치대":1100,"냄비뚜껑거치대 2개":2200,"냉장고선반_대2개":1210,"냉장고선반_소3개":1430,"드라이기거치대":1870,"디즈니패치 5P":550,"라면_대형 2개":10120,"라면_중형 2개":6600,"라면_대형":5060,"라면_중형":3300,"리모콘거치대":4950,"마그넷키친타올걸이":2970,"마그넷키친타올걸이 2P":5940,"마그넷홀더":1650,"마그넷홀더 2개":3300,"마그넷홀더 3개":4950,"머리끈커터":220,"멀티탭_대":6050,"멀티탭_중":5280,"멀티탭_대 2개":12100,"멀티탭_중 2개":10560,"멀티탭_대 3개":18150,"멀티탭_중 3개":15840,"면봉케이스_사각":1430,"면봉케이스_원형":1210,"목욕바구니_대형":2420,"목욕바구니_중형":1980,"미니가위_소":770,"미니가위_중":770,"미니독서등":1870,"미니스퀴지":1760,"미니의자받침대":330,"미니의자접이거치대_2개":264,"미니휴지통_일반":2750,"미니휴지통_일반 2개":5500,"미니휴지통_터치":3080,"미니휴지통_터치 2개":6160,"발매트_대형":9900,"발매트_중형":5500,"발커버100P":1980,"벽걸이빨래통":8690,"변기발받침":5720,"부착식면봉케이스 2개":3960,"부착식면봉케이스 4개":7920,"붙이는서랍_대형":7370,"붙이는서랍_소형":3410,"붙이는서랍_중형":5170,"빨래바구니_대형":9900,"빨래바구니_특대형":11000,"사각면봉케이스":1430,"서류정리함":4620,"소프트빨래통_대형":5060,"소프트빨래통_미니":1650,"소프트빨래통_중형":3960,"송장지우개20ml":880,"송장지우개50ml":1430,"수세미거치대":2200,"슈즈렉":869,"스텐싱크대거름망":5500,"실리콘덮개":4840,"심플머리끈24P":1760,"심플부착식선반":1650,"심플부착식선반 3개":4950,"심플부착식선반 5개":8250,"쌀통 10Kg":13200,"쌀통 5Kg":10450,"애플펜슬촉":1430,"양면테이프 10개":715,"양면테이프 20개":1430,"오리타올":2640,"옥타곤연필꽂이":4730,"옷걸이 10P":6500,"옷걸이 15P":9750,"옷걸이 5P":3250,"옷걸이 1P":715,"욕실선반_대":3300,"욕실선반_소":1650,"인테리어10L휴지통":10230,"접이식리빙박스_대":28600,"접이식리빙박스_중":18700,"접이식빨래통":12100,"종이컵홀더 1구":3850,"종이컵홀더 2개":6160,"치약홀더":1650,"캡슐커피보관함":3850,"텀블러_1칸":2750,"텀블러_2칸":3300,"텀블러_3칸":4180,"텀블러_1칸 2개":5500,"텀블러_2칸 2개":6600,"텀블러_3칸 2개":8360,"투명고리집게4P":1320,"투명접시거치대_대형":3850,"투명접시거치대_소형":2090,"틈새청소스틱":1430,"틈새케이블정리":4620,"페이퍼클립":1650,"펜트리수납":1650,"프리미엄계란보관함":9900,"프리미엄계란보관함 2개":19800,"프리미엄화장품정리":17380,"플라워커튼홀더":5940,"플라워커튼홀더 2개":11880,"플라워커튼홀더 4개":23760,"홈캠_대형":2200,"홈캠_소형":1650,"화장품정리16구":2750,"화장품파우치":3630,"회전브러쉬정리":3630,"회전연필꽂이":3850,"회전주방트레이_대형":6050,"회전주방트레이_소형":4400,"마그넷 휴지걸이":2970,"슬라이딩 케이블 정리함":4620,"양문형 리빙박스_중형":18700,"양문형 리빙박스_대형":28600,"인덕션 모서리 냄비받침":5170,"냄비뚜껑 받침대 2개":2200,"냄비뚜껑 받침대":1100,"부착식 사각선반":1650,"냉장고 클립형 소스 보관함_소 3개":1430,"냉장고 클립형 소스 보관함_대 2개":1210,"섬유탈취제 100ml 1개+얼룩제거제 100ml 1개":3596,"캡슐 세제 1개 + 얼룩제거제 100ml 1개 + 섬유탈취제 100ml 1개 + 하트 패키지 포장":10139,"섬유탈취제 400 3개 + 얼룩제거제 100":10915,"섬유탈취제 400 4개 + 100미리 1개":13756,"배송비":3300,"건조기시트 코튼블루":4325,"건조기시트 베이비크림":4325,"건조기시트 바이올렛머스크":4325,"건조기시트 2개 코튼블루":8650,"건조기시트 2개 베이비크림":8650,"섬유탈취제 400 2개 + 얼룩제거제 100":7905,"이염방지시트+건조기시트":7048,"캡슐세제 2개+건조기시트 1개":8118,"건조기시트 샘플":770,"캡슐세제 2개+얼룩제거제 100":9469,"섬유탈취제 400 2개+얼룩제거제 350 1개":9335,"캡슐세제 1개+건조기시트 2개":8118,"캡슐세제 2개+틴케이스+집게":10867,"캡슐세제 3개+틴케이스+하트집게":14671,"캡슐세제 1개+섬유탈취제 400 1개+얼룩제거제 350 1개":10322,"캡슐세제 6개+캡슐 틴케이스+집게":26049,"캡슐세제 하트 틴케이스":2750,"하트식세기 2개+틴케이스+집게+수세미":9657,"건조기시트 6개":25951,"건조기시트 코튼블루 1개":4325,"건조기시트 베이비크림 1개":4325,"건조기시트 바이올렛 머스크 1개":4325,"얼룩제거제 + 건조기시트(베이비크림)":7844,"얼룩제거제":3519,"얼룩제거제350ml+얼룩제거제100ml":5567,"건조기시트 베이비크림 3개":12976,"건조기시트 바이올렛 머스크 3개":12976,"건조기시트 코튼블루 3개":12976,"얼룩제거제100ml":2048,"얼룩제거제 + 건조기시트(바이올렛 머스크)":7844,"얼룩제거제 + 건조기시트(코튼블루)":7844,"건조기시트 1개+하트식세기 2개":7311,"빨래방 건조기시트":4325,"건조기시트 2개+섬유탈취제 400 1개":11661,"건조기시트 2개+캡슐세제 1개":8118,"건조기시트 6개+섬유탈취제 100 1개":27664,"섬유탈취제 2개+얼룩제거제 350 1개":6944,"섬유탈취제 400 1개+얼룩제거제 350 1개+건조기시트 1개":10855,"섬유탈취제 400 6개+섬유탈취제 100 1개":19777,"얼룩제거제 350 1개+건조기시트 1개+섬유탈취제 400 1개":9557,"얼룩제거제 350 1개+건조기시트 2개":12169,"얼룩제거제 350 1개+하트식세기 2개":9490,"얼룩제거제350 3개+100":12605,"캡슐세제 1개+섬유탈취제 400 1개+건조기시트 1개":11129,"캡슐세제 1개+섬유탈취제 400 1개+건조기시트 1개+섬유탈취제 100 1개":12841,"캡슐세제 2개+섬유탈취제 400 1개":6804,"캡슐세제 6개+캡슐 틴케이스+집게+섬유탈취제 100":27762,"하트식세기 1개+건조기시트 1개+섬유탈취제 400 1개":10321,"하트식세기 1개+건조기시트 1개+캡슐세제 1개":11103,"하트식세기 1개+얼룩제거제 350 1개+건조기시트":10830,"하트식세기 1개+얼룩제거제 350 1개+섬유탈취제 400 1개":9515,"하트식세기 1개+캡슐세제 1개+건조기시트 1개":11103,"하트식세기 1개+캡슐세제 1개+섬유탈취제 400 1개":9789,"하트식세기 2개+건조기시트 1개":10296,"하트식세기 2개+섬유탈취제 400 1개":8982,"하트식세기 2개+섬유탈취제 400 2개":11992,"하트식세기 2개+얼룩제거제 350 1개":9490,"하트식세기 2개+캡슐세제 1개":9764,"하트식세기 6개+틴케이스+집게+섬유탈취제 100":21640,"얼룩제거제 350 2개":7038,"하트식세기 선물세트":13802,"건조기시트 10개+섬유탈취제 100ml 1개":44965,"섬유탈취제 100(증정)":1713,"얼룩제거제 350ml 3개 + 휴대용100ml 3개":16701,"캡슐세제 10개+얼룩제거제 350ml 2개+섬유탈취제 100ml 1개":46679,"캡슐세제5팩 + 얼룩제거제 350미리 1개":22483,"얼룩제거제 350":3519,"섬유탈취제 400 3개 + 100 1개":10745};
+
+const state = {
+  costMap: {...DEFAULT_COST_MAP},       // 최종상품명 → 원가(VAT포함)
+  channels: {},      // channelId → { name, results, unmapped, aggregated }
+  allProductNames: new Set(), // known 최종상품명 for dropdown
+  currentTab: 'all',
+};
+
+// Channel definitions
+const CHANNEL_DEFS = [
+  { id: 'smartstore', name: '스마트스토어', icon: '🟢', detect: detectSmartStore, parse: parseSmartStore },
+  { id: '11st',       name: '11번가',      icon: '🔴', detect: detect11st,       parse: parse11st },
+  { id: 'kakaoGift',  name: '카카오선물',  icon: '🎁', detect: detectKakaoGift,  parse: parseKakao },
+  { id: 'kakao',      name: '카카오쇼핑',  icon: '🟡', detect: detectKakao,      parse: parseKakao },
+  { id: 'coupang',    name: '로켓배송',    icon: '🚀', detect: detectCoupang,    parse: parseCoupang },
+  { id: 'gmarket',    name: '지마켓',      icon: '🛒', detect: detectGmarket,    parse: parseGmarket },
+  { id: 'auction',    name: '옥션',        icon: '🔨', detect: detectAuction,    parse: parseAuction },
+  { id: 'ohouse',     name: '오늘의집',    icon: '🏠', detect: detectOhouse,     parse: parseOhouse },
+  { id: 'cafe24',     name: '카페24',      icon: '🏪', detect: detectCafe24,     parse: parseCafe24 },
+];
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function init() {
+  renderSidebar();
+  renderChannelGrid();
+  updateMonth();
+  // 디폴트 원가 로드 시 UI 반영
+  if (Object.keys(state.costMap).length > 0) {
+    document.getElementById('costStatus').textContent = '✅ 기본 ' + Object.keys(state.costMap).length + '개 제품';
+    document.getElementById('stepNum1').classList.add('done');
+  }
+}
+
+function updateMonth() {
+  const m = document.getElementById('settlementMonth').value;
+  document.getElementById('headerMonth').textContent = m ? m + ' 정산' : '정산 월 미설정';
+}
+
+// ═══════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════
+function toggleStep(n) {
+  const body = document.getElementById('stepBody' + n);
+  body.classList.toggle('open');
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('ko-KR');
+}
+
+function fmtRate(n) {
+  return (n * 100).toFixed(1) + '%';
+}
+
+function renderSidebar() {
+  const container = document.getElementById('sidebarChannels');
+  container.innerHTML = CHANNEL_DEFS.map(ch => {
+    const d = state.channels[ch.id];
+    let cls = '', label = '대기';
+    if (d) {
+      const hasUnmapped = d.unmapped && d.unmapped.length > 0;
+      cls = hasUnmapped ? 'warn' : 'done';
+      label = hasUnmapped ? `미매핑 ${d.unmapped.length}` : '완료';
+    }
+    return `<div class="ch-item" onclick="focusChannel('${ch.id}')">
+      <div class="ch-icon">${ch.icon}</div>
+      <div class="ch-name">${ch.name}</div>
+      <div class="ch-status ${cls}" title="${label}"></div>
+    </div>`;
+  }).join('');
+}
+
+function renderChannelGrid() {
+  const grid = document.getElementById('channelGrid');
+  grid.innerHTML = CHANNEL_DEFS.map(ch => {
+    const d = state.channels[ch.id];
+    let statusCls = 'st-wait', statusLabel = '대기';
+    let statHtml = '';
+    if (d) {
+      const hasU = d.unmapped && d.unmapped.length > 0;
+      statusCls = hasU ? 'st-warn' : 'st-ok';
+      statusLabel = hasU ? `미매핑 ${d.unmapped.length}건` : '완료';
+      const agg = d.aggregated || [];
+      const totalQty = agg.reduce((s,r) => s + r.수량, 0);
+      const totalSet = agg.reduce((s,r) => s + r.정산금액, 0);
+      statHtml = `<div class="ch-card-stat">수량 <span>${fmt(totalQty)}</span>개 · 정산 <span>₩${fmt(totalSet)}</span></div>`;
+    }
+    return `<div class="ch-card ${d ? (d.unmapped&&d.unmapped.length?'has-unmapped':'loaded') : ''}" id="chCard_${ch.id}">
+      <div class="ch-card-top">
+        <div class="ch-card-icon">${ch.icon}</div>
+        <div class="ch-card-name">${ch.name}</div>
+        <div class="ch-card-status ${statusCls}">${statusLabel}</div>
+      </div>
+      <div class="ch-card-drop" id="chDrop_${ch.id}" title="클릭해서 파일 선택">
+        <input type="file" accept=".xlsx,.xls" onchange="loadChannelFile(this,'${ch.id}')"/>
+        ${d ? '✅ 재업로드' : '📂 파일 선택'}
+      </div>
+      ${statHtml}
+    </div>`;
+  }).join('');
+}
+
+function updateSummary() {
+  let total = 0, totalCost = 0, totalQty = 0;
+  for (const ch of Object.values(state.channels)) {
+    for (const r of (ch.aggregated || [])) {
+      total += r.정산금액;
+      totalCost += r.원가합계 || 0;
+      totalQty += r.수량;
+    }
+  }
+  document.getElementById('sidebarTotal').textContent = '₩ ' + fmt(total);
+  document.getElementById('sidebarProfit').textContent = '이익 ₩ ' + fmt(total - totalCost);
+  updateChannelStatus();
+}
+
+function updateChannelStatus() {
+  const done = Object.keys(state.channels).length;
+  const total = CHANNEL_DEFS.length;
+  document.getElementById('channelStatus').textContent = `${done} / ${total} 완료`;
+}
+
+// ═══════════════════════════════════════════════════════
+// COST FILE LOADER
+// ═══════════════════════════════════════════════════════
+function loadCostFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      if (!wb.Sheets['원가']) { showToast('원가 시트를 찾을 수 없어요', 'error'); return; }
+      buildCostMap(wb);
+      document.getElementById('costDrop').classList.add('loaded');
+      document.getElementById('costDrop').querySelector('p').textContent = '✅ ' + file.name + ' 로드 완료';
+      document.getElementById('costStatus').textContent = '✅ ' + Object.keys(state.costMap).length + '개 제품';
+      document.getElementById('stepNum1').classList.add('done');
+      // show result — 요약 + 토글
+      const res = document.getElementById('costResult');
+      res.style.display = 'block';
+      const count = Object.keys(state.costMap).length;
+      document.getElementById('costSummary').innerHTML = `
+        <span style="font-size:.82rem;color:#10b981;font-weight:600;">✅ ${count}개 제품 원가 로드 완료</span>
+        <button class="btn btn-secondary btn-sm" onclick="toggleCostDetail(this)" style="font-size:.72rem;">📋 상세 보기 ▼</button>`;
+      document.getElementById('costDetailWrap').innerHTML = `<div class="tbl-wrap"><table>
+        <thead><tr><th>제품명</th><th class="num">원가(VAT포함)</th></tr></thead>
+        <tbody>${Object.entries(state.costMap).map(([k,v]) =>
+          `<tr><td>${k}</td><td class="num">₩${fmt(v)}</td></tr>`).join('')}</tbody>
+      </table></div>`;
+      showToast('원가 파일 로드 완료! ' + Object.keys(state.costMap).length + '개 제품', 'success');
+    } catch(ex) {
+      showToast('파일 읽기 오류: ' + ex.message, 'error');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function toggleCostDetail(btn) {
+  const wrap = document.getElementById('costDetailWrap');
+  const open = wrap.style.display !== 'none';
+  wrap.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? '📋 상세 보기 ▼' : '📋 접기 ▲';
+}
+
+function buildCostMap(wb) {
+  state.costMap = {};
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['원가'], {header:1});
+  for (const row of rows) {
+    const name = row[1];
+    const cost = row[3]; // 판관비포함원가(부가세포함)
+    if (name && cost && typeof name === 'string' && typeof cost === 'number') {
+      state.costMap[name.trim()] = cost;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// CHANNEL FILE LOADER
+// ═══════════════════════════════════════════════════════
+function loadChannelFile(input, channelId) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'array', cellDates:true});
+
+      // Auto-detect channel
+      let def = CHANNEL_DEFS.find(d => d.id === channelId);
+      // If not matching, try auto-detect
+      const detected = CHANNEL_DEFS.find(d => d.detect(wb));
+      if (detected && detected.id !== channelId) {
+        const useDetected = confirm(`채널 감지: ${detected.name}\n선택한 채널(${def.name}) 대신 ${detected.name}으로 처리할까요?`);
+        if (useDetected) def = detected;
+      }
+
+      const { results, unmapped } = def.parse(wb);
+
+      // Collect known product names
+      for (const r of results) {
+        if (r.매핑) state.allProductNames.add(r.최종상품명);
+      }
+
+      // Aggregate
+      const aggregated = aggregateResults(results);
+      applyCosting(aggregated);
+
+      state.channels[def.id] = { name: def.name, icon: def.icon || '📦', results, unmapped, aggregated };
+
+      renderChannelGrid();
+      renderSidebar();
+      updateSummary();
+      renderResults();
+
+      if (unmapped.length > 0) {
+        showUnmappedModal(def.id, unmapped);
+        showToast(`${def.name}: 미매핑 상품 ${unmapped.length}건 확인 필요`, 'warn');
+      } else {
+        showToast(`${def.name} 정산 완료! ${results.length}건`, 'success');
+      }
+    } catch(ex) {
+      console.error(ex);
+      showToast('처리 오류: ' + ex.message, 'error');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ═══════════════════════════════════════════════════════
+// NAME MAP BUILDER
+// ═══════════════════════════════════════════════════════
+function buildNameMap(wb, sheetNames) {
+  const map = {};
+  for (const sn of sheetNames) {
+    if (!wb.Sheets[sn]) continue;
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sn], {header:1});
+    for (const row of rows) {
+      const key = row[1];
+      const val = row[2];
+      if (key && val && typeof key === 'string' && typeof val === 'string'
+          && key !== '품명' && key !== '상품명') {
+        map[key.trim()] = val.trim();
+      }
+    }
+  }
+  return map;
+}
+
+// ═══════════════════════════════════════════════════════
+// CHANNEL DETECTORS
+// ═══════════════════════════════════════════════════════
+function getSheets(wb) { return Object.keys(wb.Sheets); }
+
+function detectSmartStore(wb) {
+  return getSheets(wb).includes('결제정산 - 일별상세');
+}
+function detect11st(wb) {
+  const sheets = getSheets(wb);
+  if (!sheets.includes('Sheet')) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet'], {header:1});
+  return rows.length > 5 && rows[5] && rows[5][14] === '상품명';
+}
+function detectKakaoGift(wb) {
+  if (!getSheets(wb).includes('Sheet0')) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet0'], {header:1});
+  return rows.length > 1 && String(rows[1][14]||'').includes('선물하기');
+}
+function detectKakao(wb) {
+  if (!getSheets(wb).includes('Sheet0')) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet0'], {header:1});
+  if (rows.length < 2 || rows[0][0] !== '결제번호' || rows[0][16] !== '상품명') return false;
+  // 카카오쇼핑하기 = 선물하기가 아닌 것
+  const ch = String(rows[1][14] || '');
+  return !ch.includes('선물하기');
+}
+function detectCoupang(wb) {
+  if (!getSheets(wb).includes('data')) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['data'], {header:1});
+  return rows.length > 0 && rows[0][0] === '구분' && rows[0][2] === 'SKU번호';
+}
+function detectGmarket(wb) {
+  return getSheets(wb).includes('매출기준_상품판매_상세내역');
+}
+function detectAuction(wb) {
+  if (!getSheets(wb).includes('Sheet1')) return false;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet1'], {header:1});
+  return rows.length > 0 && rows[0][1] === '결제번호' && rows[0][4] === '상품명';
+}
+function detectOhouse(wb) {
+  return getSheets(wb).includes('정산내역_상세');
+}
+function detectCafe24(wb) {
+  // 카페24 로우 데이터: 시트명이 자동생성(becorelab2_xxx)이므로 컬럼 헤더로 감지
+  const sheets = getSheets(wb);
+  // 기존 가공 파일 ('원본' 시트)
+  if (sheets.includes('원본') && !sheets.includes('결제정산 - 일별상세')) return true;
+  // 로우 데이터: 첫 시트의 헤더에 카페24 고유 컬럼 확인
+  const firstSheet = wb.Sheets[sheets[0]];
+  if (!firstSheet) return false;
+  const rows = XLSX.utils.sheet_to_json(firstSheet, {header:1});
+  if (rows.length < 1) return false;
+  const headers = rows[0].map(h => String(h||''));
+  return headers.includes('주문상품명(옵션포함)') && headers.includes('품목별 결제금액') && headers.includes('품목별 주문번호');
+}
+
+// ═══════════════════════════════════════════════════════
+// PARSERS
+// ═══════════════════════════════════════════════════════
+
+// 스마트스토어 (join 결제정산 + 구매확정내역)
+function parseSmartStore(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트', '품명리스트 추가']);
+
+  // 구매확정내역 → map by 상품주문번호
+  const detailMap = {};
+  const detRows = XLSX.utils.sheet_to_json(wb.Sheets['구매확정내역'], {header:1});
+  for (let i = 1; i < detRows.length; i++) {
+    const r = detRows[i];
+    const id = String(r[0] || '');
+    if (id) detailMap[id] = { option: String(r[15] || ''), qty: Number(r[16] || 1), revenue: Number(r[21] || 0) };
+  }
+
+  const settRows = XLSX.utils.sheet_to_json(wb.Sheets['결제정산 - 일별상세'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  for (let i = 1; i < settRows.length; i++) {
+    const r = settRows[i];
+    const type = String(r[2] || '');
+    const orderId = String(r[1] || '');
+    const A = Number(r[9] || 0), B = Number(r[10] || 0), C = Number(r[11] || 0), D = Number(r[12] || 0);
+    const settlement = A + B + C + D;
+
+    if (type === '배송비') {
+      results.push({ 최종상품명:'(배송비)', 수량:1, 정산금액:settlement, 매출액:Number(r[9]||0), 매핑:true });
+      continue;
+    }
+    if (type !== '상품주문') continue;
+
+    const prodName = String(r[3] || '');
+    const det = detailMap[orderId] || {};
+    const option = det.option || '';
+    const qty = det.qty || 1;
+    const revenue = det.revenue || Number(r[9] || 0);
+
+    let finalName = nameMap[prodName + option] || nameMap[prodName] || null;
+    const key = prodName + option;
+
+    if (!finalName && !unmappedKeys.has(key)) {
+      unmappedKeys.add(key);
+      unmapped.push({ key, prodName, option, qty: 0, settlement: 0, count: 0 });
+    }
+    if (!finalName) {
+      // Find in unmapped and accumulate
+      const u = unmapped.find(x => x.key === key);
+      if (u) { u.qty += qty; u.settlement += settlement; u.count++; }
+    }
+
+    results.push({ 최종상품명: finalName || key, 수량: qty, 정산금액: settlement, 매출액: revenue, 매핑: !!finalName });
+  }
+  return { results, unmapped };
+}
+
+// 11번가 (headers at row index 5)
+function parse11st(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  for (let i = 6; i < rows.length; i++) {  // data starts at index 6
+    const r = rows[i];
+    if (!r[14]) continue;
+    const status = String(r[4] || '');
+    if (status !== '구매확정') continue;
+
+    const prodName = String(r[14] || '');
+    const option = String(r[15] || '');
+    const qty = Number(r[16] || 0);
+    const settlement = Number(r[17] || 0);
+    const revenue = Number(r[22] || 0); // 판매가 × qty
+
+    const key = prodName + option;
+    let finalName = nameMap[key] || nameMap[prodName] || null;
+
+    if (!finalName && !unmappedKeys.has(key)) {
+      unmappedKeys.add(key);
+      unmapped.push({ key, prodName, option, qty, settlement, count: 1 });
+    }
+    results.push({ 최종상품명: finalName || key, 수량: qty, 정산금액: settlement, 매출액: revenue * qty, 매핑: !!finalName });
+  }
+  return { results, unmapped };
+}
+
+// 카카오쇼핑하기 / 카카오선물하기
+function parseKakao(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet0'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const type = String(r[3] || '');
+    if (type !== '일반상품') continue;
+
+    const prodName = String(r[16] || '');
+    const option = String(r[18] || '');
+    const qty = Number(r[33] || 0);
+    const settlement = Number(r[45] || 0);
+    const revenue = Number(r[22] || 0); // 상품주문금액
+
+    const key = prodName + option;
+    let finalName = nameMap[key] || nameMap[prodName] || null;
+
+    if (!finalName && prodName && !unmappedKeys.has(key)) {
+      unmappedKeys.add(key);
+      unmapped.push({ key, prodName, option, qty, settlement, count: 1 });
+    }
+    if (prodName) {
+      results.push({ 최종상품명: finalName || key, 수량: qty, 정산금액: settlement, 매출액: revenue, 매핑: !!finalName });
+    }
+  }
+  return { results, unmapped };
+}
+
+// 로켓배송
+function parseCoupang(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['data'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const type = String(r[0] || '');
+    if (type === '반품입고' || type === '반품반출') continue; // skip returns for now
+
+    const skuName = String(r[3] || '');
+    const qty = Number(r[7] || 0);
+    const unitCost = Number(r[9] || 0);  // 공급가액(VAT제외)
+    const totalCost = unitCost * qty;    // 총공급가액
+    const totalVat = Number(r[11] || 0) * qty; // 총세액
+
+    let finalName = nameMap[skuName] || null;
+    if (!finalName && skuName && !unmappedKeys.has(skuName)) {
+      unmappedKeys.add(skuName);
+      unmapped.push({ key: skuName, prodName: skuName, option: '', qty, settlement: totalCost, count: 1 });
+    }
+    if (skuName) {
+      results.push({ 최종상품명: finalName || skuName, 수량: qty, 정산금액: totalCost, 매출액: totalCost + totalVat, 매핑: !!finalName });
+    }
+  }
+  return { results, unmapped };
+}
+
+// 지마켓
+function parseGmarket(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트', '추가품명리스트 참고']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['매출기준_상품판매_상세내역'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r[4]) continue;
+    const prodName = String(r[4] || '');
+    const qty = Number(r[15] || 0);
+    const settlement = Number(r[29] || 0); // 판매자 최종정산금
+    const revenue = Number(r[23] || 0);    // 고객결제금
+
+    let finalName = nameMap[prodName] || null;
+    if (!finalName && !unmappedKeys.has(prodName)) {
+      unmappedKeys.add(prodName);
+      unmapped.push({ key: prodName, prodName, option: '', qty, settlement, count: 1 });
+    }
+    results.push({ 최종상품명: finalName || prodName, 수량: qty, 정산금액: settlement, 매출액: revenue, 매핑: !!finalName });
+  }
+  return { results, unmapped };
+}
+
+// 옥션
+function parseAuction(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트', '품명리스트 추가 참고']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['Sheet1'], {header:1});
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r[4]) continue;
+    const prodName = String(r[4] || '');
+    const qty = Number(r[16] || 0);
+    const settlement = Number(r[27] || 0); // 판매자 최종정산금
+    const revenue = Number(r[22] || 0);    // 결제금액
+
+    let finalName = nameMap[prodName] || null;
+    if (!finalName && !unmappedKeys.has(prodName)) {
+      unmappedKeys.add(prodName);
+      unmapped.push({ key: prodName, prodName, option: '', qty, settlement, count: 1 });
+    }
+    results.push({ 최종상품명: finalName || prodName, 수량: qty, 정산금액: settlement, 매출액: revenue, 매핑: !!finalName });
+  }
+  return { results, unmapped };
+}
+
+// 오늘의집 (최종상품명이 이미 있음!)
+function parseOhouse(wb) {
+  const nameMap = buildNameMap(wb, ['품명리스트']);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets['정산내역_상세'], {header:1});
+  const results = [], unmapped = [];
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const type = String(r[1] || '');
+    const status = String(r[2] || '');
+    if (type !== '주문정산' || status === '취소') continue;
+
+    // col8 is already 최종상품명!
+    let finalName = String(r[8] || '');
+    const prodName = String(r[7] || r[5] || '');
+    const qty = Number(r[10] || 0);
+    const settlement = Number(r[11] || 0);
+
+    if (!finalName && prodName) {
+      finalName = nameMap[prodName] || prodName;
+    }
+
+    if (finalName) {
+      results.push({ 최종상품명: finalName, 수량: qty, 정산금액: settlement, 매출액: settlement, 매핑: true });
+    }
+  }
+  return { results, unmapped };
+}
+
+// ═══════════════════════════════════════════════════════
+// 카페24 디폴트 품명 매핑 (760건)
+// 매달 새 상품 추가 시 여기에 추가하면 자동 매핑됨
+// ═══════════════════════════════════════════════════════
+const DEFAULT_CAFE24_NAMEMAP = {"무료 샘플 증정 이벤트":"건조기시트샘플","일비아 건조기 드라이 퍼퓸 시트 믹스 40매(옵션선택=건조기 퍼퓸시트 믹스 1개 (40매))":"건조기시트","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매":"건조기시트","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매":"건조기시트","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=1개(40매)+💙테스트키트💙, 향선택=코튼블루)":"건조기시트+샘플","⭐빨래방전용⭐ 일비아 건조기시트 40매(옵션선택=코튼블루 40매)":"건조기시트","⭐빨래방전용⭐ 일비아 건조기시트 40매(옵션선택=베이비크림 40매)":"건조기시트","⭐빨래방전용⭐ 일비아 건조기시트 40매(옵션선택=믹스 40매)":"건조기시트","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=건조기시트 1개(40매), 향선택=코튼블루)":"건조기시트","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=건조기시트 1개(40매), 향선택=베이비크림)":"건조기시트","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=건조기시트 1개(40매), 향선택=베이비크림)":"건조기시트","⭐빨래방전용⭐ 일비아 건조기시트 40매(옵션선택=코튼블루 40매 13개+베이비크림 40매 14개)":"건조기시트","⭐빨래방전용⭐ 일비아 건조기시트 40매(옵션선택=코튼블루 40매 17개+베이비크림 40매 10개)":"건조기시트","[5월 프로모션] 일비아 얼리 썸머 프로모션 9,900원 특가(품목 선택하기=건조기 시트 40매입 (베이비크림)  9900원 (얼리썸머 48% 할인))":"건조기시트","[5월 프로모션] 일비아 얼리 썸머 프로모션 9,900원 특가(품목 선택하기=건조기 시트 40매입 (코튼블루)  9900원 (얼리썸머 48% 할인))":"건조기시트","[빨래방전용] 일비아 건조기시트 40매(옵션선택=코튼블루 40매)":"건조기시트","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=2개(80매)+💙테스트키트💙, 향선택=베이비크림1개+코튼블루1개)":"건조기시트 2개","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=2개(80매)+💙테스트키트💙, 향선택=베이비크림2개)":"건조기시트 2개","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=2개(80매)+💙테스트키트💙, 향선택=코튼블루2개)":"건조기시트2개+샘플","[1월 프로모션] 일비아 베스트 제품 기획전(옵션선택=06 건조기 드라이 퍼퓸시트 40매입 2개(1+1), 건조기시트 향 선택 / 추가금액=코튼블루 2개)":"건조기시트 2개","[2월 프로모션] 일비아 베스트제품 1+1 (무료배송)(옵션선택=03 건조기 드라이 퍼퓸시트 40매입 2개(1+1), 건조기시트 향 선택 / 추가금액=코튼블루 1개  + 베이비크림 1개)":"건조기시트 2개","[2월 프로모션] 일비아 베스트제품 1+1 (무료배송)(옵션선택=03 건조기 드라이 퍼퓸시트 40매입 2개(1+1), 건조기시트 향 선택 / 추가금액=베이비크림 2개)":"건조기시트 2개","[2월 프로모션] 일비아 베스트제품 1+1 (무료배송)(옵션선택=03 건조기 드라이 퍼퓸시트 40매입 2개(1+1), 건조기시트 향 선택 / 추가금액=코튼블루 2개)":"건조기시트 2개","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=건조기시트 2개(80매), 향선택=코튼블루1개+베이비크림1개)":"건조기시트 2개","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=건조기시트 2개(80매), 향선택=베이비크림2개)":"건조기시트 2개","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=건조기시트 2개(80매), 향선택=코튼블루2개)":"건조기시트 2개","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=건조기시트 2개(80매), 향선택=베이비크림1개+코튼블루1개)":"건조기시트 2개","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=3개(120매)+💙테스트키트💙, 향선택=코튼블루3개)":"건조기시트 3개","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=건조기시트 3개(120매), 향선택=베이비크림2개+코튼블루1개)":"건조기시트 3개","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=건조기시트 3개(120매), 향선택=코튼블루3개)":"건조기시트 3개","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=건조기시트 3개(120매), 향선택=베이비크림3개)":"건조기시트 3개","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=건조기시트 3개(120매), 향선택=코튼블루2개+베이비크림1개)":"건조기시트 3개","향기 옷감 듀얼 집중 세트(옵션선택=건조기시트 40매 x 3개+이염방지시트 30매 x 3개, 건조기시트 향 선택=코튼블루 2개+베이비크림 1개)":"건조기시트 3개+이염방지시트 3개","향기 옷감 듀얼 집중 세트(옵션선택=건조기시트 40매 x 3개+이염방지시트 30매 x 3개, 건조기시트 향 선택=코튼블루 1개+베이비크림 2개)":"건조기시트 3개+이염방지시트 3개","향기 옷감 듀얼 집중 세트(옵션선택=건조기시트 40매 x 3개+이염방지시트 30매 x 3개, 건조기시트 향 선택=코튼블루 3개)":"건조기시트 3개+이염방지시트 3개","[1월 프로모션] 일비아 베스트 제품 기획전(옵션선택=07 건조기 드라이 퍼퓸시트 40매입 4개(2+2), 건조기시트 향 선택 / 추가금액=코튼블루 4개)":"건조기시트 4개","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=건조기시트 4개(160매), 향선택=코튼블루 4개)":"건조기시트 4개","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=건조기시트 4개(160매), 향선택=코튼블루 3개+베이비크림 1개)":"건조기시트 4개","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=건조기시트 4개(160매), 향선택=코튼블루 2개+베이비크림 2개)":"건조기시트 4개","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=건조기시트 4개(160매), 향선택=베이비크림 4개)":"건조기시트 4개","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=건조기시트 4개(160매), 향선택=베이비크림 2개+코튼블루 2개)":"건조기시트 4개","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=건조기시트 4개(160매), 향선택=베이비크림 4개)":"건조기시트 4개","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(일비아 건조기시트 베이비크림=1개(40매) + 💙무료 테스트키트(향 각각1매)💙)":"건조기시트+샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(일비아 건조기 퍼퓸시트 코튼블루=1개(40매) + 💙무료 테스트키트(향 각각1매)💙)":"건조기시트+샘플","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=1개(40매)+💙무료 테스트키트💙, 향선택=베이비크림)":"건조기시트+샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=1개(40매)+💙무료 테스트키트💙, 향선택=베이비크림)":"건조기시트+샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=1개(40매)+💙무료 테스트키트💙, 향선택=코튼블루)":"건조기시트+샘플","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=1개(40매)+💙테스트키트💙, 향선택=베이비크림)":"건조기시트+샘플","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=01.프리미엄 세탁 풀코스, 건조기시트 향 선택=베이비크림 2개)":"캡슐세제2개+건조기시트2개+이염방지시트2개+얼룩제거제100","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=01.프리미엄 세탁 풀코스, 건조기시트 향 선택=코튼블루 2개)":"캡슐세제2개+건조기시트2개+이염방지시트2개+얼룩제거제100","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(일비아 건조기시트 베이비크림=2개(80매) 25% 할인 + 💙무료 테스트키트(향 각각1매)💙)":"건조기시트2개+샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(일비아 건조기 퍼퓸시트 코튼블루=2개(80매) 25% 할인 + 💙무료 테스트키트(향 각각1매)💙)":"건조기시트2개+샘플","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=2개(80매)+💙무료 테스트키트💙, 향선택=베이비크림2개)":"건조기시트2개+샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=2개(80매)+💙무료 테스트키트💙, 향선택=코튼블루+베이비크림)":"건조기시트2개+샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=2개(80매)+💙무료 테스트키트💙, 향선택=코튼블루2개)":"건조기시트2개+샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=2개(80매)+💙무료 테스트키트💙, 향선택=코튼블루1개+베이비크림1개)":"건조기시트2개+샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=2개(80매)+💙무료 테스트키트💙, 향선택=베이비크림2개)":"건조기시트2개+샘플","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(일비아 건조기시트 베이비크림=3개(120매) 40% 할인 + 💙무료 테스트키트(향 각각1매)💙)":"건조기시트3개+샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(일비아 건조기 퍼퓸시트 코튼블루=3개(120매) 40% 할인 + 💙무료 테스트키트(향 각각1매)💙)":"건조기시트3개+샘플","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=3개(120매)+💙무료 테스트키트💙, 향선택=베이비크림2개+코튼블루1개)":"건조기시트3개+샘플","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=3개(120매)+💙무료 테스트키트💙, 향선택=코튼블루2개+베이비크림1개)":"건조기시트3개+샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=3개(120매)+💙무료 테스트키트💙, 향선택=코튼블루2개+베이비크림1개)":"건조기시트3개+샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=3개(120매)+💙무료 테스트키트💙, 향선택=코튼블루3개)":"건조기시트3개+샘플","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=3개(120매)+💙테스트키트💙, 향선택=베이비크림3개)":"건조기시트3개+샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=3개(120매)+💙무료 테스트키트💙, 향선택=베이비크림2개+코튼블루1개)":"건조기시트3개+샘플","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=3개(120매)+💙테스트키트💙, 향선택=베이비크림2개+코튼블루1개)":"건조기시트3개+샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(수량선택=3개(120매)+💙무료 테스트키트💙, 향선택=베이비크림3개)":"건조기시트3개+샘플","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=3개(120매)+💙테스트키트💙, 향선택=코튼블루2개+베이비크림1개)":"건조기시트3개+샘플","건조기시트 테스트키트":"건조기시트샘플","🩵무료 테스트 키트 2매🩵":"건조기시트샘플","무료 테스트 키트 2매":"건조기시트샘플","건조기🩵무료 테스트 키트 2매🩵":"건조기시트샘플","건조기 무료 테스트 키트 2매":"건조기시트샘플","일비아 32구 2단 계란 트레이 보관함(색상=화이트)":"계란보관함","일비아 32구 2단 계란 트레이 보관함(색상=그레이)":"계란보관함","일비아 패밀리 구급함(선택=2단 대형)":"구급함_2단 대형","일비아 패밀리 구급함(선택=2단 소형)":"구급함_2단 소형","일비아 액체 스프레이 다목적 세정제 500ml(옵션선택=다목적 세정제 1개 (500ml))":"다목적세정제","일비아 펜트리 라면 정리함(선택=대형)":"라면_대형","일비아 펜트리 라면 정리함(선택=중형)":"라면_중형","일비아 템바보드 모던 멀티탭 보관함(사이즈=대형, 색상=그린)":"멀티탭_대","일비아 템바보드 모던 멀티탭 보관함(사이즈=대형, 색상=브라운)":"멀티탭_대","일비아 템바보드 모던 멀티탭 보관함(사이즈=대형, 색상=화이트)":"멀티탭_대","일비아 템바보드 모던 멀티탭 보관함(사이즈=중형, 색상=화이트)":"멀티탭_중","일비아 템바보드 모던 멀티탭 보관함(사이즈=중형, 색상=브라운)":"멀티탭_중","일비아 메모리폼 주방 욕실 발매트(사이즈=주방용(40*120, 색상=차콜)":"발매트 대형","일비아 메모리폼 주방 욕실 발매트(사이즈=주방용(40*120, 색상=아이보리)":"발매트 대형","일비아 메모리폼 주방 욕실 발매(사이즈=욕실용(40*60), 색상=아이보리)":"발매트 중형","일비아 메모리폼 주방 욕실 발매(사이즈=주방용(40*120, 색상=그레이)":"발매트 중형","일비아 메모리폼 주방 욕실 발매(사이즈=욕실용(40*60), 색상=차콜)":"발매트 중형","일비아 메모리폼 주방 욕실 발매(사이즈=욕실용(40*60), 색상=그레이)":"발매트 중형","일비아 메모리폼 주방 욕실 발매트(사이즈=욕실용(40*60), 색상=아이보리)":"발매트 중형","일비아 메모리폼 주방 욕실 발매트(사이즈=욕실용(40*60), 색상=차콜)":"발매트 중형","일비아 메모리폼 주방 욕실 발매트(사이즈=욕실용(40*60), 색상=그레이)":"발매트 중형","일비아 서류 정리 트레이(색상=화이트)":"서류보관함","일비아 서류 정리 트레이(색상=투명)":"서류보관함","[첫구매 990원] 일비아 드럼/통돌이 섬유유연제 60정(옵션선택=섬유유연제 1개 (60정/2개월분))":"섬유유연제","일비아 드럼/통돌이 타블릿 섬유유연제 60정(옵션선택=섬유유연제 1개 (60정/2개월분))":"섬유유연제","일비아 세제보관함 전용 용기(옵션선택=세제보관용기 1개)":"세제보관함","[첫구매 990원] 일비아 드럼/통돌이 타블릿 세탁 세제 60정(옵션선택=세탁 세제 1개 (60정/2개월분))":"세탁세제","일비아 드럼/통돌이 타블릿 세탁 세제 60정(옵션선택=세탁 세제 1개 (60정/2개월분))":"세탁세제","[첫구매 990원] 일비아 세탁조 클리너 60정(옵션선택=세탁조 클리너 1개 (60정/6회분))":"세탁조클리너","일비아 드럼/통돌이 세탁조 클리너 6회분(옵션선택=세탁조 클리너 1개 (60정/6회분))":"세탁조클리너","일비아 올인원 세제 수세미(옵션선택=일비아 올인원 세제 수세미)":"수세미","일비아 뽑아쓰는 올인원 세제 일체형 수세미(옵션선택=⭐ 올인원 세제 수세미 1개 ⭐)":"수세미","일비아 뽑아쓰는 올인원 세제 일체형 수세미(옵션선택=올인원 세제 수세미 1개)":"수세미","[첫구매 990원 이벤트] 일비아 뽑아쓰는 올인원 세제 수세미(옵션선택=올인원 세제 수세미 1개)":"수세미","[첫구매 990원] 일비아 뽑아쓰는 올인원 세제 수세미(옵션선택=올인원 세제 수세미 1개)":"수세미","⭐1+1⭐ 일비아 올인원 세제 수세미(옵션선택=[5+5] 일비아 올인원 세제 수세미 10개)":"수세미 10개","일비아 뽑아쓰는 올인원 세제 일체형 수세미(옵션선택=[5+5] 일비아 올인원 세제 수세미 10개)":"수세미 10개","⭐1+1⭐ 일비아 올인원 세제 수세미(옵션선택=[1+1] 일비아 올인원 세제 수세미 2개)":"수세미 2개","일비아 뽑아쓰는 올인원 세제 일체형 수세미(옵션선택=[1+1] 일비아 올인원 세제 수세미 2개)":"수세미 2개","다용도 올인원 세트(옵션선택=[수퍼얼리버드 5%] 올인원세제수세미 36매 x 5개+다목적세정제 500ml x 3개)":"수세미 5개+다목적세정제 3개","다용도 올인원 세트(옵션선택=올인원세제수세미 36매 x 5개+다목적세정제 500ml x 3개)":"수세미 5개+다목적세정제 3개","⭐1+1⭐ 일비아 올인원 세제 수세미(옵션선택=[3+3] 일비아 올인원 세제 수세미 6개)":"수세미 6개","일비아 뽑아쓰는 올인원 세제 일체형 수세미(옵션선택=[3+3] 일비아 올인원 세제 수세미 6개)":"수세미 6개","⭐1+1⭐ 일비아 올인원 세제 수세미(옵션선택=[4+4] 일비아 올인원 세제 수세미 8개)":"수세미 8개","일비아 슈즈렉 신발장 정리(색상=화이트)":"슈즈렉","일비아 1종 올인원 타블릿 식기세척기세제 60정(옵션선택=식기세척기 세제 1개 (60정/2개월분))":"식기세척기 세제","일비아 안전성분 올인원 타블릿 식기세척기세제 60정(옵션선택=식기세척기 세제 1개 (60정/2개월분))":"식기세척기 세제","무료 샘플 키트 6정 + 감사카드":"식세기샘플","🩵무료 샘플 키트 6정🩵 + 감사카드":"식세기샘플","식세기🩵무료 샘플 키트 6정🩵 + 감사카드":"식세기샘플","식세기무료 샘플 키트 6정 + 감사카드":"식세기샘플","식세기 무료 샘플 키트 6정 + 감사카드":"식세기 샘플키트","[5월 프로모션 사은품] 얼룩제거제 100ml":"얼룩제거제 100","일비아 티트리 딥클린 얼룩제거제 휴대용 100ml(구성 선택하기=얼룩제거제 100ml 1개  8900원)":"얼룩제거제 100","일비아 티트리 딥클린 얼룩제거제 휴대용 100ml(선택=얼룩제거제 100ml 2개)":"얼룩제거제 100 2개","[첫구매 990원 이벤트] 일비아 티트리 딥클린 얼룩제거제 휴대용 100ml(선택=얼룩제거제 100ml 2개)":"얼룩제거제 100 2개","일비아 티트리 딥클린 얼룩제거제 350ml(얼룩제거제 구성 선택하기=얼룩제거제 100ml 1+1)":"얼룩제거제 100 2개","일비아 티트리 딥클린 얼룩제거제 휴대용 100ml(구성 선택하기=얼룩제거제 100ml 3개  25500원 (1개당 8500원))":"얼룩제거제 100 3개","일비아 티트리 딥클린 얼룩제거제 350ml(얼룩제거제 구성 선택하기=얼룩제거제 350ml)":"얼룩제거제 350","(스타일씨 리뷰 체험단) 일비아 티트리 딥클린 얼룩제거제 350ml(옵션선택=얼룩제거제 350ml 1개)":"얼룩제거제 350","일비아 티트리 딥클린 얼룩제거제 350ml(얼룩제거제 구성 선택하기=얼룩제거제 350ml 1개)":"얼룩제거제 350","일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=얼룩제거제 350ml 1개  12900원)":"얼룩제거제 350 1개 + 100 1개","일비아 티트리 딥클린 얼룩제거제 350ml(얼룩제거제 구성 선택하기=얼룩제거제 350ml 1+1)":"얼룩제거제 350 2개","일비아 티트리 딥클린 얼룩제거제 350ml(얼룩제거제 구성 선택하기=얼룩제거제 350ml 2개)":"얼룩제거제 350 2개","일비아 티트리 딥클린 얼룩제거제 350ml(얼룩제거제 구성 선택하기=얼룩제거제 350ml 3개)":"얼룩제거제 350 3개","일비아 티트리 딥클린 얼룩제거제 350ml(얼룩제거제 구성 선택하기=★BEST★ 얼룩제거제 350ml 3+1(1개 증정))":"얼룩제거제 350 4개","일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=얼룩제거제 350ml 4개  50000원 카톡 쿠폰 적용시 (1개당 11750원))":"얼룩제거제 350 4개","⭐ 체험단이벤트 ⭐ 얼룩제거제 350ml+100ml(옵션선택=얼룩제거제 350ml 1개 + 100ml 1개)":"얼룩제거제 350+100","일비아 티트리 딥클린 얼룩제거제 350ml(선택=얼룩제거제 350ml 1개+100ml 1개)":"얼룩제거제 350+100","일비아 티트리 딥클린 얼룩제거제 휴대용 100ml(선택=얼룩제거제  350ml 1개+100ml 1개)":"얼룩제거제 350+100","[첫구매 990원 이벤트] 일비아 티트리 딥클린 얼룩제거제 휴대용 100ml(선택=얼룩제거제  350ml 1개+100ml 1개)":"얼룩제거제 350+100","일비아 티트리 딥클린 얼룩제거제 350ml(얼룩제거제 구성 선택하기=★BEST★ 얼룩제거제 세트(350ml+100ml))":"얼룩제거제 350+100","[1월 프로모션] 일비아 베스트 제품 기획전(옵션선택=10 티트리 딥클린 얼룩제거제 세트(350ml+100ml) 1개, 건조기시트 향 선택 / 추가금액=선택안함)":"얼룩제거제 350+100","[2월 프로모션] 일비아 베스트제품 1+1 (무료배송)(옵션선택=05 티트리 딥클린 얼룩제거제 세트(350ml+100ml) 1개, 건조기시트 향 선택 / 추가금액=선택안함)":"얼룩제거제 350+100","일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=얼룩제거제 350ml 2개  25500원 (1개당 12750원))":"얼룩제거제 350 2개","일비아 티트리 딥클린 얼룩제거제 350ml(선택=얼룩제거제 100ml 1개)":"얼룩제거제 100","일비아 티트리 딥클린 얼룩제거제 휴대용 100ml(선택=얼룩제거제 100ml 1개)":"얼룩제거제 100","[첫구매 990원 이벤트] 일비아 티트리 딥클린 얼룩제거제 휴대용 100ml(선택=얼룩제거제 100ml 1개)":"얼룩제거제 100","일비아 티트리 딥클린 얼룩제거제 350ml(얼룩제거제 구성 선택하기=얼룩제거제 100ml)":"얼룩제거제 100","(증정) 일비아 티트리 딥클린 얼룩제거제 휴대용 100ml(선택=얼룩제거제 100ml 1개)":"얼룩제거제 100","일비아 티트리 딥클린 얼룩제거제 350ml(선택=얼룩제거제 350ml 1개)":"얼룩제거제350","일비아 티트리 딥클린 얼룩제거제 350ml(선택=얼룩제거제 350ml 2개)":"얼룩제거제 350 2개","[첫구매 990원] 일비아 이염방지시트 30매(옵션선택=이염방지시트 1개 (30매))":"이염방지시트","일비아 이염방지시트 30매(옵션선택=이염방지시트 1개 (30매/2개월분))":"이염방지시트","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=01.프리미엄 세탁 풀코스, 건조기시트 향 선택=코튼블루1개+베이비크림1개)":"캡슐세제2개+건조기시트2개+이염방지시트2개+얼룩제거제100","[1+1] 일비아 이염방지시트 30매+30매(옵션선택=[1+1] 이염방지시트 2개 (60매/4개월분))":"이염방지시트 2개","[1월 프로모션] 일비아 베스트 제품 기획전(옵션선택=08 이염방지시트 30매입 2개(1+1), 건조기시트 향 선택 / 추가금액=선택안함)":"이염방지시트 2개","[2월 프로모션] 일비아 베스트제품 1+1 (무료배송)(옵션선택=04 이염방지시트 30매입 2개(1+1), 건조기시트 향 선택 / 추가금액=선택안함)":"이염방지시트 2개","[1+1] 일비아 이염방지시트 30매+30매(구성 선택하기=[1+1] 이염방지시트 2개(60매)  16900원 (1개당 8450원))":"이염방지시트 2개","[5월 프로모션] 일비아 얼리 썸머 프로모션 9,900원 특가(품목 선택하기=이염 방지 시트 1+1 (60매)  9900원 (얼리썸머 67% 할인))":"이염방지시트 2개","[1월 프로모션] 일비아 베스트 제품 기획전(옵션선택=09 이염방지시트 30매입 4개(2+2), 건조기시트 향 선택 / 추가금액=선택안함)":"이염방지시트 4개","💙인스타체험단💙일비아 초고농축 세탁 캡슐세제 버블코튼향 30개입(선택=일비아 캡슐세제 버블코튼 1개)":"캡슐세제","일비아 초고농축 세탁 캡슐세제 버블코튼향 30개입(선택=일비아 캡슐세제 버블코튼 1개)":"캡슐세제","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 단품 1개)":"캡슐세제","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 1개(30개입))":"캡슐세제","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 1개)":"캡슐세제","💙리뷰체험단💙일비아 초고농축 세탁 캡슐세제 버블코튼향 30개입(선택=일비아 캡슐세제 버블코튼 1개)":"캡슐세제","시크릿 특가 일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 1개)":"캡슐세제","[5월 프로모션] 일비아 얼리 썸머 프로모션 9,900원 특가(품목 선택하기=버블 코튼 캡슐 세제 30개입  9900원 (얼리썸머 60% 할인))":"캡슐세제","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=02.세탁 필수품, 건조기시트 향 선택=베이비크림 1개)":"캡슐세제2개+건조기시트1개+이염방지시트1개+얼룩제거제100","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 1개  14900원)":"캡슐세제","일비아 초고농축 세탁 캡슐세제 버블코튼향 30개입(선택=일비아 캡슐세제 버블코튼 2개)":"캡슐세제 2개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 선물패키지(단품 2개 구성))":"캡슐세제 2개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 2개(60개입))":"캡슐세제 2개","베이직 캡슐세제 세탁 집중 세트(옵션 선택=버블코튼 캡슐세제 1+1개 증정(60정))":"캡슐세제 2개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=💙인기구성💙버블코튼 캡슐세제 2개)":"캡슐세제 2개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 2개)":"캡슐세제 2개","[1월 프로모션] 일비아 베스트 제품 기획전(옵션선택=01 버블 코튼 캡슐 세제 2개(1+1), 건조기시트 향 선택 / 추가금액=선택안함)":"캡슐세제 2개","[2월 프로모션] 일비아 베스트제품 1+1 (무료배송)(옵션선택=01 버블 코튼 캡슐 세제 2개(1+1), 건조기시트 향 선택 / 추가금액=선택안함)":"캡슐세제 2개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 2개  28900원 (1개당 14450원))":"캡슐세제 2개","베이직 세탁세제 풀코스 세트(옵션선택=[수퍼얼리버드 5%] 캡슐세제 30개입 x 2개+건조기시트  40매 x 2개+얼룩제거제 350ml x 1개+얼룩제거제 100ml x 1개, 건조기시트 향 선택=코튼블루 1개+베이비크림 1개)":"캡슐세제 2개+건조기시트 2개+얼룩제거제 350+100","베이직 세탁세제 풀코스 세트(옵션선택=[수퍼얼리버드 5%] 캡슐세제 30개입 x 2개+건조기시트  40매 x 2개+얼룩제거제 350ml x 1개+얼룩제거제 100ml x 1개, 건조기시트 향 선택=코튼블루 2개)":"캡슐세제 2개+건조기시트 2개+얼룩제거제 350+100","베이직 세탁세제 풀코스 세트(옵션선택=캡슐세제 30개입 x 2개+건조기시트  40매 x 2개+얼룩제거제 350ml x 1개+얼룩제거제 100ml x 1개, 건조기시트 향 선택=코튼블루 1개+베이비크림 1개)":"캡슐세제 2개+건조기시트 2개+얼룩제거제 350+100","베이직 세탁세제 풀코스 세트(옵션선택=[수퍼얼리버드 5%] 캡슐세제 30개입 x 2개+건조기시트  40매 x 2개+얼룩제거제 350ml x 1개+얼룩제거제 100ml x 1개, 건조기시트 향 선택=베이비크림 2개)":"캡슐세제 2개+건조기시트 2개+얼룩제거제 350+100","베이직 세탁세제 풀코스 세트(옵션선택=캡슐세제 30개입 x 2개+건조기시트  40매 x 2개+얼룩제거제 350ml x 1개+얼룩제거제 100ml x 1개, 건조기시트 향 선택=코튼블루 2개)":"캡슐세제 2개+건조기시트 2개+얼룩제거제 350+100","옷감 관리 집중 세트(옵션선택=[수퍼얼리버드 5%]캡슐세제 30개입 x 2개+이염방지시트 30매 x 2개+건조기시트 40매 x 1개, 건조기시트 향 선택=코튼블루 1개)":"캡슐세제 2개+이염방지시트 2개+건조기시트","옷감 관리 집중 세트(옵션선택=캡슐세제 30개입 x 2개+이염방지시트 30매 x 2개+건조기시트 40매 x 1개, 건조기시트 향 선택=코튼블루 1개)":"캡슐세제 2개+이염방지시트 2개+건조기시트","얼룩 제거 집중 세트(옵션선택=[수퍼얼리버드 5%]캡슐세제 30개입 x 2개+이염방지시트 30매 x 2개+얼룩제거제 350ml 1개+얼룩제거제 100ml 1개)":"캡슐세제 2개+이염방지시트 2개+얼룩제거제 350+100","얼룩 제거 집중 세트(옵션선택=캡슐세제 30개입 x 2개+이염방지시트 30매 x 2개+얼룩제거제 350ml 1개+얼룩제거제 100ml 1개)":"캡슐세제 2개+이염방지시트 2개+얼룩제거제 350+100","일비아 초고농축 세탁 캡슐세제 버블코튼향 30개입(선택=일비아 캡슐세제 버블코튼 3개)":"캡슐세제 3개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 선물패키지(단품 2개) + 단품 1개 / 총 단품 3개 구성)":"캡슐세제 3개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 3개(90개입))":"캡슐세제 3개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=💙최다판매💙버블코튼 캡슐세제 3개)":"캡슐세제 3개","베이직 캡슐세제 세탁 집중 세트(옵션 선택=버블코튼 캡슐세제 2+1개 증정(90정))":"캡슐세제 3개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=💙인기구성💙버블코튼 캡슐세제 3개)":"캡슐세제 3개","일비아 초고농축 세탁 캡슐세제 버블코튼향 30개입(선택=일비아 캡슐세제 버블코튼 4개)":"캡슐세제 4개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 선물패키지(단품 2개)+ 선물패키지(단품 2개) / 총 단품 4개 구성)":"캡슐세제 4개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 4개)":"캡슐세제 4개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=💙최대할인💙버블코튼 캡슐세제 4개)":"캡슐세제 4개","[1월 프로모션] 일비아 베스트 제품 기획전(옵션선택=02 버블 코튼 캡슐 세제 4개(2+2), 건조기시트 향 선택 / 추가금액=선택안함)":"캡슐세제 4개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 4개  53900원 카톡 쿠폰 적용시 (1개당 12725원))":"캡슐세제 4개","베이직 캡슐세제 세탁 집중 세트(옵션 선택=버블코튼 캡슐세제 3+1+1개 증정(150정) 🩵최다판매🩵)":"캡슐세제 5개","베이직 세탁세제 향기 집중 세트(옵션선택=캡슐세제 30개입 x 1개+건조기시트  40매 x 1개, 건조기시트 향 선택=베이비크림 1개)":"캡슐세제+건조기시트","베이직 세탁세제 향기 집중 세트(옵션선택=캡슐세제 30개입 x 1개+건조기시트  40매 x 1개, 건조기시트 향 선택=코튼블루 1개)":"캡슐세제+건조기시트","베이직 세탁세제 얼룩 집중 세트(옵션선택=캡슐세제 30개입 x 1개+이염방지시트 30매 x 1개)":"캡슐세제+이염방지시트","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=02.세탁 필수품, 건조기시트 향 선택=코튼블루 1개)":"캡슐세제2개+건조기시트1개+이염방지시트1개+얼룩제거제100","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=03.베이직 세탁 향기, 건조기시트 향 선택=베이비크림 2개)":"캡슐세제1개+건조기시트1개","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=03.베이직 세탁 향기, 건조기시트 향 선택=코튼블루 2개)":"캡슐세제1개+건조기시트1개","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=03.베이직 세탁 향기, 건조기시트 향 선택=코튼블루1개+베이비크림1개)":"캡슐세제1개+건조기시트1개","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=04.베이직 식세기 세트, 건조기시트 향 선택=_)":"하트식세기2개+틴케이스+집게+수세미","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=05.단품 캡슐세제 1개, 건조기시트 향 선택=_)":"캡슐세제","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=06.단품 하트식기세척기 세제 1개+샘플키트, 건조기시트 향 선택=_)":"하트식세기+샘플","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=07.단품 건조기시트1개+샘플키트, 건조기시트 향 선택=베이비크림 1개)":"건조기시트+샘플","일비아 캡슐 커피 보관함(색상=아이보리 화이트)":"캡슐커피보관함","일비아 캡슐 커피 보관함(색상=올리브 그린)":"캡슐커피보관함","일비아 투명 텀블러 보관함(선택=1칸)":"텀블러_1칸","일비아 투명 텀블러 보관함(선택=2칸)":"텀블러_2칸","일비아 투명 텀블러 보관함(선택=3칸)":"텀블러_3칸","일비아 프리미엄 투명 32구 2단 계란 트레이":"프리미엄계란보관함","⭐ 체험단이벤트 ⭐ 하트 중성 세탁세제 60정(옵션선택=하트 중성 세탁세제 60정)":"하트세탁","일비아 하트 아기 중성 타블릿 세탁 세제 60정(옵션선택=하트 세탁 세제 1개 (60정/2개월분))":"하트세탁세제","일비아 하트 세탁 세제 스페셜 패키지(옵션선택=하트 세탁 세제 스페셜 패키지)":"하트세탁패키지","일비아 하트 식기세척기 세제 스페셜 패키지(옵션선택=하트 식기세척기 세제 1개(60정))":"하트식세기","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 1개(60정))":"하트식세기","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 1개(60정))":"하트식세기","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(옵션선택=하트 식기세척기 세제 1개(60정)":"하트식세기","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(옵션선택=하트 식기세척기 세제 1개(60정))":"하트식세기","일비아 하트 식기세척기 세제 패키지(하트 식세기 세제 선물세트=하트 식기세척기 세제 1개(60정))":"하트식세기","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 1개(60정)  12500원)":"하트식세기","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 1개(60정)  12500원)":"하트식세기","일비아 하트 식기세척기 세제 패키지(구성 선택하기=하트 식기세척기 세제 1개(60정)  13900원)":"하트식세기","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 1개(60정)  13900원)":"하트식세기","[1월 프로모션] 일비아 베스트 제품 기획전(옵션선택=03 하트 식기세척기 세제 60정 2개(1+1), 건조기시트 향 선택 / 추가금액=선택안함)":"하트식세기 2개","[2월 프로모션] 일비아 베스트제품 1+1 (무료배송)(옵션선택=02 하트 식기세척기 세제 60정 2개(1+1), 건조기시트 향 선택 / 추가금액=선택안함)":"하트식세기 2개","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(옵션선택=하트 식기세척기 세제 2개(120정))":"하트식세기 2개","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 2개(120정))":"하트식세기 2개","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 2개(120정))":"하트식세기 2개","일비아 하트 식기세척기 세제 패키지(하트 식세기 세제 선물세트=하트 식기세척기 세제 2개(120정))":"하트식세기 2개","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 2개(120정)  24200원 (1개당 12100원))":"하트식세기 2개","🚨시크릿 특가🚨 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 2개(120정)  24200원 (1개당 12100원))":"하트식세기 2개","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 2개(120정)  24200원 (1개당 12100원))":"하트식세기 2개","시크릿 특가 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 2개(120정)  24200원 (1개당 12100원))":"하트식세기 2개","일비아 하트 식기세척기 세제 패키지(구성 선택하기=하트 식기세척기 세제 2개(120정)  26500원 (1개당 13250원))":"하트식세기 2개","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 2개(120정)  26500원 (1개당 13250원))":"하트식세기 2개","식세기있는 주방 올인원 관리 세트(옵션선택=하트 식기세척기 세제 60정 x 2개+다목적세정제 500ml x 2개+올인원세제수세미 36매 x 3개)":"하트식세기 2개+다목적세정제 2개+수세미 3개","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 2개(120정) +샘플키트+CD)":"하트식세기 2개+샘플","일비아 하트 식기세척기 세제 스페셜 패키지(하트 식기세척기 세제 선물세트=하트 식기세척기 세제 단품 2개 + 샘플키트(6정))":"하트식세기 2개+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 2개(120정) +샘플키트+감사카드)":"하트식세기 2개+샘플","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 2개(120정) +샘플키트+CD)":"하트식세기 2개+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(옵션선택=하트 식기세척기 세제 2개(120정) +샘플키트+감사카드)":"하트식세기 2개+샘플","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 2개(120정) +샘플키트+CD)":"하트식세기 2개+샘플","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 2개(120정) +샘플키트+감사카드)":"하트식세기 2개+샘플","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 2개(120정) +샘플키트+감사카드)":"하트식세기 2개+샘플","일비아 하트 식기세척기 세제 패키지(하트 식세기 세제 선물세트=하트 식기세척기 세제 단품 2개 + 샘플키트(6정))":"하트식세기 2개+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 3개(180정))":"하트식세기 3개","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(옵션선택=하트 식기세척기 세제 3개(180정)":"하트식세기 3개","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 3개(180정))":"하트식세기 3개","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 3개(180정))":"하트식세기 3개","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(옵션선택=하트 식기세척기 세제 3개(180정))":"하트식세기 3개","일비아 하트 식기세척기 세제 패키지(하트 식세기 세제 선물세트=하트 식기세척기 세제 3개(180정))":"하트식세기 3개","일비아 하트 식기세척기 세제 패키지(구성 선택하기=하트 식기세척기 세제 3개(180정)  37900원  카톡 쿠폰 적용시 (1개당 11700원))":"하트식세기 3개","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 3개(180정)  37900원  카톡 쿠폰 적용시 (1개당 11700원))":"하트식세기 3개","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 3개(180정) +샘플키트+CD)":"하트식세기 3개+샘플","일비아 하트 식기세척기 세제 스페셜 패키지(하트 식기세척기 세제 선물세트=하트 식기세척기 세제 단품 3개 + 샘플키트(6정))":"하트식세기 3개+샘플","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 3개(180정) +샘플키트+CD)":"하트식세기 3개+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 3개(180정) +샘플키트+감사카드)":"하트식세기 3개+샘플","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 3개(180정) +샘플키트+감사카드)":"하트식세기 3개+샘플","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 3개(180정) +샘플키트+CD)":"하트식세기 3개+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(옵션선택=하트 식기세척기 세제 3개(180정) +샘플키트+감사카드)":"하트식세기 3개+샘플","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 3개(180정) +샘플키트+감사카드)":"하트식세기 3개+샘플","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 3개(180정) + 하트 집게 + 하트 틴케이스)":"하트식세기 3개+틴케이스+집게","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 3개(180정) + 하트 집게 + 하트 틴케이스)":"하트식세기 3개+틴케이스+집게","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 3개(180정) + 집게 + 틴케이스  38900원 (카톡 쿠폰 적용 가능))":"하트식세기 3개+틴케이스+집게","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 3개(180정) + 집게 + 틴케이스  38900원 (카톡 쿠폰 적용 가능))":"하트식세기 3개+틴케이스+집게","[1월 프로모션] 일비아 베스트 제품 기획전(옵션선택=04 하트 식기세척기 세제 60정 4개(2+2), 건조기시트 향 선택 / 추가금액=선택안함)":"하트식세기 4개","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(옵션선택=하트 식기세척기 세제 4개(240정))":"하트식세기 4개","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 4개(240정))":"하트식세기 4개","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 4개(240정))":"하트식세기 4개","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 4개(240정)  42600원  카톡 쿠폰 적용시 (1개당 9900원))":"하트식세기 4개","🚨시크릿 특가🚨 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 4개(240정)  42600원  카톡 쿠폰 적용시 (1개당 9900원))":"하트식세기 4개","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 4개(240정)  42600원  카톡 쿠폰 적용시 (1개당 9900원))":"하트식세기 4개","시크릿 특가 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 4개(240정)  42600원  카톡 쿠폰 적용시 (1개당 9900원))":"하트식세기 4개","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 4개(240정)  48900원  카톡 쿠폰 적용시 (1개당 11475원))":"하트식세기 4개","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 4개(240정) +샘플키트+CD)":"하트식세기 4개+샘플","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 4개(240정) +샘플키트+CD)":"하트식세기 4개+샘플","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 4개(240정) +샘플키트+감사카드)":"하트식세기 4개+샘플","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 4개(240정) +샘플키트+감사카드)":"하트식세기 4개+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(옵션선택=하트 식기세척기 세제 4개(240정)+샘플키트+감사카드)":"하트식세기 4개+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=1개(60정) + 샘플키트 + CD)":"하트식세기+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=1개(60정) + 샘플키트)":"하트식세기+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=1개(60정) + 샘플키트 + CD)":"하트식세기+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=1개(60정) + 샘플키트)":"하트식세기+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=1개(60정) + 샘플 키트(6정) 증정 + CD)":"하트식세기+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=1개(60정) + 샘플 키트(6정) 증정)":"하트식세기+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=1개(60정) + 샘플 키트(6정) 증정 + CD)":"하트식세기+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 1개(60정)+샘플키트+CD)":"하트식세기+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=1개(60정) + 샘플키트 + 감사카드)":"하트식세기+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=1개(60정) + 샘플키트 + 감사카드)":"하트식세기+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=1개(60정) + 샘플 키트(6정) 증정 + 감사카드)":"하트식세기+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=1개(60정) + 샘플 키트(6정) 증정 + 감사카드)":"하트식세기+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 1개(60정)+샘플키트+감사카드)":"하트식세기+샘플","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 1개(60정)+샘플키트+CD)":"하트식세기+샘플","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 1개(60정)+샘플키트+CD)":"하트식세기+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(옵션선택=하트 식기세척기 세제 1개(60정)+샘플키트+감사카드)":"하트식세기+샘플","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 1개(60정)+샘플키트+감사카드)":"하트식세기+샘플","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트 식기세척기 세제 1개(60정)+샘플키트+감사카드)":"하트식세기+샘플","일비아 하트 식기세척기 세제 패키지(하트 식세기 세제 선물세트=하트 식기세척기 세제 단품 1개+샘플키트(6정))":"하트식세기+샘플","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=07.단품 건조기시트1개+샘플키트, 건조기시트 향 선택=코튼블루 1개)":"건조기시트+샘플","베이직 식세기있는 주방 관리 세트(옵션선택=하트 식기세척기 세제 60정 x 1개+올인원세제수세미 36매 x 2개+하트틴케이스 1개+전용 집게 1개)":"하트식세기+수세미 2개+틴케이스+집게","베이직 식기세척기 세제&보관 세트(옵션선택=하트 식기세척기 세제 60정 x 1개+하트틴케이스 1개+전용 집게 1개)":"하트식세기+틴케이스+집게","밍융망마켓 일비아  공동구매(선택=하트 식기세척기 세제 2개)":"하트식세기2개","💙밍융망마켓💙 일비아  공동구매(선택=하트 식기세척기 세제 2개)":"하트식세기2개","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=2개(120정) + 샘플키트(6정) 증정 + CD)":"하트식세기2개+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=2개(120정) + 샘플키트(6정) 증정)":"하트식세기2개+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=2개(120정) + 샘플키트 + CD)":"하트식세기2개+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=2개(120정) + 샘플키트 + CD)":"하트식세기2개+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=2개(120정) + 샘플키트(6정) 증정 + 감사카드)":"하트식세기2개+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=2개(120정) + 샘플키트 + 감사카드)":"하트식세기2개+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=2개(120정) + 샘플키트 + 감사카드)":"하트식세기2개+샘플","[쏘핑네흰집X일비아] 일비아 공동구매(구성선택=08.단품 이염방지시트 1개, 건조기시트 향 선택=_)":"이염방지시트","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정) + 다목적세정제 + 샘플키트 + CD)":"하트식세기3개+다목적+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정) + 다목적세정제 + 샘플키트)":"하트식세기3개+다목적+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정) + 다목적세정제 + 샘플키트 + CD)":"하트식세기3개+다목적+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정) + 다목적세정제 + 샘플키트)":"하트식세기3개+다목적+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정) + 다목적세정제 + 샘플키트 + 감사카드)":"하트식세기3개+다목적+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정) + 다목적세정제 + 샘플키트 + 감사카드)":"하트식세기3개+다목적+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정) + 샘플키트(6정) 증정 + CD)":"하트식세기3개+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정)  + 샘플키트 + CD)":"하트식세기3개+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정)  + 샘플키트 + CD)":"하트식세기3개+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정) + 샘플키트(6정) 증정 + CD)":"하트식세기3개+샘플","💙EVENT💙 일비아 하트 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정)  + 샘플키트 + CD)":"하트식세기3개+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정) + 샘플키트(6정) 증정 + 감사카드)":"하트식세기3개+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정)  + 샘플키트 + 감사카드)":"하트식세기3개+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정)  + 샘플키트 + 감사카드)":"하트식세기3개+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정) + 샘플키트(6정) 증정 + 감사카드)":"하트식세기3개+샘플","💙EVENT💙 일비아 하트 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=3개(180정)  + 샘플키트 + 감사카드)":"하트식세기3개+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=4개(240정) + 하트 틴케이스 + 샘플키트 + CD)":"하트식세기4개+틴케이스+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=4개(180정) + 하트 틴케이스 증정 + 샘플키트(6정) 증정 + CD)":"하트식세기4개+틴케이스+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=4개(240정) + 하트 틴케이스 + 샘플키트 + CD)":"하트식세기4개+틴케이스+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=4개(240정) + 하트 틴케이스 증정 + 샘플키트(6정) 증정 + CD)":"하트식세기4개+틴케이스+샘플","💙EVENT💙 일비아 하트 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=4개(240정) + 하트 틴케이스 + 샘플키트 + CD)":"하트식세기4개+틴케이스+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=4개(240정) + 하트 틴케이스 + 샘플키트 + 감사카드)":"하트식세기4개+틴케이스+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=4개(180정) + 하트 틴케이스 증정 + 샘플키트(6정) 증정 + 감사카드)":"하트식세기4개+틴케이스+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=4개(240정) + 하트 틴케이스 + 샘플키트 + 감사카드)":"하트식세기4개+틴케이스+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=4개(240정) + 하트 틴케이스 증정 + 샘플키트(6정) 증정 + 감사카드)":"하트식세기4개+틴케이스+샘플","💙EVENT💙 일비아 하트 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=4개(240정) + 하트 틴케이스 + 샘플키트 + 감사카드)":"하트식세기4개+틴케이스+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=5개(300정) + 샘플키트(6정) 증정 + CD)":"하트식세기5개+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=5개(300정) + 샘플키트(6정) 증정 + 감사카드)":"하트식세기5개+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=5개(300정) + 샘플키트(6정) 증정 + 하트틴케이스 증정 + CD)":"하트식세기5개+샘플+틴케이스","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=5개(300정) + 샘플키트(6정) 증정 + 하트틴케이스 증정 + 감사카드)":"하트식세기5개+샘플+틴케이스","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=6개(360정)  + 다목적세정제 + 샘플키트)":"하트식세기6개+다목적+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=6개(360정)  + 다목적세정제 + 샘플키트 + CD)":"하트식세기6개+다목적+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=6개(360정)  + 다목적세정제 + 샘플키트)":"하트식세기6개+다목적+샘플","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=6개(360정) + 다목적세정제 / 샘플키트(6정) 증정)":"하트식세기6개+다목적+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=6개(360정)  + 다목적세정제 + 샘플키트 + CD)":"하트식세기6개+다목적+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=6개(360정)  + 다목적세정제 + 샘플키트 + 감사카드)":"하트식세기6개+다목적+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=6개(360정)  + 다목적세정제 + 샘플키트 + 감사카드)":"하트식세기6개+다목적+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=8개(480정)  + 다목적세정제 + 샘플키트 + CD)":"하트식세기8개+다목적+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=8개(480정)  + 다목적세정제 + 샘플키트)":"하트식세기8개+다목적+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=8개(480정)  + 다목적세정제 + 샘플키트 + CD)":"하트식세기8개+다목적+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=8개(480정)  + 다목적세정제 + 샘플키트)":"하트식세기8개+다목적+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=8개(480정)  + 다목적세정제 + 샘플키트 + 감사카드)":"하트식세기8개+다목적+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=8개(480정)  + 다목적세정제 + 샘플키트 + 감사카드)":"하트식세기8개+다목적+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=8개(480정)  + 샘플키트 + CD)":"하트식세기8개+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=8개(480정)  + 샘플키트 + CD)":"하트식세기8개+샘플","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=8개(480정)  + 샘플키트 + 감사카드)":"하트식세기8개+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=8개(480정)  + 샘플키트 + 감사카드)":"하트식세기8개+샘플","[1월 프로모션] 일비아 베스트 제품 기획전(옵션선택=05 하트 식기세척기 세제 선물세트 1개, 건조기시트 향 선택 / 추가금액=선택안함)":"하트식세기패키지","일비아 하트 식기세척기 세제 스페셜 패키지(옵션선택=하트 식기세척기 세제 스페셜 패키지)":"하트식세기패키지","💙밍융망마켓💙 일비아  공동구매(선택=하트 식기세척기 세제 1개)":"하트식세기패키지","💙밍융망마켓💙 일비아  공동구매(선택=하트 식기세척기 세제 스페셜 패키지)":"하트식세기패키지","밍융망마켓 일비아  공동구매(선택=하트 식기세척기 세제 스페셜 패키지)":"하트식세기패키지","일비아 하트 식기세척기 세제 스페셜 패키지(하트 식기세척기 세제 선물세트=하트식기세척기세제 선물세트)":"하트식세기패키지","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트식기세척기세제 선물세트(3월10일 부터 순차 출고 예정))":"하트식세기패키지","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트식기세척기세제 선물세트(3월10일 부터 순차 출고 예정))":"하트식세기패키지","일비아 하트 식기세척기 세제 패키지(하트 식세기 세제 선물세트=하트식기세척기세제 선물세트(3월10일 부터 순차 출고 예정))":"하트식세기패키지","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(옵션선택=하트 식기세척기 세제 선물세트(3월10일 부터 순차 발송 예정))":"하트식세기패키지","일비아 하트 식기세척기 세제 패키지(하트 식세기 세제 선물세트=하트식기세척기세제 선물세트)":"하트식세기패키지","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트식기세척기세제 선물세트)":"하트식세기패키지","일비아 하트 식기세척기 세제 패키지(하트 식세기 세제 선물세트=하트 식기세척기 세제 선물세트)":"하트식세기패키지","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트식기세척기세제 선물세트)":"하트식세기패키지","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(옵션선택=하트 식기세척기 세제 선물세트)":"하트식세기패키지","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 선물세트  38500원 (카톡 쿠폰 적용 가능))":"하트식세기패키지","🚨시크릿 특가🚨 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 선물세트  38500원 (카톡 쿠폰 적용 가능))":"하트식세기패키지","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 선물세트  38500원 (카톡 쿠폰 적용 가능))":"하트식세기패키지","시크릿 특가 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 선물세트  38500원 (카톡 쿠폰 적용 가능))":"하트식세기패키지","일비아 하트 식기세척기 세제 패키지(구성 선택하기=하트 식기세척기 세제 선물세트  42900원 (카톡 쿠폰 적용 가능))":"하트식세기패키지","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트식기세척기세제 선물세트+샘플키트+CD)":"하트식세기패키지+샘플","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트식기세척기세제 선물세트+샘플키트+CD)":"하트식세기패키지+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(옵션선택=하트식기세척기세제 선물세트+샘플키트+감사카드)":"하트식세기패키지+샘플","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트식기세척기세제 선물세트+샘플키트+감사카드)":"하트식세기패키지+샘플","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트식기세척기세제 선물세트+샘플키트+감사카드)":"하트식세기패키지+샘플","일비아 하트 식기세척기 세제 스페셜 패키지(하트 식기세척기 세제 선물세트=하트 식기세척기 세제 단품 1개+샘플키트(6정))":"하트식세기패키지+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트식기세척기세제 선물세트+샘플키트+CD)":"하트식세기패키지+샘플","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(선택하기=하트식기세척기세제 선물세트+샘플키트+감사카드)":"하트식세기패키지+샘플","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=하트 집게)":"하트집게","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=하트 집게)":"하트집게","일비아 타블릿 세제 하트 집게":"하트집게","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=하트 집게)":"하트집게","일비아 하트 식기세척기 세제 스페셜 패키지(옵션선택=하트 타블렛 집게)":"하트집게","[첫구매 990원 이벤트] 일비아 타블릿 세제 하트 집게":"하트집게","[첫구매 990원] 일비아 타블릿 세제 하트 집게":"하트집게","EVENT 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=하트 틴케이스)":"하트틴케이스","💙EVENT💙 일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=하트 틴케이스)":"하트틴케이스","일비아 타블릿 세제 하트 틴케이스":"하트 틴케이스","일비아 하트 1종 올인원 타블릿 식기세척기세제 60정(일비아 하트 식기세척기 세제=하트 틴케이스)":"하트틴케이스","일비아 하트 식기세척기 세제 스페셜 패키지(옵션선택=하트 틴케이스)":"하트틴케이스","[첫구매 990원 이벤트] 일비아 타블릿 세제 하트 틴케이스":"하트틴케이스","[첫구매 990원 이벤트] 일비아 타블릿 세제 하트 틴케이스(3월 10일 부터 순차 출고 예정)":"하트틴케이스","일비아 타블릿 세제 하트 틴케이스(3월 10일 부터 순차 출고 예정)":"하트틴케이스","[첫구매 990원] 일비아 타블릿 세제 하트 틴케이스":"하트 틴케이스","일비아 휴대용 화장품 파우치(색상=블랙)":"화장품파우치","일비아 휴대용 화장품 파우치(색상=브라운)":"화장품파우치","일비아 휴대용 화장품 파우치(색상=아이보리)":"화장품파우치","일비아 휴대용 화장품 파우치(색상=핑크)":"화장품파우치","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(수량선택=건조기시트 1개(40매), 향선택=코튼블루)":"건조기시트","일비아 건조기 드라이 퍼퓸 시트 바이올렛머스크 40매(구성 선택하기=건조기시트 1개(40매) 바이올렛 머스크  13900원)":"건조기시트","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 3개  42000원 카톡 쿠폰 적용시 (1개당 13000원))":"캡슐세제 3개","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(구성 선택하기=건조기시트 1개(40매) 베이비 크림  13900원)":"건조기시트","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(구성 선택하기=건조기시트 1개(40매) 코튼 블루  13900원)":"건조기시트","[런칭 프로모션 1+1] 일비아 건조기 드라이 퍼퓸 시트 바이올렛머스크 40매(구성 선택하기=[1+1] 건조기시트 2개(80매) 바이올렛 머스크  13800원 런칭 프로모션가 (1개당 6900원))":"건조기시트 2개","[추가 구매 할인] 버블 코튼 캡슐 세제(30개입)(구성 선택하기=캡슐세제 1개(30개입) 9900원  추가 구매 할인 적용 (*단독 구매 불가))":"캡슐세제","[리뷰 약속] 건조기 시향 시트 2매(랜덤 향)":"건조기시트 샘플","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(구성 선택하기=건조기시트 3개(120매) 코튼 블루  40000원 카톡 쿠폰 적용시 (1개당 12400원))":"건조기시트 3개","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 선물세트  42900원 (카톡 쿠폰 적용 가능))":"하트식세기패키지","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(구성 선택하기=건조기시트 4개(160매) 베이비 크림  47600원 카톡 쿠폰 적용시 (1개당 11150원))":"건조기시트 4개","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(구성 선택하기=건조기시트 4개(160매) 코튼 블루  47600원 카톡 쿠폰 적용시 (1개당 11150원))":"건조기시트 4개","[빨래방전용] 일비아 건조기시트 40매(옵션선택=코튼블루 40매 13개+베이비크림 40매 14개)":"건조기시트","일비아 하트 식기세척기 세제 패키지(구성 선택하기=하트 식기세척기 세제 3개(180정)  37500원 카톡 쿠폰 적용시 (1개당 11500원))":"하트식세기 3개","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(구성 선택하기=건조기시트 2개(80매) 코튼 블루  26800원 (1개당 13400원))":"건조기시트 2개","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 선물세트  42900원 카톡 쿠폰 적용시 (39900원))":"하트식세기패키지","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 4개(240정)  48800원  카톡 쿠폰 적용시 (1개당 11450원))":"하트식세기 4개","일비아 건조기 드라이 퍼퓸 시트 바이올렛머스크 40매(구성 선택하기=건조기시트 3개(120매) 바이올렛 머스크  38100원 카톡 쿠폰 적용시 (1개당 11700원))":"건조기시트 3개","일비아 건조기 드라이 퍼퓸 시트 바이올렛머스크 40매(구성 선택하기=건조기시트 4개(160매) 바이올렛 머스크  47600원 카톡 쿠폰 적용시 (1개당 11150원))":"건조기시트 4개","일비아 건조기 드라이 퍼퓸 시트 코튼블루 40매(구성 선택하기=건조기시트 3개(120매) 코튼 블루  38100원 카톡 쿠폰 적용시 (1개당 11700원))":"건조기시트 3개","일비아 하트 식기세척기 세제 패키지(구성 선택하기=하트 식기세척기 세제 선물세트  42900원 카톡 쿠폰 적용시 (39900원))":"하트식세기 선물세트","일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 3개(180정)  37500원 카톡 쿠폰 적용시 (1개당 11500원))":"하트식세기 3개","일비아 건조기 드라이 퍼퓸 시트 바이올렛머스크 40매(구성 선택하기=건조기시트 2개(80매) 바이올렛 머스크  26800원 (1개당 13400원))":"건조기시트 2개","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(구성 선택하기=건조기시트 2개(80매) 베이비 크림  26800원 (1개당 13400원))":"건조기시트 2개","🚨시크릿 특가🚨 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 선물세트  38500원 카톡 쿠폰 적용시 (35500원))":"하트식세기패키지","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 3개(180정) + 집게 + 틴케이스  38900원 카톡 쿠폰 적용시 (35900원))":"하트식세기 3개+틴케이스+집게","일비아 뽑아쓰는 올인원 세제 일체형 수세미(구성 선택하기=올인원 수세미 4개  27600원 (1개당 6900원))":"수세미 4개","일비아 이염방지시트 30매(구성 선택하기=이염방지시트 1개(30매)  9900원)":"이염방지시트","🚨시크릿 특가🚨 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 선물세트  38500원 카톡 쿠폰 적용시 (35500원))":"하트식세기패키지","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 4개(120캡슐)  50200원 카톡 쿠폰 적용시 (1개당 11800원))":"캡슐세제 4개","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 2개(60캡슐)  28900원 (1개당 14450원))":"캡슐세제 2개","일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=섬유탈취제 400ml 1개)":"섬유탈취제 400","일비아 스타일링 섬유탈취제 코튼블루 100ml(구성 선택하기=섬유탈취제 100ml 1개)":"섬유탈취제 100","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 1개(30캡슐)  14900원)":"캡슐세제","일비아 뽑아쓰는 올인원 세제 일체형 수세미(구성 선택하기=올인원 수세미 1개  8900원)":"수세미","시크릿 특가 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 선물세트  38500원 카톡 쿠폰 적용시 (35500원))":"하트식세기패키지","[1+1] 일비아 이염방지시트 30매+30매(구성 선택하기=[3+3] 이염방지시트 6개(180매)  35400원 카톡 쿠폰 적용시 (1개당 5400원))":"이염방지시트 6개","일비아 뽑아쓰는 올인원 세제 일체형 수세미(구성 선택하기=올인원 수세미 2개  16200원 (1개당 8100원))":"수세미 2개","일비아 건조기 드라이 퍼퓸 시트 바이올렛머스크 40매(구성 선택하기=건조기시트 1개(40매) 바이올렛 머스크  15900원)":"건조기시트","시크릿 특가 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 선물세트  38500원 카톡 쿠폰 적용시(35500원))":"하트식세기패키지","시크릿 특가 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 1개(60정)  9900원)":"하트식세기","🚨시크릿 특가🚨 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 1개(60정)  9900원)":"하트식세기","🚨시크릿 특가🚨 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 선물세트  38500원 카톡 쿠폰 적용시(35500원))":"하트식세기패키지","[런칭이벤트] 일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=섬유탈취제 400ml 2개 + 100ml 1개)":"섬유탈취제 400 2개+100","[리뷰 이벤트] 리뷰 약속하고 샘플 받기(구성 선택하기=건조기시트 랜덩 향기 2매)":"건조기시트샘플","일비아 티트리 딥클린 얼룩제거제 휴대용 100ml(구성 선택하기=얼룩제거제 100ml 1개  9900원)":"얼룩제거제 100","[추가 구매 할인] 건조기 드라이 퍼퓸 시트(40매)(구성 선택하기=베이비 크림 1개(40매입) 7900원  추가 구매 할인 적용 (*단독 구매 불가))":"건조기시트","[추가 구매 할인] 건조기 드라이 퍼퓸 시트(40매)(구성 선택하기=코튼 블루 1개(40매입) 7900원  추가 구매 할인 적용 (*단독 구매 불가))":"건조기시트","[추가 구매 할인] 건조기 드라이 퍼퓸 시트(40매)(구성 선택하기=바이올렛 머스크 1개(40매입) 7900원  추가 구매 할인 적용 (*단독 구매 불가))":"건조기시트","[런칭이벤트] 일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=섬유탈취제 200ml 2개 + 100ml 1개 24900원 (런칭 이벤트 54% 할인가))":"섬유탈취제 400 2개+100","일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 1개 12900원)":"섬유탈취제 400","일비아 스타일링 섬유탈취제 코튼블루 휴대용 100ml(구성 선택하기=스타일링 섬유탈취제 100ml 1개 9900원)":"섬유탈취제 100","일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 3개 34200원 카톡 쿠폰 적용시(1개당 10400))":"섬유탈취제 400 3개","🚨시크릿 특가🚨 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 6개(360정) + 집게 + 틴케이스  62900원  카톡 쿠폰 적용시 (59900원))":"하트식세기 6개+틴케이스+집게","일비아 스타일링 섬유탈취제 코튼블루 휴대용 100ml(구성 선택하기=스타일링 섬유탈취제 100ml 2개 18400원 (1개당 9200원))":"섬유탈취제 100 2개","일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 2개 24400원 (1개당 12200원))":"섬유탈취제 400 2개","[스타일씨] 일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 1개 5000원 (스타일씨 리뷰체험단))":"섬유탈취제 400","일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 3개 34200원 카톡 쿠폰 적용시 (1개당 10400))":"섬유탈취제 400 3개","시크릿 특가 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 6개(360정) + 집게 + 틴케이스  62900원  카톡 쿠폰 적용시 (59900원))":"하트식세기 6개+틴케이스+집게","일비아 이염방지시트 30매(구성 선택하기=이염방지시트 2개(60매)  16900원 (1개당 8450원))":"이염방지시트 2개","[첫구매 990원] 일비아 티트리 딥클린 얼룩제거제 휴대용 100ml(선택=얼룩제거제 100ml 1개)":"얼룩제거제 100","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 2개 19600원 (1개당 9800원))":"섬유탈취제 400 2개","[추가 구매 할인] 스타일링 섬유탈취제 휴대용 100ml(구성 선택하기=스타일링 섬유탈취제 100ml 1개 7900원 (*단독 구매 불가))":"섬유탈취제 100","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 1개 9900원)":"섬유탈취제 400","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 4개 38000원 카톡 쿠폰 적용시 (1개당 8750원))":"섬유탈취제 400 4개","[개인결제][빨래방전용] 일비아 건조기시트 40매(옵션선택=코튼블루 17개 + 베이비크림 10개)":"건조기시트","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 3개 29100원 (1개당 9700원))":"섬유탈취제 400 3개","🚨시크릿 특가🚨 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 3개(180정) + 집게  28900원)":"하트식세기 3개+집게","시크릿 특가 일비아 하트 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 3개(180정) + 집게  28900원)":"하트식세기 3개+집게","[안나님x일비아] 단독 공동구매(구성 선택=07. 건조기시트 1개, 향 선택=코튼블루 1개)":"건조기시트","[안나님x일비아] 단독 공동구매(구성 선택=07. 건조기시트 1개, 향 선택=베이비크림 1개)":"건조기시트","[안나님x일비아] 단독 공동구매(구성 선택=07. 건조기시트 1개, 향 선택=바이올렛머스크 1개)":"건조기시트","[안나님x일비아] 단독 공동구매(구성 선택=06. 캡슐세제 1개, 향 선택=선택안함)":"캡슐세제","[안나님x일비아] 단독 공동구매(구성 선택=02. 캡슐세제 2개 + 건조기시트 3개, 향 선택=코튼블루 1개 + 베이비크림 1개 + 바이올렛머스크 1개)":"캡슐세제 2개+건조기시트 3개","시크릿 특가 일비아 하트 안심성분 올인원 타블릿 식기세척기세제 60정(구성 선택하기=하트 식기세척기 세제 3개(180정) + 집게 + 틴케이스  38900원 카톡 쿠폰 적용시 (35900원))":"하트식세기 3개+틴케이스+집게","일비아 스타일링 섬유탈취제 코튼블루 휴대용 100ml(구성 선택하기=스타일링 섬유탈취제 100ml 3개 25200원 (1개당 8400원))":"섬유탈취제 100 3개","[안나님x일비아] 단독 공동구매(구성 선택=02. 캡슐세제 2개 + 건조기시트 3개, 향 선택=베이비크림 2개 + 바이올렛머스크 1개)":"캡슐세제 2개+건조기시트 3개","[안나님x일비아] 단독 공동구매(구성 선택=02. 캡슐세제 2개 + 건조기시트 3개, 향 선택=베이비크림 2개 + 코튼블루 1개)":"캡슐세제 2개+건조기시트 3개","[안나님x일비아] 단독 공동구매(구성 선택=01. 캡슐세제 3개 + 건조기시트 3개, 향 선택=바이올렛머스크 2개 + 코튼블루 1개)":"캡슐세제 3개+건조기시트 3개","[안나님x일비아] 단독 공동구매(구성 선택=01. 캡슐세제 3개 + 건조기시트 3개, 향 선택=코튼블루 1개 + 베이비크림 1개 + 바이올렛머스크 1개)":"캡슐세제 3개+건조기시트 3개","[안나님x일비아] 단독 공동구매(구성 선택=01. 캡슐세제 3개 + 건조기시트 3개, 향 선택=베이비크림 2개 + 바이올렛머스크 1개)":"캡슐세제 3개+건조기시트 3개","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 1개  9900원)":"섬유탈취제 400","[안나님x일비아] 단독 공동구매(구성 선택=03. 캡슐세제 2개 + 건조기시트 2개, 향 선택=베이비크림 2개)":"캡슐세제 2개+건조기시트 2개","[안나님x일비아] 단독 공동구매(구성 선택=02. 캡슐세제 2개 + 건조기시트 3개, 향 선택=코튼블루 3개)":"캡슐세제 2개+건조기시트 3개","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 6개  59400원 카톡 쿠폰 적용시 (1개당 9400원))":"섬유탈취제 400 6개","일비아 건조기 드라이 퍼퓸 시트 베이비크림 40매(구성 선택하기=건조기시트 3개(120매) 베이비 크림  38100원 카톡 쿠폰 적용시 (1개당 11700원))":"건조기시트 3개","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 2개 + 100ml 1개  27900원)":"섬유탈취제 400+100","일비아 뽑아쓰는 올인원 세제 일체형 수세미(구성 선택하기=올인원 수세미 3개 (108매) 22500원 (1개당 7500원))":"수세미 3개","일비아 뽑아쓰는 올인원 세제 일체형 수세미(구성 선택하기=올인원 수세미 1개 (36매) 8900원)":"수세미","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 3개 + 100ml 1개  36800원 카톡 쿠폰 적용시 (33800원))":"섬유탈취제 400 3개+100","일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=얼룩제거제 350ml 3개  38700원 카톡 쿠폰 적용시 (1개당 11900원))":"얼룩제거제 350 3개","[1+1] 일비아 이염방지시트 30매+30매(구성 선택하기=[2+2] 이염방지시트 4개(120매)  28800원 (1개당 7200원))":"이염방지시트 4개","일비아 액체 스프레이 다목적 세정제 500ml(옵션선택=다목적세정제 1개 (체험특가))":"다목적세정제","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 3개  27900원  (1개당 9300원))":"섬유탈취제 400 3개","[추가 구매 할인] 스타일링 섬유탈취제 휴대용 100ml(구성 선택하기=스타일링 섬유탈취제 100ml 1개 8900원)":"섬유탈취제 100","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 2개  19400원  (1개당 9700원))":"섬유탈취제 400 2개","일비아 액체 스프레이 다목적 세정제 500ml(옵션선택=다목적세정제 2개 + 올인원수세미 2개)":"다목적세정제 2개+수세미 2개","[추가 구매 할인] 스타일링 섬유탈취제 휴대용 100ml(구성 선택하기=스타일링 섬유탈취제 100ml 2개 14800원 (1개당 7400원))":"섬유탈취제 100 2개","일비아 액체 스프레이 다목적 세정제 500ml(구성 선택하기=[1+1] 다목적 세정제 500ml 2개 13800원 (1개당 6900원))":"다목적세정제 2개+수세미 2개","[첫구매 990원] 일비아 뽑아쓰는 올인원 세제 수세미(옵션선택=올인원 세제 수세미 1개(36매))":"수세미","일비아 뽑아쓰는 올인원 세제 일체형 수세미(구성 선택하기=올인원 수세미 4개 (144매)  27600원 (1개당 6900원))":"수세미 4개","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 3개  27900원  (1개당 9300원 + 얼룩제거제 100ml 증정))":"섬유탈취제 400 3개 + 얼룩제거제 100","[blessing_seul x iLBiA] 단독 공동구매(구성=12. 건조기시트 2개(80매), 향 선택=코튼블루 + 베이비크림, 선택=주문 확인)":"건조기시트 2개","[blessing_seul x iLBiA] 단독 공동구매(구성=10. 섬유탈취제 100ml 1개 + 얼룩제거제 100ml 1개, 향 선택=선택 안함, 선택=주문 확인)":"섬유탈취제 100 1개+얼룩제거제 100 1개","[교보생명] 일비아 캡슐 세제 선물세트(옵션 선택=캡슐 세제 1개 + 얼룩제거제 100ml 1개 + 섬유탈취제 100ml 1개 + 하트 패키지 포장)":"캡슐 세제 1개 + 얼룩제거제 100 1개 + 섬유탈취제 100 1개 + 하트 패키지 포장","[교보생명] 일비아 캡슐 세제 선물세트(옵션 선택=배송비)":"교보생명 운임비","[blessing_seul x iLBiA] 단독 공동구매(구성=07. 섬유탈취제 400ml 3개, 향 선택=선택 안함, 선택=(사은품) 섬유탈취제 100ml 1개)":"섬유탈취제 400 3개+100 1개","일비아 액체 스프레이 다목적 세정제 500ml(구성 선택하기=다목적 세정제 500ml 1개 7900원)":"다목적세정제","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[2+1] 스타일링 섬유탈취제 400ml 3개  28500원  (1개당 9500원 + 섬유탈취제 100ml 증정))":"섬유탈취제 400 3개+100 1개","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[1+1] 스타일링 섬유탈취제 400ml 2개  19800원  (1개당 9900원))":"섬유탈취제 400 2개","일비아 티트리 딥클린 얼룩제거제 휴대용 100ml(구성 선택하기=얼룩제거제 100ml 2개  17400원 (1개당 8700원))":"얼룩제거제 100 2개","🚨시크릿 특가🚨일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[2+2] 스타일링 섬유탈취제 400ml 4개  37200원 쿠폰 적용 시 (1개당 8550원 + 섬유탈취제 100ml 증정))":"섬유탈취제 400 4개 + 100미리 1개","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[2+2] 스타일링 섬유탈취제 400ml 4개  37200원 쿠폰 적용 시 (1개당 8550원 + 섬유탈취제 100ml 증정))":"섬유탈취제 400 4개 + 100미리 1개","일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 휴대용 100ml(구성 선택하기=스타일링 섬유탈취제 100ml 2개 18400원 (1개당 9200원))":"섬유탈취제 100 2개","일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 1개 12900원)":"섬유탈취제 400","[빨래방전용] 일비아 건조기시트 40매(옵션선택=베이비크림 40매)":"건조기시트","일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 휴대용 100ml(구성 선택하기=스타일링 섬유탈취제 100ml 1개 9900원)":"섬유탈취제 100","일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 2개 24400원 (1개당 12200원))":"섬유탈취제 400 2개","일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 3개 34200원 카톡 쿠폰 적용시 (1개당 10400))":"섬유탈취제 400 3개","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[1+1] 스타일링 섬유탈취제 400ml 2개  19800원  (1개당 9900원))":"섬유탈취제 400 2개","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[2+1] 스타일링 섬유탈취제 400ml 3개  28500원  (1개당 9500원 + 섬유탈취제 100ml 증정))":"섬유탈취제 400 3개","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml":"섬유탈취제 400","[추석 빅-세일] 일비아 인기상품 9,900원 균일가 대전(옵션 선택하기=01. 하트 식기세척기 세제 1개(60정)  9900원 (50% 할인))":"하트식세기","[추석 빅-세일] 일비아 인기상품 9,900원 균일가 대전(옵션 선택하기=02. 건조기시트 1개(40매) 바이올렛머스크  9900원 (48% 할인))":"건조기시트","[추석 빅-세일] 일비아 인기상품 9,900원 균일가 대전(옵션 선택하기=02. 건조기시트 1개(40매) 코튼블루  9900원 (48% 할인))":"건조기시트","[추석 빅-세일] 일비아 인기상품 9,900원 균일가 대전(옵션 선택하기=02. 건조기시트 1개(40매) 베이비크림  9900원 (48% 할인))":"건조기시트","[추석 빅-세일] 일비아 인기상품 9,900원 균일가 대전(옵션 선택하기=03. 스타일링 섬유탈취제 400ml 1개  9900원 (48% 할인))":"섬유탈취제 400","[5만원 이상 구매 사은픔] 섬유탈취제 100ml":"섬유탈취제 100","[추석 빅-세일] 일비아 인기상품 9,900원 균일가 대전(옵션 선택하기=07. 얼룩제거제 100ml x 2개  9900원 (68% 할인 1개당 4950원))":"얼룩제거제 100 2개","[추석 빅-세일] 일비아 인기상품 9,900원 균일가 대전(옵션 선택하기=04. 이염방지시트 30매 x 2개  9900원 (67% 할인 1개당 4950원))":"이염방지시트 2개","[추석 빅-세일] 일비아 인기상품 9,900원 균일가 대전(옵션 선택하기=06. 다목적 세정제 500ml x 2개  9900원 (71% 할인 1개당 4950원))":"다목적세정제 2개","[추석 빅-세일] 일비아 인기상품 9,900원 균일가 대전(옵션 선택하기=05. 올인원 세제 수세미 36매 x 3개  9900원 (73% 할인 1개당 3300원))":"수세미 3개","[추가 구매 할인] 스타일링 섬유탈취제 휴대용 100ml":"섬유탈취제 100","[빨래방전용] 일비아 건조기시트 40매(옵션선택=코튼블루 9개 + 베이비크림 9개 +바이올렛머스크 9개)":"건조기시트","[빨래방전용] 일비아 건조기시트 40매(옵션선택=코튼블루 17개 + 바이올렛머스크 10개)":"건조기시트","[가을 쇼핑페스타] 일비아 인기상품 최대 73% 할인(옵션 선택하기=01. 하트 식기세척기 세제 1개(60정)  9900원 (50% 할인))":"하트식세기","[가을 쇼핑페스타] 일비아 인기상품 최대 73% 할인(옵션 선택하기=03. 스타일링 섬유탈취제 400ml 1개  9900원 (48% 할인))":"섬유탈취제 400","[가을 쇼핑페스타] 일비아 인기상품 최대 73% 할인(옵션 선택하기=02. 건조기시트 1개(40매) 베이비크림  9900원 (48% 할인))":"건조기시트","[가을 쇼핑페스타] 일비아 인기상품 최대 73% 할인(옵션 선택하기=07. 얼룩제거제 100ml x 2개  9900원 (68% 할인 1개당 4950원))":"얼룩제거제 100 2개","[가을 쇼핑페스타] 일비아 인기상품 최대 73% 할인(옵션 선택하기=02. 건조기시트 1개(40매) 바이올렛머스크  9900원 (48% 할인))":"건조기시트","[가을 쇼핑페스타] 일비아 인기상품 최대 73% 할인(옵션 선택하기=02. 건조기시트 1개(40매) 코튼블루  9900원 (48% 할인))":"건조기시트","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 1개 9900원)":"섬유탈취제 400","일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 30개입(구성 선택하기=버블코튼 캡슐세제 3개(90캡슐)  41100원 카톡 쿠폰 적용시 (1개당 12700원))":"캡슐세제 3개","[가을 쇼핑페스타] 일비아 인기상품 최대 73% 할인(옵션 선택하기=05. 올인원 세제 수세미 36매 x 3개  9900원 (73% 할인 1개당 3300원))":"수세미 3개","[가을 쇼핑페스타] 일비아 인기상품 최대 73% 할인(옵션 선택하기=04. 이염방지시트 30매 x 2개  9900원 (67% 할인 1개당 4950원))":"이염방지시트 2개","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 3개 + 섬유탈취제 100ml 1개(증정) 25500원 (1개당 8500원))":"섬유탈취제 400 3개+100 1개","[추가 구매 할인] 스타일링 섬유탈취제 휴대용 100ml(구성 선택하기=스타일링 섬유탈취제 100ml 1개 6900원 (*단독 구매 불가))":"섬유탈취제 100","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 2개 18000원 (1개당 9000원))":"섬유탈취제 400 2개","[가을 쇼핑페스타] 일비아 인기상품 최대 73% 할인(옵션 선택하기=06. 다목적 세정제 500ml x 2개  9900원 (71% 할인 1개당 4950원))":"다목적세정제 2개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=06. [1+1] 건조기시트, 건조기시트 향 선택=바이올렛머스크 2개)":"건조기시트 2개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=07. [1+1] 이염방지시트, 건조기시트 향 선택=해당없음)":"이염방지시트 2개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=06. [1+1] 건조기시트, 건조기시트 향 선택=코튼블루 + 베이비크림)":"건조기시트 2개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=01. 프리미엄 세탁 풀코스 세트, 건조기시트 향 선택=베이비크림 + 바이올렛머스크)":"캡슐세제 2개+건조기시트 2개+이염방지시트 2개+얼룩제거제 100 1개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=05. [1+1] 캡슐세제, 건조기시트 향 선택=해당없음)":"캡슐세제 2개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=06. [1+1] 건조기시트, 건조기시트 향 선택=코튼블루 + 바이올렛머스크)":"건조기시트 2개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=03. 베이직 식세기 필수 세트, 건조기시트 향 선택=해당없음)":"하트식세기 2개+틴케이스+집게","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=01. 프리미엄 세탁 풀코스 세트, 건조기시트 향 선택=코튼블루 + 바이올렛머스크)":"캡슐세제 2개+건조기시트 2개+이염방지시트 2개+얼룩제거제 100 1개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=06. [1+1] 건조기시트, 건조기시트 향 선택=베이비크림 + 바이올렛머스크)":"건조기시트 2개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=06. [1+1] 건조기시트, 건조기시트 향 선택=베이비크림 2개)":"건조기시트 2개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=06. [1+1] 건조기시트, 건조기시트 향 선택=코튼블루 2개)":"건조기시트 2개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=01. 프리미엄 세탁 풀코스 세트, 건조기시트 향 선택=코튼블루 + 베이비크림)":"캡슐세제 2개+건조기시트 2개+이염방지시트 2개+얼룩제거제 100 1개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=04. 섬유탈취제 실속 세트, 건조기시트 향 선택=해당없음)":"섬유탈취제 400 1개 + 100 1개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=02. 베이직 세탁 향기 집중 세트, 건조기시트 향 선택=베이비크림)":"캡슐세제 2개+건조기시트 1개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=02. 베이직 세탁 향기 집중 세트, 건조기시트 향 선택=코튼블루)":"캡슐세제 2개+건조기시트 1개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=01. 프리미엄 세탁 풀코스 세트, 건조기시트 향 선택=베이비크림 2개)":"캡슐세제 2개+건조기시트 2개+이염방지시트 2개+얼룩제거제 100 1개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=01. 프리미엄 세탁 풀코스 세트, 건조기시트 향 선택=코튼블루 2개)":"캡슐세제 2개+건조기시트 2개+이염방지시트 2개+얼룩제거제 100 1개","[쏘핑네흰집X일비아] 단독 공동구매(구성 선택하기=02. 베이직 세탁 향기 집중 세트, 건조기시트 향 선택=바이올렛머스크)":"캡슐세제 2개+건조기시트 1개","[채아맘님X일비아] 단독 공동구매(구성 선택하기=01. 하트 식기세척기 세제 1개(60정)  9200원 (54% 할인))":"하트식세기","[채아맘님X일비아] 단독 공동구매(구성 선택하기=02. 하트 식기세척기 세제 3개(180정) + 집게  27600원 (54% 할인+사은품))":"하트식세기 3개+집게","[채아맘님X일비아] 단독 공동구매(구성 선택하기=03. 하트 식기세척기 세제 6개(360정) + 틴케이스 + 집게  55200원 (54% 할인+사은품))":"하트식세기 6개+틴케이스+집게","[채아맘님X일비아] 단독 공동구매(구성 선택하기=05. [추가 구성] 전용 하트 틴케이스 1개  5000원 (50% 할인))":"하트틴케이스","[채아맘님X일비아] 단독 공동구매(구성 선택하기=06. [추가 구성] 전용 하트 집게 1개  2000원 (50% 할인))":"하트집게","[빨래방전용] 일비아 건조기시트 40매(옵션선택=바이올렛머스크 40매)":"건조기시트","일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 3개 34200원 카톡 쿠폰 적용시 (1개당 10400원))":"섬유탈취제 400 3개","[채아맘님X일비아] 단독 공동구매(구성 선택하기=04. 하트 식기세척기 세제 선물세트  32900원 (57% 할인))":"하트식세기패키지","[11월 프로모션] 11월엔 하나 더! 일비아 인기상품 1+1 혜택(품목 선택하기=01. 하트 식기세척기 세제(60정) 1+1  19800원 (1개당 9900원!))":"하트식세기 2개","[5만원 이상 구매 사은픔] 다목적 세정제 500ml":"다목적세정제(사은품)","[11월 프로모션] 11월엔 하나 더! 일비아 인기상품 1+1 혜택(품목 선택하기=02. 건조기 퍼퓸 시트(40매) 코튼 블루 1+1  19800원 (1개당 9900원!))":"건조기시트 2개","[11월 프로모션] 11월엔 하나 더! 일비아 인기상품 1+1 혜택(품목 선택하기=03. 버블 코튼 캡슐 세제(30개입) 1+1  19800원 (1개당 9900원!))":"캡슐세제 2개","[11월 프로모션] 11월엔 하나 더! 일비아 인기상품 1+1 혜택(품목 선택하기=05. 스타일링 섬유탈취제 1+1 (400ml+100ml)  16800원 (53% 할인 특가))":"섬유탈취제 400+100","[11월 프로모션] 11월엔 하나 더! 일비아 인기상품 1+1 혜택(품목 선택하기=02. 건조기 퍼퓸 시트(40매) 바이올렛 머스크 1+1  19800원 (1개당 9900원!))":"건조기시트 2개","[추가 구매 할인] 이염방지시트, 올인원수세미 1+1(품목 선택하기=06. 이염방지시트 1+1 10800원 (1개당 5400원 *단독구매불가))":"이염방지시트 2개","[추가 구매 할인] 이염방지시트, 올인원수세미 1+1(품목 선택하기=07. 올인원 세제 수세미 1+1 7800원 (1개당 3900원 *단독구매불가))":"수세미 2개","[11월 프로모션] 11월엔 하나 더! 일비아 인기상품 1+1 혜택(품목 선택하기=02. 건조기 퍼퓸 시트(40매) 베이비 크림 1+1  19800원 (1개당 9900원!))":"건조기시트 2개","일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 휴대용 100ml(구성 선택하기=스타일링 섬유탈취제 100ml 3개 25200원 (1개당 8400원))":"섬유탈취제 100 3개","[11월 프로모션] 11월엔 하나 더! 일비아 인기상품 1+1 혜택(품목 선택하기=04. 티트리 딥클린 얼룩제거제 1+1 (350ml+100ml)  16800원 (51% 할인 특가))":"얼룩제거제 350+100","[BLACK FRIDAY]  일비아 살림 필수템 9,900원 균일가(옵션 선택하기=05. 티트리 딥클린 얼룩제거제 350ml 1개  9900원 (48% 할인))":"얼룩제거제 350","[BLACK FRIDAY]  일비아 살림 필수템 9,900원 균일가(옵션 선택하기=03. 버블 코튼 캡슐 세제 1개(30캡슐)  9900원 (60% 할인))":"캡슐세제","[BLACK FRIDAY]  일비아 살림 필수템 9,900원 균일가(옵션 선택하기=01. 하트 식기세척기 세제 1개(60정)  9900원 (50% 할인))":"하트식세기","[BLACK FRIDAY]  일비아 살림 필수템 9,900원 균일가(옵션 선택하기=02. 건조기시트 1개(40매) 베이비크림  9900원 (48% 할인))":"건조기시트","[BLACK FRIDAY]  일비아 살림 필수템 9,900원 균일가(옵션 선택하기=04. 스타일링 섬유탈취제 400ml 1개  9900원 (48% 할인))":"섬유탈취제 400","[BLACK FRIDAY]  일비아 살림 필수템 9,900원 균일가(옵션 선택하기=02. 건조기시트 1개(40매) 코튼블루  9900원 (48% 할인))":"건조기시트","[안나님x일비아] 단독 공동구매(구성 선택=07. 건조기시트 1+1+1, 향 선택=코튼블루 3개)":"건조기시트 2개","[BLACK FRIDAY]  일비아 살림 필수템 9,900원 균일가(옵션 선택하기=02. 건조기시트 1개(40매) 바이올렛머스크  9900원 (48% 할인))":"건조기시트","[추가 구매 할인]  얼룩제거제 & 섬유탈취제 휴대용 100ml(구성 선택하기=07. 스타일링 섬유탈취제 휴대용 100ml 6900원 (*단독 구매 불가))":"섬유탈취제 100","[추가 구매 할인]  이염방지시트 & 올인원 세제 수세미(구성 선택하기=09. 올인원 세제 수세미(36매) 5900원 (*단독 구매 불가))":"수세미","[추가 구매 할인]  이염방지시트 & 올인원 세제 수세미(구성 선택하기=08. 이염방지시트(30매) 5900원 (*단독 구매 불가))":"이염방지시트","[추가 구매 할인]  얼룩제거제 & 섬유탈취제 휴대용 100ml(구성 선택하기=06. 티트리 딥클린 얼룩제거제 휴대용 100ml 6900원 (*단독 구매 불가))":"얼룩제거제 100","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[단품] 섬유탈취제 400ml 1개  9900원)":"섬유탈취제 400","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[실속 구성] 섬유탈취제 400ml 2개 + 섬유탈취제 100ml 1개 32900원 카톡 쿠폰 적용시 (28900원))":"섬유탈취제 400 2개+100 1개","[안나님x일비아] 단독 공동구매(구성 선택=06. 캡슐세제 1+1+1, 향 선택=선택안함)":"캡슐세제 3개","[안나님x일비아] 단독 공동구매(구성 선택=07. 건조기시트 1+1+1, 향 선택=코튼블루 1개 + 베이비크림 1개 + 바이올렛머스크 1개)":"건조기시트 3개","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[최대 할인] 섬유탈취제 400ml 5개 + 섬유탈취제 100ml 2개 54900원 카톡 쿠폰 적용시 (51900원))":"섬유탈취제 400 5개+100 2개","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[실속 구성] 섬유탈취제 400ml 3개 + 섬유탈취제 100ml 1개 32900원 카톡 쿠폰 적용시 (28900원))":"섬유탈취제 400 3개+100 1개","일비아 액체 스프레이 다목적 세정제 500ml(구성 선택하기=[2+1] 다목적 세정제 500ml 3개 17700원 (1개당 5900원))":"다목적세정제 3개","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[얼룩 Set] 섬유탈취제 400ml 2개 + 얼룩제거제 350ml 1개 32900원 카톡 쿠폰 적용시 (28900원))":"섬유탈취제 400 2개 + 얼룩제거제 350 1개","[유자몽님X일비아] 단독 공동구매(구성 선택하기=02. 섬유탈취제 세트, 건조기시트 향 선택=해당없음)":"섬유탈취제 400+100","[유자몽님X일비아] 단독 공동구매(구성 선택하기=01. 베이직 세탁 향기 세트, 건조기시트 향 선택=코튼블루 1개+베이비크림 1개)":"캡슐세제 1개+건조기시트 2개","[blessing_seul x iLBiA] 단독 공동구매(구성 선택하기=16. 스타일링 섬유탈취제 400ml 1개, 향 선택=해당없음)":"섬유탈취제 400","[blessing_seul x iLBiA] 단독 공동구매(구성 선택하기=14. 딥클린 얼룩제거제 350ml 1개, 향 선택=해당없음)":"얼룩제거제 350","[blessing_seul x iLBiA] 단독 공동구매(구성 선택하기=02. 하트 식기세척기 세제 2개(120정), 향 선택=해당없음)":"하트식세기 2개","[blessing_seul x iLBiA] 단독 공동구매(구성 선택하기=07. 건조기 퍼퓸 시트 2개(80매), 향 선택=베이비크림 1개+바이올렛머스크 1개)":"건조기시트 2개","[blessing_seul x iLBiA] 단독 공동구매(구성 선택하기=05. 버블 코튼 캡슐 세제 4개(120캡슐), 향 선택=해당없음)":"캡슐세제 4개","[12월 프로모션] 일비아 얼리 윈터 페스타 (UP TO 64% OFF)(구성 선택하기=01. 얼리 윈터 세탁 풀코스 세트, 건조기 시트 향 선택=코튼블루 1개+베이비크림 1개)":"캡슐세제 2개+건조기 2개+이염방지시트2개+얼룩제거제 100 1개","[12월 프로모션] 일비아 얼리 윈터 페스타 (UP TO 64% OFF)(구성 선택하기=07. 건조기 퍼퓸 시트 1개(40매), 건조기 시트 향 선택=바이올렛머스크)":"건조기시트","[12월 프로모션] 일비아 얼리 윈터 페스타 (UP TO 64% OFF)(구성 선택하기=04. 하트 식기세척기 세제 1개(60정), 건조기 시트 향 선택=해당 없음)":"하트식세기","[12월 프로모션] 일비아 얼리 윈터 페스타 (UP TO 64% OFF)(구성 선택하기=08. 티드리 딥클린 얼룩제거제 350ml 1개, 건조기 시트 향 선택=해당 없음)":"얼룩제거제 350","[유자몽님X일비아] 단독 공동구매(구성 선택하기=01. 베이직 세탁 향기 세트, 건조기시트 향 선택=코튼블루 1개+바이올렛머스크 1개)":"캡슐세제 1개+건조기시트 2개","[12월 프로모션] 일비아 얼리 윈터 페스타 (UP TO 64% OFF)(구성 선택하기=05. 스타일링 섬유탈취제 400ml 1개, 건조기 시트 향 선택=해당 없음)":"섬유탈취제 400","[12월 프로모션] 일비아 얼리 윈터 페스타 (UP TO 64% OFF)(구성 선택하기=02. 얼리 윈터 주방 필수템 세트, 건조기 시트 향 선택=해당 없음)":"하트식세기 2개+틴케이스+집게+수세미","[12월 프로모션] 일비아 얼리 윈터 페스타 (UP TO 64% OFF)(구성 선택하기=01. 얼리 윈터 세탁 풀코스 세트, 건조기 시트 향 선택=코튼블루 2개)":"캡슐세제 2개+건조기 2개+이염방지시트2개+얼룩제거제 100 1개","[유자몽님X일비아] 단독 공동구매(구성 선택하기=01. 베이직 세탁 향기 세트, 건조기시트 향 선택=코튼블루 2개)":"캡슐세제 1개+건조기시트 2개","[12월 프로모션] 일비아 얼리 윈터 페스타 (UP TO 64% OFF)(구성 선택하기=06. 버블 코튼 캡슐 세제 1개(30캡슐), 건조기 시트 향 선택=해당 없음)":"캡슐세제","[12월 프로모션] 일비아 얼리 윈터 페스타 (UP TO 64% OFF)(구성 선택하기=07. 건조기 퍼퓸 시트 1개(40매), 건조기 시트 향 선택=코튼블루)":"건조기시트","[12월 프로모션] 일비아 얼리 윈터 페스타 (UP TO 64% OFF)(구성 선택하기=07. 건조기 퍼퓸 시트 1개(40매), 건조기 시트 향 선택=베이비크림)":"건조기시트","[12월 프로모션] 일비아 얼리 윈터 페스타 (UP TO 64% OFF)(구성 선택하기=08. 티트리 딥클린 얼룩제거제 350ml 1개, 건조기 시트 향 선택=해당 없음)":"얼룩제거제 350","[체험단] 일비아 티트리 딥클린 얼룩제거제 350ml":"체험단","[12월 프로모션] 일비아 얼리 윈터 페스타 (UP TO 64% OFF)(구성 선택하기=03. 얼리 윈터 세탁&주름 관리 세트, 건조기 시트 향 선택=해당 없음)":"캡슐세제 1개+섬유탈취제 400 1개+얼룩제거제 350 1개","[스타일씨] 일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml":"체험단","[12월 프로모션] 일비아 얼리 윈터 페스타 (UP TO 64% OFF)(구성 선택하기=01. 얼리 윈터 세탁 풀코스 세트, 건조기 시트 향 선택=코튼블루 1개+바이올렛머스크 1개)":"캡슐세제 2개+건조기 2개+이염방지시트2개+얼룩제거제 100 1개","[첫구매 990원] 일비아 타블릿&캡슐 세제 하트 집게":"하트집게","일비아 타블릿&캡슐 세제 하트 집게":"하트 집게","[ADIEU 2025]  일비아 연말 감사제  UP TO 65% OFF(옵션 선택하기=05. [단품] 스타일링 섬유탈취제 400ml 1개  9900원 (48% 할인))":"섬유탈취제 400","[ADIEU 2025]  일비아 연말 감사제  UP TO 65% OFF(옵션 선택하기=03. [메가팩] 건조기시트 6개(240매) 코튼블루  56900원 (50% 할인+사은품))":"건조기시트 6개","일비아 캡슐 세탁 세제 하트 틴케이스":"캡슐세제 틴케이스","[추가 구매 할인]  일비아 2025 연말 감사제(상품 선택하기=10. 이염방지시트 1개(30매) 5900원 (*단독 구매 불가))":"이염방지시트","[ADIEU 2025]  일비아 연말 감사제  UP TO 65% OFF(옵션 선택하기=04. [단품] 하트 식기세척기 세제 1개(60정)  9900원 (50% 할인))":"하트식세기","[ADIEU 2025]  일비아 연말 감사제  UP TO 65% OFF(옵션 선택하기=08. [단품] 티트리 딥클린 얼룩제거제 350ml 1개  9900원 (48% 할인))":"얼룩제거제 350","[ADIEU 2025]  일비아 연말 감사제  UP TO 65% OFF(옵션 선택하기=06. [단품] 버블 코튼 캡슐 세제 1개(30캡슐)  9900원 (60% 할인))":"캡슐세제","[추가 구매 할인]  일비아 2025 연말 감사제(상품 선택하기=09. 티트리 딥클린 얼룩제거제 휴대용 100ml 6900원 (*단독 구매 불가))":"얼룩제거제 100","[ADIEU 2025]  일비아 연말 감사제  UP TO 65% OFF(옵션 선택하기=03. [메가팩] 건조기시트 6개(240매) 베이비크림  56900원 (50% 할인+사은품))":"건조기시트 6개","[추가 구매 할인]  일비아 2025 연말 감사제(상품 선택하기=11. 다목적 세정제 500ml 1개 5900원 (*단독 구매 불가))":"다목적세정제","[ADIEU 2025]  일비아 연말 감사제  UP TO 65% OFF(옵션 선택하기=01. [메가팩] 버블 코튼 캡슐 세제 6개(180캡슐)  62900원 (62% 할인+사은품))":"캡슐세제 6개+캡슐 틴케이스+집게","[ADIEU 2025]  일비아 연말 감사제  UP TO 65% OFF(옵션 선택하기=02. [메가팩] 하트 식기세척기 세제 6개(360정)  59900원 (55% 할인+사은품))":"하트식세기 6개+틴케이스+집게","[ADIEU 2025]  일비아 연말 감사제  UP TO 65% OFF(옵션 선택하기=03. [메가팩] 건조기시트 6개(240매) 바이올렛머스크  56900원 (50% 할인+사은품))":"건조기시트 6개","[ADIEU 2025]  일비아 연말 감사제  UP TO 65% OFF(옵션 선택하기=07. [단품] 건조기시트 1개(40매) 코튼블루  9900원 (48% 할인))":"건조기시트","[ADIEU 2025]  일비아 연말 감사제  UP TO 65% OFF(옵션 선택하기=07. [단품] 건조기시트 1개(40매) 베이비크림  9900원 (48% 할인))":"건조기시트","[ADIEU 2025]  일비아 연말 감사제  UP TO 65% OFF(옵션 선택하기=07. [단품] 건조기시트 1개(40매) 바이올렛머스크  9900원 (48% 할인))":"건조기시트","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[1+1] 섬유탈취제 400ml 2개 19000원 (1개당 9500원))":"섬유탈취제 400 2개","[책임환불제] 섬유탈취제 무료 테스트 샘플 10ml":"섬유탈취제 샘플","🚨시크릿 특가🚨일비아 탈취 정전기 방지 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[1+1] 섬유탈취제 400ml 2개 19000원 (1개당 9500원))":"섬유탈취제 400 2개","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[2+1] 섬유탈취제 400ml 3개 + 섬유탈취제 100ml 1개(사은품) 27600원 (1개당 9200원))":"섬유탈취제 400 3개+섬유탈취제 100 1개","🚨시크릿 특가🚨일비아 뿌리는 다리미 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[2+2] 섬유탈취제 400ml 4개 + 섬유탈취제 100ml 1개(사은품) 35600원 카톡 쿠폰 적용시 (1개당 8150원))":"섬유탈취제 400 4개+섬유탈취제 100 1개","🚨시크릿 특가🚨일비아 탈취 정전기 방지 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[2+1] 섬유탈취제 400ml 3개 + 섬유탈취제 100ml 1개(사은품) 27600원 (1개당 9200원))":"섬유탈취제 400 3개+섬유탈취제 100 1개","일비아 뽑아쓰는 올인원 세제 일체형 수세미(구성 선택하기=올인원 수세미 2개 (72매)  16200원 (1개당 8100원))":"수세미 2개","시크릿 특가일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=[단품] 얼룩제거제 350ml 1개  10900원)":"얼룩제거제 350","🚨시크릿 특가🚨일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=[1+1] 얼룩제거제 350ml 2개  21000원 (1개당 10500원))":"얼룩제거제 350","시크릿 특가일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=[1+1] 얼룩제거제 350ml 2개  21000원 (1개당 10500원))":"얼룩제거제 350 2개","일비아 이염방지시트 30매(구성 선택하기=이염방지시트 3개(90매)  24600원 (1개당 8200원))":"이염방지시트 3개","🚨시크릿 특가🚨일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=[단품] 얼룩제거제 350ml 1개  10900원)":"얼룩제거제 350","[추가 구매 할인] 딥클린 얼룩제거제 휴대용 100ml(구성 선택하기=딥클린 얼룩제거제 휴대용 100ml 6900원 (*단독 구매 불가))":"얼룩제거제 100","[루루하우스님X일비아] 단독 공동구매(구성 선택하기=03. 하트 식기세척기 세제 6개(360정) + 틴케이스 + 집게  55200원 (54% 할인+사은품))":"하트식세기 6개+틴케이스+집게","시크릿 특가일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=[3+1] 얼룩제거제 350ml 3개 + 얼룩제거제 100ml 1개(사은품)  26700원 (1개당 8900원+사은품))":"얼룩제거제 350 3개+얼룩제거제 100 1개","시크릿 특가일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=[단품] 얼룩제거제 350ml 1개  9900원)":"얼룩제거제 350","[빨래방전용] 일비아 건조기 드라이 퍼퓸 시트 40매(옵션선택=코튼블루 40매)":"건조기시트","🚨시크릿 특가🚨일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=[3+1] 얼룩제거제 350ml 3개 + 얼룩제거제 100ml 1개(사은품)  26700원 (1개당 8900원+사은품))":"얼룩제거제 350 3개+얼룩제거제 100 1개","🚨시크릿 특가🚨일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=[단품] 얼룩제거제 350ml 1개  9900원)":"얼룩제거제 350","[메가팩] 일비아 하트 안심성분 올인원 타블릿 식기세척기 세제 6개(구성 선택하기=[메가팩] 하트 식기세척기 세제 6개(360정)  59900원 (사은품 : 타블릿 틴케이스+집게))":"하트식세기 6개+틴케이스+집게","시크릿 특가일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=[1+1] 얼룩제거제 350ml 2개  18800원 (1개당 9400원))":"얼룩제거제 350 2개","🚨시크릿 특가🚨일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=[1+1] 얼룩제거제 350ml 2개  18800원 (1개당 9400원))":"얼룩제거제 350 2개","[메가팩] 일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향 6개(구성 선택하기=[메가팩] 버블 코튼 캡슐 세제 6개(180캡슐)  62900원 (사은품 : 캡슐세제 틴케이스+집게))":"캡슐세제 6개+캡슐 틴케이스+집게","[투윤맘님X일비아] 단독 공동구매(구성 선택하기=01. 하트 식기세척기 세제 1개(60정)  9200원 (54% 할인))":"하트식세기","[투윤맘님X일비아] 단독 공동구매(구성 선택하기=03. 하트 식기세척기 세제 6개(360정) + 틴케이스 + 집게  55200원 (54% 할인+사은품))":"하트식세기 6개+틴케이스+집게","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=하트 식기세척기 세제 1개(60정), 3번 옵션=하트 식기세척기 세제 1개(60정))":"하트식세기 3개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=★메가팩★ 하트 식기세척기 세제 6개, 2번 옵션=타블릿세제 틴케이스+하트 집게, 3번 옵션=해당 없음)":"하트식세기 6개+틴케이스+집게","[투윤맘님X일비아] 단독 공동구매(구성 선택하기=02. 하트 식기세척기 세제 3개(180정) + 집게  27600원 (54% 할인+사은품))":"하트식세기 3개+집게","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=건조기시트 1개(40매) 베이비크림, 2번 옵션=건조기시트 1개(40매) 바이올렛머스크, 3번 옵션=건조기시트 1개(40매) 바이올렛머스크)":"건조기시트 3개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=★메가팩★ 건조기시트 6개, 2번 옵션=코튼블루 6개, 3번 옵션=해당 없음)":"건조기시트 6개","[투윤맘님X일비아] 단독 공동구매(구성 선택하기=06. [추가 구성] 전용 하트 집게 1개  2000원 (50% 할인))":"하트 집게","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=건조기시트 1개(40매) 코튼블루, 2번 옵션=건조기시트 1개(40매) 베이비크림, 3번 옵션=버블 코튼 캡슐 세제 1개(30캡슐))":"건조기시트 2개+캡슐세제 1개","[투윤맘님X일비아] 단독 공동구매(구성 선택하기=05. [추가 구성] 전용 하트 틴케이스 1개  5000원 (50% 할인))":"하트 틴케이스","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=스타일림 섬유탈취제 400ml 1개, 2번 옵션=스타일림 섬유탈취제 400ml 1개, 3번 옵션=스타일림 섬유탈취제 400ml 1개)":"섬유탈취제 400 3개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=건조기시트 1개(40매) 바이올렛머스크, 2번 옵션=건조기시트 1개(40매) 바이올렛머스크, 3번 옵션=스타일림 섬유탈취제 400ml 1개)":"건조기시트 2개+섬유탈취제 400","시크릿 특가일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=티트리 딥클린 얼룩제거제 350ml 2개  21000원 (1개당 9900원))":"얼룩제거제 350 2개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=티트리 딥클린 얼룩제거제 350ml 1개, 3번 옵션=건조기시트 1개(40매) 베이비크림)":"하트식세기 1개+얼룩제거제 350 1개+건조기시트","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=티트리 딥클린 얼룩제거제 350ml 1개, 2번 옵션=하트 식기세척기 세제 1개(60정), 3번 옵션=하트 식기세척기 세제 1개(60정))":"얼룩제거제 350 1개+하트식세기 2개","시크릿 특가일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=티트리 딥클린 얼룩제거제 350ml 1개  10900원)":"얼룩제거제 350","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=하트 식기세척기 세제 1개(60정), 3번 옵션=건조기시트 1개(40매) 베이비크림)":"하트식세기 2개+건조기시트 1개","[메가팩] 일비아 초고농축 세탁 캡슐세제 알러지프리 버블코튼향(30캡슐) 6개(구성 선택하기=[메가팩] 버블 코튼 캡슐 세제 6개(180캡슐)  69900원 (사은품 : 캡슐세제 틴케이스+집게))":"캡슐세제 6개+캡슐 틴케이스+집게","[빨래방전용] 일비아 건조기 드라이 퍼퓸 시트 40매(옵션선택=코튼블루 18개+바이올렛머스크 9개)":"건조기시트 27개","🚨시크릿 특가🚨일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=티트리 딥클린 얼룩제거제 350ml 1개  10900원)":"얼룩제거제 350","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=스타일림 섬유탈취제 400ml 1개, 2번 옵션=티트리 딥클린 얼룩제거제 350ml 1개, 3번 옵션=건조기시트 1개(40매) 베이비크림)":"섬유탈취제 400 1개+얼룩제거제 350 1개+건조기시트 1개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=티트리 딥클린 얼룩제거제 350ml 1개, 2번 옵션=티트리 딥클린 얼룩제거제 350ml 1개, 3번 옵션=티트리 딥클린 얼룩제거제 350ml 1개)":"얼룩제거제 350 3개","🚨시크릿 특가🚨일비아 티트리 딥클린 얼룩제거제 350ml(구성 선택하기=[실속 구성] 티트리 딥클린 얼룩제거제 350ml 3개  28800원 (1개당 9600원))":"얼룩제거제 350 3개","[메가팩] 일비아 하트 안심성분 올인원 타블릿 식기세척기 세제(60정) 6개(구성 선택하기=[메가팩] 하트 식기세척기 세제 6개(360정)  65900원 (사은품 : 타블릿 틴케이스+집게))":"하트식세기 6개+틴케이스+집게","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=티트리 딥클린 얼룩제거제 350ml 1개, 2번 옵션=건조기시트 1개(40매) 코튼블루, 3번 옵션=건조기시트 1개(40매) 베이비크림)":"얼룩제거제 350 1개+건조기시트 2개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=버블 코튼 캡슐 세제 1개(30캡슐), 2번 옵션=버블 코튼 캡슐 세제 1개(30캡슐), 3번 옵션=건조기시트 1개(40매) 코튼블루)":"캡슐세제 2개+건조기시트 1개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=버블 코튼 캡슐 세제 1개(30캡슐), 2번 옵션=버블 코튼 캡슐 세제 1개(30캡슐), 3번 옵션=스타일림 섬유탈취제 400ml 1개)":"캡슐세제 2개+섬유탈취제 400 1개","[빨래방전용] 일비아 건조기 드라이 퍼퓸 시트 40매(옵션선택=베이비크림 40매)":"건조기시트 27개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=★메가팩★ 캡슐 세제 6개, 2번 옵션=캡슐세제 틴케이스+하트 집게, 3번 옵션=해당 없음)":"캡슐세제 6개+캡슐 틴케이스+집게","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=스타일림 섬유탈취제 400ml 1개, 3번 옵션=스타일림 섬유탈취제 400ml 1개)":"하트식세기 2개+섬유탈취제 400 2개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=스타일림 섬유탈취제 400ml 1개, 2번 옵션=티트리 딥클린 얼룩제거제 350ml 1개, 3번 옵션=스타일림 섬유탈취제 400ml 1개)":"섬유탈취제 2개+얼룩제거제 350 1개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=티트리 딥클린 얼룩제거제 350ml 1개, 3번 옵션=스타일림 섬유탈취제 400ml 1개)":"하트식세기 1개+얼룩제거제 350 1개+섬유탈취제 400 1개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=건조기시트 1개(40매) 베이비크림, 2번 옵션=하트 식기세척기 세제 1개(60정), 3번 옵션=하트 식기세척기 세제 1개(60정))":"건조기시트 1개+하트식세기 2개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=버블 코튼 캡슐 세제 1개(30캡슐), 2번 옵션=스타일림 섬유탈취제 400ml 1개, 3번 옵션=건조기시트 1개(40매) 코튼블루)":"캡슐세제 1개+섬유탈취제 400 1개+건조기시트 1개","일비아 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=스타일링 섬유탈취제 400ml 3개 34200원 카톡 쿠폰 적용시 (1개당 10400원))":"섬유탈취제 400 3개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=버블 코튼 캡슐 세제 1개(30캡슐), 3번 옵션=하트 식기세척기 세제 1개(60정))":"하트식세기 2개+캡슐세제 1개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=하트 식기세척기 세제 1개(60정), 3번 옵션=스타일림 섬유탈취제 400ml 1개)":"하트식세기 2개+섬유탈취제 400 1개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=건조기시트 1개(40매) 코튼블루, 3번 옵션=건조기시트 1개(40매) 베이비크림)":"하트식세기 1개+건조기시트 1개+섬유탈취제 400 1개","🚨시크릿 특가🚨일비아 탈취 정전기 방지 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[단품] 스타일링 섬유탈취제 400ml 1개 9900원)":"섬유탈취제 400","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=스타일림 섬유탈취제 400ml 1개, 2번 옵션=스타일림 섬유탈취제 400ml 1개, 3번 옵션=티트리 딥클린 얼룩제거제 350ml 1개)":"섬유탈취제 400 2개+얼룩제거제 350 1개","[메가팩] 일비아 스타일링 섬유탈취제 코튼블루 400ml 6개(구성 선택하기=[메가팩] 스타일링 섬유탈취제 400ml 6개 62400원 (사은품 : 섬유탈취제 100ml))":"섬유탈취제 400 6개+섬유탈취제 100 1개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=건조기시트 1개(40매) 베이비크림, 3번 옵션=버블 코튼 캡슐 세제 1개(30캡슐))":"하트식세기 1개+건조기시트 1개+캡슐세제 1개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=버블 코튼 캡슐 세제 1개(30캡슐), 3번 옵션=스타일림 섬유탈취제 400ml 1개)":"하트식세기 1개+캡슐세제 1개+섬유탈취제 400 1개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=버블 코튼 캡슐 세제 1개(30캡슐), 3번 옵션=건조기시트 1개(40매) 베이비크림)":"하트식세기 1개+캡슐세제 1개+건조기시트 1개","🚨시크릿 특가🚨일비아 탈취 정전기 방지 스타일링 섬유탈취제 코튼블루 400ml(구성 선택하기=[2+2] 섬유탈취제 400ml 4개 + 섬유탈취제 100ml 1개(사은품) 35600원 카톡 쿠폰 적용시 (1개당 8150원))":"섬유탈취제 400 4개+섬유탈취제 100 1개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=버블 코튼 캡슐 세제 1개(30캡슐), 3번 옵션=건조기시트 1개(40매) 코튼블루)":"하트식세기 1개+캡슐세제 1개+건조기시트 1개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=티트리 딥클린 얼룩제거제 350ml 1개, 2번 옵션=건조기시트 1개(40매) 코튼블루, 3번 옵션=스타일림 섬유탈취제 400ml 1개)":"얼룩제거제 350 1개+건조기시트 1개+섬유탈취제 400 1개","[Hello 2026] 일비아 균일가 대전 UP TO 62% OFF(옵션 선택하기=04. [단품] 하트 식기세척기 세제 1개(60정)  9900원 (50% 할인))":"하트식세기","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=하트 식기세척기 세제 1개(60정), 3번 옵션=버블 코튼 캡슐 세제 1개(30캡슐))":"하트식세기 2개+캡슐세제 1개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=버블 코튼 캡슐 세제 1개(30캡슐), 2번 옵션=버블 코튼 캡슐 세제 1개(30캡슐), 3번 옵션=버블 코튼 캡슐 세제 1개(30캡슐))":"캡슐세제 3개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=티트리 딥클린 얼룩제거제 350ml 1개, 3번 옵션=하트 식기세척기 세제 1개(60정))":"하트식세기 2개+얼룩제거제 350 1개","[1월 프로모션] 일비아 BEST 상품 7종 균일가 골라 담기(1번 옵션=하트 식기세척기 세제 1개(60정), 2번 옵션=스타일림 섬유탈취제 400ml 1개, 3번 옵션=하트 식기세척기 세제 1개(60정))":"하트식세기 2개+섬유탈취제 400 1개","[Hello 2026] 일비아 균일가 대전 UP TO 62% OFF(옵션 선택하기=06. [단품] 버블 코튼 캡슐 세제 1개(30캡슐)  9900원 (60% 할인))":"캡슐세제","[Hello 2026] 일비아 균일가 대전 UP TO 62% OFF(옵션 선택하기=08. [단품] 티트리 딥클린 얼룩제거제 350ml 1개  9900원 (48% 할인))":"얼룩제거제 350","[Hello 2026] 일비아 균일가 대전 UP TO 62% OFF(옵션 선택하기=07. [단품] 건조기시트 1개(40매) 베이비크림  9900원 (48% 할인))":"건조기시트","[Hello 2026] 일비아 균일가 대전 UP TO 62% OFF(옵션 선택하기=02. [메가팩] 하트 식기세척기 세제 6개(360정)  59900원 (55% 할인+사은품))":"하트식세기 6개+틴케이스+집게+섬유탈취제 100","[Hello 2026] 일비아 균일가 대전 UP TO 62% OFF(옵션 선택하기=01. [메가팩] 버블 코튼 캡슐 세제 6개(180캡슐)  62900원 (62% 할인+사은품))":"캡슐세제 6개+캡슐 틴케이스+집게+섬유탈취제 100","[Hello 2026] 일비아 균일가 대전 UP TO 62% OFF(옵션 선택하기=03. [메가팩] 건조기시트 6개(240매) 바이올렛머스크  56900원 (50% 할인+사은품))":"건조기시트 6개+섬유탈취제 100","[Hello 2026] 일비아 균일가 대전 UP TO 62% OFF(옵션 선택하기=07. [단품] 건조기시트 1개(40매) 바이올렛머스크  9900원 (48% 할인))":"건조기시트","[Hello 2026] 일비아 균일가 대전 UP TO 62% OFF(옵션 선택하기=07. [단품] 건조기시트 1개(40매) 코튼블루  9900원 (48% 할인))":"건조기시트","[Hello 2026] 일비아 균일가 대전 UP TO 62% OFF(옵션 선택하기=03. [메가팩] 건조기시트 6개(240매) 베이비크림  56900원 (50% 할인+사은품))":"건조기시트 6개+섬유탈취제 100","[추가 구매 할인]  Hello 2026 일비아 균일가 대전(상품 선택하기=10. 스타일링 섬유탈취제 휴대용 100ml 6900원 (*단독 구매 불가))":"섬유탈취제 100","[추가 구매 할인]  Hello 2026 일비아 균일가 대전(상품 선택하기=09. 티트리 딥클린 얼룩제거제 휴대용 100ml 6900원 (*단독 구매 불가))":"얼룩제거제 100","[Hello 2026] 일비아 균일가 대전 UP TO 62% OFF(옵션 선택하기=05. [단품] 스타일링 섬유탈취제 400ml 1개  9900원 (48% 할인))":"섬유탈취제 400","[빨래방전용] 일비아 건조기 드라이 퍼퓸 시트 40매(옵션선택=바이올렛머스크 40매)":"건조기시트 27개","[Hello 2026] 일비아 균일가 대전 UP TO 62% OFF(옵션 선택하기=03. [메가팩] 건조기시트 6개(240매) 코튼블루  56900원 (50% 할인+사은품))":"건조기시트 6개+섬유탈취제 100","[추가 구매 할인]  Hello 2026 일비아 균일가 대전(상품 선택하기=11. 다목적 세정제 500ml 1개 6900원 (*단독 구매 불가))":"다목적세정제","[미아르나X일비아] 단독 공동구매(구성 선택하기=05. 버블 코튼 캡슐 세제(30개입) 1개, 향 선택=해당없음)":"캡슐세제","[미아르나X일비아] 단독 공동구매(구성 선택하기=07. 건조기 드라이 퍼퓸 시트(40매) 1개, 향 선택=베이비크림 1개)":"건조기시트","[미아르나X일비아] 단독 공동구매(구성 선택하기=03. 세탁 향기&주름 관리 세트, 향 선택=베이비크림 1개)":"캡슐세제 1개+섬유탈취제 400 1개+건조기시트 1개+섬유탈취제 100 1개","[미아르나X일비아] 단독 공동구매(구성 선택하기=10. 티트리 딥클린 얼룩제거제 350ml 1개, 향 선택=해당없음)":"얼룩제거제 350"};
+
+// 카페24 — 매뉴얼 기반 전면 재작성
+function parseCafe24(wb) {
+  // 파일 내 품명리스트 시트가 있으면 사용, 없으면 디폴트 매핑 사용
+  const fileNameMap = buildNameMap(wb, ['품명리스트', '품명리스트추가']);
+  const nameMap = Object.keys(fileNameMap).length > 0 ? fileNameMap : {...DEFAULT_CAFE24_NAMEMAP};
+
+  // 시트 찾기: '원본' 또는 첫 번째 시트(로우 데이터)
+  const sheets = getSheets(wb);
+  const sheetName = sheets.includes('원본') ? '원본' : sheets[0];
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {header:1});
+  if (rows.length < 2) return { results:[], unmapped:[] };
+
+  // 헤더 기반 컬럼 인덱스 매핑 (컬럼 순서 변해도 동작)
+  const hdr = rows[0].map(h => String(h||'').trim());
+  const col = (name) => hdr.indexOf(name);
+
+  const C = {
+    취소구분:       col('취소구분'),
+    주문상태:       col('주문 상태') >= 0 ? col('주문 상태') : col('주문상태'),
+    주문번호:       col('주문번호'),
+    주문상품명:     col('주문상품명'),
+    주문상품명옵션: col('주문상품명(옵션포함)'),
+    상품옵션:       col('상품옵션'),
+    수량:           col('수량'),
+    옵션판매가:     col('옵션+판매가'),
+    판매가:         col('판매가'),
+    품목별결제금액: col('품목별 결제금액'),
+    회원등급추가할인: col('회원등급 추가할인금액'),
+    쿠폰할인최초:   col('쿠폰 할인금액(최초)'),
+    적립금최종:     col('사용한 적립금액(최종)') >= 0 ? col('사용한 적립금액(최종)') : col('사용한 적립금액(최초)'),
+    앱상품할인최종: col('앱 상품할인 금액(최종)'),
+    상품구매금액:   col('상품구매금액'),
+  };
+
+  const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  // 중복 주문번호 할인 추적 (매뉴얼 5단계)
+  const seenOrderDiscounts = new Set();
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+
+    // ── 매뉴얼 2단계: 취소 필터링 ──
+    // 카페24 상태값에 공백 포함 ('배송 완료', '취소 완료' 등) → 공백 제거 후 비교
+    const cancelType = String(r[C.취소구분] || '').replace(/\s/g,'');
+    // 취소구분이 '취소안함'이 아니면 제외 (취소, 부분취소)
+    if (cancelType !== '' && cancelType !== '취소안함') continue;
+
+    // ── 매뉴얼 3단계: 상품명 가공 ──
+    const prodNameOpt = String(r[C.주문상품명옵션] || r[C.주문상품명] || '').trim();
+    const prodName = String(r[C.주문상품명] || '').trim();
+    const option = String(r[C.상품옵션] || '').trim();
+
+    if (!prodName) continue;
+
+    const qty = Number(r[C.수량] || 0);
+    if (qty <= 0) continue;
+
+    // ── 매뉴얼 4단계: 결제총액 = 수량 × (옵션+판매가) ──
+    // 샘플/무료 상품은 옵션+판매가=0 → 자동으로 결제총액=0
+    const unitPrice = Number(r[C.옵션판매가] || r[C.판매가] || 0);
+    const totalAmount = qty * unitPrice;
+
+    // ── 매뉴얼 5단계: 중복 주문번호 할인 처리 ──
+    const orderNo = String(r[C.주문번호] || '');
+    let couponDiscount = 0, pointDiscount = 0, appDiscount = 0;
+
+    if (!seenOrderDiscounts.has(orderNo)) {
+      seenOrderDiscounts.add(orderNo);
+      couponDiscount = Number(r[C.쿠폰할인최초] || 0);
+      pointDiscount = Number(r[C.적립금최종] || 0);
+      appDiscount = Number(r[C.앱상품할인최종] || 0);
+    }
+
+    // ── 매뉴얼 6단계: 최종 정산금액 ──
+    const settlement = totalAmount - couponDiscount - pointDiscount - appDiscount;
+
+    // 최종상품명 매핑 (품명리스트 VLOOKUP 재현)
+    const key = prodNameOpt || (prodName + option);
+    let finalName = nameMap[key] || nameMap[prodName] || nameMap[prodNameOpt] || null;
+
+    if (!finalName && !unmappedKeys.has(key)) {
+      unmappedKeys.add(key);
+      unmapped.push({ key, prodName, option, qty, settlement, count: 1 });
+    }
+
+    results.push({
+      최종상품명: finalName || key,
+      수량: qty,
+      정산금액: settlement,
+      매출액: totalAmount,
+      매핑: !!finalName
+    });
+  }
+  return { results, unmapped };
+}
+
+// ═══════════════════════════════════════════════════════
+// AGGREGATION & COSTING
+// ═══════════════════════════════════════════════════════
+function aggregateResults(results) {
+  const map = {};
+  for (const r of results) {
+    const k = r.최종상품명;
+    if (!map[k]) map[k] = { 최종상품명: k, 수량: 0, 정산금액: 0, 매출액: 0, 매핑: r.매핑 };
+    map[k].수량 += r.수량;
+    map[k].정산금액 += r.정산금액;
+    map[k].매출액 += r.매출액;
+    if (!r.매핑) map[k].매핑 = false;
+  }
+  return Object.values(map).sort((a, b) => b.정산금액 - a.정산금액);
+}
+
+function applyCosting(aggregated) {
+  for (const r of aggregated) {
+    const unitCost = state.costMap[r.최종상품명] || 0;
+    r.원가단가 = unitCost;
+    r.원가합계 = unitCost * r.수량;
+    r.이익 = r.정산금액 - r.원가합계;
+    r.이익률 = r.정산금액 > 0 ? r.이익 / r.정산금액 : 0;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// UNMAPPED MODAL
+// ═══════════════════════════════════════════════════════
+let currentModalChannel = null;
+
+function showUnmappedModal(channelId, unmapped) {
+  currentModalChannel = channelId;
+  const knownNames = [...state.allProductNames].sort();
+  const body = document.getElementById('modalBody');
+
+  body.innerHTML = `<p style="font-size:.8rem;color:#94a3b8;margin-bottom:12px;">
+    <strong style="color:#f59e0b;">${unmapped.length}개</strong>의 상품이 품명리스트에 없어요. 최종상품명을 지정해주세요.</p>
+  ${unmapped.map((u, idx) => `
+    <div class="unmapped-row">
+      <div class="unmapped-key" title="${u.key}">${u.prodName}<br/><small style="color:#64748b;">${u.option||''}</small></div>
+      <div style="font-size:.72rem;color:#64748b;text-align:right;min-width:70px;">${fmt(u.qty||0)}개<br/>₩${fmt(u.settlement||0)}</div>
+      <input list="nameList_${idx}" id="unmap_${idx}" data-key="${u.key}" placeholder="최종상품명 입력" value="${u.key.length < 20 ? u.key : ''}"/>
+      <datalist id="nameList_${idx}">${knownNames.map(n => `<option value="${n}">`).join('')}</datalist>
+    </div>`).join('')}`;
+
+  document.getElementById('modalBg').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modalBg').style.display = 'none';
+}
+
+function applyModalUnmapped() {
+  const inputs = document.querySelectorAll('#modalBody input[data-key]');
+  const mapping = {};
+  inputs.forEach(inp => {
+    const key = inp.dataset.key;
+    const val = inp.value.trim();
+    if (val) mapping[key] = val;
+  });
+
+  if (currentModalChannel && state.channels[currentModalChannel]) {
+    const ch = state.channels[currentModalChannel];
+    // Apply mapping to results
+    for (const r of ch.results) {
+      if (!r.매핑 && mapping[r.최종상품명]) {
+        r.최종상품명 = mapping[r.최종상품명];
+        r.매핑 = true;
+        state.allProductNames.add(r.최종상품명);
+      }
+    }
+    // Remove mapped from unmapped
+    ch.unmapped = ch.unmapped.filter(u => !mapping[u.key]);
+    // Re-aggregate
+    ch.aggregated = aggregateResults(ch.results);
+    applyCosting(ch.aggregated);
+  }
+
+  closeModal();
+  renderChannelGrid();
+  renderSidebar();
+  updateSummary();
+  renderResults();
+  showToast('매핑 적용 완료!', 'success');
+}
+
+function applyUnmapped() {
+  applyModalUnmapped();
+}
+
+// ═══════════════════════════════════════════════════════
+// RESULTS RENDERING
+// ═══════════════════════════════════════════════════════
+function renderResults() {
+  const section = document.getElementById('resultSection');
+  const channels = Object.values(state.channels);
+  if (channels.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  // 로그인 상태면 클라우드 저장 버튼 표시
+  const saveBtn = document.getElementById('cloudSaveBtn');
+  if (saveBtn) saveBtn.style.display = currentUser ? 'inline-flex' : 'none';
+
+  // Summary cards
+  let totalSett = 0, totalCost = 0, totalQty = 0, totalRevenue = 0;
+  for (const ch of channels) {
+    for (const r of ch.aggregated || []) {
+      totalSett += r.정산금액;
+      totalCost += r.원가합계 || 0;
+      totalQty += r.수량;
+      totalRevenue += r.매출액 || 0;
+    }
+  }
+  const totalProfit = totalSett - totalCost;
+  const profitRate = totalSett > 0 ? totalProfit / totalSett : 0;
+
+  document.getElementById('sumCards').innerHTML = `
+    <div class="sum-card"><div class="val">₩${fmt(totalSett)}</div><div class="lbl">총 정산금액</div></div>
+    <div class="sum-card"><div class="val" style="color:#0284c7;">${fmt(totalQty)}개</div><div class="lbl">총 판매수량</div></div>
+    <div class="sum-card"><div class="val" style="color:${totalProfit>=0?'#10b981':'#ef4444'};">₩${fmt(totalProfit)}</div><div class="lbl">총 이익 (정산기준)</div></div>
+    <div class="sum-card"><div class="val" style="color:${profitRate>=0.2?'#10b981':profitRate>=0?'#f59e0b':'#ef4444'};">${fmtRate(profitRate)}</div><div class="lbl">이익률</div></div>
+  `;
+
+  const month = document.getElementById('settlementMonth').value;
+  document.getElementById('resultMonth').textContent = month ? `(${month})` : '';
+
+  // Tabs
+  const tabs = [{ id:'all', name:'📊 전체 종합' }, ...channels.map(ch => ({ id:ch.name, name:ch.icon+' '+ch.name }))];
+  document.getElementById('resultTabs').innerHTML = tabs.map(t =>
+    `<button class="btn ${state.currentTab===t.id?'btn-primary':'btn-secondary'} btn-sm" onclick="switchTab('${t.id}')">${t.name}</button>`
+  ).join('');
+
+  renderTable();
+}
+
+function switchTab(tabId) {
+  state.currentTab = tabId;
+  document.getElementById('resultTabs').querySelectorAll('button').forEach((btn, i) => {
+    const tabs = [{ id:'all' }, ...Object.values(state.channels).map(ch => ({ id:ch.name }))];
+    btn.className = 'btn ' + (state.currentTab === tabs[i].id ? 'btn-primary' : 'btn-secondary') + ' btn-sm';
+  });
+  renderTable();
+}
+
+function renderTable() {
+  const wrap = document.getElementById('resultTableWrap');
+  let data = [];
+
+  if (state.currentTab === 'all') {
+    // Aggregate across all channels by 최종상품명
+    const map = {};
+    for (const ch of Object.values(state.channels)) {
+      for (const r of ch.aggregated || []) {
+        if (!map[r.최종상품명]) map[r.최종상품명] = { 최종상품명:r.최종상품명, 수량:0, 정산금액:0, 매출액:0, 원가단가:r.원가단가||0, 원가합계:0, 이익:0, 매핑:r.매핑 };
+        map[r.최종상품명].수량 += r.수량;
+        map[r.최종상품명].정산금액 += r.정산금액;
+        map[r.최종상품명].매출액 += r.매출액;
+        map[r.최종상품명].원가합계 += r.원가합계 || 0;
+        map[r.최종상품명].이익 += r.이익 || 0;
+        if (!r.매핑) map[r.최종상품명].매핑 = false;
+      }
+    }
+    data = Object.values(map).sort((a,b) => b.정산금액 - a.정산금액);
+    for (const d of data) d.이익률 = d.정산금액 > 0 ? d.이익 / d.정산금액 : 0;
+  } else {
+    const ch = Object.values(state.channels).find(c => c.name === state.currentTab);
+    data = ch ? (ch.aggregated || []) : [];
+  }
+
+  const rowsHtml = data.map(r => {
+    const profitCls = r.이익 >= 0 ? 'profit-pos' : 'profit-neg';
+    const rateCls = (r.이익률||0) >= 0.2 ? 'profit-pos' : (r.이익률||0) >= 0 ? '' : 'profit-neg';
+    return `<tr>
+      <td>${r.최종상품명}${!r.매핑 ? ' <span class="unmapped-badge">미매핑</span>' : ''}</td>
+      <td class="num">${fmt(r.수량)}</td>
+      <td class="num">₩${fmt(r.정산금액)}</td>
+      <td class="num">${r.원가단가 ? '₩'+fmt(r.원가단가) : '-'}</td>
+      <td class="num">${r.원가합계 ? '₩'+fmt(r.원가합계) : '-'}</td>
+      <td class="num ${profitCls}">${r.이익 !== undefined ? '₩'+fmt(r.이익) : '-'}</td>
+      <td class="num ${rateCls}">${r.이익률 !== undefined ? fmtRate(r.이익률) : '-'}</td>
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `<div class="tbl-wrap"><table>
+    <thead><tr>
+      <th>최종상품명</th>
+      <th class="num">수량</th>
+      <th class="num">정산금액</th>
+      <th class="num">원가/개</th>
+      <th class="num">원가합계</th>
+      <th class="num">이익</th>
+      <th class="num">이익률</th>
+    </tr></thead>
+    <tbody>${rowsHtml}</tbody>
+  </table></div>`;
+}
+
+function focusChannel(channelId) {
+  const ch = CHANNEL_DEFS.find(d => d.id === channelId);
+  if (ch && state.channels[channelId]) {
+    switchTab(state.channels[channelId].name);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// VIEW MODE TOGGLE (Table ↔ Spreadsheet)
+// ═══════════════════════════════════════════════════════
+let currentViewMode = 'table';
+let spreadsheetInstance = null;
+
+function setViewMode(mode) {
+  currentViewMode = mode;
+  document.getElementById('viewTable').classList.toggle('active', mode === 'table');
+  document.getElementById('viewSheet').classList.toggle('active', mode === 'sheet');
+  document.getElementById('resultTableWrap').style.display = mode === 'table' ? 'block' : 'none';
+  document.getElementById('spreadsheetWrap').style.display = mode === 'sheet' ? 'block' : 'none';
+  if (mode === 'sheet') renderSpreadsheet();
+}
+
+// ═══════════════════════════════════════════════════════
+// JSPREADSHEET RENDERING
+// ═══════════════════════════════════════════════════════
+function getDisplayData() {
+  let data = [];
+  if (state.currentTab === 'all') {
+    const map = {};
+    for (const ch of Object.values(state.channels)) {
+      for (const r of ch.aggregated || []) {
+        if (!map[r.최종상품명]) map[r.최종상품명] = { 최종상품명:r.최종상품명, 수량:0, 정산금액:0, 매출액:0, 원가단가:r.원가단가||0, 원가합계:0, 이익:0, 매핑:r.매핑 };
+        map[r.최종상품명].수량 += r.수량;
+        map[r.최종상품명].정산금액 += r.정산금액;
+        map[r.최종상품명].매출액 += r.매출액;
+        map[r.최종상품명].원가합계 += r.원가합계 || 0;
+        map[r.최종상품명].이익 += r.이익 || 0;
+        if (!r.매핑) map[r.최종상품명].매핑 = false;
+      }
+    }
+    data = Object.values(map).sort((a,b) => b.정산금액-a.정산금액);
+    for (const d of data) d.이익률 = d.정산금액 > 0 ? d.이익 / d.정산금액 : 0;
+  } else {
+    const ch = Object.values(state.channels).find(c => c.name === state.currentTab);
+    data = ch ? (ch.aggregated || []) : [];
+  }
+  return data;
+}
+
+function renderSpreadsheet() {
+  const wrap = document.getElementById('spreadsheetWrap');
+  wrap.innerHTML = '';
+  if (spreadsheetInstance) { spreadsheetInstance = null; }
+
+  const data = getDisplayData();
+  if (data.length === 0) {
+    wrap.innerHTML = '<p style="color:#64748b;font-size:.82rem;padding:20px;">데이터가 없습니다.</p>';
+    return;
+  }
+
+  const sheetData = data.map(r => [
+    r.최종상품명,
+    r.수량,
+    Math.round(r.정산금액),
+    r.원가단가 || 0,
+    Math.round(r.원가합계 || 0),
+    Math.round(r.이익 || 0),
+    r.이익률 !== undefined ? parseFloat((r.이익률 * 100).toFixed(1)) : 0
+  ]);
+
+  // 합계 행 추가
+  const totals = ['합계',
+    data.reduce((s,r) => s + r.수량, 0),
+    Math.round(data.reduce((s,r) => s + r.정산금액, 0)),
+    '',
+    Math.round(data.reduce((s,r) => s + (r.원가합계||0), 0)),
+    Math.round(data.reduce((s,r) => s + (r.이익||0), 0)),
+    ''
+  ];
+  sheetData.push(totals);
+
+  const div = document.createElement('div');
+  div.id = 'jspreadsheet_result';
+  wrap.appendChild(div);
+
+  spreadsheetInstance = jspreadsheet(div, {
+    data: sheetData,
+    columns: [
+      { type:'text', title:'최종상품명', width:200 },
+      { type:'numeric', title:'수량', width:80, mask:'#,##0' },
+      { type:'numeric', title:'정산금액', width:130, mask:'#,##0' },
+      { type:'numeric', title:'원가/개', width:100, mask:'#,##0' },
+      { type:'numeric', title:'원가합계', width:130, mask:'#,##0' },
+      { type:'numeric', title:'이익', width:130, mask:'#,##0' },
+      { type:'numeric', title:'이익률(%)', width:90, mask:'#,##0.0' },
+    ],
+    tableOverflow: true,
+    tableWidth: '100%',
+    tableHeight: '400px',
+    allowInsertRow: true,
+    allowDeleteRow: true,
+    allowInsertColumn: false,
+    allowDeleteColumn: false,
+    columnSorting: true,
+    search: true,
+    pagination: data.length > 50 ? 50 : 0,
+    text: {
+      noRecordsFound: '데이터 없음',
+      showingPage: '{0}/{1} 페이지',
+      search: '검색...',
+      insertANewRowBefore: '위에 행 삽입',
+      insertANewRowAfter: '아래에 행 삽입',
+      deleteSelectedRows: '선택 행 삭제',
+      copy: '복사',
+      paste: '붙여넣기',
+      saveAs: '저장',
+    },
+    onchange: function(instance, cell, x, y, value) {
+      // 스프레드시트 편집 시 이익 자동 재계산
+      if (x == 1 || x == 3) { // 수량 또는 원가 변경시
+        const qty = Number(instance.jexcel.getValueFromCoords(1, y)) || 0;
+        const unitCost = Number(instance.jexcel.getValueFromCoords(3, y)) || 0;
+        const settlement = Number(instance.jexcel.getValueFromCoords(2, y)) || 0;
+        const totalCost = unitCost * qty;
+        const profit = settlement - totalCost;
+        const rate = settlement > 0 ? (profit / settlement) * 100 : 0;
+        instance.jexcel.setValueFromCoords(4, y, totalCost, true);
+        instance.jexcel.setValueFromCoords(5, y, profit, true);
+        instance.jexcel.setValueFromCoords(6, y, parseFloat(rate.toFixed(1)), true);
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// EXCELJS STYLED EXPORT
+// ═══════════════════════════════════════════════════════
+async function downloadExcelStyled() {
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'iLBiA 매출정산 대시보드';
+  wb.created = new Date();
+  const month = document.getElementById('settlementMonth').value || '정산';
+
+  const headerFill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF0F766E' } };
+  const headerFont = { bold:true, color:{ argb:'FFFFFFFF' }, size:11, name:'맑은 고딕' };
+  const borderStyle = { style:'thin', color:{ argb:'FF334155' } };
+  const borders = { top:borderStyle, left:borderStyle, bottom:borderStyle, right:borderStyle };
+  const numFmt = '#,##0';
+  const rateFmt = '0.0%';
+
+  // 채널별 시트
+  for (const ch of Object.values(state.channels)) {
+    const ws = wb.addWorksheet(ch.name.substring(0,31));
+
+    // 헤더 행
+    const headerRow = ws.addRow(['최종상품명','수량','정산금액','원가/개','원가합계','이익','이익률']);
+    headerRow.eachCell((cell) => {
+      cell.fill = headerFill;
+      cell.font = headerFont;
+      cell.border = borders;
+      cell.alignment = { horizontal:'center', vertical:'middle' };
+    });
+    headerRow.height = 24;
+
+    // 데이터 행
+    let totalSett = 0, totalCost = 0, totalProfit = 0, totalQty = 0;
+    for (const r of ch.aggregated || []) {
+      const row = ws.addRow([
+        r.최종상품명, r.수량, r.정산금액, r.원가단가||0, r.원가합계||0, r.이익||0, r.이익률||0
+      ]);
+      row.getCell(2).numFmt = numFmt;
+      row.getCell(3).numFmt = numFmt;
+      row.getCell(4).numFmt = numFmt;
+      row.getCell(5).numFmt = numFmt;
+      row.getCell(6).numFmt = numFmt;
+      row.getCell(7).numFmt = rateFmt;
+      // 이익 색상
+      if ((r.이익||0) >= 0) {
+        row.getCell(6).font = { color:{ argb:'FF10B981' }, bold:true };
+      } else {
+        row.getCell(6).font = { color:{ argb:'FFEF4444' }, bold:true };
+      }
+      row.eachCell(cell => { cell.border = borders; });
+      totalSett += r.정산금액;
+      totalCost += r.원가합계||0;
+      totalProfit += r.이익||0;
+      totalQty += r.수량;
+    }
+
+    // 합계 행
+    const sumFill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1A1D27' } };
+    const sumFont = { bold:true, size:11, name:'맑은 고딕' };
+    const sumRow = ws.addRow(['합계', totalQty, totalSett, '', totalCost, totalProfit, totalSett > 0 ? totalProfit/totalSett : 0]);
+    sumRow.eachCell((cell) => {
+      cell.fill = sumFill;
+      cell.font = sumFont;
+      cell.border = borders;
+    });
+    sumRow.getCell(2).numFmt = numFmt;
+    sumRow.getCell(3).numFmt = numFmt;
+    sumRow.getCell(5).numFmt = numFmt;
+    sumRow.getCell(6).numFmt = numFmt;
+    sumRow.getCell(7).numFmt = rateFmt;
+
+    // 열 너비
+    ws.columns = [
+      { width:28 }, { width:10 }, { width:16 }, { width:14 }, { width:16 }, { width:16 }, { width:10 }
+    ];
+  }
+
+  // 종합 시트
+  const wsAll = wb.addWorksheet('종합');
+  const allHeader = wsAll.addRow(['최종상품명','수량','정산금액합계','원가합계','이익','이익률']);
+  allHeader.eachCell(cell => {
+    cell.fill = headerFill;
+    cell.font = headerFont;
+    cell.border = borders;
+    cell.alignment = { horizontal:'center', vertical:'middle' };
+  });
+  allHeader.height = 24;
+
+  const allMap = {};
+  for (const ch of Object.values(state.channels)) {
+    for (const r of ch.aggregated || []) {
+      if (!allMap[r.최종상품명]) allMap[r.최종상품명] = { 최종상품명:r.최종상품명, 수량:0, 정산금액:0, 원가합계:0, 이익:0 };
+      allMap[r.최종상품명].수량 += r.수량;
+      allMap[r.최종상품명].정산금액 += r.정산금액;
+      allMap[r.최종상품명].원가합계 += r.원가합계||0;
+      allMap[r.최종상품명].이익 += r.이익||0;
+    }
+  }
+  let gTotal=0, gCost=0, gProfit=0, gQty=0;
+  for (const r of Object.values(allMap).sort((a,b) => b.정산금액-a.정산금액)) {
+    const rate = r.정산금액 > 0 ? r.이익 / r.정산금액 : 0;
+    const row = wsAll.addRow([r.최종상품명, r.수량, r.정산금액, r.원가합계, r.이익, rate]);
+    row.getCell(2).numFmt = numFmt;
+    row.getCell(3).numFmt = numFmt;
+    row.getCell(4).numFmt = numFmt;
+    row.getCell(5).numFmt = numFmt;
+    row.getCell(6).numFmt = rateFmt;
+    if (r.이익 >= 0) {
+      row.getCell(5).font = { color:{ argb:'FF10B981' }, bold:true };
+    } else {
+      row.getCell(5).font = { color:{ argb:'FFEF4444' }, bold:true };
+    }
+    row.eachCell(cell => { cell.border = borders; });
+    gTotal += r.정산금액; gCost += r.원가합계; gProfit += r.이익; gQty += r.수량;
+  }
+  const gSumRow = wsAll.addRow(['합계', gQty, gTotal, gCost, gProfit, gTotal > 0 ? gProfit/gTotal : 0]);
+  const sumFill2 = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1A1D27' } };
+  gSumRow.eachCell(cell => { cell.fill = sumFill2; cell.font = { bold:true }; cell.border = borders; });
+  gSumRow.getCell(2).numFmt = numFmt;
+  gSumRow.getCell(3).numFmt = numFmt;
+  gSumRow.getCell(4).numFmt = numFmt;
+  gSumRow.getCell(5).numFmt = numFmt;
+  gSumRow.getCell(6).numFmt = rateFmt;
+  wsAll.columns = [{ width:28 },{ width:10 },{ width:18 },{ width:16 },{ width:16 },{ width:10 }];
+
+  // 다운로드
+  const buffer = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `iLBiA_매출정산_${month}_서식.xlsx`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('서식 포함 Excel 다운로드 완료!', 'success');
+}
+
+// ═══════════════════════════════════════════════════════
+// EXCEL EXPORT (기본 - SheetJS)
+// ═══════════════════════════════════════════════════════
+function downloadExcel() {
+  const wb = XLSX.utils.book_new();
+  const month = document.getElementById('settlementMonth').value || '정산';
+
+  // 채널별 시트
+  for (const ch of Object.values(state.channels)) {
+    const rows = [['최종상품명','수량','정산금액','원가/개','원가합계','이익','이익률']];
+    for (const r of ch.aggregated || []) {
+      rows.push([r.최종상품명, r.수량, r.정산금액, r.원가단가||0, r.원가합계||0, r.이익||0, r.이익률||0]);
+    }
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, ch.name.substring(0,31));
+  }
+
+  // 종합 시트
+  const allMap = {};
+  for (const ch of Object.values(state.channels)) {
+    for (const r of ch.aggregated || []) {
+      if (!allMap[r.최종상품명]) allMap[r.최종상품명] = { 최종상품명:r.최종상품명, 수량:0, 정산금액:0, 원가합계:0, 이익:0 };
+      allMap[r.최종상품명].수량 += r.수량;
+      allMap[r.최종상품명].정산금액 += r.정산금액;
+      allMap[r.최종상품명].원가합계 += r.원가합계||0;
+      allMap[r.최종상품명].이익 += r.이익||0;
+    }
+  }
+  const allRows = [['최종상품명','수량','정산금액합계','원가합계','이익','이익률']];
+  for (const r of Object.values(allMap).sort((a,b) => b.정산금액-a.정산금액)) {
+    const rate = r.정산금액 > 0 ? r.이익 / r.정산금액 : 0;
+    allRows.push([r.최종상품명, r.수량, r.정산금액, r.원가합계, r.이익, rate]);
+  }
+  const wsAll = XLSX.utils.aoa_to_sheet(allRows);
+  XLSX.utils.book_append_sheet(wb, wsAll, '종합');
+
+  XLSX.writeFile(wb, `iLBiA_매출정산_${month}.xlsx`);
+  showToast('Excel 다운로드 완료!', 'success');
+}
+
+// ═══════════════════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════════════════
+function resetAll() {
+  if (!confirm('모든 데이터를 초기화할까요?')) return;
+  state.channels = {};
+  state.allProductNames.clear();
+  state.currentTab = 'all';
+  renderChannelGrid();
+  renderSidebar();
+  updateSummary();
+  document.getElementById('resultSection').style.display = 'none';
+  showToast('초기화 완료', 'success');
+}
+
+// ═══════════════════════════════════════════════════════
+// MAIN TAB SWITCH
+// ═══════════════════════════════════════════════════════
+function switchMainTab(tab) {
+  document.querySelectorAll('.main-tab').forEach((btn, i) => {
+    btn.classList.toggle('active', (i === 0 && tab === 'input') || (i === 1 && tab === 'records'));
+  });
+  document.getElementById('inputSection').style.display = tab === 'input' ? 'block' : 'none';
+  document.getElementById('recordsSection').className = 'records-section' + (tab === 'records' ? ' visible' : '');
+  if (tab === 'records') loadMonthlyRecords();
+}
+
+// ═══════════════════════════════════════════════════════
+// FIREBASE AUTH
+// ═══════════════════════════════════════════════════════
+function handleAuth() {
+  if (!firebaseReady) {
+    showToast('Firebase 설정이 필요해요. firebaseConfig을 입력해주세요.', 'warn');
+    return;
+  }
+  if (currentUser) {
+    auth.signOut();
+  } else {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(err => {
+      showToast('로그인 실패: ' + err.message, 'error');
+    });
+  }
+}
+
+if (auth) {
+  auth.onAuthStateChanged(user => {
+    currentUser = user;
+    const profileEl = document.getElementById('authProfile');
+    const btnEl = document.getElementById('authBtn');
+    const saveBtn = document.getElementById('cloudSaveBtn');
+    if (user) {
+      profileEl.style.display = 'flex';
+      profileEl.innerHTML = `<img src="${user.photoURL || ''}" alt="" onerror="this.style.display='none'"/><span>${user.displayName || user.email}</span>`;
+      btnEl.textContent = '로그아웃';
+      if (saveBtn) saveBtn.style.display = 'inline-flex';
+    } else {
+      profileEl.style.display = 'none';
+      profileEl.innerHTML = '';
+      btnEl.textContent = '🔑 Google 로그인';
+      if (saveBtn) saveBtn.style.display = 'none';
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// FIRESTORE: SAVE
+// ═══════════════════════════════════════════════════════
+async function saveToCloud() {
+  if (!currentUser) { showToast('로그인이 필요해요', 'warn'); return; }
+  if (!firebaseReady) { showToast('Firebase 설정이 필요해요', 'warn'); return; }
+
+  const month = document.getElementById('settlementMonth').value;
+  if (!month) { showToast('정산 월을 설정해주세요', 'warn'); return; }
+
+  const channels = Object.values(state.channels);
+  if (channels.length === 0) { showToast('정산 데이터가 없어요', 'warn'); return; }
+
+  const btn = document.getElementById('cloudSaveBtn');
+  btn.disabled = true;
+  btn.textContent = '💾 저장 중...';
+
+  try {
+    const channelsData = {};
+    let totalQty = 0, totalSett = 0, totalCost = 0, totalProfit = 0;
+
+    for (const ch of channels) {
+      let chQty = 0, chSett = 0, chCost = 0, chProfit = 0;
+      const agg = (ch.aggregated || []).map(r => {
+        chQty += r.수량;
+        chSett += r.정산금액;
+        chCost += r.원가합계 || 0;
+        chProfit += r.이익 || 0;
+        return {
+          name: r.최종상품명,
+          qty: r.수량,
+          settlement: r.정산금액,
+          unitCost: r.원가단가 || 0,
+          totalCost: r.원가합계 || 0,
+          profit: r.이익 || 0,
+          profitRate: r.이익률 || 0,
+          mapped: r.매핑 !== false
+        };
+      });
+      channelsData[ch.name] = {
+        aggregated: agg,
+        summary: { qty: chQty, settlement: chSett, cost: chCost, profit: chProfit, profitRate: chSett > 0 ? chProfit / chSett : 0 }
+      };
+      totalQty += chQty;
+      totalSett += chSett;
+      totalCost += chCost;
+      totalProfit += chProfit;
+    }
+
+    const docRef = db.collection('settlements').doc(currentUser.uid).collection('months').doc(month);
+    await docRef.set({
+      savedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      channels: channelsData,
+      totalSummary: {
+        qty: totalQty,
+        settlement: totalSett,
+        cost: totalCost,
+        profit: totalProfit,
+        profitRate: totalSett > 0 ? totalProfit / totalSett : 0
+      }
+    });
+
+    btn.disabled = false;
+    btn.textContent = '💾 클라우드 저장';
+    showToast(`${month} 정산 데이터를 클라우드에 저장했어요!`, 'success');
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = '💾 클라우드 저장';
+    showToast('저장 실패: ' + err.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// FIRESTORE: LOAD MONTHLY RECORDS
+// ═══════════════════════════════════════════════════════
+async function loadMonthlyRecords() {
+  const wrap = document.getElementById('recordsList');
+  if (!currentUser) {
+    wrap.innerHTML = '<div class="no-records">🔑 Google 로그인하면 저장된 월별 정산 기록을 볼 수 있어요</div>';
+    return;
+  }
+  if (!firebaseReady) {
+    wrap.innerHTML = '<div class="no-records">Firebase 설정이 필요해요</div>';
+    return;
+  }
+
+  wrap.innerHTML = '<div class="no-records">불러오는 중...</div>';
+
+  try {
+    const snapshot = await db.collection('settlements').doc(currentUser.uid)
+      .collection('months').orderBy('savedAt', 'desc').get();
+
+    if (snapshot.empty) {
+      wrap.innerHTML = '<div class="no-records">저장된 정산 기록이 없어요.<br>정산 입력 탭에서 정산 후 💾 클라우드 저장을 눌러보세요!</div>';
+      return;
+    }
+
+    let html = '';
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const monthId = doc.id;
+      const savedAt = data.savedAt ? data.savedAt.toDate().toLocaleString('ko-KR') : '';
+      const ts = data.totalSummary || {};
+      const channelNames = Object.keys(data.channels || {});
+      const profitColor = (ts.profit || 0) >= 0 ? '#10b981' : '#ef4444';
+      const profitRate = ts.profitRate ? (ts.profitRate * 100).toFixed(1) + '%' : '-';
+
+      html += `<div class="record-card" id="record-${monthId}">
+        <div class="record-header" onclick="toggleRecord('${monthId}')">
+          <div class="record-month">${monthId}</div>
+          <span style="font-size:.72rem;color:#64748b;">${channelNames.length}개 채널</span>
+          <span style="font-size:.78rem;color:#10b981;font-weight:600;">₩${fmt(ts.settlement || 0)}</span>
+          <span style="font-size:.78rem;color:${profitColor};font-weight:600;">이익 ₩${fmt(ts.profit || 0)} (${profitRate})</span>
+          <div class="record-date">${savedAt}</div>
+          <button class="record-delete" onclick="event.stopPropagation();deleteRecord('${monthId}')">삭제</button>
+        </div>
+        <div class="record-body" id="recordBody-${monthId}">
+          <div class="record-summary">
+            <div class="record-stat"><div class="rv">₩${fmt(ts.settlement || 0)}</div><div class="rl">총 정산금액</div></div>
+            <div class="record-stat"><div class="rv" style="color:#0284c7;">${fmt(ts.qty || 0)}개</div><div class="rl">총 판매수량</div></div>
+            <div class="record-stat"><div class="rv" style="color:${profitColor};">₩${fmt(ts.profit || 0)}</div><div class="rl">총 이익</div></div>
+            <div class="record-stat"><div class="rv" style="color:${profitColor};">${profitRate}</div><div class="rl">이익률</div></div>
+          </div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>채널</th><th class="num">수량</th><th class="num">정산금액</th><th class="num">원가</th><th class="num">이익</th><th class="num">이익률</th></tr></thead>
+            <tbody>
+              ${channelNames.map(ch => {
+                const s = data.channels[ch].summary || {};
+                const pc = (s.profit || 0) >= 0 ? 'profit-pos' : 'profit-neg';
+                const rate = s.profitRate ? (s.profitRate * 100).toFixed(1) + '%' : '-';
+                return `<tr>
+                  <td>${ch}</td>
+                  <td class="num">${fmt(s.qty || 0)}</td>
+                  <td class="num">₩${fmt(s.settlement || 0)}</td>
+                  <td class="num">₩${fmt(s.cost || 0)}</td>
+                  <td class="num ${pc}">₩${fmt(s.profit || 0)}</td>
+                  <td class="num ${pc}">${rate}</td>
+                </tr>`;
+              }).join('')}
+              <tr style="background:#1a1d27;font-weight:700;">
+                <td>합계</td>
+                <td class="num">${fmt(ts.qty || 0)}</td>
+                <td class="num">₩${fmt(ts.settlement || 0)}</td>
+                <td class="num">₩${fmt(ts.cost || 0)}</td>
+                <td class="num" style="color:${profitColor};">₩${fmt(ts.profit || 0)}</td>
+                <td class="num" style="color:${profitColor};">${profitRate}</td>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>`;
+    });
+
+    wrap.innerHTML = html;
+  } catch (err) {
+    wrap.innerHTML = `<div class="no-records">데이터 로드 실패: ${err.message}</div>`;
+  }
+}
+
+function toggleRecord(monthId) {
+  const body = document.getElementById('recordBody-' + monthId);
+  body.classList.toggle('open');
+}
+
+async function deleteRecord(monthId) {
+  if (!confirm(`${monthId} 정산 기록을 삭제할까요?`)) return;
+  if (!currentUser || !firebaseReady) return;
+
+  try {
+    await db.collection('settlements').doc(currentUser.uid)
+      .collection('months').doc(monthId).delete();
+    const card = document.getElementById('record-' + monthId);
+    if (card) card.remove();
+    showToast(`${monthId} 기록 삭제 완료`, 'success');
+  } catch (err) {
+    showToast('삭제 실패: ' + err.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// START
+// ═══════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
