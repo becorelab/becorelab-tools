@@ -372,11 +372,53 @@ a.app-link{
 .bento>.card:nth-child(12){animation-delay:calc(var(--d)*11)}
 .bento>.card:nth-child(13){animation-delay:calc(var(--d)*12)}
 .bento>.card:nth-child(14){animation-delay:calc(var(--d)*13)}
+/* ── Lock screen ── */
+.lock-screen{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:20px;
+}
+.lock-screen h2{
+  font-size:1.4rem;font-weight:800;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.lock-screen p{font-size:.82rem;color:var(--muted)}
+.lock-input{
+  width:260px;padding:12px 16px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:4px;color:var(--text);font-size:.9rem;
+  font-family:inherit;outline:none;text-align:center;
+  letter-spacing:4px;
+}
+.lock-input:focus{border-color:var(--border-hover);box-shadow:0 0 16px var(--glow)}
+.lock-input::placeholder{letter-spacing:0;color:var(--muted)}
+.lock-btn{
+  padding:10px 36px;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  border:none;border-radius:4px;
+  color:var(--white);font-size:.88rem;font-weight:700;
+  font-family:inherit;cursor:pointer;
+  transition:opacity .2s;
+}
+.lock-btn:hover{opacity:.85}
+.lock-error{font-size:.78rem;color:var(--rose);height:18px}
 </style>
 </head>
 <body>
 
-<div class="hub">
+<!-- Lock Screen -->
+<div class="lock-screen" id="lockScreen">
+  <h2>BECORE LAB</h2>
+  <p>비밀번호를 입력해주세요</p>
+  <input class="lock-input" id="lockInput" type="password" placeholder="Password" autofocus
+    onkeypress="if(event.key==='Enter')unlock()"/>
+  <button class="lock-btn" onclick="unlock()">접속</button>
+  <div class="lock-error" id="lockError"></div>
+</div>
+
+<div class="hub" id="mainHub" style="display:none">
 
   <div class="header-row">
     <div class="greeting">
@@ -392,22 +434,22 @@ a.app-link{
     <div class="card g-mixed b-quick-top">
       <div class="card-title">빠른 실행</div>
       <div class="quick-btns">
-        <a class="quick-btn" href="../logistics/발주대시보드.html">
+        <a class="quick-btn" href="./logistics/orders.html">
           <span>📦</span>발주 확인
         </a>
-        <a class="quick-btn" href="../accounting/매출정산.html">
+        <a class="quick-btn" href="./accounting/sales.html">
           <span>💰</span>매출 정산
         </a>
         <a class="quick-btn" href="#" onclick="event.preventDefault();alert('소싱 앱 실행:\ncd sourcing && python sourcing_app.py')">
           <span>🔍</span>소싱 검색
         </a>
-        <a class="quick-btn" href="../rocket/rocket_preview.html">
+        <a class="quick-btn" href="./rocket/rocket_preview.html">
           <span>🚀</span>로켓 등록
         </a>
         <a class="quick-btn" href="#" onclick="event.preventDefault();alert('인스타그램 앱 실행:\ncd instagram && python instagram_app.py')">
           <span>📸</span>인스타
         </a>
-        <a class="quick-btn" href="../tools/ilbia.html">
+        <a class="quick-btn" href="./tools/ilbia.html">
           <span>🏠</span>브랜드
         </a>
       </div>
@@ -428,7 +470,7 @@ a.app-link{
 
     <!-- ── 앱: 세일즈 / 로켓 ── -->
     <div class="card g-purple b-app-lg">
-      <a class="app-link c-purple" href="../rocket/rocket_preview.html">
+      <a class="app-link c-purple" href="./rocket/rocket_preview.html">
         <div class="app-icon">🚀</div>
         <div class="app-name">로켓 미리보기</div>
         <div class="app-desc">쿠팡 로켓그로스 상품 등록 미리보기</div>
@@ -440,7 +482,7 @@ a.app-link{
 
     <!-- ── 앱: 물류 / 발주 ── -->
     <div class="card g-blue b-app-lg">
-      <a class="app-link c-blue" href="../logistics/발주대시보드.html">
+      <a class="app-link c-blue" href="./logistics/orders.html">
         <div class="app-icon">📦</div>
         <div class="app-name">발주 대시보드</div>
         <div class="app-desc">이지어드민 재고 현황 및 발주 관리</div>
@@ -452,7 +494,7 @@ a.app-link{
 
     <!-- ── 앱: 회계 / 매출정산 ── -->
     <div class="card g-amber b-app-lg">
-      <a class="app-link c-amber" href="../accounting/매출정산.html">
+      <a class="app-link c-amber" href="./accounting/sales.html">
         <div class="app-icon">💰</div>
         <div class="app-name">매출 정산</div>
         <div class="app-desc">채널별 매출 데이터 정산 및 리포트</div>
@@ -561,7 +603,7 @@ a.app-link{
 
     <!-- ── 앱: 마케팅 / 브랜드 ── -->
     <div class="card g-sky b-app-lg">
-      <a class="app-link c-sky" href="../tools/ilbia.html">
+      <a class="app-link c-sky" href="./tools/ilbia.html">
         <div class="app-icon">🏠</div>
         <div class="app-name">브랜드 페이지</div>
         <div class="app-desc">iLBiA 브랜드 소개 랜딩페이지</div>
@@ -645,6 +687,25 @@ a.app-link{
 </div>
 
 <script>
+// Lock
+const _k=[98,101,99,111,114,101,108,97,98,48,51,48,57];
+function unlock(){
+  const input=document.getElementById('lockInput').value;
+  if(input===_k.map(c=>String.fromCharCode(c)).join('')){
+    localStorage.setItem('bc_auth','1');
+    document.getElementById('lockScreen').style.display='none';
+    document.getElementById('mainHub').style.display='block';
+    initDashboard();
+  } else {
+    document.getElementById('lockError').textContent='비밀번호가 틀렸습니다';
+    document.getElementById('lockInput').value='';
+  }
+}
+if(localStorage.getItem('bc_auth')==='1'){
+  document.getElementById('lockScreen').style.display='none';
+  document.getElementById('mainHub').style.display='block';
+}
+function initDashboard(){
 const d=new Date();
 const days=['일','월','화','수','목','금','토'];
 document.getElementById('datePill').textContent=
@@ -657,6 +718,8 @@ setTimeout(()=>{
     setTimeout(()=>bar.style.width=w,80);
   });
 },200);
+}
+if(localStorage.getItem('bc_auth')==='1') initDashboard();
 </script>
 
 </body>
