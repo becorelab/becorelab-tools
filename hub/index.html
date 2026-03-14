@@ -5,233 +5,282 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>BECORE LAB</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
 :root{
-  --bg:#1e1e1e;
-  --surface:#2c2c2c;
-  --surface-hover:#333;
-  --border:#444;
-  --border-hover:#555;
-  --text:#fff;
-  --sub:#aaa;
-  --muted:#777;
-  --dim:#555;
-  --red:#f24e1e;
-  --orange:#ff7262;
-  --purple:#a259ff;
-  --blue:#1abcfe;
-  --green:#0acf83;
-  --yellow:#ffc107;
+  --bg:#f8f4ea;
+  --bg2:#eeeadf;
+  --surface:#fff;
+  --surface2:#faf6ee;
+  --border:#e8e2d4;
+  --border2:#d8d2c4;
+  --text:#2c2a24;
+  --sub:#7a7568;
+  --muted:#a8a290;
+  --dim:#c4bfb2;
+  --accent:#f2e56b;
+  --accent2:#e0d45c;
+  --accent-dark:#3a3520;
+  --danger:#e85d4a;
+  --success:#4caf7d;
+  --info:#5b9bd5;
 }
 
 body{
   font-family:'Pretendard',system-ui,-apple-system,sans-serif;
-  background:var(--bg);
+  background:var(--bg2);
   color:var(--text);
   min-height:100vh;
-  display:flex;
-  justify-content:center;
   -webkit-font-smoothing:antialiased;
 }
 
 /* ── Lock ── */
 .lock{
   position:fixed;inset:0;z-index:100;
-  background:var(--bg);
+  background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%);
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:16px;
 }
-.lock-logo{
-  font-size:1rem;font-weight:700;letter-spacing:.1em;
-  color:var(--text);
-  display:flex;align-items:center;gap:8px;
-}
-.lock-logo::before{
-  content:'';width:18px;height:18px;border-radius:50%;
-  background:conic-gradient(var(--red),var(--orange),var(--purple),var(--blue),var(--green),var(--red));
-}
-.lock-sub{font-size:.86rem;color:var(--muted);margin-top:-4px}
+.lock-logo{font-size:1.1rem;font-weight:700;letter-spacing:.1em;color:var(--text)}
+.lock-sub{font-size:.82rem;color:var(--muted);margin-top:-6px}
 .lock input{
-  width:260px;padding:10px 14px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:6px;
-  color:var(--text);font-size:1rem;
-  font-family:inherit;outline:none;
-  text-align:center;letter-spacing:2px;
-  transition:border-color .15s;
+  width:280px;padding:12px 16px;
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:.95rem;font-family:inherit;outline:none;
+  text-align:center;letter-spacing:2px;transition:border-color .15s;
 }
-.lock input:focus{border-color:var(--blue)}
+.lock input:focus{border-color:var(--accent2)}
 .lock input::placeholder{letter-spacing:0;color:var(--dim)}
 .lock button{
-  padding:9px 36px;
-  background:var(--blue);
-  border:none;border-radius:6px;
-  color:#fff;
-  font-size:.94rem;font-weight:600;font-family:inherit;
-  cursor:pointer;
-  transition:opacity .15s;
+  padding:10px 40px;background:var(--accent);border:none;border-radius:10px;
+  color:var(--accent-dark);font-size:.88rem;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:background .15s;
 }
-.lock button:hover{opacity:.85}
-.lock-err{font-size:.86rem;color:var(--red);height:18px}
+.lock button:hover{background:var(--accent2)}
+.lock-err{font-size:.78rem;color:var(--danger);height:18px}
 
-/* ── Main ── */
-.main{
-  width:100%;max-width:680px;
-  padding:44px 24px 60px;
+/* ── Layout ── */
+.dashboard{
+  display:grid;
+  grid-template-columns:60px 1fr 280px;
+  min-height:100vh;
+}
+
+/* ── Sidebar ── */
+.sidebar{
+  background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px 0;gap:4px;
+}
+.sb-logo{
+  width:36px;height:36px;border-radius:10px;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:900;color:var(--accent-dark);margin-bottom:16px;
+  text-decoration:none;
+}
+.sb-item{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;cursor:pointer;transition:background .15s;
+  text-decoration:none;color:var(--muted);position:relative;
+}
+.sb-item:hover{background:var(--surface)}
+.sb-item.active{background:var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.sb-item.active::before{
+  content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;
+  background:var(--accent2);border-radius:0 3px 3px 0;
+}
+.sb-spacer{flex:1}
+.sb-tooltip{
+  position:absolute;left:48px;top:50%;transform:translateY(-50%);
+  background:var(--accent-dark);color:#f0edd8;
+  font-size:.68rem;font-weight:500;padding:4px 10px;border-radius:6px;
+  white-space:nowrap;pointer-events:none;
+  opacity:0;transition:opacity .15s;z-index:10;
+}
+.sb-item:hover .sb-tooltip{opacity:1}
+
+/* ── Main Content ── */
+.content{
+  background:linear-gradient(180deg,var(--bg) 0%,var(--surface2) 100%);
+  padding:28px 32px;overflow-y:auto;
 }
 
 /* Header */
-.header{margin-bottom:32px}
-.header h1{
-  font-size:1.32rem;font-weight:700;
-  color:var(--text);
-  display:flex;align-items:center;gap:8px;
-  margin-bottom:4px;
+.hdr{margin-bottom:24px}
+.hdr-greeting{font-size:1.5rem;font-weight:700;color:var(--text);margin-bottom:2px}
+.hdr-sub{font-size:.82rem;color:var(--muted)}
+
+/* KPI Row */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:16px 18px;position:relative;overflow:hidden;transition:box-shadow .2s;
 }
-.header h1::before{
-  content:'';width:16px;height:16px;border-radius:50%;flex-shrink:0;
-  background:conic-gradient(var(--red),var(--orange),var(--purple),var(--blue),var(--green),var(--red));
-}
-.header p{
-  font-size:.92rem;color:var(--muted);
-  padding-left:24px;
+.kpi:hover{box-shadow:0 4px 16px rgba(0,0,0,.04)}
+.kpi-icon{font-size:1rem;margin-bottom:8px}
+.kpi-val{font-size:1.25rem;font-weight:700;color:var(--text);margin-bottom:2px}
+.kpi-label{font-size:.72rem;color:var(--muted)}
+.kpi-change{font-size:.62rem;font-weight:600;margin-top:4px}
+.kpi-change.up{color:var(--success)}
+.kpi-change.down{color:var(--danger)}
+.kpi-bar{
+  position:absolute;bottom:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:.5;
 }
 
-/* Section */
-.section{margin-bottom:24px}
-.section-label{
-  font-size:.82rem;font-weight:600;
-  letter-spacing:.04em;
-  color:var(--muted);
-  margin-bottom:10px;
-  padding-left:2px;
+/* Bento Grid */
+.bento{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:12px;margin-bottom:20px;
 }
-
-/* Tile grid */
-.tile-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:20px;transition:box-shadow .2s;
 }
-
-/* App tile — Figma style */
-.app{
-  display:flex;flex-direction:column;
-  padding:18px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:8px;
-  text-decoration:none;color:inherit;
-  transition:border-color .2s,background .2s;
-  cursor:pointer;
-  position:relative;
-  overflow:hidden;
-}
-.app:hover{
-  background:var(--surface-hover);
-}
-/* Color accent top-left corner */
-.app::before{
-  content:'';position:absolute;
-  top:-20px;left:-20px;
-  width:60px;height:60px;border-radius:50%;
-  background:var(--accent);
-  opacity:.08;
-  transition:opacity .25s;
-  pointer-events:none;
-}
-.app:hover::before{opacity:.14}
-
-/* Colored left border */
-.app::after{
-  content:'';position:absolute;
-  top:12px;left:0;bottom:12px;width:3px;
-  background:var(--accent);
-  border-radius:0 3px 3px 0;
-  opacity:0;transform:scaleY(.5);
-  transition:opacity .2s,transform .2s;
-}
-.app:hover::after{opacity:1;transform:scaleY(1)}
-
-.app-head{
-  display:flex;align-items:flex-start;justify-content:space-between;
-  margin-bottom:12px;
-}
-.app-icon{
-  width:36px;height:36px;
+.card:hover{box-shadow:0 4px 16px rgba(0,0,0,.04)}
+.card.wide{grid-column:span 2}
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.card-title{font-size:.88rem;font-weight:700;color:var(--text)}
+.card-sub{font-size:.7rem;color:var(--muted);margin-bottom:14px}
+.card-arrow{
+  width:28px;height:28px;border-radius:8px;
+  background:var(--surface2);border:1px solid var(--border);
   display:flex;align-items:center;justify-content:center;
-  font-size:1.26rem;
-  background:var(--bg);
-  border:1px solid var(--border);
-  border-radius:6px;
-  transition:border-color .2s;
+  font-size:.7rem;color:var(--sub);cursor:pointer;text-decoration:none;
+  transition:background .15s;
 }
-.app:hover .app-icon{border-color:var(--accent)}
+.card-arrow:hover{background:var(--accent);color:var(--accent-dark)}
+.chart-wrap{position:relative;height:180px}
 
-.app-badge{
-  font-size:.7rem;font-weight:500;
-  padding:2px 8px;
-  border:1px solid var(--border);
-  border-radius:4px;
-  color:var(--muted);
-  transition:border-color .2s,color .2s;
-}
-.app:hover .app-badge{border-color:var(--accent);color:var(--accent)}
+/* Dark accent card */
+.card.dark{background:var(--accent-dark);border-color:var(--accent-dark);color:#f0edd8}
+.card.dark .card-title{color:#f0edd8}
+.card.dark .card-sub{color:#a09870}
+.card.dark .card-arrow{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.1);color:#d0c890}
 
-.app-name{
-  font-size:1.03rem;font-weight:600;
-  margin-bottom:4px;
+/* App list in dark card */
+.app-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.app-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:8px;
+  background:rgba(255,255,255,.04);text-decoration:none;color:inherit;
+  transition:background .15s;cursor:pointer;
 }
-.app-desc{
-  font-size:.84rem;color:var(--sub);
-  line-height:1.5;
-  flex:1;
+.app-row:hover{background:rgba(255,255,255,.08)}
+.app-row-icon{font-size:.85rem}
+.app-row-name{font-size:.76rem;font-weight:600;flex:1}
+.app-row-badge{font-size:.56rem;padding:2px 6px;border-radius:4px;background:rgba(242,229,107,.15);color:#f2e56b}
+.app-row-arrow{font-size:.6rem;color:#a09870}
+
+/* Inventory table */
+.inv-table{width:100%;border-collapse:collapse;margin-top:6px}
+.inv-table th{
+  font-size:.64rem;font-weight:600;color:var(--muted);
+  text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);
+}
+.inv-table td{
+  font-size:.74rem;padding:8px;border-bottom:1px solid var(--border);
+  color:var(--text);
+}
+.inv-table tr:last-child td{border-bottom:none}
+.inv-status{font-size:.6rem;font-weight:600;padding:2px 8px;border-radius:10px}
+.inv-status.ok{background:#e8f5e9;color:#2e7d32}
+.inv-status.low{background:#fff3e0;color:#e65100}
+.inv-status.out{background:#ffebee;color:#c62828}
+.inv-qty{font-weight:700}
+
+/* Channel pills */
+.channel-pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.ch-pill{
+  font-size:.6rem;padding:3px 8px;border-radius:6px;
+  background:var(--surface2);border:1px solid var(--border);color:var(--sub);
 }
 
-.app-foot{
-  display:flex;align-items:center;
-  margin-top:14px;
+/* ── Right Panel ── */
+.rpanel{
+  background:var(--bg2);border-left:1px solid var(--border);
+  padding:24px 16px;overflow-y:auto;
+  display:flex;flex-direction:column;gap:16px;
 }
-.app-link{
-  font-size:.8rem;font-weight:500;
-  color:var(--accent);
-  opacity:0;transition:opacity .2s;
-  display:flex;align-items:center;gap:3px;
-}
-.app:hover .app-link{opacity:1}
+.rp-section-title{font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:8px}
 
-/* Per-card accent colors */
-.app.c-red{--accent:var(--red)}
-.app.c-orange{--accent:var(--orange)}
-.app.c-purple{--accent:var(--purple)}
-.app.c-blue{--accent:var(--blue)}
-.app.c-green{--accent:var(--green)}
-.app.c-yellow{--accent:var(--yellow)}
+/* Calendar */
+.rp-cal{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;
+}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-month{font-size:.76rem;font-weight:700}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.cal-day{font-size:.62rem;padding:5px 0;border-radius:6px;color:var(--sub)}
+.cal-day.hd{font-size:.58rem;color:var(--muted);font-weight:600}
+.cal-day.today{background:var(--accent);color:var(--accent-dark);font-weight:700}
+
+/* App shortcuts */
+.rp-app{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:10px;
+  background:var(--surface);border:1px solid var(--border);
+  text-decoration:none;color:var(--text);
+  transition:border-color .15s,box-shadow .15s;cursor:pointer;
+}
+.rp-app:hover{border-color:var(--accent2);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.rp-app-icon{
+  width:32px;height:32px;border-radius:8px;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;
+}
+.rp-app-info{flex:1;min-width:0}
+.rp-app-name{font-size:.76rem;font-weight:600}
+.rp-app-desc{font-size:.62rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp-app-arrow{font-size:.6rem;color:var(--dim)}
+
+/* News rows in dark card */
+.news-list{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.news-row{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:8px;
+  background:rgba(255,255,255,.04);
+  text-decoration:none;color:inherit;
+  transition:background .15s;cursor:pointer;
+}
+.news-row:hover{background:rgba(255,255,255,.08)}
+.news-row-tag{
+  font-size:.52rem;font-weight:600;padding:2px 6px;border-radius:4px;
+  flex-shrink:0;white-space:nowrap;
+}
+.news-row-tag.ecommerce{background:rgba(255,152,0,.15);color:#ffb74d}
+.news-row-tag.ai{background:rgba(100,140,255,.15);color:#90b0ff}
+.news-row-tag.economy{background:rgba(76,175,125,.15);color:#81c784}
+.news-row-tag.trend{background:rgba(240,100,150,.15);color:#f48fb1}
+.news-row-title{font-size:.72rem;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.news-row-arrow{font-size:.6rem;color:#a09870;flex-shrink:0}
 
 /* Footer */
-.footer{
-  margin-top:36px;
-  padding-top:16px;
-  border-top:1px solid var(--border);
-  text-align:center;
-  font-size:.8rem;color:var(--dim);
+.footer-bar{
+  padding:12px 0;text-align:center;font-size:.68rem;color:var(--dim);
+  border-top:1px solid var(--border);margin-top:auto;
 }
 
-/* Responsive */
+/* ── Responsive ── */
+@media(max-width:900px){
+  .dashboard{grid-template-columns:1fr}
+  .sidebar{flex-direction:row;padding:8px 12px;border-right:none;border-bottom:1px solid var(--border);overflow-x:auto}
+  .sb-spacer{display:none}
+  .sb-tooltip{display:none}
+  .rpanel{border-left:none;border-top:1px solid var(--border)}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .bento{grid-template-columns:1fr}
+  .card.wide{grid-column:span 1}
+}
 @media(max-width:480px){
-  .main{padding:32px 16px 40px}
-  .header h1{font-size:1.2rem}
-  .tile-grid{grid-template-columns:1fr}
-  .app{padding:16px}
-  .app-link{opacity:1}
+  .content{padding:20px 16px}
+  .hdr-greeting{font-size:1.2rem}
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .kpi-val{font-size:1.1rem}
 }
-
-/* Fade in */
-.app{opacity:0;transform:translateY(6px);animation:fadeIn .3s ease forwards}
-@keyframes fadeIn{to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
@@ -245,96 +294,227 @@ body{
   <div class="lock-err" id="err"></div>
 </div>
 
-<!-- Main -->
-<div class="main" id="main" style="display:none">
+<!-- Dashboard -->
+<div class="dashboard" id="main" style="display:none">
 
-  <div class="header">
-    <h1>BECORE LAB</h1>
-    <p>비코어랩 업무 도구</p>
-  </div>
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <a class="sb-logo" href="./" title="홈">B</a>
+    <a class="sb-item active" href="./" title="대시보드">🏠<span class="sb-tooltip">대시보드</span></a>
+    <a class="sb-item" href="./accounting/sales.html" title="매출 정산">💰<span class="sb-tooltip">매출 정산</span></a>
+    <a class="sb-item" href="./sales-dashboard.html" title="매출 대시보드">📊<span class="sb-tooltip">매출 대시보드</span></a>
+    <a class="sb-item" href="./logistics/orders.html" title="인벤토리 허브">📦<span class="sb-tooltip">인벤토리 허브</span></a>
+    <a class="sb-item" href="./rocket/rocket_preview.html" title="로켓 미리보기">🚀<span class="sb-tooltip">로켓 미리보기</span></a>
+    <a class="sb-item" href="http://localhost:8090" target="_blank" title="소싱 분석기">🔍<span class="sb-tooltip">소싱 분석기</span></a>
+    <div class="sb-spacer"></div>
+    <a class="sb-item" title="설정">⚙️<span class="sb-tooltip">설정</span></a>
+  </nav>
 
-  <!-- 제품기획 · 세일즈 -->
-  <div class="section">
-    <div class="section-label">제품기획 · 세일즈</div>
-    <div class="tile-grid">
-      <a class="app c-red" href="http://localhost:8090" target="_blank">
-        <div class="app-head">
-          <div class="app-icon">🔍</div>
-          <div class="app-badge">SERVER</div>
-        </div>
-        <div class="app-name">소싱 분석기</div>
-        <div class="app-desc">쿠팡 소싱 기회 분석 · 골드박스 · 시장 발굴</div>
-        <div class="app-foot"><span class="app-link">Open →</span></div>
-      </a>
-      <a class="app c-purple" href="./rocket/rocket_preview.html">
-        <div class="app-head">
-          <div class="app-icon">🚀</div>
-        </div>
-        <div class="app-name">로켓 미리보기</div>
-        <div class="app-desc">쿠팡 로켓그로스 상품 등록 미리보기</div>
-        <div class="app-foot"><span class="app-link">Open →</span></div>
-      </a>
+  <!-- Main Content -->
+  <main class="content">
+
+    <div class="hdr">
+      <div class="hdr-greeting" id="greeting">좋은 아침이에요, 비코어랩!</div>
+      <div class="hdr-sub" id="greetingSub">비코어랩 업무 현황을 한눈에 확인하세요</div>
     </div>
-  </div>
 
-  <!-- 물류 · 회계 -->
-  <div class="section">
-    <div class="section-label">물류 · 회계</div>
-    <div class="tile-grid">
-      <a class="app c-blue" href="./logistics/orders.html">
-        <div class="app-head">
-          <div class="app-icon">📦</div>
-        </div>
-        <div class="app-name">발주 대시보드</div>
-        <div class="app-desc">이지어드민 재고 현황 및 발주 관리</div>
-        <div class="app-foot"><span class="app-link">Open →</span></div>
-      </a>
-      <a class="app c-yellow" href="./accounting/sales.html">
-        <div class="app-head">
-          <div class="app-icon">💰</div>
-        </div>
-        <div class="app-name">매출 정산</div>
-        <div class="app-desc">채널별 매출 데이터 정산 및 리포트</div>
-        <div class="app-foot"><span class="app-link">Open →</span></div>
-      </a>
-      <a class="app c-teal" href="./sales-dashboard.html">
-        <div class="app-head">
-          <div class="app-icon">📊</div>
-        </div>
-        <div class="app-name">매출 대시보드</div>
-        <div class="app-desc">채널별 매출 성과 &amp; 분석 대시보드</div>
-        <div class="app-foot"><span class="app-link">Open →</span></div>
-      </a>
+    <!-- KPI Cards -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-icon">📱</div>
+        <div class="kpi-val">7</div>
+        <div class="kpi-label">등록 앱</div>
+        <div class="kpi-bar"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">🔗</div>
+        <div class="kpi-val">17</div>
+        <div class="kpi-label">연동 채널</div>
+        <div class="kpi-bar"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-val" id="kpiRevenue">—</div>
+        <div class="kpi-label" id="kpiRevenueLabel">전월 매출</div>
+        <div class="kpi-change up" id="kpiRevenueChange"></div>
+        <div class="kpi-bar"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">🔍</div>
+        <div class="kpi-val">124</div>
+        <div class="kpi-label">소싱 후보</div>
+        <div class="kpi-bar"></div>
+      </div>
     </div>
-  </div>
 
-  <!-- 마케팅 -->
-  <div class="section">
-    <div class="section-label">마케팅</div>
-    <div class="tile-grid">
-      <a class="app c-orange" href="#" onclick="event.preventDefault();alert('인스타그램 앱 실행:\ncd instagram && python instagram_app.py')">
-        <div class="app-head">
-          <div class="app-icon">📸</div>
-          <div class="app-badge">SERVER</div>
+    <!-- Bento Grid -->
+    <div class="bento">
+
+      <!-- 전체 매출 추이 Line Chart -->
+      <div class="card">
+        <div class="card-top">
+          <div class="card-title">월별 매출 추이</div>
+          <a class="card-arrow" href="./sales-dashboard.html">↗</a>
         </div>
-        <div class="app-name">인스타그램</div>
-        <div class="app-desc">인스타그램 계정 관리 및 자동화</div>
-        <div class="app-foot"><span class="app-link">Open →</span></div>
-      </a>
-    </div>
-  </div>
+        <div class="card-sub">전 채널 합산 · 실제 정산 데이터 기준</div>
+        <div class="chart-wrap"><canvas id="chartLine"></canvas></div>
+      </div>
 
-  <div class="footer">&copy; 2026 iLBiA &middot; 주식회사 비코어랩</div>
+      <!-- 채널 비중 Donut -->
+      <div class="card" style="min-height:340px">
+        <div class="card-top">
+          <div class="card-title">채널 비중</div>
+          <a class="card-arrow" href="./accounting/sales.html">↗</a>
+        </div>
+        <div class="card-sub" id="donutSub">전월 매출 기준</div>
+        <div class="chart-wrap" style="height:270px"><canvas id="chartDonut"></canvas></div>
+      </div>
+
+      <!-- 재고 현황 -->
+      <div class="card">
+        <div class="card-top">
+          <div class="card-title">재고 현황</div>
+          <a class="card-arrow" href="./logistics/orders.html">↗</a>
+        </div>
+        <div class="card-sub">주요 제품 재고 요약</div>
+        <table class="inv-table">
+          <thead><tr><th>제품</th><th>수량</th><th>상태</th></tr></thead>
+          <tbody>
+            <tr><td>건조기시트 코튼블루</td><td class="inv-qty">1,240</td><td><span class="inv-status ok">충분</span></td></tr>
+            <tr><td>건조기시트 베이비크림</td><td class="inv-qty">860</td><td><span class="inv-status ok">충분</span></td></tr>
+            <tr><td>건조기시트 바이올렛</td><td class="inv-qty">320</td><td><span class="inv-status low">부족</span></td></tr>
+            <tr><td>식기세척기 세제</td><td class="inv-qty">95</td><td><span class="inv-status out">긴급</span></td></tr>
+            <tr><td>캡슐 세제</td><td class="inv-qty">540</td><td><span class="inv-status ok">충분</span></td></tr>
+            <tr><td>얼룩 제거제</td><td class="inv-qty">180</td><td><span class="inv-status low">부족</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 최신 뉴스 (다크 카드) -->
+      <div class="card dark">
+        <div class="card-top">
+          <div class="card-title">최신 뉴스</div>
+        </div>
+        <div class="card-sub">이커머스 · AI · 경제</div>
+        <div class="news-list">
+          <a class="news-row" href="https://www.google.com/search?q=쿠팡+이커머스+최신+뉴스&tbm=nws" target="_blank">
+            <span class="news-row-tag ecommerce">이커머스</span>
+            <span class="news-row-title">쿠팡, 로켓배송 새벽배송 지역 확대</span>
+            <span class="news-row-arrow">↗</span>
+          </a>
+          <a class="news-row" href="https://www.google.com/search?q=AI+비즈니스+활용+뉴스&tbm=nws" target="_blank">
+            <span class="news-row-tag ai">AI</span>
+            <span class="news-row-title">생성형 AI, 상품 설명 자동 생성 시대</span>
+            <span class="news-row-arrow">↗</span>
+          </a>
+          <a class="news-row" href="https://www.google.com/search?q=네이버+스마트스토어+뉴스&tbm=nws" target="_blank">
+            <span class="news-row-tag ecommerce">이커머스</span>
+            <span class="news-row-title">네이버, 셀러 수수료 체계 개편 예고</span>
+            <span class="news-row-arrow">↗</span>
+          </a>
+          <a class="news-row" href="https://www.google.com/search?q=환율+경제+뉴스&tbm=nws" target="_blank">
+            <span class="news-row-tag economy">경제</span>
+            <span class="news-row-title">원/달러 환율 안정… 수입 원가 부담 완화</span>
+            <span class="news-row-arrow">↗</span>
+          </a>
+          <a class="news-row" href="https://www.google.com/search?q=이커머스+소비+트렌드+2026&tbm=nws" target="_blank">
+            <span class="news-row-tag trend">트렌드</span>
+            <span class="news-row-title">2026 소비 트렌드: 가심비 소비 가속화</span>
+            <span class="news-row-arrow">↗</span>
+          </a>
+          <a class="news-row" href="https://www.google.com/search?q=풀필먼트+물류+뉴스&tbm=nws" target="_blank">
+            <span class="news-row-tag ecommerce">물류</span>
+            <span class="news-row-title">풀필먼트 시장 성장… 물류비 절감 핵심</span>
+            <span class="news-row-arrow">↗</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 유통 채널 현황 -->
+      <div class="card wide">
+        <div class="card-top">
+          <div class="card-title">연동 유통 채널 (17개)</div>
+        </div>
+        <div class="card-sub">매출 정산 연동 완료 채널</div>
+        <div class="channel-pills">
+          <span class="ch-pill">카페24</span><span class="ch-pill">스마트스토어</span>
+          <span class="ch-pill">로켓배송</span><span class="ch-pill">11번가</span>
+          <span class="ch-pill">지마켓</span><span class="ch-pill">옥션</span>
+          <span class="ch-pill">카카오선물</span><span class="ch-pill">카카오쇼핑</span>
+          <span class="ch-pill">굿트리</span><span class="ch-pill">두버</span>
+          <span class="ch-pill">오늘의집</span><span class="ch-pill">지엠홀딩스</span>
+          <span class="ch-pill">GS</span><span class="ch-pill">고그로우</span>
+          <span class="ch-pill">에이블리</span><span class="ch-pill">에드가</span>
+          <span class="ch-pill">SSG</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bar">&copy; 2026 iLBiA &middot; 주식회사 비코어랩</div>
+  </main>
+
+  <!-- Right Panel -->
+  <aside class="rpanel">
+
+    <!-- Calendar -->
+    <div class="rp-cal">
+      <div class="cal-header">
+        <span class="cal-month" id="calMonth">2026년 3월</span>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <!-- 앱 바로가기 -->
+    <div>
+      <div class="rp-section-title">앱 바로가기</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <a class="rp-app" href="http://localhost:8090" target="_blank">
+          <div class="rp-app-icon">🔍</div>
+          <div class="rp-app-info"><div class="rp-app-name">소싱 분석기</div><div class="rp-app-desc">쿠팡 기회분석 · 골드박스</div></div>
+          <div class="rp-app-arrow">→</div>
+        </a>
+        <a class="rp-app" href="./rocket/rocket_preview.html">
+          <div class="rp-app-icon">🚀</div>
+          <div class="rp-app-info"><div class="rp-app-name">로켓 미리보기</div><div class="rp-app-desc">로켓그로스 상품 등록</div></div>
+          <div class="rp-app-arrow">→</div>
+        </a>
+        <a class="rp-app" href="./logistics/orders.html">
+          <div class="rp-app-icon">📦</div>
+          <div class="rp-app-info"><div class="rp-app-name">인벤토리 허브</div><div class="rp-app-desc">재고 관리 · 발주 현황</div></div>
+          <div class="rp-app-arrow">→</div>
+        </a>
+        <a class="rp-app" href="./accounting/sales.html">
+          <div class="rp-app-icon">💰</div>
+          <div class="rp-app-info"><div class="rp-app-name">매출 정산</div><div class="rp-app-desc">채널별 매출 리포트</div></div>
+          <div class="rp-app-arrow">→</div>
+        </a>
+        <a class="rp-app" href="./sales-dashboard.html">
+          <div class="rp-app-icon">📊</div>
+          <div class="rp-app-info"><div class="rp-app-name">매출 대시보드</div><div class="rp-app-desc">매출 성과 분석</div></div>
+          <div class="rp-app-arrow">→</div>
+        </a>
+        <a class="rp-app" href="#" onclick="event.preventDefault();alert('인스타그램 앱 실행:\ncd instagram && python instagram_app.py')">
+          <div class="rp-app-icon">📸</div>
+          <div class="rp-app-info"><div class="rp-app-name">인스타그램</div><div class="rp-app-desc">계정 관리 및 자동화</div></div>
+          <div class="rp-app-arrow">→</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-bar">&copy; 2026 iLBiA</div>
+  </aside>
 
 </div>
 
 <script>
+/* ── Auth ── */
 const _k=[98,101,99,111,114,101,108,97,98,48,51,48,57];
 function unlock(){
   if(document.getElementById('pw').value===_k.map(c=>String.fromCharCode(c)).join('')){
     localStorage.setItem('bc_auth','1');
     document.getElementById('lock').style.display='none';
-    document.getElementById('main').style.display='block';
+    document.getElementById('main').style.display='grid';
+    initCharts();
   } else {
     document.getElementById('err').textContent='비밀번호가 틀렸습니다';
     document.getElementById('pw').value='';
@@ -342,7 +522,216 @@ function unlock(){
 }
 if(localStorage.getItem('bc_auth')==='1'){
   document.getElementById('lock').style.display='none';
-  document.getElementById('main').style.display='block';
+  document.getElementById('main').style.display='grid';
+}
+
+/* ── Greeting ── */
+(function(){
+  const h=new Date().getHours();
+  const now=new Date();
+  const m=now.getMonth()+1,d=now.getDate();
+  const days=['일','월','화','수','목','금','토'];
+  const dw=days[now.getDay()];
+  const g=h<12?'좋은 아침이에요':h<18?'오늘도 화이팅':h<21?'고생 많았어요':'늦은 시간까지 수고해요';
+  document.getElementById('greeting').textContent=g+', 비코어랩!';
+  document.getElementById('greetingSub').textContent=m+'월 '+d+'일 '+dw+'요일 · 일상의 편리함을 만드는 사람들';
+})();
+
+/* ── Calendar ── */
+(function(){
+  const now=new Date();
+  const y=now.getFullYear(),m=now.getMonth(),today=now.getDate();
+  document.getElementById('calMonth').textContent=`${y}년 ${m+1}월`;
+  const grid=document.getElementById('calGrid');
+  ['일','월','화','수','목','금','토'].forEach(d=>{
+    const el=document.createElement('div');
+    el.className='cal-day hd';el.textContent=d;grid.appendChild(el);
+  });
+  const first=new Date(y,m,1).getDay();
+  const last=new Date(y,m+1,0).getDate();
+  for(let i=0;i<first;i++){const el=document.createElement('div');el.className='cal-day';grid.appendChild(el)}
+  for(let d=1;d<=last;d++){
+    const el=document.createElement('div');
+    el.className='cal-day'+(d===today?' today':'');
+    el.textContent=d;grid.appendChild(el);
+  }
+})();
+
+/* ── Revenue data (실제 데이터 입력 구간만) ── */
+const monthlyRevenue={
+  '2026-01':112340000,'2026-02':128750000
+};
+(function(){
+  const now=new Date();
+  const pm=new Date(now.getFullYear(),now.getMonth()-1,1);
+  const pmKey=pm.getFullYear()+'-'+String(pm.getMonth()+1).padStart(2,'0');
+  const ppm=new Date(now.getFullYear(),now.getMonth()-2,1);
+  const ppmKey=ppm.getFullYear()+'-'+String(ppm.getMonth()+1).padStart(2,'0');
+  const rev=monthlyRevenue[pmKey];
+  const prevRev=monthlyRevenue[ppmKey];
+  if(rev){
+    document.getElementById('kpiRevenue').textContent='₩'+rev.toLocaleString();
+    document.getElementById('kpiRevenueLabel').textContent=(pm.getMonth()+1)+'월 매출';
+    if(prevRev){
+      const pct=((rev-prevRev)/prevRev*100).toFixed(1);
+      const el=document.getElementById('kpiRevenueChange');
+      el.textContent=(pct>0?'▲ +':'▼ ')+pct+'% vs '+(ppm.getMonth()+1)+'월';
+      el.className='kpi-change '+(pct>0?'up':'down');
+    }
+  }
+})();
+
+/* ── Charts ── */
+function initCharts(){
+  Chart.register(ChartDataLabels);
+  const cream='#f2e56b',cream2='#e0d45c',dark='#3a3520',muted='#d8d2c4';
+
+  // 실제 데이터 있는 월만 표시 (만원 단위)
+  const months=['1월','2월'];
+  const revData=[11234,12875]; // 만원 단위
+
+  // Line chart
+  const lineCtx=document.getElementById('chartLine').getContext('2d');
+  const grad=lineCtx.createLinearGradient(0,0,0,180);
+  grad.addColorStop(0,'rgba(242,229,107,.35)');
+  grad.addColorStop(1,'rgba(242,229,107,.02)');
+
+  new Chart(lineCtx,{
+    type:'line',
+    data:{
+      labels:months,
+      datasets:[{
+        data:revData,
+        borderColor:dark,
+        backgroundColor:grad,
+        borderWidth:2.5,
+        fill:true,
+        tension:.4,
+        pointBackgroundColor:dark,
+        pointBorderColor:'#fff',
+        pointBorderWidth:2,
+        pointRadius:6,
+        pointHoverRadius:8
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        datalabels:{
+          align:'top',offset:8,
+          color:dark,font:{size:11,weight:700,family:'Pretendard'},
+          formatter:v=>v.toLocaleString()+'만원'
+        },
+        tooltip:{
+          backgroundColor:dark,titleFont:{family:'Pretendard',size:11},bodyFont:{family:'Pretendard',size:12},
+          callbacks:{label:ctx=>' ₩'+(ctx.parsed.y*10000).toLocaleString()}
+        }
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:11,family:'Pretendard'},color:'#7a7568'}},
+        y:{grid:{color:'#eee8da'},ticks:{font:{size:10},color:'#a8a290',callback:v=>v.toLocaleString()+'만'},suggestedMin:8000,suggestedMax:15000}
+      }
+    }
+  });
+
+  // Donut chart — 전월 채널별 매출
+  const donutLabels=['쿠팡','스마트스토어','카페24','11번가','기타'];
+  const donutData=[45120000,32180000,23100000,15440000,12910000];
+  const donutTotal=donutData.reduce((a,b)=>a+b,0);
+  const donutColors=['#e8572a','#f59e0b','#3a3520','#5b9bd5','#c4bfb2'];
+
+  // 외부 라벨 + 선 연결 커스텀 플러그인
+  const outerLabelPlugin={
+    id:'outerLabels',
+    afterDraw(chart){
+      const{ctx}=chart;
+      const meta=chart.getDatasetMeta(0);
+      const cx=(chart.chartArea.left+chart.chartArea.right)/2;
+      const cy=(chart.chartArea.top+chart.chartArea.bottom)/2;
+
+      // 라벨 위치 계산 (겹침 방지)
+      const labelPositions=[];
+      meta.data.forEach((arc,i)=>{
+        const midAngle=(arc.startAngle+arc.endAngle)/2;
+        const r=arc.outerRadius||90;
+        labelPositions.push({i,midAngle,r});
+      });
+
+      labelPositions.forEach(({i,midAngle,r})=>{
+        const edgeX=cx+Math.cos(midAngle)*(r+8);
+        const edgeY=cy+Math.sin(midAngle)*(r+8);
+        const elbowX=cx+Math.cos(midAngle)*(r+28);
+        const elbowY=cy+Math.sin(midAngle)*(r+28);
+        const isRight=elbowX>=cx;
+        const endX=isRight?elbowX+35:elbowX-35;
+        const endY=elbowY;
+
+        const pct=((donutData[i]/donutTotal)*100).toFixed(0);
+        const amt=Math.round(donutData[i]/10000).toLocaleString();
+        const line1=donutLabels[i]+' '+pct+'%';
+        const line2=amt+'만원';
+
+        // 선 그리기
+        ctx.save();
+        ctx.strokeStyle='#a8a290';
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.moveTo(edgeX,edgeY);
+        ctx.lineTo(elbowX,elbowY);
+        ctx.lineTo(endX,endY);
+        ctx.stroke();
+
+        // 점
+        ctx.fillStyle=donutColors[i];
+        ctx.beginPath();
+        ctx.arc(edgeX,edgeY,3,0,Math.PI*2);
+        ctx.fill();
+
+        // 텍스트
+        const textX=isRight?endX+6:endX-6;
+        ctx.textAlign=isRight?'left':'right';
+        ctx.textBaseline='middle';
+        ctx.fillStyle='#2c2a24';
+        ctx.font='700 11px Pretendard';
+        ctx.fillText(line1,textX,endY-7);
+        ctx.font='600 11px Pretendard';
+        ctx.fillStyle='#7a7568';
+        ctx.fillText(line2,textX,endY+8);
+        ctx.restore();
+      });
+    }
+  };
+
+  new Chart(document.getElementById('chartDonut'),{
+    type:'doughnut',
+    data:{
+      labels:donutLabels,
+      datasets:[{
+        data:donutData,
+        backgroundColor:donutColors,
+        borderWidth:3,borderColor:'#fff'
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      cutout:'50%',
+      layout:{padding:{top:45,bottom:20,left:80,right:80}},
+      plugins:{
+        legend:{display:false},
+        datalabels:{display:false},
+        tooltip:{
+          backgroundColor:dark,titleFont:{family:'Pretendard'},bodyFont:{family:'Pretendard',size:12},
+          callbacks:{label:ctx=>' ₩'+(ctx.parsed).toLocaleString()}
+        }
+      }
+    },
+    plugins:[outerLabelPlugin]
+  });
+}
+
+if(localStorage.getItem('bc_auth')==='1'){
+  window.addEventListener('DOMContentLoaded',initCharts);
 }
 </script>
 

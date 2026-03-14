@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BECORE LAB — Dashboard Design Preview</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Pretendard',system-ui,sans-serif;
+  background:#0e0e0e;
+  color:#eee;
+  min-height:100vh;
+  padding:32px 24px 60px;
+  -webkit-font-smoothing:antialiased;
+}
+.page-header{text-align:center;margin-bottom:40px}
+.page-header h1{font-size:1rem;font-weight:700;letter-spacing:.1em;color:#888;margin-bottom:6px}
+.page-header p{font-size:.78rem;color:#555}
+
+.grid{
+  display:flex;flex-direction:column;
+  gap:28px;max-width:1200px;margin:0 auto;
+}
+
+.preview{
+  border-radius:12px;overflow:hidden;
+  border:1px solid #222;
+  transition:border-color .2s;
+}
+.preview:hover{border-color:#444}
+
+/* Each mockup is a mini dashboard */
+.mock{
+  display:grid;
+  grid-template-columns:56px 1fr 240px;
+  grid-template-rows:auto;
+  min-height:480px;
+  overflow:hidden;
+}
+
+/* ── Sidebar ── */
+.sb{
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px 0;gap:6px;
+}
+.sb-logo{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:800;margin-bottom:12px;
+}
+.sb-item{
+  width:34px;height:34px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.82rem;transition:background .15s;cursor:pointer;
+}
+
+/* ── Main content ── */
+.mc{
+  padding:24px 28px;
+  display:flex;flex-direction:column;gap:16px;
+}
+.mc-greeting{font-size:1.2rem;font-weight:700;margin-bottom:2px}
+.mc-sub{font-size:.72rem;margin-bottom:8px}
+
+/* KPI row */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kpi{padding:14px;border-radius:10px;position:relative}
+.kpi-val{font-size:1.15rem;font-weight:700;margin-bottom:2px}
+.kpi-label{font-size:.62rem;opacity:.6}
+.kpi-icon{position:absolute;top:12px;right:12px;font-size:.85rem;opacity:.5}
+
+/* Bento grid */
+.bento{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:auto auto;
+  gap:10px;flex:1;
+}
+.bento-card{
+  padding:16px;border-radius:10px;
+  display:flex;flex-direction:column;
+}
+.bento-card.wide{grid-column:span 2}
+.bc-title{font-size:.72rem;font-weight:600;margin-bottom:4px}
+.bc-sub{font-size:.6rem;opacity:.5;margin-bottom:10px}
+
+/* Mini chart placeholders */
+.mini-bars{display:flex;align-items:flex-end;gap:4px;height:60px;margin-top:auto}
+.mini-bar{flex:1;border-radius:3px 3px 0 0;min-width:8px}
+.mini-line{height:50px;margin-top:auto;position:relative}
+.mini-line svg{width:100%;height:100%}
+.mini-donut{width:60px;height:60px;border-radius:50%;margin:auto;position:relative;display:flex;align-items:center;justify-content:center}
+.mini-donut::after{content:'';position:absolute;width:30px;height:30px;border-radius:50%}
+.mini-donut-val{font-size:.6rem;font-weight:700;position:relative;z-index:1}
+
+/* ── Right panel ── */
+.rp{
+  padding:20px 16px;
+  display:flex;flex-direction:column;gap:12px;
+  border-left-width:1px;border-left-style:solid;
+}
+.rp-title{font-size:.72rem;font-weight:600;margin-bottom:4px}
+.rp-item{
+  padding:10px;border-radius:8px;
+  display:flex;align-items:center;gap:8px;
+  cursor:pointer;transition:opacity .15s;
+}
+.rp-item:hover{opacity:.8}
+.rp-item-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.75rem}
+.rp-item-name{font-size:.68rem;font-weight:600}
+.rp-item-desc{font-size:.56rem;opacity:.5}
+.rp-item-arrow{margin-left:auto;font-size:.6rem;opacity:.3}
+
+/* Calendar mini */
+.rp-cal{margin-top:8px}
+.rp-cal-header{font-size:.62rem;font-weight:600;margin-bottom:6px;display:flex;justify-content:space-between}
+.rp-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:.52rem}
+.rp-cal-day{padding:4px 0;border-radius:4px}
+
+/* Info bar */
+.info{
+  padding:14px 24px;
+  background:#111;
+  border-top:1px solid #222;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.info-name{font-size:.85rem;font-weight:700}
+.info-desc{font-size:.68rem;color:#777}
+.info-tag{font-size:.6rem;padding:3px 10px;border-radius:20px;border:1px solid #333;color:#888}
+
+/* ═══════════════════════════════════════ */
+/*  A. Figma Dark + Multi-color           */
+/* ═══════════════════════════════════════ */
+.figma-dark .sb{background:#1a1a1a}
+.figma-dark .sb-logo{background:conic-gradient(#f24e1e,#ff7262,#a259ff,#1abcfe,#0acf83,#f24e1e);color:#000}
+.figma-dark .sb-item{color:#666}
+.figma-dark .sb-item.active{background:#2c2c2c;color:#fff}
+.figma-dark .mc{background:#1e1e1e;color:#fff}
+.figma-dark .mc-sub{color:#777}
+.figma-dark .kpi{background:#2c2c2c}
+.figma-dark .kpi:nth-child(1){border-left:3px solid #f24e1e}
+.figma-dark .kpi:nth-child(2){border-left:3px solid #a259ff}
+.figma-dark .kpi:nth-child(3){border-left:3px solid #1abcfe}
+.figma-dark .kpi:nth-child(4){border-left:3px solid #0acf83}
+.figma-dark .bento-card{background:#2c2c2c;color:#eee}
+.figma-dark .mini-bar{background:#a259ff}
+.figma-dark .mini-bar:nth-child(odd){background:#1abcfe}
+.figma-dark .mini-donut{background:conic-gradient(#f24e1e 0% 40%,#a259ff 40% 65%,#0acf83 65% 100%)}
+.figma-dark .mini-donut::after{background:#2c2c2c}
+.figma-dark .rp{background:#1a1a1a;border-left-color:#2a2a2a;color:#eee}
+.figma-dark .rp-item{background:#242424}
+.figma-dark .rp-item-icon{background:#2c2c2c}
+.figma-dark .rp-cal-day.today{background:#a259ff;color:#fff}
+
+/* ═══════════════════════════════════════ */
+/*  B. Warm Cream + Gold                  */
+/* ═══════════════════════════════════════ */
+.warm-cream .sb{background:#eeeadf}
+.warm-cream .sb-logo{background:#f2e56b;color:#3a3520}
+.warm-cream .sb-item{color:#c0b89e}
+.warm-cream .sb-item.active{background:#fff;color:#3a3520;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.warm-cream .mc{background:linear-gradient(180deg,#fdf8ec 0%,#f8f4ea 100%);color:#2c2a24}
+.warm-cream .mc-sub{color:#a8a290}
+.warm-cream .kpi{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.warm-cream .kpi:nth-child(1){border-left:3px solid #f2e56b}
+.warm-cream .kpi:nth-child(2){border-left:3px solid #e6d85e}
+.warm-cream .kpi:nth-child(3){border-left:3px solid #d4c94f}
+.warm-cream .kpi:nth-child(4){border-left:3px solid #f2e56b}
+.warm-cream .bento-card{background:#fff;color:#2c2a24;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.warm-cream .mini-bar{background:#f2e56b}
+.warm-cream .mini-bar:nth-child(odd){background:#e0d45c}
+.warm-cream .mini-donut{background:conic-gradient(#f2e56b 0% 45%,#3a3520 45% 70%,#f5f0d8 70% 100%)}
+.warm-cream .mini-donut::after{background:#fff}
+.warm-cream .mini-donut-val{color:#2c2a24}
+.warm-cream .rp{background:#eeeadf;border-left-color:#e2ddd0;color:#2c2a24}
+.warm-cream .rp-item{background:#fff}
+.warm-cream .rp-item-icon{background:#faf6ee}
+.warm-cream .rp-cal-day.today{background:#f2e56b;color:#3a3520}
+
+/* ═══════════════════════════════════════ */
+/*  C. Light Neutral + Orange             */
+/* ═══════════════════════════════════════ */
+.lt-orange .sb{background:#f7f7f5}
+.lt-orange .sb-logo{background:#f24e1e;color:#fff}
+.lt-orange .sb-item{color:#bbb}
+.lt-orange .sb-item.active{background:#fff;color:#333;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.lt-orange .mc{background:#fafaf8;color:#1a1a1a}
+.lt-orange .mc-sub{color:#999}
+.lt-orange .kpi{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.lt-orange .kpi:nth-child(1){border-left:3px solid #f24e1e}
+.lt-orange .kpi:nth-child(2){border-left:3px solid #ff7262}
+.lt-orange .kpi:nth-child(3){border-left:3px solid #ff9a76}
+.lt-orange .kpi:nth-child(4){border-left:3px solid #f24e1e}
+.lt-orange .bento-card{background:#fff;color:#1a1a1a;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.lt-orange .mini-bar{background:#f24e1e}
+.lt-orange .mini-bar:nth-child(odd){background:#ff9a76}
+.lt-orange .mini-donut{background:conic-gradient(#f24e1e 0% 40%,#ff7262 40% 65%,#ffd4c4 65% 100%)}
+.lt-orange .mini-donut::after{background:#fff}
+.lt-orange .mini-donut-val{color:#1a1a1a}
+.lt-orange .rp{background:#f7f7f5;border-left-color:#eeece8;color:#1a1a1a}
+.lt-orange .rp-item{background:#fff}
+.lt-orange .rp-item-icon{background:#fff5f2}
+.lt-orange .rp-cal-day.today{background:#f24e1e;color:#fff}
+
+/* ═══════════════════════════════════════ */
+/*  D. Dark + Lime/Neon                   */
+/* ═══════════════════════════════════════ */
+.dark-lime .sb{background:#1a1a18}
+.dark-lime .sb-logo{background:#c8ff00;color:#1a1a18}
+.dark-lime .sb-item{color:#555}
+.dark-lime .sb-item.active{background:#2a2a26;color:#c8ff00}
+.dark-lime .mc{background:#212120;color:#f0f0e8}
+.dark-lime .mc-sub{color:#777}
+.dark-lime .kpi{background:#2a2a26}
+.dark-lime .kpi:nth-child(1){border-left:3px solid #c8ff00}
+.dark-lime .kpi:nth-child(2){border-left:3px solid #a8d600}
+.dark-lime .kpi:nth-child(3){border-left:3px solid #88b000}
+.dark-lime .kpi:nth-child(4){border-left:3px solid #c8ff00}
+.dark-lime .bento-card{background:#2a2a26;color:#e8e8e0}
+.dark-lime .mini-bar{background:#c8ff00}
+.dark-lime .mini-bar:nth-child(odd){background:#88b000}
+.dark-lime .mini-donut{background:conic-gradient(#c8ff00 0% 45%,#88b000 45% 70%,#444 70% 100%)}
+.dark-lime .mini-donut::after{background:#2a2a26}
+.dark-lime .rp{background:#1a1a18;border-left-color:#2a2a26;color:#e8e8e0}
+.dark-lime .rp-item{background:#242422}
+.dark-lime .rp-item-icon{background:#2e2e2a}
+.dark-lime .rp-cal-day.today{background:#c8ff00;color:#1a1a18}
+
+/* ═══════════════════════════════════════ */
+/*  E. Light Gray + Green                 */
+/* ═══════════════════════════════════════ */
+.lt-green .sb{background:#f0f2f0}
+.lt-green .sb-logo{background:#22c55e;color:#fff}
+.lt-green .sb-item{color:#bbb}
+.lt-green .sb-item.active{background:#fff;color:#1a1a1a;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.lt-green .mc{background:#f8faf8;color:#1a1a1a}
+.lt-green .mc-sub{color:#888}
+.lt-green .kpi{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.lt-green .kpi:nth-child(1){border-left:3px solid #22c55e}
+.lt-green .kpi:nth-child(2){border-left:3px solid #16a34a}
+.lt-green .kpi:nth-child(3){border-left:3px solid #4ade80}
+.lt-green .kpi:nth-child(4){border-left:3px solid #22c55e}
+.lt-green .bento-card{background:#fff;color:#1a1a1a;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.lt-green .mini-bar{background:#22c55e}
+.lt-green .mini-bar:nth-child(odd){background:#4ade80}
+.lt-green .mini-donut{background:conic-gradient(#22c55e 0% 40%,#16a34a 40% 70%,#d1fae5 70% 100%)}
+.lt-green .mini-donut::after{background:#fff}
+.lt-green .mini-donut-val{color:#1a1a1a}
+.lt-green .rp{background:#f0f2f0;border-left-color:#e0e4e0;color:#1a1a1a}
+.lt-green .rp-item{background:#fff}
+.lt-green .rp-item-icon{background:#f0fdf4}
+.lt-green .rp-cal-day.today{background:#22c55e;color:#fff}
+
+@media(max-width:768px){
+  .mock{grid-template-columns:1fr;grid-template-rows:auto}
+  .sb{flex-direction:row;padding:8px 12px;overflow-x:auto}
+  .rp{border-left:none;border-top:1px solid #333}
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>BECORE LAB — DASHBOARD DESIGN PREVIEW</h1>
+  <p>대시보드 색감 시안 비교 (5종) · 마음에 드는 번호를 알려주세요</p>
+</div>
+
+<div class="grid">
+
+<!-- ═══ A. Figma Dark + Multi-color ═══ -->
+<div class="preview">
+  <div class="mock figma-dark">
+    <div class="sb">
+      <div class="sb-logo">B</div>
+      <div class="sb-item active">🏠</div>
+      <div class="sb-item">📊</div>
+      <div class="sb-item">📦</div>
+      <div class="sb-item">💰</div>
+      <div class="sb-item">📸</div>
+      <div class="sb-item" style="margin-top:auto">⚙️</div>
+    </div>
+    <div class="mc">
+      <div class="mc-greeting">Good Morning, 대표님</div>
+      <div class="mc-sub">비코어랩 업무 현황 요약</div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-val">6</div><div class="kpi-label">등록 앱</div><div class="kpi-icon">📱</div></div>
+        <div class="kpi"><div class="kpi-val">17</div><div class="kpi-label">연동 채널</div><div class="kpi-icon">🔗</div></div>
+        <div class="kpi"><div class="kpi-val">₩8.2M</div><div class="kpi-label">이번달 매출</div><div class="kpi-icon">💰</div></div>
+        <div class="kpi"><div class="kpi-val">124</div><div class="kpi-label">소싱 후보</div><div class="kpi-icon">🔍</div></div>
+      </div>
+      <div class="bento">
+        <div class="bento-card">
+          <div class="bc-title">채널별 매출</div>
+          <div class="bc-sub">최근 6개월</div>
+          <div class="mini-bars">
+            <div class="mini-bar" style="height:35%"></div>
+            <div class="mini-bar" style="height:55%"></div>
+            <div class="mini-bar" style="height:45%"></div>
+            <div class="mini-bar" style="height:70%"></div>
+            <div class="mini-bar" style="height:85%"></div>
+            <div class="mini-bar" style="height:60%"></div>
+            <div class="mini-bar" style="height:90%"></div>
+            <div class="mini-bar" style="height:75%"></div>
+          </div>
+        </div>
+        <div class="bento-card">
+          <div class="bc-title">채널 비중</div>
+          <div class="bc-sub">이번달 매출 기준</div>
+          <div class="mini-donut"><span class="mini-donut-val">42%</span></div>
+        </div>
+        <div class="bento-card wide">
+          <div class="bc-title">소싱 기회 분석</div>
+          <div class="bc-sub">기회점수 TOP 키워드 · 최근 스캔 결과</div>
+          <div class="mini-bars" style="height:40px">
+            <div class="mini-bar" style="height:90%;background:#0acf83"></div>
+            <div class="mini-bar" style="height:75%;background:#0acf83"></div>
+            <div class="mini-bar" style="height:60%;background:#1abcfe"></div>
+            <div class="mini-bar" style="height:55%;background:#1abcfe"></div>
+            <div class="mini-bar" style="height:45%;background:#a259ff"></div>
+            <div class="mini-bar" style="height:40%;background:#a259ff"></div>
+            <div class="mini-bar" style="height:35%;background:#f24e1e"></div>
+            <div class="mini-bar" style="height:30%;background:#f24e1e"></div>
+            <div class="mini-bar" style="height:25%;background:#666"></div>
+            <div class="mini-bar" style="height:20%;background:#666"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="rp">
+      <div class="rp-title">앱 바로가기</div>
+      <div class="rp-item"><div class="rp-item-icon">🔍</div><div><div class="rp-item-name">소싱 분석기</div><div class="rp-item-desc">SERVER · 쿠팡 기회분석</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">🚀</div><div><div class="rp-item-name">로켓 미리보기</div><div class="rp-item-desc">로켓그로스 등록</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">📦</div><div><div class="rp-item-name">발주 대시보드</div><div class="rp-item-desc">재고 현황 관리</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">💰</div><div><div class="rp-item-name">매출 정산</div><div class="rp-item-desc">채널별 리포트</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-title" style="margin-top:8px">최근 활동</div>
+      <div class="rp-cal">
+        <div class="rp-cal-header"><span>2026년 3월</span></div>
+        <div class="rp-cal-grid">
+          <div class="rp-cal-day">일</div><div class="rp-cal-day">월</div><div class="rp-cal-day">화</div><div class="rp-cal-day">수</div><div class="rp-cal-day">목</div><div class="rp-cal-day">금</div><div class="rp-cal-day">토</div>
+          <div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day">1</div>
+          <div class="rp-cal-day">2</div><div class="rp-cal-day">3</div><div class="rp-cal-day">4</div><div class="rp-cal-day">5</div><div class="rp-cal-day">6</div><div class="rp-cal-day">7</div><div class="rp-cal-day">8</div>
+          <div class="rp-cal-day">9</div><div class="rp-cal-day">10</div><div class="rp-cal-day">11</div><div class="rp-cal-day">12</div><div class="rp-cal-day">13</div><div class="rp-cal-day">14</div><div class="rp-cal-day today">15</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info">
+    <div><div class="info-name">A. Figma Dark + Multi-color</div><div class="info-desc">다크 캔버스 + Figma 멀티 컬러 악센트, 개발자/크리에이터 감성</div></div>
+    <div class="info-tag">Dark</div>
+  </div>
+</div>
+
+<!-- ═══ B. Warm Cream + Gold ═══ -->
+<div class="preview">
+  <div class="mock warm-cream">
+    <div class="sb">
+      <div class="sb-logo">B</div>
+      <div class="sb-item active">🏠</div>
+      <div class="sb-item">📊</div>
+      <div class="sb-item">📦</div>
+      <div class="sb-item">💰</div>
+      <div class="sb-item">📸</div>
+      <div class="sb-item" style="margin-top:auto">⚙️</div>
+    </div>
+    <div class="mc">
+      <div class="mc-greeting">Good Morning, 대표님</div>
+      <div class="mc-sub">비코어랩 업무 현황 요약</div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-val">6</div><div class="kpi-label">등록 앱</div><div class="kpi-icon">📱</div></div>
+        <div class="kpi"><div class="kpi-val">17</div><div class="kpi-label">연동 채널</div><div class="kpi-icon">🔗</div></div>
+        <div class="kpi"><div class="kpi-val">₩8.2M</div><div class="kpi-label">이번달 매출</div><div class="kpi-icon">💰</div></div>
+        <div class="kpi"><div class="kpi-val">124</div><div class="kpi-label">소싱 후보</div><div class="kpi-icon">🔍</div></div>
+      </div>
+      <div class="bento">
+        <div class="bento-card">
+          <div class="bc-title">채널별 매출</div>
+          <div class="bc-sub">최근 6개월</div>
+          <div class="mini-bars">
+            <div class="mini-bar" style="height:35%"></div>
+            <div class="mini-bar" style="height:55%"></div>
+            <div class="mini-bar" style="height:45%"></div>
+            <div class="mini-bar" style="height:70%"></div>
+            <div class="mini-bar" style="height:85%"></div>
+            <div class="mini-bar" style="height:60%"></div>
+            <div class="mini-bar" style="height:90%"></div>
+            <div class="mini-bar" style="height:75%"></div>
+          </div>
+        </div>
+        <div class="bento-card">
+          <div class="bc-title">채널 비중</div>
+          <div class="bc-sub">이번달 매출 기준</div>
+          <div class="mini-donut"><span class="mini-donut-val">42%</span></div>
+        </div>
+        <div class="bento-card wide">
+          <div class="bc-title">소싱 기회 분석</div>
+          <div class="bc-sub">기회점수 TOP 키워드 · 최근 스캔 결과</div>
+          <div class="mini-bars" style="height:40px">
+            <div class="mini-bar" style="height:90%"></div><div class="mini-bar" style="height:75%"></div>
+            <div class="mini-bar" style="height:60%"></div><div class="mini-bar" style="height:55%"></div>
+            <div class="mini-bar" style="height:45%"></div><div class="mini-bar" style="height:40%"></div>
+            <div class="mini-bar" style="height:35%"></div><div class="mini-bar" style="height:30%"></div>
+            <div class="mini-bar" style="height:25%"></div><div class="mini-bar" style="height:20%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="rp">
+      <div class="rp-title">앱 바로가기</div>
+      <div class="rp-item"><div class="rp-item-icon">🔍</div><div><div class="rp-item-name">소싱 분석기</div><div class="rp-item-desc">SERVER · 쿠팡 기회분석</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">🚀</div><div><div class="rp-item-name">로켓 미리보기</div><div class="rp-item-desc">로켓그로스 등록</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">📦</div><div><div class="rp-item-name">발주 대시보드</div><div class="rp-item-desc">재고 현황 관리</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">💰</div><div><div class="rp-item-name">매출 정산</div><div class="rp-item-desc">채널별 리포트</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-title" style="margin-top:8px">최근 활동</div>
+      <div class="rp-cal">
+        <div class="rp-cal-header"><span>2026년 3월</span></div>
+        <div class="rp-cal-grid">
+          <div class="rp-cal-day">일</div><div class="rp-cal-day">월</div><div class="rp-cal-day">화</div><div class="rp-cal-day">수</div><div class="rp-cal-day">목</div><div class="rp-cal-day">금</div><div class="rp-cal-day">토</div>
+          <div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day">1</div>
+          <div class="rp-cal-day">2</div><div class="rp-cal-day">3</div><div class="rp-cal-day">4</div><div class="rp-cal-day">5</div><div class="rp-cal-day">6</div><div class="rp-cal-day">7</div><div class="rp-cal-day">8</div>
+          <div class="rp-cal-day">9</div><div class="rp-cal-day">10</div><div class="rp-cal-day">11</div><div class="rp-cal-day">12</div><div class="rp-cal-day">13</div><div class="rp-cal-day">14</div><div class="rp-cal-day today">15</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info">
+    <div><div class="info-name">B. Soft Cream + Butter Yellow</div><div class="info-desc">밝은 크림 배경 + 버터 옐로 악센트, 따뜻하고 부드러운 무드 (Crextio 참고)</div></div>
+    <div class="info-tag">Light</div>
+  </div>
+</div>
+
+<!-- ═══ C. Light Neutral + Orange ═══ -->
+<div class="preview">
+  <div class="mock lt-orange">
+    <div class="sb">
+      <div class="sb-logo">B</div>
+      <div class="sb-item active">🏠</div>
+      <div class="sb-item">📊</div>
+      <div class="sb-item">📦</div>
+      <div class="sb-item">💰</div>
+      <div class="sb-item">📸</div>
+      <div class="sb-item" style="margin-top:auto">⚙️</div>
+    </div>
+    <div class="mc">
+      <div class="mc-greeting">Good Morning, 대표님</div>
+      <div class="mc-sub">비코어랩 업무 현황 요약</div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-val">6</div><div class="kpi-label">등록 앱</div><div class="kpi-icon">📱</div></div>
+        <div class="kpi"><div class="kpi-val">17</div><div class="kpi-label">연동 채널</div><div class="kpi-icon">🔗</div></div>
+        <div class="kpi"><div class="kpi-val">₩8.2M</div><div class="kpi-label">이번달 매출</div><div class="kpi-icon">💰</div></div>
+        <div class="kpi"><div class="kpi-val">124</div><div class="kpi-label">소싱 후보</div><div class="kpi-icon">🔍</div></div>
+      </div>
+      <div class="bento">
+        <div class="bento-card">
+          <div class="bc-title">채널별 매출</div>
+          <div class="bc-sub">최근 6개월</div>
+          <div class="mini-bars">
+            <div class="mini-bar" style="height:35%"></div><div class="mini-bar" style="height:55%"></div>
+            <div class="mini-bar" style="height:45%"></div><div class="mini-bar" style="height:70%"></div>
+            <div class="mini-bar" style="height:85%"></div><div class="mini-bar" style="height:60%"></div>
+            <div class="mini-bar" style="height:90%"></div><div class="mini-bar" style="height:75%"></div>
+          </div>
+        </div>
+        <div class="bento-card">
+          <div class="bc-title">채널 비중</div>
+          <div class="bc-sub">이번달 매출 기준</div>
+          <div class="mini-donut"><span class="mini-donut-val">42%</span></div>
+        </div>
+        <div class="bento-card wide">
+          <div class="bc-title">소싱 기회 분석</div>
+          <div class="bc-sub">기회점수 TOP 키워드 · 최근 스캔 결과</div>
+          <div class="mini-bars" style="height:40px">
+            <div class="mini-bar" style="height:90%"></div><div class="mini-bar" style="height:75%"></div>
+            <div class="mini-bar" style="height:60%"></div><div class="mini-bar" style="height:55%"></div>
+            <div class="mini-bar" style="height:45%"></div><div class="mini-bar" style="height:40%"></div>
+            <div class="mini-bar" style="height:35%"></div><div class="mini-bar" style="height:30%"></div>
+            <div class="mini-bar" style="height:25%"></div><div class="mini-bar" style="height:20%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="rp">
+      <div class="rp-title">앱 바로가기</div>
+      <div class="rp-item"><div class="rp-item-icon">🔍</div><div><div class="rp-item-name">소싱 분석기</div><div class="rp-item-desc">SERVER · 쿠팡 기회분석</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">🚀</div><div><div class="rp-item-name">로켓 미리보기</div><div class="rp-item-desc">로켓그로스 등록</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">📦</div><div><div class="rp-item-name">발주 대시보드</div><div class="rp-item-desc">재고 현황 관리</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">💰</div><div><div class="rp-item-name">매출 정산</div><div class="rp-item-desc">채널별 리포트</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-title" style="margin-top:8px">최근 활동</div>
+      <div class="rp-cal">
+        <div class="rp-cal-header"><span>2026년 3월</span></div>
+        <div class="rp-cal-grid">
+          <div class="rp-cal-day">일</div><div class="rp-cal-day">월</div><div class="rp-cal-day">화</div><div class="rp-cal-day">수</div><div class="rp-cal-day">목</div><div class="rp-cal-day">금</div><div class="rp-cal-day">토</div>
+          <div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day">1</div>
+          <div class="rp-cal-day">2</div><div class="rp-cal-day">3</div><div class="rp-cal-day">4</div><div class="rp-cal-day">5</div><div class="rp-cal-day">6</div><div class="rp-cal-day">7</div><div class="rp-cal-day">8</div>
+          <div class="rp-cal-day">9</div><div class="rp-cal-day">10</div><div class="rp-cal-day">11</div><div class="rp-cal-day">12</div><div class="rp-cal-day">13</div><div class="rp-cal-day">14</div><div class="rp-cal-day today">15</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info">
+    <div><div class="info-name">C. Light Neutral + Orange</div><div class="info-desc">밝은 뉴트럴 배경 + 오렌지/레드 악센트, 모던하고 깔끔한 비즈니스</div></div>
+    <div class="info-tag">Light</div>
+  </div>
+</div>
+
+<!-- ═══ D. Dark + Lime/Neon ═══ -->
+<div class="preview">
+  <div class="mock dark-lime">
+    <div class="sb">
+      <div class="sb-logo">B</div>
+      <div class="sb-item active">🏠</div>
+      <div class="sb-item">📊</div>
+      <div class="sb-item">📦</div>
+      <div class="sb-item">💰</div>
+      <div class="sb-item">📸</div>
+      <div class="sb-item" style="margin-top:auto">⚙️</div>
+    </div>
+    <div class="mc">
+      <div class="mc-greeting">Good Morning, 대표님</div>
+      <div class="mc-sub">비코어랩 업무 현황 요약</div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-val">6</div><div class="kpi-label">등록 앱</div><div class="kpi-icon">📱</div></div>
+        <div class="kpi"><div class="kpi-val">17</div><div class="kpi-label">연동 채널</div><div class="kpi-icon">🔗</div></div>
+        <div class="kpi"><div class="kpi-val">₩8.2M</div><div class="kpi-label">이번달 매출</div><div class="kpi-icon">💰</div></div>
+        <div class="kpi"><div class="kpi-val">124</div><div class="kpi-label">소싱 후보</div><div class="kpi-icon">🔍</div></div>
+      </div>
+      <div class="bento">
+        <div class="bento-card">
+          <div class="bc-title">채널별 매출</div>
+          <div class="bc-sub">최근 6개월</div>
+          <div class="mini-bars">
+            <div class="mini-bar" style="height:35%"></div><div class="mini-bar" style="height:55%"></div>
+            <div class="mini-bar" style="height:45%"></div><div class="mini-bar" style="height:70%"></div>
+            <div class="mini-bar" style="height:85%"></div><div class="mini-bar" style="height:60%"></div>
+            <div class="mini-bar" style="height:90%"></div><div class="mini-bar" style="height:75%"></div>
+          </div>
+        </div>
+        <div class="bento-card">
+          <div class="bc-title">채널 비중</div>
+          <div class="bc-sub">이번달 매출 기준</div>
+          <div class="mini-donut"><span class="mini-donut-val">42%</span></div>
+        </div>
+        <div class="bento-card wide">
+          <div class="bc-title">소싱 기회 분석</div>
+          <div class="bc-sub">기회점수 TOP 키워드 · 최근 스캔 결과</div>
+          <div class="mini-bars" style="height:40px">
+            <div class="mini-bar" style="height:90%"></div><div class="mini-bar" style="height:75%"></div>
+            <div class="mini-bar" style="height:60%"></div><div class="mini-bar" style="height:55%"></div>
+            <div class="mini-bar" style="height:45%"></div><div class="mini-bar" style="height:40%"></div>
+            <div class="mini-bar" style="height:35%"></div><div class="mini-bar" style="height:30%"></div>
+            <div class="mini-bar" style="height:25%"></div><div class="mini-bar" style="height:20%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="rp">
+      <div class="rp-title">앱 바로가기</div>
+      <div class="rp-item"><div class="rp-item-icon">🔍</div><div><div class="rp-item-name">소싱 분석기</div><div class="rp-item-desc">SERVER · 쿠팡 기회분석</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">🚀</div><div><div class="rp-item-name">로켓 미리보기</div><div class="rp-item-desc">로켓그로스 등록</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">📦</div><div><div class="rp-item-name">발주 대시보드</div><div class="rp-item-desc">재고 현황 관리</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">💰</div><div><div class="rp-item-name">매출 정산</div><div class="rp-item-desc">채널별 리포트</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-title" style="margin-top:8px">최근 활동</div>
+      <div class="rp-cal">
+        <div class="rp-cal-header"><span>2026년 3월</span></div>
+        <div class="rp-cal-grid">
+          <div class="rp-cal-day">일</div><div class="rp-cal-day">월</div><div class="rp-cal-day">화</div><div class="rp-cal-day">수</div><div class="rp-cal-day">목</div><div class="rp-cal-day">금</div><div class="rp-cal-day">토</div>
+          <div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day">1</div>
+          <div class="rp-cal-day">2</div><div class="rp-cal-day">3</div><div class="rp-cal-day">4</div><div class="rp-cal-day">5</div><div class="rp-cal-day">6</div><div class="rp-cal-day">7</div><div class="rp-cal-day">8</div>
+          <div class="rp-cal-day">9</div><div class="rp-cal-day">10</div><div class="rp-cal-day">11</div><div class="rp-cal-day">12</div><div class="rp-cal-day">13</div><div class="rp-cal-day">14</div><div class="rp-cal-day today">15</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info">
+    <div><div class="info-name">D. Dark + Lime/Neon</div><div class="info-desc">다크 올리브 배경 + 네온 라임 악센트, 트렌디하고 임팩트 있는 느낌</div></div>
+    <div class="info-tag">Dark</div>
+  </div>
+</div>
+
+<!-- ═══ E. Light Gray + Green ═══ -->
+<div class="preview">
+  <div class="mock lt-green">
+    <div class="sb">
+      <div class="sb-logo">B</div>
+      <div class="sb-item active">🏠</div>
+      <div class="sb-item">📊</div>
+      <div class="sb-item">📦</div>
+      <div class="sb-item">💰</div>
+      <div class="sb-item">📸</div>
+      <div class="sb-item" style="margin-top:auto">⚙️</div>
+    </div>
+    <div class="mc">
+      <div class="mc-greeting">Good Morning, 대표님</div>
+      <div class="mc-sub">비코어랩 업무 현황 요약</div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-val">6</div><div class="kpi-label">등록 앱</div><div class="kpi-icon">📱</div></div>
+        <div class="kpi"><div class="kpi-val">17</div><div class="kpi-label">연동 채널</div><div class="kpi-icon">🔗</div></div>
+        <div class="kpi"><div class="kpi-val">₩8.2M</div><div class="kpi-label">이번달 매출</div><div class="kpi-icon">💰</div></div>
+        <div class="kpi"><div class="kpi-val">124</div><div class="kpi-label">소싱 후보</div><div class="kpi-icon">🔍</div></div>
+      </div>
+      <div class="bento">
+        <div class="bento-card">
+          <div class="bc-title">채널별 매출</div>
+          <div class="bc-sub">최근 6개월</div>
+          <div class="mini-bars">
+            <div class="mini-bar" style="height:35%"></div><div class="mini-bar" style="height:55%"></div>
+            <div class="mini-bar" style="height:45%"></div><div class="mini-bar" style="height:70%"></div>
+            <div class="mini-bar" style="height:85%"></div><div class="mini-bar" style="height:60%"></div>
+            <div class="mini-bar" style="height:90%"></div><div class="mini-bar" style="height:75%"></div>
+          </div>
+        </div>
+        <div class="bento-card">
+          <div class="bc-title">채널 비중</div>
+          <div class="bc-sub">이번달 매출 기준</div>
+          <div class="mini-donut"><span class="mini-donut-val">42%</span></div>
+        </div>
+        <div class="bento-card wide">
+          <div class="bc-title">소싱 기회 분석</div>
+          <div class="bc-sub">기회점수 TOP 키워드 · 최근 스캔 결과</div>
+          <div class="mini-bars" style="height:40px">
+            <div class="mini-bar" style="height:90%"></div><div class="mini-bar" style="height:75%"></div>
+            <div class="mini-bar" style="height:60%"></div><div class="mini-bar" style="height:55%"></div>
+            <div class="mini-bar" style="height:45%"></div><div class="mini-bar" style="height:40%"></div>
+            <div class="mini-bar" style="height:35%"></div><div class="mini-bar" style="height:30%"></div>
+            <div class="mini-bar" style="height:25%"></div><div class="mini-bar" style="height:20%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="rp">
+      <div class="rp-title">앱 바로가기</div>
+      <div class="rp-item"><div class="rp-item-icon">🔍</div><div><div class="rp-item-name">소싱 분석기</div><div class="rp-item-desc">SERVER · 쿠팡 기회분석</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">🚀</div><div><div class="rp-item-name">로켓 미리보기</div><div class="rp-item-desc">로켓그로스 등록</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">📦</div><div><div class="rp-item-name">발주 대시보드</div><div class="rp-item-desc">재고 현황 관리</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-item"><div class="rp-item-icon">💰</div><div><div class="rp-item-name">매출 정산</div><div class="rp-item-desc">채널별 리포트</div></div><div class="rp-item-arrow">→</div></div>
+      <div class="rp-title" style="margin-top:8px">최근 활동</div>
+      <div class="rp-cal">
+        <div class="rp-cal-header"><span>2026년 3월</span></div>
+        <div class="rp-cal-grid">
+          <div class="rp-cal-day">일</div><div class="rp-cal-day">월</div><div class="rp-cal-day">화</div><div class="rp-cal-day">수</div><div class="rp-cal-day">목</div><div class="rp-cal-day">금</div><div class="rp-cal-day">토</div>
+          <div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day"></div><div class="rp-cal-day">1</div>
+          <div class="rp-cal-day">2</div><div class="rp-cal-day">3</div><div class="rp-cal-day">4</div><div class="rp-cal-day">5</div><div class="rp-cal-day">6</div><div class="rp-cal-day">7</div><div class="rp-cal-day">8</div>
+          <div class="rp-cal-day">9</div><div class="rp-cal-day">10</div><div class="rp-cal-day">11</div><div class="rp-cal-day">12</div><div class="rp-cal-day">13</div><div class="rp-cal-day">14</div><div class="rp-cal-day today">15</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info">
+    <div><div class="info-name">E. Light Gray + Green</div><div class="info-desc">밝은 그레이 배경 + 그린 악센트, 깔끔하고 자연스러운 비즈니스 톤</div></div>
+    <div class="info-tag">Light</div>
+  </div>
+</div>
+
+</div>
+
+<div style="text-align:center;margin-top:40px;font-size:.75rem;color:#555">
+  A~E 중 마음에 드는 색감을 알려주세요 — 바로 대시보드로 제작해드릴게요 ✨
+</div>
+
+</body>
+</html>

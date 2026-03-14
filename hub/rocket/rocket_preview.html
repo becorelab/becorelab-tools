@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>로켓배송 발주서 미리보기</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 24px;
+  }
+
+  /* 드롭존 */
+  .dropzone {
+    border: 2px dashed #334155;
+    border-radius: 12px;
+    padding: 48px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #1e2330;
+    margin-bottom: 24px;
+  }
+  .dropzone:hover, .dropzone.drag-over {
+    border-color: #e8542a;
+    background: #1e2330;
+  }
+  .dropzone input { display: none; }
+  .dropzone-icon { font-size: 40px; margin-bottom: 12px; }
+  .dropzone-text { font-size: 14px; color: #94a3b8; }
+  .dropzone-text strong { color: #e2e8f0; }
+  .dropzone-hint { font-size: 12px; color: #475569; margin-top: 6px; }
+
+  /* 요약 카드 */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .card {
+    background: #1e2330;
+    border-radius: 10px;
+    padding: 16px 20px;
+    border: 1px solid #2d3748;
+  }
+  .card-label { font-size: 11px; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .card-value { font-size: 22px; font-weight: 700; color: #fff; }
+  .card-value.orange { color: #e8542a; }
+  .card-value.green { color: #22c55e; }
+  .card-value.blue { color: #60a5fa; }
+
+  /* 경고 배너 */
+  .warnings {
+    background: #3b1a0a;
+    border: 1px solid #7c2d12;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: #fca5a5;
+  }
+  .warnings strong { color: #f87171; display: block; margin-bottom: 4px; }
+
+  /* 툴바 */
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .toolbar-title { font-size: 14px; font-weight: 600; color: #94a3b8; }
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: #e8542a; color: #fff; }
+  .btn-primary:hover { background: #c94320; }
+  .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #334155; }
+  .btn-outline:hover { border-color: #64748b; color: #e2e8f0; }
+
+  /* 테이블 */
+  .table-wrap {
+    background: #1e2330;
+    border-radius: 10px;
+    border: 1px solid #2d3748;
+    overflow: auto;
+    max-height: 65vh;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    position: sticky;
+    top: 0;
+    background: #161b27;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid #2d3748;
+    white-space: nowrap;
+    z-index: 1;
+  }
+  tbody tr {
+    border-bottom: 1px solid #1a202c;
+    transition: background 0.1s;
+  }
+  tbody tr:hover { background: #252d3d; }
+  tbody td {
+    padding: 10px 14px;
+    color: #e2e8f0;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-rocket { background: #1e3a5f; color: #60a5fa; }
+  .badge-warn { background: #3b1a0a; color: #f87171; }
+  .addr-cell { max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .num-cell { text-align: right; font-variant-numeric: tabular-nums; }
+  .empty-cell { color: #334155; }
+
+  /* 빈 상태 */
+  .empty-state { display: none; }
+  .initial-state { display: block; }
+</style>
+</head>
+<body>
+
+<h1>로켓배송 발주서 미리보기</h1>
+<p class="subtitle">이지어드민 업로드 전 내용을 확인하세요 — 변환된 .xls 파일을 드래그하거나 클릭해서 열어주세요</p>
+
+<!-- 드롭존 -->
+<div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+  <input type="file" id="fileInput" accept=".xls,.xlsx" onchange="loadFile(this.files[0])">
+  <div class="dropzone-icon">📦</div>
+  <div class="dropzone-text"><strong>파일을 여기에 드래그</strong>하거나 클릭해서 선택</div>
+  <div class="dropzone-hint">바이피엘 출고요청_MMDD(로켓배송).xls</div>
+</div>
+
+<!-- 요약 카드 (초기엔 숨김) -->
+<div class="summary" id="summary" style="display:none">
+  <div class="card">
+    <div class="card-label">총 발주 건수</div>
+    <div class="card-value blue" id="totalCount">-</div>
+  </div>
+  <div class="card">
+    <div class="card-label">물류센터 수</div>
+    <div class="card-value" id="centerCount">-</div>
+  </div>
+  <div class="card">
+    <div class="card-label">총 수량</div>
+    <div class="card-value" id="totalQty">-</div>
+  </div>
+  <div class="card">
+    <div class="card-label">총 매입금액</div>
+    <div class="card-value orange" id="totalAmount">-</div>
+  </div>
+</div>
+
+<!-- 경고 (주소 확인 필요) -->
+<div class="warnings" id="warnings" style="display:none">
+  <strong>⚠️ 주소 확인 필요</strong>
+  <div id="warningList"></div>
+</div>
+
+<!-- 테이블 영역 -->
+<div id="tableArea" style="display:none">
+  <div class="toolbar">
+    <div class="toolbar-title" id="fileLabel">파일명</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">다른 파일 열기</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead id="tableHead"></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// 드래그 앤 드롭
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault();
+  dz.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) loadFile(f);
+});
+
+function loadFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = new Uint8Array(e.target.result);
+    const wb = XLSX.read(data, { type: 'array' });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+    renderTable(rows, file.name);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderTable(rows, fileName) {
+  if (!rows || rows.length < 2) return;
+
+  const headers = rows[0];
+  const data = rows.slice(1).filter(r => r.some(c => c !== ''));
+
+  // 컬럼 인덱스
+  const iChannel  = headers.indexOf('채널명');
+  const iOrderNum = headers.indexOf('주문번호');
+  const iName     = headers.indexOf('받는분성함');
+  const iPhone    = headers.indexOf('받는분전화번호');
+  const iAddr     = headers.indexOf('받는분주소');
+  const iProduct  = headers.indexOf('상품명');
+  const iQty      = headers.indexOf('수량');
+  const iPrice    = headers.indexOf('판매가격');
+  const iTrack    = headers.indexOf('송장번호');
+
+  // 요약 계산
+  const centers = new Set(data.map(r => r[iName] || ''));
+  const totalQty = data.reduce((s, r) => s + (Number(r[iQty]) || 0), 0);
+  const totalAmt = data.reduce((s, r) => s + (Number(r[iPrice]) || 0), 0);
+  const warnings = data.filter(r => String(r[iAddr]).includes('주소확인필요'));
+
+  // 요약 카드
+  document.getElementById('totalCount').textContent = data.length.toLocaleString() + '건';
+  document.getElementById('centerCount').textContent = centers.size + '개';
+  document.getElementById('totalQty').textContent = totalQty.toLocaleString() + '개';
+  document.getElementById('totalAmount').textContent = '₩' + totalAmt.toLocaleString();
+
+  // 경고
+  if (warnings.length > 0) {
+    document.getElementById('warnings').style.display = 'block';
+    document.getElementById('warningList').innerHTML = warnings.map(r =>
+      `• 주문번호 ${r[iOrderNum]} — ${r[iName]} → 물류센터 주소 매핑 없음 (rocket_config.py에 추가 필요)`
+    ).join('<br>');
+  } else {
+    document.getElementById('warnings').style.display = 'none';
+  }
+
+  // 헤더
+  const displayCols = ['주문번호', '받는분성함', '받는분전화번호', '받는분주소', '상품명', '수량', '판매가격', '송장번호'];
+  const colIdxs = displayCols.map(h => headers.indexOf(h));
+
+  document.getElementById('tableHead').innerHTML = `<tr>${displayCols.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+  // 바디
+  document.getElementById('tableBody').innerHTML = data.map((row, i) => {
+    const cells = colIdxs.map((ci, j) => {
+      const v = ci >= 0 ? row[ci] : '';
+      const h = displayCols[j];
+      if (h === '받는분성함') {
+        const isUnknown = String(row[iAddr]).includes('주소확인필요');
+        return `<td>${isUnknown ? `<span class="badge badge-warn">⚠️ ${v}</span>` : `<span class="badge badge-rocket">${v}</span>`}</td>`;
+      }
+      if (h === '받는분주소') {
+        return `<td class="addr-cell" title="${v}">${v || '<span class="empty-cell">—</span>'}</td>`;
+      }
+      if (h === '수량') {
+        return `<td class="num-cell">${v !== '' ? Number(v).toLocaleString() : '<span class="empty-cell">—</span>'}</td>`;
+      }
+      if (h === '판매가격') {
+        return `<td class="num-cell">${v !== '' ? '₩' + Number(v).toLocaleString() : '<span class="empty-cell">—</span>'}</td>`;
+      }
+      if (h === '송장번호') {
+        return `<td>${v ? v : '<span class="empty-cell">미입력</span>'}</td>`;
+      }
+      if (h === '상품명') {
+        return `<td style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${v}">${v}</td>`;
+      }
+      return `<td>${v !== '' ? v : '<span class="empty-cell">—</span>'}</td>`;
+    });
+    return `<tr>${cells.join('')}</tr>`;
+  }).join('');
+
+  // 표시
+  document.getElementById('dropzone').style.display = 'none';
+  document.getElementById('summary').style.display = 'grid';
+  document.getElementById('tableArea').style.display = 'block';
+  document.getElementById('fileLabel').textContent = '📄 ' + fileName;
+}
+</script>
+</body>
+</html>
