@@ -229,13 +229,19 @@ tr:hover td{background:#1a1d2788;}
 .cloud-save-btn:disabled{opacity:.5;cursor:not-allowed;}
 .no-records{text-align:center;padding:60px 20px;color:#475569;font-size:.88rem;}
 
-/* ═══ CHANNEL DETAIL PANEL ═══ */
-.detail-panel{background:#161b27;border:1px solid #1e293b;border-radius:6px;padding:20px;margin-bottom:16px;display:none;}
-.detail-panel.active{display:block;}
-.detail-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.detail-panel-header h3{font-size:1rem;font-weight:700;color:#e2e8f0;}
-.detail-panel-close{background:none;border:1px solid #334155;color:#94a3b8;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:.78rem;}
-.detail-panel-close:hover{background:#1e293b;color:#e2e8f0;}
+/* ═══ CHANNEL DETAIL MODAL ═══ */
+.channel-modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:none;align-items:center;justify-content:center;}
+.channel-modal-overlay.active{display:flex;animation:modalFadeIn .2s ease forwards;}
+@keyframes modalFadeIn{from{opacity:0}to{opacity:1}}
+.channel-modal{width:90vw;height:90vh;background:#161b27;border:1px solid #1e293b;border-radius:6px;display:flex;flex-direction:column;overflow:hidden;}
+.channel-modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #1e293b;flex-shrink:0;}
+.channel-modal-header h3{font-size:1.1rem;font-weight:700;color:#e2e8f0;margin:0;}
+.channel-modal-close{background:none;border:1px solid #334155;color:#94a3b8;border-radius:4px;width:32px;height:32px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.channel-modal-close:hover{background:#1e293b;color:#e2e8f0;border-color:#475569;}
+.channel-modal-body{flex:1;overflow-y:auto;padding:24px;}
+
+/* Legacy inline detail panel (hidden) */
+.detail-panel{display:none!important;}
 
 /* KPI Cards */
 .detail-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
@@ -587,7 +593,7 @@ function renderSidebar() {
       cls = hasUnmapped ? 'warn' : 'done';
       label = hasUnmapped ? `미매핑 ${d.unmapped.length}` : '완료';
     }
-    return `<div class="ch-item" onclick="focusChannel('${ch.id}')">
+    return `<div class="ch-item" onclick="openChannelModal('${ch.id}')" style="cursor:pointer;">
       <div class="ch-icon">${ch.icon}</div>
       <div class="ch-name">${ch.name}</div>
       <div class="ch-status ${cls}" title="${label}"></div>
@@ -1621,14 +1627,6 @@ function switchTab(tabId) {
     btn.className = 'btn ' + (state.currentTab === tabs[i].id ? 'btn-primary' : 'btn-secondary') + ' btn-sm';
   });
   renderTable();
-
-  // Detail panel: show for specific channels, hide for "전체 종합"
-  if (tabId === 'all') {
-    closeDetailPanel();
-  } else {
-    state.detailChannel = tabId;
-    renderDetailPanel(tabId);
-  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1636,17 +1634,37 @@ function switchTab(tabId) {
 // ═══════════════════════════════════════════════════════
 function closeDetailPanel() {
   state.detailChannel = null;
-  document.getElementById('detailPanel').classList.remove('active');
 }
 
-function renderDetailPanel(channelName) {
-  const panel = document.getElementById('detailPanel');
-  const ch = Object.values(state.channels).find(c => c.name === channelName);
-  if (!ch) { panel.classList.remove('active'); return; }
+function openChannelModal(channelId) {
+  const def = CHANNEL_DEFS.find(d => d.id === channelId);
+  if (!def) return;
+  const ch = state.channels[channelId];
+  if (!ch) return;
 
-  panel.classList.add('active');
-  const def = CHANNEL_DEFS.find(d => d.name === channelName);
-  document.getElementById('detailPanelTitle').textContent = (def ? def.icon + ' ' : '') + channelName + ' 상세 분석';
+  state.detailChannel = ch.name;
+  const overlay = document.getElementById('channelModalOverlay');
+  document.getElementById('channelModalTitle').textContent = def.icon + ' ' + ch.name + ' 상세 분석';
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  renderModalContent(ch.name);
+}
+
+function closeChannelModal() {
+  state.detailChannel = null;
+  const overlay = document.getElementById('channelModalOverlay');
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeChannelModal();
+});
+
+function renderModalContent(channelName) {
+  const ch = Object.values(state.channels).find(c => c.name === channelName);
+  if (!ch) return;
 
   const data = (ch.aggregated || []).slice().sort((a, b) => b.정산금액 - a.정산금액);
 
@@ -1672,7 +1690,7 @@ function renderDetailPanel(channelName) {
     { label: '이익률', value: fmtRate(profitRate), color: profitRate >= 0.2 ? '#10b981' : profitRate >= 0 ? '#f59e0b' : '#ef4444', prev: prevData ? prevData.profitRate : null, isRate: true },
   ];
 
-  document.getElementById('detailKpiRow').innerHTML = kpiItems.map(k => {
+  document.getElementById('modalKpiRow').innerHTML = kpiItems.map(k => {
     let deltaHtml = '';
     if (k.prev !== null && k.prev !== undefined) {
       if (k.isRate) {
@@ -1698,7 +1716,7 @@ function renderDetailPanel(channelName) {
   // Product breakdown (Top 20)
   const top20 = data.slice(0, 20);
   const maxSett = top20.length > 0 ? top20[0].정산금액 : 1;
-  document.getElementById('detailProductList').innerHTML = top20.map((r, i) => {
+  document.getElementById('modalProductList').innerHTML = top20.map((r, i) => {
     const rankCls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'normal';
     const barW = maxSett > 0 ? Math.max(2, (r.정산금액 / maxSett) * 100) : 2;
     const pr = r.이익률 !== undefined ? r.이익률 : (r.정산금액 > 0 ? (r.이익 || 0) / r.정산금액 : 0);
@@ -1716,10 +1734,23 @@ function renderDetailPanel(channelName) {
   }).join('');
 
   // Insights
-  generateInsights(channelName, data, totalSett, totalQty, totalProfit, profitRate);
+  generateInsightsModal(channelName, data, totalSett, totalQty, totalProfit, profitRate);
 
   // Monthly trend chart
-  loadChannelHistory(channelName);
+  loadChannelHistoryModal(channelName);
+}
+
+function renderDetailPanel(channelName) {
+  // Legacy - now handled by modal
+  openChannelModalByName(channelName);
+}
+
+function openChannelModalByName(channelName) {
+  const def = CHANNEL_DEFS.find(d => d.name === channelName);
+  if (!def) return;
+  const ch = state.channels[def.id];
+  if (!ch) return;
+  openChannelModal(def.id);
 }
 
 function getPrevMonth(month) {
@@ -1755,7 +1786,7 @@ function updateDetailKPIs(channelName) {
     { label: '이익률', value: fmtRate(profitRate), color: profitRate >= 0.2 ? '#10b981' : profitRate >= 0 ? '#f59e0b' : '#ef4444', prev: prevData ? prevData.profitRate : null, isRate: true },
   ];
 
-  document.getElementById('detailKpiRow').innerHTML = kpiItems.map(k => {
+  document.getElementById('modalKpiRow').innerHTML = kpiItems.map(k => {
     let deltaHtml = '';
     if (k.prev !== null && k.prev !== undefined) {
       if (k.isRate) {
@@ -1779,11 +1810,11 @@ function updateDetailKPIs(channelName) {
 
   // Also re-render insights with MoM data
   const allData = data.slice().sort((a, b) => b.정산금액 - a.정산금액);
-  generateInsights(channelName, allData, totalSett, totalQty, totalProfit, profitRate);
+  generateInsightsModal(channelName, allData, totalSett, totalQty, totalProfit, profitRate);
 }
 
-async function loadChannelHistory(channelName) {
-  const chartEl = document.getElementById('trendChart');
+async function loadChannelHistoryModal(channelName) {
+  const chartEl = document.getElementById('modalTrendChart');
   if (!currentUser || !firebaseReady) {
     chartEl.innerHTML = '<div class="trend-loading">로그인하면 월별 추이를 확인할 수 있어요</div>';
     return;
@@ -2001,6 +2032,15 @@ function generateInsights(channelName, data, totalSett, totalQty, totalProfit, p
       <div class="insight-text">${ins.text}</div>
     </div>`
   ).join('');
+}
+
+function generateInsightsModal(channelName, data, totalSett, totalQty, totalProfit, profitRate) {
+  // Reuse generateInsights logic but target modal element
+  generateInsights(channelName, data, totalSett, totalQty, totalProfit, profitRate);
+  // Copy content to modal
+  const src = document.getElementById('detailInsights');
+  const dst = document.getElementById('modalInsights');
+  if (src && dst) dst.innerHTML = src.innerHTML;
 }
 
 function renderTable() {
@@ -3008,5 +3048,30 @@ async function deleteRecord(monthId) {
 // ═══════════════════════════════════════════════════════
 init();
 </script>
+
+<!-- Channel Detail Modal -->
+<div class="channel-modal-overlay" id="channelModalOverlay" onclick="if(event.target===this)closeChannelModal()">
+  <div class="channel-modal">
+    <div class="channel-modal-header">
+      <h3 id="channelModalTitle">채널 상세 분석</h3>
+      <button class="channel-modal-close" onclick="closeChannelModal()" title="닫기">&times;</button>
+    </div>
+    <div class="channel-modal-body">
+      <div class="detail-kpi-row" id="modalKpiRow"></div>
+      <div class="detail-body">
+        <div class="detail-products" id="modalProducts">
+          <h4>상품별 매출 구성 (Top 20)</h4>
+          <div id="modalProductList"></div>
+        </div>
+        <div class="detail-trend" id="modalTrend">
+          <h4>월별 정산 추이 (최근 6개월)</h4>
+          <div class="trend-svg-wrap" id="modalTrendChart"></div>
+        </div>
+      </div>
+      <div class="detail-insights" id="modalInsights"></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
