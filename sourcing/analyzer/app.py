@@ -665,15 +665,19 @@ def _run_scan_wing(scan_id: int, keyword: str):
 
 
 # === 카테고리 탐색 ===
-from analyzer.categories import CATEGORY_SEEDS, get_all_seeds, get_category_names
+from analyzer.categories import CATEGORY_SEEDS, get_all_seeds, get_category_names, get_explorable_categories, SKIP_CATEGORIES
 
 
 @app.route('/api/categories')
 def api_categories():
-    """탐색 가능한 카테고리 목록"""
+    """카테고리 트리 (대 > 소)"""
     cats = []
     for name, keywords in CATEGORY_SEEDS.items():
-        cats.append({'name': name, 'count': len(keywords)})
+        cats.append({
+            'name': name,
+            'children': keywords,
+            'count': len(keywords),
+        })
     return jsonify({'success': True, 'categories': cats})
 
 
@@ -850,7 +854,14 @@ def _run_autoscan(seeds: list, min_search: int, max_scan: int):
 
             all_keywords = {}  # keyword → {search, competition, product_count}
 
+            # 시드 키워드 전처리: "속옷/잠옷" → ["속옷", "잠옷"]
+            expanded_seeds = []
             for seed in seeds:
+                parts = [p.strip() for p in seed.replace('/', ' ').replace('>', ' ').replace(',', ' ').split() if p.strip()]
+                expanded_seeds.extend(parts)
+            expanded_seeds = list(dict.fromkeys(expanded_seeds))  # 중복 제거
+
+            for seed in expanded_seeds:
                 if not _auto_scan_state['running']:
                     break
                 _auto_scan_state['current_keyword'] = f'확장: {seed}'

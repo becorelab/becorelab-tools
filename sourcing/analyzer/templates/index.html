@@ -634,34 +634,75 @@ body {
     background: rgba(16, 185, 129, 0.08);
 }
 
-/* ── 카테고리 칩 ── */
-.cat-chip {
-    display: inline-flex;
+/* ── 카테고리 트리 ── */
+.cat-tree { max-height: 500px; overflow-y: auto; }
+
+.cat-group { border-bottom: 1px solid var(--border); }
+.cat-group:last-child { border-bottom: none; }
+
+.cat-parent {
+    display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 6px 14px;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
+    gap: 8px;
+    padding: 10px 14px;
     cursor: pointer;
-    transition: all 0.15s;
-    color: var(--text-secondary);
-    background: var(--bg-input);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    transition: background 0.1s;
     user-select: none;
 }
 
-.cat-chip:hover { border-color: var(--accent); color: var(--text-primary); }
+.cat-parent:hover { background: var(--bg-card-hover); }
 
-.cat-chip.selected {
+.cat-parent .cat-arrow {
+    font-size: 9px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+    width: 14px;
+}
+
+.cat-parent .cat-arrow.open { transform: rotate(90deg); }
+
+.cat-parent .cat-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.cat-parent .cat-check {
+    width: 16px; height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.cat-children {
+    display: none;
+    padding: 0 14px 8px 36px;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.cat-children.open { display: flex; }
+
+.cat-child {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    background: var(--bg-input);
+    transition: all 0.1s;
+    user-select: none;
+}
+
+.cat-child:hover { border-color: var(--accent); color: var(--text-primary); }
+
+.cat-child.selected {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
-}
-
-.cat-chip .cat-count {
-    font-size: 10px;
-    opacity: 0.7;
 }
 
 /* ── 조사 기록 드롭다운 ── */
@@ -929,7 +970,7 @@ body {
                 <span class="card-title">시장 발굴</span>
                 <span class="card-subtitle">카테고리별 자동 기회 탐색 — 모르는 시장에서 보석을 찾아보세요</span>
             </div>
-            <div id="categoryGrid" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;"></div>
+            <div id="categoryGrid" class="cat-tree"></div>
             <div style="display:flex; gap:8px; align-items:center;">
                 <button class="btn btn-sm btn-secondary" onclick="selectAllCats()" style="font-size:11px;">전체 선택</button>
                 <button class="btn btn-sm btn-secondary" onclick="deselectAllCats()" style="font-size:11px;">전체 해제</button>
@@ -1783,47 +1824,78 @@ document.getElementById('btnAutoScan').addEventListener('click', async () => {
     }
 });
 
-// 카테고리 칩 로드
+// 카테고리 트리 로드
 async function loadCategories() {
     try {
         const res = await fetch('/api/categories');
         const data = await res.json();
         if (data.success) {
             const grid = document.getElementById('categoryGrid');
-            grid.innerHTML = data.categories.map(c =>
-                `<div class="cat-chip" data-cat="${c.name}" onclick="toggleCat(this)">
-                    ${c.name} <span class="cat-count">${c.count}</span>
-                </div>`
-            ).join('');
+            grid.innerHTML = data.categories.map((c, i) => `
+                <div class="cat-group">
+                    <div class="cat-parent" onclick="toggleCatGroup(this)">
+                        <span class="cat-arrow">&#9654;</span>
+                        <input type="checkbox" class="cat-check" data-cat="${c.name}" onclick="event.stopPropagation(); toggleParentCheck(this)">
+                        <span>${c.name}</span>
+                        <span class="cat-count">${c.count}개</span>
+                    </div>
+                    <div class="cat-children" id="catChildren${i}">
+                        ${c.children.map(ch => `<div class="cat-child" data-keyword="${ch}" onclick="toggleChild(this)">${ch}</div>`).join('')}
+                    </div>
+                </div>
+            `).join('');
         }
     } catch(e) {}
 }
 
-function toggleCat(el) {
+function toggleCatGroup(el) {
+    const arrow = el.querySelector('.cat-arrow');
+    const children = el.nextElementSibling;
+    arrow.classList.toggle('open');
+    children.classList.toggle('open');
+}
+
+function toggleParentCheck(checkbox) {
+    const group = checkbox.closest('.cat-group');
+    const children = group.querySelectorAll('.cat-child');
+    children.forEach(c => {
+        if (checkbox.checked) c.classList.add('selected');
+        else c.classList.remove('selected');
+    });
+    updateCatCount();
+}
+
+function toggleChild(el) {
     el.classList.toggle('selected');
+    // 부모 체크박스 동기화
+    const group = el.closest('.cat-group');
+    const children = group.querySelectorAll('.cat-child');
+    const selected = group.querySelectorAll('.cat-child.selected');
+    group.querySelector('.cat-check').checked = selected.length === children.length;
     updateCatCount();
 }
 
 function selectAllCats() {
-    document.querySelectorAll('.cat-chip').forEach(c => c.classList.add('selected'));
+    document.querySelectorAll('.cat-child').forEach(c => c.classList.add('selected'));
+    document.querySelectorAll('.cat-check').forEach(c => c.checked = true);
     updateCatCount();
 }
 
 function deselectAllCats() {
-    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.cat-child').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.cat-check').forEach(c => c.checked = false);
     updateCatCount();
 }
 
 function updateCatCount() {
-    const selected = document.querySelectorAll('.cat-chip.selected');
-    const total = [...selected].reduce((sum, el) => sum + parseInt(el.querySelector('.cat-count').textContent), 0);
-    document.getElementById('catSeedCount').textContent = `${total}개 시드`;
+    const selected = document.querySelectorAll('.cat-child.selected');
+    document.getElementById('catSeedCount').textContent = `${selected.length}개 시드`;
 }
 
 // 카테고리 탐색 (시장 발굴)
 document.getElementById('btnExploreScan').addEventListener('click', async () => {
-    const selected = [...document.querySelectorAll('.cat-chip.selected')].map(el => el.dataset.cat);
-    if (selected.length === 0) { alert('카테고리를 선택해주세요'); return; }
+    const selectedChildren = [...document.querySelectorAll('.cat-child.selected')].map(el => el.dataset.keyword);
+    if (selectedChildren.length === 0) { alert('소카테고리를 선택해주세요'); return; }
 
     const maxScan = parseInt(document.getElementById('discoverMaxScan').value) || 30;
 
@@ -1832,10 +1904,10 @@ document.getElementById('btnExploreScan').addEventListener('click', async () => 
     btn.textContent = '발굴 중...';
 
     try {
-        const res = await fetch('/api/autoscan/explore', {
+        const res = await fetch('/api/autoscan/start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ categories: selected, max_scan: maxScan, min_search: 3000 })
+            body: JSON.stringify({ seeds: selectedChildren, max_scan: maxScan, min_search: 3000 })
         });
         const data = await res.json();
         if (data.success) {
