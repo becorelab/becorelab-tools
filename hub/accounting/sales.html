@@ -718,6 +718,8 @@ function buildNameMap(wb, sheetNames) {
 // CHANNEL DETECTORS
 // ═══════════════════════════════════════════════════════
 function getSheets(wb) { return Object.keys(wb.Sheets); }
+// 콤마 포함 문자열도 숫자로 변환 ("31,992" → 31992)
+function toNum(v) { if (v == null || v === '') return 0; if (typeof v === 'number') return v; return Number(String(v).replace(/,/g, '')) || 0; }
 
 function detectSmartStore(wb) {
   return getSheets(wb).includes('결제정산 - 일별상세');
@@ -841,7 +843,7 @@ function parseSmartStore(wb) {
   for (let i = 1; i < detRows.length; i++) {
     const r = detRows[i];
     const id = String(r[0] || '');
-    if (id) detailMap[id] = { option: String(r[15] || ''), qty: Number(r[16] || 1), revenue: Number(r[21] || 0) };
+    if (id) detailMap[id] = { option: String(r[15] || ''), qty: toNum(r[16] || 1), revenue: toNum(r[21] || 0) };
   }
 
   const settRows = XLSX.utils.sheet_to_json(wb.Sheets['결제정산 - 일별상세'], {header:1});
@@ -852,11 +854,11 @@ function parseSmartStore(wb) {
     const r = settRows[i];
     const type = String(r[2] || '');
     const orderId = String(r[1] || '');
-    const A = Number(r[9] || 0), B = Number(r[10] || 0), C = Number(r[11] || 0), D = Number(r[12] || 0);
+    const A = toNum(r[9] || 0), B = toNum(r[10] || 0), C = toNum(r[11] || 0), D = toNum(r[12] || 0);
     const settlement = A + B + C + D;
 
     if (type === '배송비') {
-      results.push({ 최종상품명:'(배송비)', 수량:1, 정산금액:settlement, 매출액:Number(r[9]||0), 매핑:true });
+      results.push({ 최종상품명:'(배송비)', 수량:1, 정산금액:settlement, 매출액:toNum(r[9]||0), 매핑:true });
       continue;
     }
     if (type !== '상품주문') continue;
@@ -865,7 +867,7 @@ function parseSmartStore(wb) {
     const det = detailMap[orderId] || {};
     const option = det.option || '';
     const qty = det.qty || 1;
-    const revenue = det.revenue || Number(r[9] || 0);
+    const revenue = det.revenue || toNum(r[9] || 0);
 
     let finalName = nameMap[prodName + option] || nameMap[prodName] || null;
     const key = prodName + option;
@@ -900,9 +902,9 @@ function parse11st(wb) {
 
     const prodName = String(r[14] || '');
     const option = String(r[15] || '');
-    const qty = Number(r[16] || 0);
-    const settlement = Number(r[17] || 0);
-    const revenue = Number(r[22] || 0); // 판매가 × qty
+    const qty = toNum(r[16] || 0);
+    const settlement = toNum(r[17] || 0);
+    const revenue = toNum(r[22] || 0); // 판매가 × qty
 
     const key = prodName + option;
     let finalName = nameMap[key] || nameMap[prodName] || null;
@@ -930,9 +932,9 @@ function parseKakao(wb) {
 
     const prodName = String(r[16] || '');
     const option = String(r[18] || '');
-    const qty = Number(r[33] || 0);
-    const settlement = Number(r[45] || 0);
-    const revenue = Number(r[22] || 0); // 상품주문금액
+    const qty = toNum(r[33] || 0);
+    const settlement = toNum(r[45] || 0);
+    const revenue = toNum(r[22] || 0); // 상품주문금액
 
     const key = prodName + option;
     let finalName = nameMap[key] || nameMap[prodName] || null;
@@ -961,10 +963,10 @@ function parseCoupang(wb) {
     if (type === '반품입고' || type === '반품반출') continue; // skip returns for now
 
     const skuName = String(r[3] || '');
-    const qty = Number(r[7] || 0);
-    const unitCost = Number(r[9] || 0);  // 공급가액(VAT제외)
+    const qty = toNum(r[7] || 0);
+    const unitCost = toNum(r[9] || 0);  // 공급가액(VAT제외)
     const totalCost = unitCost * qty;    // 총공급가액
-    const totalVat = Number(r[11] || 0) * qty; // 총세액
+    const totalVat = toNum(r[11] || 0) * qty; // 총세액
 
     let finalName = nameMap[skuName] || null;
     if (!finalName && skuName && !unmappedKeys.has(skuName)) {
@@ -989,9 +991,9 @@ function parseGmarket(wb) {
     const r = rows[i];
     if (!r[4]) continue;
     const prodName = String(r[4] || '');
-    const qty = Number(r[15] || 0);
-    const settlement = Number(r[29] || 0); // 판매자 최종정산금
-    const revenue = Number(r[23] || 0);    // 고객결제금
+    const qty = toNum(r[15]);
+    const settlement = toNum(r[29]); // 판매자 최종정산금
+    const revenue = toNum(r[23]);    // 고객결제금
 
     let finalName = nameMap[prodName] || null;
     if (!finalName && !unmappedKeys.has(prodName)) {
@@ -1014,9 +1016,9 @@ function parseAuction(wb) {
     const r = rows[i];
     if (!r[4]) continue;
     const prodName = String(r[4] || '');
-    const qty = Number(r[16] || 0);
-    const settlement = Number(r[27] || 0); // 판매자 최종정산금
-    const revenue = Number(r[22] || 0);    // 결제금액
+    const qty = toNum(r[16] || 0);
+    const settlement = toNum(r[27] || 0); // 판매자 최종정산금
+    const revenue = toNum(r[22] || 0);    // 결제금액
 
     let finalName = nameMap[prodName] || null;
     if (!finalName && !unmappedKeys.has(prodName)) {
@@ -1028,31 +1030,41 @@ function parseAuction(wb) {
   return { results, unmapped };
 }
 
-// 오늘의집 (최종상품명이 이미 있음!)
+// 오늘의집
 function parseOhouse(wb) {
   const nameMap = buildNameMap(wb, ['품명리스트']);
   const rows = XLSX.utils.sheet_to_json(wb.Sheets['정산내역_상세'], {header:1});
   const results = [], unmapped = [];
+  const unmappedKeys = new Set();
+
+  // 헤더에서 열 인덱스 동적 탐색
+  const header = rows[0] || [];
+  const colMap = {};
+  header.forEach((h, idx) => {
+    const s = String(h || '').replace(/\s+/g, '').replace(/\n/g, '');
+    if (s.includes('구분') && !colMap.type) colMap.type = idx;
+    if (s.includes('정산구분') && !colMap.status) colMap.status = idx;
+    if (s === '상품명' || s.includes('상품명')) { if (!colMap.prodName) colMap.prodName = idx; }
+    if (s === '개수') colMap.qty = idx;
+    if (s === '정산금액') colMap.settlement = idx;
+  });
 
   for (let i = 1; i < rows.length; i++) {
     const r = rows[i];
-    const type = String(r[1] || '');
-    const status = String(r[2] || '');
-    if (type !== '주문정산' || status === '취소') continue;
+    const type = String(r[colMap.type] || '');
+    if (type !== '주문정산') continue;
 
-    // col8 is already 최종상품명!
-    let finalName = String(r[8] || '');
-    const prodName = String(r[7] || r[5] || '');
-    const qty = Number(r[10] || 0);
-    const settlement = Number(r[11] || 0);
+    const prodName = String(r[colMap.prodName] || '').trim();
+    if (!prodName || prodName === '배송비') continue;
+    const qty = toNum(r[colMap.qty]);
+    const settlement = toNum(r[colMap.settlement]);
 
-    if (!finalName && prodName) {
-      finalName = nameMap[prodName] || prodName;
+    let finalName = nameMap[prodName] || null;
+    if (!finalName && !unmappedKeys.has(prodName)) {
+      unmappedKeys.add(prodName);
+      unmapped.push({ key: prodName, prodName, option: '', qty, settlement, count: 1 });
     }
-
-    if (finalName) {
-      results.push({ 최종상품명: finalName, 수량: qty, 정산금액: settlement, 매출액: settlement, 매핑: true });
-    }
+    results.push({ 최종상품명: finalName || prodName, 수량: qty, 정산금액: settlement, 매출액: settlement, 매핑: !!finalName });
   }
   return { results, unmapped };
 }
@@ -1119,12 +1131,12 @@ function parseCafe24(wb) {
 
     if (!prodName) continue;
 
-    const qty = Number(r[C.수량] || 0);
+    const qty = toNum(r[C.수량] || 0);
     if (qty <= 0) continue;
 
     // ── 매뉴얼 4단계: 결제총액 = 수량 × (옵션+판매가) ──
     // 샘플/무료 상품은 옵션+판매가=0 → 자동으로 결제총액=0
-    const unitPrice = Number(r[C.옵션판매가] || r[C.판매가] || 0);
+    const unitPrice = toNum(r[C.옵션판매가] || r[C.판매가] || 0);
     const totalAmount = qty * unitPrice;
 
     // ── 매뉴얼 5단계: 중복 주문번호 할인 처리 ──
@@ -1133,9 +1145,9 @@ function parseCafe24(wb) {
 
     if (!seenOrderDiscounts.has(orderNo)) {
       seenOrderDiscounts.add(orderNo);
-      couponDiscount = Number(r[C.쿠폰할인최초] || 0);
-      pointDiscount = Number(r[C.적립금최종] || 0);
-      appDiscount = Number(r[C.앱상품할인최종] || 0);
+      couponDiscount = toNum(r[C.쿠폰할인최초] || 0);
+      pointDiscount = toNum(r[C.적립금최종] || 0);
+      appDiscount = toNum(r[C.앱상품할인최종] || 0);
     }
 
     // ── 매뉴얼 6단계: 최종 정산금액 ──
@@ -1171,10 +1183,10 @@ function parseGroupBuy(wb) {
     const r = rows[i];
     const prodName = String(r[3] || '').trim();
     if (!prodName) continue;
-    const qty = Number(r[6] || 0);
-    const supplyTotal = Number(r[7] || 0);
+    const qty = toNum(r[6] || 0);
+    const supplyTotal = toNum(r[7] || 0);
     if (qty === 0 && supplyTotal === 0) continue;
-    const settlement = Number(r[10] || 0);
+    const settlement = toNum(r[10] || 0);
     results.push({ 최종상품명: prodName, 수량: qty, 정산금액: settlement, 매출액: settlement, 매핑: true });
   }
   return { results, unmapped: [] };
@@ -1194,9 +1206,9 @@ function parseGS(wb) {
     const prodName = String(r[11] || '').trim();
     const option = String(r[12] || '').trim();
     const key = option ? prodName + option : prodName;
-    const qty = Number(r[17] || 0);
-    const settlement = Number(r[23] || 0);
-    const revenue = Number(r[22] || 0);
+    const qty = toNum(r[17] || 0);
+    const settlement = toNum(r[23] || 0);
+    const revenue = toNum(r[22] || 0);
     let finalName = nameMap[key] || nameMap[prodName] || null;
     if (!finalName && !unmappedKeys.has(key)) {
       unmappedKeys.add(key);
@@ -1226,8 +1238,8 @@ function parseGogrow(wb) {
     const r = rows[i];
     const prodName = String(r[3] || '').trim();
     if (!prodName) continue;
-    const qty = Number(r[7] || 0);
-    const settlement = Number(r[10] || 0);
+    const qty = toNum(r[7] || 0);
+    const settlement = toNum(r[10] || 0);
     results.push({ 최종상품명: prodName, 수량: qty, 정산금액: settlement, 매출액: settlement, 매핑: true });
   }
   return { results, unmapped: [] };
@@ -1243,7 +1255,7 @@ function parseAbly(wb) {
     for (let i = 1; i < cRows.length; i++) {
       const r = cRows[i];
       if (!r[2]) continue;
-      confirmMap[String(r[2]).trim()] = { prodName: String(r[4]||'').trim(), option: String(r[6]||'').trim(), qty: Number(r[7]||1) };
+      confirmMap[String(r[2]).trim()] = { prodName: String(r[4]||'').trim(), option: String(r[6]||'').trim(), qty: toNum(r[7]||1) };
     }
   }
   const settleSheet = wb.Sheets[sheets[0]];
@@ -1254,8 +1266,8 @@ function parseAbly(wb) {
     const r = rows[i];
     if (r[12] === undefined || r[12] === null || r[12] === '') continue;
     const orderNo = String(r[6] || '').trim();
-    const settlement = Number(r[12] || 0);
-    const revenue = Number(r[7] || 0);
+    const settlement = toNum(r[12] || 0);
+    const revenue = toNum(r[7] || 0);
     const confirm = confirmMap[orderNo];
     const prodName = confirm ? confirm.prodName : orderNo;
     const option = confirm ? confirm.option : '';
@@ -1283,10 +1295,10 @@ function parseSSG(wb) {
     if (!r[0] && r[0] !== 0) continue;
     const prodName = String(r[16] || '').trim();
     if (!prodName) continue;
-    const qty = Number(r[18] || 0);
-    const settlement = Number(r[19] || 0);
-    const revenue = Number(r[21] || 0) || Number(r[20] || 0) * qty;
-    shippingTotal += Number(r[31] || 0);
+    const qty = toNum(r[18] || 0);
+    const settlement = toNum(r[19] || 0);
+    const revenue = toNum(r[21] || 0) || toNum(r[20] || 0) * qty;
+    shippingTotal += toNum(r[31] || 0);
     let finalName = nameMap[prodName] || null;
     if (!finalName && !unmappedKeys.has(prodName)) {
       unmappedKeys.add(prodName);
