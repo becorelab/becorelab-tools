@@ -1475,15 +1475,27 @@ function applyInlineMap(btn, oldName) {
 
   // 모든 채널에서 해당 상품명 업데이트
   for (const ch of Object.values(state.channels)) {
-    for (const r of ch.results || []) {
-      if (r.최종상품명 === oldName && !r.매핑) {
-        r.최종상품명 = newName;
-        r.매핑 = true;
+    // results가 있으면 results에서 업데이트 후 재집계
+    if (ch.results && ch.results.length > 0) {
+      for (const r of ch.results) {
+        if (r.최종상품명 === oldName && !r.매핑) {
+          r.최종상품명 = newName;
+          r.매핑 = true;
+        }
       }
+      ch.aggregated = aggregateResults(ch.results);
+      applyCosting(ch.aggregated);
+    } else if (ch.aggregated) {
+      // 클라우드 로드 데이터: aggregated에서 직접 수정
+      for (const r of ch.aggregated) {
+        if (r.최종상품명 === oldName && !r.매핑) {
+          r.최종상품명 = newName;
+          r.매핑 = true;
+        }
+      }
+      applyCosting(ch.aggregated);
     }
     if (ch.unmapped) ch.unmapped = ch.unmapped.filter(u => u.key !== oldName);
-    ch.aggregated = aggregateResults(ch.results || []);
-    applyCosting(ch.aggregated);
   }
 
   // 사용자 매핑 영구 저장
