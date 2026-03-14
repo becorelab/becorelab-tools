@@ -1677,7 +1677,9 @@ async function showScanResult(scanId, scanSummary) {
             </tr></thead><tbody>`;
             for (const p of products) {
                 const isNew = (p.review_count || 0) < 100;
-                prodHtml += `<tr style="${isNew ? 'background:rgba(59,130,246,0.05)' : ''}">
+                const isHot = (p.revenue_monthly || 0) >= 3000000;
+                const rowBg = isHot ? 'background:rgba(255,107,43,0.08);' : isNew ? 'background:rgba(59,130,246,0.05);' : '';
+                prodHtml += `<tr style="${rowBg}">
                     <td>${p.ranking}</td>
                     <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
                         ${p.product_url ? '<a href="'+p.product_url+'" target="_blank" style="color:var(--text-primary);text-decoration:none;">' : ''}
@@ -1688,7 +1690,7 @@ async function showScanResult(scanId, scanSummary) {
                     <td style="font-size:11px;color:var(--text-secondary)">${p.brand || '-'}</td>
                     <td>${formatNumber(p.price)}원</td>
                     <td>${formatNumber(p.sales_monthly)}</td>
-                    <td>${formatNumber(p.revenue_monthly)}원</td>
+                    <td style="${isHot ? 'color:var(--accent);font-weight:700;' : ''}">${formatNumber(p.revenue_monthly)}원</td>
                     <td>${formatNumber(p.click_count)}</td>
                     <td>${p.conversion_rate ? p.conversion_rate.toFixed(1) + '%' : '-'}</td>
                     <td>${formatNumber(p.review_count)}</td>
