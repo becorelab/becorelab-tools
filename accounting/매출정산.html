@@ -2413,7 +2413,93 @@ async function downloadFinalReport() {
   ws2.columns = [{ width:12 }, { width:18 }, { width:10 }, { width:18 }, { width:16 }, { width:16 }, { width:10 }];
 
   // ─────────────────────────────────────────────
-  // Sheet 3: 원가
+  // Sheet 3: 세부 (채널별 수량/금액 - 대표님 파일 '세부' 시트)
+  // ─────────────────────────────────────────────
+  const ws3d = wb.addWorksheet('세부');
+  const t3d = ws3d.addRow([]);
+  ws3d.addRow(['', '■ 판매별 매출현황']);
+  ws3d.getRow(2).getCell(2).font = { bold:true, size:12, name:'맑은 고딕' };
+  ws3d.addRow([]);
+  ws3d.addRow(['', '[단위: 원, VAT포함]']);
+  ws3d.getRow(4).getCell(2).font = { size:9, color:{argb:'FF94A3B8'}, name:'맑은 고딕' };
+
+  // 헤더
+  const dH1 = ws3d.addRow(['', '판매처', '', '합계', '', monthLabel]);
+  const dH2 = ws3d.addRow(['', '', '', '수량', '금액', '수량', '금액']);
+  [dH1, dH2].forEach(r => r.eachCell(cell => { cell.fill = tealFill; cell.font = whiteFont; cell.border = borders; cell.alignment = {horizontal:'center',vertical:'middle'}; }));
+
+  // 채널별 데이터
+  for (const [groupName, channelIds] of Object.entries(channelGroups)) {
+    const groupChannels = channelIds.filter(id => state.channels[id]);
+    if (groupChannels.length === 0) continue;
+    let isFirstInGroup = true;
+    for (const chId of groupChannels) {
+      const def = CHANNEL_DEFS.find(d => d.id === chId);
+      const ch = state.channels[chId];
+      if (!ch || !ch.aggregated) continue;
+      const qty = ch.aggregated.reduce((s,r) => s + (r.수량||0), 0);
+      const rev = ch.aggregated.reduce((s,r) => s + (r.정산금액||0), 0);
+      const row = ws3d.addRow([
+        '', isFirstInGroup ? groupName : '', def.name,
+        qty, rev, qty, rev
+      ]);
+      row.eachCell(cell => { cell.border = borders; cell.font = normalFont; });
+      [4,5,6,7].forEach(c => row.getCell(c).numFmt = numFmt);
+      isFirstInGroup = false;
+    }
+  }
+  // 미분류
+  for (const ch of ungrouped || []) {
+    const qty = (ch.aggregated||[]).reduce((s,r) => s + (r.수량||0), 0);
+    const rev = (ch.aggregated||[]).reduce((s,r) => s + (r.정산금액||0), 0);
+    const row = ws3d.addRow(['', '기타', ch.name, qty, rev, qty, rev]);
+    row.eachCell(cell => { cell.border = borders; cell.font = normalFont; });
+    [4,5,6,7].forEach(c => row.getCell(c).numFmt = numFmt);
+  }
+
+  ws3d.columns = [
+    {width:4}, {width:14}, {width:20}, {width:12}, {width:16}, {width:12}, {width:16}
+  ];
+
+  // ─────────────────────────────────────────────
+  // Sheet 4: 이커머스 성장률 (채널별 월 매출 추이)
+  // ─────────────────────────────────────────────
+  const ws4g = wb.addWorksheet('이커머스 성장률');
+  ws4g.addRow(['채널별 매출 성장률']);
+  ws4g.getRow(1).getCell(1).font = { bold:true, size:14, name:'맑은 고딕' };
+  ws4g.addRow([]);
+
+  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const gH = ws4g.addRow(['온라인 채널', ...monthNames, '합계']);
+  gH.eachCell(cell => { cell.fill = tealFill; cell.font = whiteFont; cell.border = borders; cell.alignment = {horizontal:'center'}; });
+
+  // 현재 월 인덱스
+  const curMonthIdx = parseInt(month.split('-')[1]) - 1; // 0-based
+
+  for (const [groupName, channelIds] of Object.entries(channelGroups)) {
+    for (const chId of channelIds) {
+      const def = CHANNEL_DEFS.find(d => d.id === chId);
+      if (!def) continue;
+      const ch = state.channels[chId];
+      const rev = ch ? ch.aggregated.reduce((s,r) => s + (r.정산금액||0), 0) : 0;
+      const monthVals = new Array(12).fill('');
+      monthVals[curMonthIdx] = rev;
+      const row = ws4g.addRow([def.name, ...monthVals, rev || '']);
+      row.eachCell((cell, colNum) => { cell.border = borders; cell.font = normalFont; if (colNum > 1) cell.numFmt = numFmt; });
+    }
+  }
+  for (const ch of ungrouped || []) {
+    const rev = (ch.aggregated||[]).reduce((s,r) => s + (r.정산금액||0), 0);
+    const monthVals = new Array(12).fill('');
+    monthVals[curMonthIdx] = rev;
+    const row = ws4g.addRow([ch.name, ...monthVals, rev || '']);
+    row.eachCell((cell, colNum) => { cell.border = borders; cell.font = normalFont; if (colNum > 1) cell.numFmt = numFmt; });
+  }
+
+  ws4g.columns = [{width:22}, ...new Array(12).fill({width:14}), {width:16}];
+
+  // ─────────────────────────────────────────────
+  // Sheet 5: 원가
   // ─────────────────────────────────────────────
   const ws3 = wb.addWorksheet('원가');
   const t3 = ws3.addRow(['적용 원가 데이터']);
