@@ -27,7 +27,10 @@ body{font-family:'Pretendard','Spoqa Han Sans Neo',sans-serif;background:#0d1117
 /* HEADER */
 header{background:linear-gradient(90deg,#0f766e 0%,#0284c7 100%);padding:8px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,.3);}
 header h1{font-size:.88rem;font-weight:600;color:#fff;letter-spacing:.3px;}
-.header-badge{background:rgba(255,255,255,.15);border-radius:4px;padding:3px 10px;font-size:.7rem;color:#fff;margin-left:auto;}
+.header-badge{background:rgba(255,255,255,.12);border-radius:5px;padding:0;margin-left:auto;display:flex;align-items:center;gap:0;overflow:hidden;}
+.header-badge label{font-size:.68rem;color:rgba(255,255,255,.7);padding:5px 8px 5px 12px;cursor:pointer;}
+.header-badge input[type=month]{background:transparent;border:none;color:#fff;font-size:.85rem;font-weight:700;font-family:inherit;padding:5px 12px 5px 0;cursor:pointer;outline:none;letter-spacing:.5px;}
+.header-badge input[type=month]::-webkit-calendar-picker-indicator{filter:invert(1);cursor:pointer;}
 
 /* LAYOUT */
 .layout{display:flex;min-height:calc(100vh - 40px);}
@@ -335,7 +338,10 @@ tr:hover td{background:#1a1d2788;}
   <div>
     <h1>Becorelab 매출 대시보드</h1>
   </div>
-  <div class="header-badge" id="headerMonth">매출 월 미설정</div>
+  <div class="header-badge" id="headerMonth">
+    <label for="headerMonthInput">매출 월</label>
+    <input type="month" id="headerMonthInput" onchange="syncMonth(this.value)"/>
+  </div>
   <div class="auth-area">
     <div id="authProfile" class="auth-profile" style="display:none;"></div>
     <button id="authBtn" class="auth-btn" onclick="handleAuth()">🔑 Google 로그인</button>
@@ -387,7 +393,7 @@ tr:hover td{background:#1a1d2788;}
         <!-- 매출 월 설정 -->
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
           <span style="font-size:.82rem;color:#94a3b8;">매출 월:</span>
-          <input type="month" id="settlementMonth" value="2026-01" style="background:#0d1117;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 10px;font-size:.82rem;font-family:inherit;" onchange="updateMonth()"/>
+          <input type="month" id="settlementMonth" style="background:#0d1117;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 10px;font-size:.82rem;font-family:inherit;" onchange="updateMonth()"/>
         </div>
         <div class="ch-grid" id="channelGrid"></div>
       </div>
@@ -579,6 +585,15 @@ const CHANNEL_DEFS = [
 // INIT
 // ═══════════════════════════════════════════════════════
 function init() {
+  // 기본값: 전월 (현재 3월이면 2월)
+  const now = new Date();
+  let prevM = now.getMonth(); // 0-based, so current month index = previous month number
+  let prevY = now.getFullYear();
+  if (prevM === 0) { prevM = 12; prevY--; }
+  const defaultMonth = `${prevY}-${String(prevM).padStart(2, '0')}`;
+  document.getElementById('settlementMonth').value = defaultMonth;
+  document.getElementById('headerMonthInput').value = defaultMonth;
+
   renderSidebar();
   renderChannelGrid();
   updateMonth();
@@ -596,7 +611,9 @@ function updateCostUI() {
 
 function updateMonth() {
   const m = document.getElementById('settlementMonth').value;
-  document.getElementById('headerMonth').textContent = m ? m + ' 매출' : '매출 월 미설정';
+  // 헤더 월 선택기 동기화
+  const headerInput = document.getElementById('headerMonthInput');
+  if (headerInput && headerInput.value !== m) headerInput.value = m;
   // 월 변경 시: 로컬 데이터 초기화 + 해당 월 클라우드 데이터 불러오기
   state.channels = {};
   state.allProductNames = new Set();
@@ -606,6 +623,11 @@ function updateMonth() {
   updateSummary();
   renderResults();
   autoLoadChannelsFromCloud();
+}
+// 헤더 월 선택 → 입력 섹션 동기화
+function syncMonth(val) {
+  document.getElementById('settlementMonth').value = val;
+  updateMonth();
 }
 
 // ═══════════════════════════════════════════════════════
