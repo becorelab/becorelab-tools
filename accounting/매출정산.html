@@ -718,8 +718,8 @@ function buildNameMap(wb, sheetNames) {
 // CHANNEL DETECTORS
 // ═══════════════════════════════════════════════════════
 function getSheets(wb) { return Object.keys(wb.Sheets); }
-// 콤마 포함 문자열도 숫자로 변환 ("31,992" → 31992)
-function toNum(v) { if (v == null || v === '') return 0; if (typeof v === 'number') return v; return Number(String(v).replace(/,/g, '')) || 0; }
+// 콤마 포함 문자열도 숫자로 변환 ("31,992" → 31992), NaN 방지
+function toNum(v) { if (v == null || v === '') return 0; if (typeof v === 'number') return isNaN(v) ? 0 : v; const n = Number(String(v).replace(/,/g, '')); return isNaN(n) ? 0 : n; }
 
 function detectSmartStore(wb) {
   return getSheets(wb).includes('결제정산 - 일별상세');
@@ -1221,7 +1221,7 @@ function parseGS(wb) {
     const dRows = XLSX.utils.sheet_to_json(deliverySheet, {header:1});
     let deliveryTotal = 0;
     for (let i = 1; i < dRows.length; i++) {
-      if (String(dRows[i][0] || '').trim() === '배송비') deliveryTotal += Number(dRows[i][12] || 0);
+      if (String(dRows[i][0] || '').trim() === '배송비') deliveryTotal += toNum(dRows[i][12]);
     }
     if (deliveryTotal) results.push({ 최종상품명: '(배송비)', 수량: 1, 정산금액: deliveryTotal, 매출액: deliveryTotal, 매핑: true });
   }
@@ -1318,9 +1318,9 @@ function aggregateResults(results) {
   for (const r of results) {
     const k = r.최종상품명;
     if (!map[k]) map[k] = { 최종상품명: k, 수량: 0, 정산금액: 0, 매출액: 0, 매핑: r.매핑 };
-    map[k].수량 += r.수량;
-    map[k].정산금액 += r.정산금액;
-    map[k].매출액 += r.매출액;
+    map[k].수량 += (isNaN(r.수량) ? 0 : r.수량);
+    map[k].정산금액 += (isNaN(r.정산금액) ? 0 : r.정산금액);
+    map[k].매출액 += (isNaN(r.매출액) ? 0 : r.매출액);
     if (!r.매핑) map[k].매핑 = false;
   }
   return Object.values(map).sort((a, b) => b.정산금액 - a.정산금액);
@@ -1350,9 +1350,10 @@ function findCost(name) {
 
 function applyCosting(aggregated) {
   for (const r of aggregated) {
-    const unitCost = findCost(r.최종상품명);
+    const unitCost = findCost(r.최종상품명) || 0;
     r.원가단가 = unitCost;
-    r.원가합계 = unitCost * r.수량;
+    r.원가합계 = unitCost * (r.수량 || 0);
+    r.정산금액 = isNaN(r.정산금액) ? 0 : r.정산금액;
     r.이익 = r.정산금액 - r.원가합계;
     r.이익률 = r.정산금액 > 0 ? r.이익 / r.정산금액 : 0;
   }
