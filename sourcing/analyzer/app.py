@@ -1518,7 +1518,7 @@ def get_scan_detail(scan_id):
 @app.route('/api/scan/<int:scan_id>/status', methods=['PUT'])
 def update_scan_status(scan_id):
     """스캔 상태 변경 (go / pass)"""
-    data = request.json
+    data = request.get_json(silent=True) or {}
     status = data.get('status')
     db = get_db()
     db.execute('''
