@@ -550,24 +550,30 @@ const state = {
 
 // Channel definitions
 // 매출순 정렬 (1월 기준)
+// 채널 아이콘: 큰 플랫폼은 favicon, 소규모는 이모지
+function chIcon(src, size) {
+  size = size || 18;
+  if (src.startsWith('http')) return `<img src="${src}" width="${size}" height="${size}" style="border-radius:3px;vertical-align:middle;" onerror="this.style.display='none'"/>`;
+  return `<span style="font-size:${size}px;line-height:1;">${src}</span>`;
+}
 const CHANNEL_DEFS = [
-  { id: 'cafe24',     name: '카페24',      icon: '🏪', detect: detectCafe24,     parse: parseCafe24 },
-  { id: 'smartstore', name: '스마트스토어', icon: '🟢', detect: detectSmartStore, parse: parseSmartStore },
-  { id: 'coupang',    name: '로켓배송',    icon: '🚀', detect: detectCoupang,    parse: parseCoupang },
-  { id: '11st',       name: '11번가',      icon: '🔴', detect: detect11st,       parse: parse11st },
-  { id: 'gmarket',    name: '지마켓',      icon: '🛒', detect: detectGmarket,    parse: parseGmarket },
-  { id: 'auction',    name: '옥션',        icon: '🔨', detect: detectAuction,    parse: parseAuction },
-  { id: 'kakaoGift',  name: '카카오선물',  icon: '🎁', detect: detectKakaoGift,  parse: parseKakao },
+  { id: 'cafe24',     name: '카페24',      icon: 'https://www.google.com/s2/favicons?domain=cafe24.com&sz=32', detect: detectCafe24,     parse: parseCafe24 },
+  { id: 'smartstore', name: '스마트스토어', icon: 'https://www.google.com/s2/favicons?domain=smartstore.naver.com&sz=32', detect: detectSmartStore, parse: parseSmartStore },
+  { id: 'coupang',    name: '로켓배송',    icon: 'https://www.google.com/s2/favicons?domain=coupang.com&sz=32', detect: detectCoupang,    parse: parseCoupang },
+  { id: '11st',       name: '11번가',      icon: 'https://www.google.com/s2/favicons?domain=11st.co.kr&sz=32', detect: detect11st,       parse: parse11st },
+  { id: 'gmarket',    name: '지마켓',      icon: 'https://www.google.com/s2/favicons?domain=gmarket.co.kr&sz=32', detect: detectGmarket,    parse: parseGmarket },
+  { id: 'auction',    name: '옥션',        icon: 'https://www.google.com/s2/favicons?domain=auction.co.kr&sz=32', detect: detectAuction,    parse: parseAuction },
+  { id: 'kakaoGift',  name: '카카오선물',  icon: 'https://www.google.com/s2/favicons?domain=gift.kakao.com&sz=32', detect: detectKakaoGift,  parse: parseKakao },
   { id: 'goodtree',   name: '굿트리',     icon: '🌳', detect: detectGoodtree,   parse: parseGroupBuy },
-  { id: 'kakao',      name: '카카오쇼핑',  icon: '🟡', detect: detectKakao,      parse: parseKakao },
+  { id: 'kakao',      name: '카카오쇼핑',  icon: 'https://www.google.com/s2/favicons?domain=shopping.kakao.com&sz=32', detect: detectKakao,      parse: parseKakao },
   { id: 'duber',      name: '두버',       icon: '🛍️', detect: detectDuber,      parse: parseGroupBuy },
-  { id: 'ohouse',     name: '오늘의집',    icon: '🏠', detect: detectOhouse,     parse: parseOhouse },
+  { id: 'ohouse',     name: '오늘의집',    icon: 'https://www.google.com/s2/favicons?domain=ohou.se&sz=32', detect: detectOhouse,     parse: parseOhouse },
   { id: 'gmholdings', name: '지엠홀딩스', icon: '🏢', detect: detectGmholdings, parse: parseGroupBuy },
-  { id: 'gs',         name: 'GS',         icon: '🟠', detect: detectGS,         parse: parseGS },
+  { id: 'gs',         name: 'GS',         icon: 'https://www.google.com/s2/favicons?domain=gsshop.com&sz=32', detect: detectGS,         parse: parseGS },
   { id: 'gogrow',     name: '고그로우',   icon: '🌸', detect: detectGogrow,     parse: parseGogrow },
-  { id: 'ably',       name: '에이블리',   icon: '🎀', detect: detectAbly,       parse: parseAbly },
+  { id: 'ably',       name: '에이블리',   icon: 'https://www.google.com/s2/favicons?domain=a-bly.com&sz=32', detect: detectAbly,       parse: parseAbly },
   { id: 'edgar',      name: '에드가',     icon: '📦', detect: detectEdgar,      parse: parseGroupBuy },
-  { id: 'ssg',        name: '신세계',     icon: '🏬', detect: detectSSG,        parse: parseSSG },
+  { id: 'ssg',        name: '신세계',     icon: 'https://www.google.com/s2/favicons?domain=ssg.com&sz=32', detect: detectSSG,        parse: parseSSG },
 ];
 
 // ═══════════════════════════════════════════════════════
@@ -645,7 +651,7 @@ function renderSidebar() {
       if (rev > 0) revText = `<div style="font-size:.65rem;color:#64748b;">₩${fmt(rev)}</div>`;
     }
     return `<div class="ch-item" onclick="openChannelModal('${ch.id}')" style="cursor:pointer;" title="${ch.name} 상세 분석">
-      <div class="ch-icon">${ch.icon}</div>
+      <div class="ch-icon">${chIcon(ch.icon, 20)}</div>
       <div class="ch-name">${ch.name}${revText}</div>
       <div class="ch-status ${cls}" title="${label}"></div>
     </div>`;
@@ -669,7 +675,7 @@ function renderChannelGrid() {
     }
     return `<div class="ch-card ${d ? (d.unmapped&&d.unmapped.length?'has-unmapped':'loaded') : ''}" id="chCard_${ch.id}">
       <div class="ch-card-top">
-        <div class="ch-card-icon">${ch.icon}</div>
+        <div class="ch-card-icon">${chIcon(ch.icon, 24)}</div>
         <div class="ch-card-name">${ch.name}</div>
         <div class="ch-card-status ${statusCls}">${statusLabel}</div>
       </div>
@@ -1697,7 +1703,7 @@ function openChannelModal(channelId) {
 
   state.detailChannel = channelName;
   const overlay = document.getElementById('channelModalOverlay');
-  document.getElementById('channelModalTitle').textContent = def.icon + ' ' + channelName + ' 상세 분석';
+  document.getElementById('channelModalTitle').innerHTML = chIcon(def.icon, 22) + ' ' + channelName + ' 상세 분석';
   overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
 
@@ -2784,7 +2790,7 @@ function renderDashboard() {
     const pct = maxRevenue > 0 ? (ch.revenue / maxRevenue * 100) : 0;
     const rateColor = ch.profitRate >= 0.2 ? '#10b981' : ch.profitRate >= 0 ? '#f59e0b' : '#ef4444';
     html += `<div class="dash-bar-row">
-      <div class="dash-bar-name">${ch.icon} ${ch.name}</div>
+      <div class="dash-bar-name">${chIcon(ch.icon, 16)} ${ch.name}</div>
       <div class="dash-bar-track"><div class="dash-bar-fill" style="width:${pct}%;"></div></div>
       <div class="dash-bar-val">₩${fmt(ch.revenue)} <span style="color:${rateColor};font-size:.7rem;">(${fmtRate(ch.profitRate)})</span></div>
     </div>`;
