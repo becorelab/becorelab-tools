@@ -19,6 +19,7 @@ from analyzer.helpstore import (
     CoupangProduct, InflowKeyword
 )
 from analyzer.scoring import calculate_opportunity, generate_keyword_variants, OpportunityScore
+from analyzer.wing import wing_search, wing_ensure_login, get_wing_status
 
 app = Flask(__name__)
 
@@ -481,6 +482,186 @@ def _save_keyword_variants(db, scan_id: int, keyword: str, related_keywords: lis
                 variant_keyword, search_volume, competition_level)
             VALUES (?, ?, ?, ?, ?)
         ''', (scan_id, keyword, variant, variant_search, variant_comp))
+
+
+# === 쿠팡윙 직접 스캔 ===
+_wing_state = {'status': 'idle', 'message': ''}
+
+
+@app.route('/api/wing/login', methods=['POST'])
+def api_wing_login():
+    """쿠팡윙 로그인 (백그라운드 — 브라우저 열고 로그인 대기)"""
+    if _wing_state['status'] == 'logging_in':
+        return jsonify({'success': True, 'message': '로그인 진행 중...'})
+
+    _wing_state['status'] = 'logging_in'
+
+    def _do():
+        result = wing_ensure_login()
+        _wing_state['status'] = 'logged_in' if result['success'] else 'failed'
+        _wing_state['message'] = result['message']
+
+    threading.Thread(target=_do, daemon=True).start()
+    return jsonify({'success': True, 'message': '브라우저를 여는 중...'})
+
+
+@app.route('/api/wing/login/poll')
+def api_wing_login_poll():
+    return jsonify({'success': True, 'status': _wing_state['status'], 'message': _wing_state['message']})
+
+
+@app.route('/api/wing/debug')
+def api_wing_debug():
+    """디버그: 첫 상품 HTML 구조"""
+    from analyzer.wing import _send
+    try:
+        html = _send('debug_html', timeout=120)
+        return html, 200, {'Content-Type': 'text/html; charset=utf-8'}
+    except Exception as e:
+        return str(e), 500
+
+
+@app.route('/api/wing/status')
+def api_wing_status():
+    """쿠팡윙 로그인 상태 확인"""
+    status = get_wing_status()
+    return jsonify({'success': True, **status})
+
+
+@app.route('/api/scan/wing', methods=['POST'])
+def wing_scan():
+    """쿠팡윙 직접 스캔 — 실제 판매 데이터 수집"""
+    data = request.json
+    keyword = data.get('keyword', '').strip()
+    if not keyword:
+        return jsonify({'success': False, 'error': '키워드를 입력해주세요'})
+
+    # 스캔 기록 생성
+    db = get_db()
+    cursor = db.execute('''
+        INSERT INTO market_scans (keyword, scan_type, status)
+        VALUES (?, 'wing', 'scanning')
+    ''', (keyword,))
+    db.commit()
+    scan_id = cursor.lastrowid
+
+    # 백그라운드 스레드에서 수집
+    thread = threading.Thread(
+        target=_run_scan_wing,
+        args=(scan_id, keyword)
+    )
+    thread.daemon = True
+    thread.start()
+
+    return jsonify({
+        'success': True,
+        'scan_id': scan_id,
+        'message': f'"{keyword}" 쿠팡윙 스캔 시작!'
+    })
+
+
+def _run_scan_wing(scan_id: int, keyword: str):
+    """쿠팡윙 API로 상품 데이터 수집 + 헬프스토어 키워드 데이터 결합"""
+    with app.app_context():
+        db = get_db()
+        try:
+            # 1. 쿠팡윙 상품 데이터
+            products = wing_search(keyword)
+
+            for p in products:
+                db.execute('''
+                    INSERT INTO products (scan_id, ranking, product_name, brand,
+                        manufacturer, price, sales_monthly, revenue_monthly,
+                        review_count, click_count, conversion_rate, page_views,
+                        category, category_code, product_url)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    scan_id, p.ranking, p.product_name, p.brand,
+                    p.manufacturer, p.price, p.sales_monthly,
+                    p.revenue_monthly, p.review_count, p.click_count,
+                    p.conversion_rate, p.page_views, p.category,
+                    p.category_code, p.product_url
+                ))
+
+            # 2. 헬프스토어 키워드 데이터 (연관키워드/검색량)
+            api = get_helpstore()
+            api_result = api.search_keyword(keyword)
+
+            for kw in api_result.related_keywords:
+                db.execute('''
+                    INSERT INTO inflow_keywords (scan_id, keyword, search_volume,
+                        click_count, click_rate, ad_weight)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (
+                    scan_id, kw.keyword, kw.total_search,
+                    kw.pc_search + kw.mobile_search,
+                    (kw.pc_click_rate + kw.mobile_click_rate) / 2, 0
+                ))
+
+            # 3. 키워드 변형
+            _save_keyword_variants(db, scan_id, keyword, api_result.related_keywords)
+
+            # 4. 기회점수 산출
+            opp_score = calculate_opportunity(
+                products=products,
+                inflow_keywords=[],
+                related_keywords=api_result.related_keywords,
+                keyword=keyword
+            )
+
+            # 5. DB 업데이트
+            db.execute('''
+                UPDATE market_scans SET
+                    status = 'scanned',
+                    category = ?,
+                    opportunity_score = ?,
+                    top10_avg_revenue = ?,
+                    top10_avg_sales = ?,
+                    top10_avg_price = ?,
+                    revenue_concentration = ?,
+                    revenue_equality = ?,
+                    new_product_rate = ?,
+                    ad_dependency = ?,
+                    recommended_keyword = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (
+                api_result.main_category,
+                round(opp_score.total_score, 1),
+                opp_score.top4_10_avg_revenue,  # 4~10등 평균매출 (진입 기대)
+                opp_score.top4_10_avg_sales,
+                opp_score.top4_10_avg_price,
+                round(opp_score.top3_share * 100, 1),  # 상위3 점유율
+                round(opp_score.sellers_over_3m_rate * 100, 1),  # 300만+ 비율
+                round(opp_score.new_product_rate * 100, 1),
+                round(opp_score.avg_new_product_weight, 1),  # 신상품 가중치
+                opp_score.recommended_keyword,
+                scan_id
+            ))
+            db.commit()
+
+            print(
+                f'[SCAN-WING] 완료: {keyword}\n'
+                f'  기회점수: {opp_score.total_score:.1f} ({opp_score.grade})\n'
+                f'  매출분산: {opp_score.concentration_score:.0f} | 활성: {opp_score.activity_score:.0f}\n'
+                f'  기대매출: {opp_score.entry_revenue_score:.0f} | 수요신호: {opp_score.demand_signal_score:.0f}\n'
+                f'  상위3 점유율: {opp_score.top3_share*100:.1f}% | 300만+: {opp_score.sellers_over_3m}개\n'
+                f'  4~10등 평균매출: {opp_score.top4_10_avg_revenue:,}원\n'
+                f'  신상품 가중치: {opp_score.avg_new_product_weight:.1f}'
+            )
+
+        except Exception as e:
+            import traceback
+            error_msg = str(e)
+            print(f'[SCAN-WING] 에러: {keyword} — {error_msg}')
+            traceback.print_exc()
+
+            status = 'login_required' if 'LOGIN_REQUIRED' in error_msg else 'failed'
+            db.execute('''
+                UPDATE market_scans SET status = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (status, scan_id))
+            db.commit()
 
 
 # === 헬프스토어 캡처 (북마클릿) ===

@@ -9,24 +9,26 @@
 <link href="https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/css/SpoqaHanSansNeo.css" rel="stylesheet">
 <style>
 :root {
-    --bg-primary: #0a0f1e;
-    --bg-secondary: #111827;
-    --bg-card: #1a2236;
-    --bg-card-hover: #1f2a42;
-    --bg-input: #0d1525;
-    --border: #2a3550;
-    --border-light: #3a4a6a;
-    --text-primary: #e8ecf4;
-    --text-secondary: #8896b3;
-    --text-muted: #5a6a8a;
-    --accent: #3b82f6;
-    --accent-hover: #2563eb;
-    --accent-glow: rgba(59, 130, 246, 0.15);
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --gradient-card: linear-gradient(135deg, #1a2236 0%, #1e293b 100%);
-    --shadow-card: 0 2px 8px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
+    --bg-primary: #0c0e14;
+    --bg-secondary: #12151e;
+    --bg-card: #181c28;
+    --bg-card-hover: #1e2335;
+    --bg-input: #0e1018;
+    --border: #2a2f40;
+    --border-light: #3a4055;
+    --text-primary: #f0f2f7;
+    --text-secondary: #9ba3b8;
+    --text-muted: #5c6478;
+    --accent: #ff6b2b;
+    --accent-hover: #e85a1a;
+    --accent-glow: rgba(255, 107, 43, 0.12);
+    --success: #00e676;
+    --warning: #ffab00;
+    --danger: #ff5252;
+    --cyan: #00e5ff;
+    --purple: #b388ff;
+    --gradient-card: linear-gradient(135deg, #181c28 0%, #1a2030 100%);
+    --shadow-card: 0 2px 10px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.2);
     --radius: 4px;
 }
 
@@ -64,7 +66,9 @@ body {
 }
 
 .header-title .logo {
-    color: var(--accent);
+    background: linear-gradient(135deg, #ff6b2b, #ff9500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     font-size: 18px;
     font-weight: 800;
 }
@@ -211,8 +215,8 @@ body {
 
 .btn-capture {
     background: transparent;
-    border: 1px solid var(--accent);
-    color: var(--accent);
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
     font-family: inherit;
     font-size: 13px;
     font-weight: 600;
@@ -379,6 +383,7 @@ body {
     padding: 12px 12px;
     border-bottom: 1px solid rgba(42, 53, 80, 0.5);
     vertical-align: middle;
+    white-space: nowrap;
 }
 
 .data-table tbody tr:hover {
@@ -397,9 +402,9 @@ body {
     font-weight: 700;
 }
 
-.score-high { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-.score-mid { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
-.score-low { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+.score-high { background: rgba(0, 230, 118, 0.15); color: var(--success); }
+.score-mid { background: rgba(255, 171, 0, 0.15); color: var(--warning); }
+.score-low { background: rgba(255, 82, 82, 0.15); color: var(--danger); }
 
 /* ── 상태 뱃지 ── */
 .status-badge {
@@ -473,7 +478,7 @@ body {
 
 .scan-indicator.active {
     background: var(--success);
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    box-shadow: 0 0 8px rgba(0, 230, 118, 0.5);
     animation: pulse 2s infinite;
 }
 
@@ -629,6 +634,100 @@ body {
     background: rgba(16, 185, 129, 0.08);
 }
 
+/* ── 조사 기록 드롭다운 ── */
+.history-dropdown {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.history-toggle {
+    width: 100%;
+    background: var(--bg-card);
+    border: none;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 14px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s;
+}
+
+.history-toggle:hover { background: var(--bg-card-hover); }
+
+.history-count {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    min-width: 24px;
+    text-align: center;
+}
+
+.history-arrow {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+}
+
+.history-arrow.open { transform: rotate(180deg); }
+
+#historyPanel {
+    background: var(--bg-secondary);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.1s;
+    gap: 12px;
+}
+
+.history-item:hover { background: var(--bg-card-hover); }
+
+.history-item .hi-keyword {
+    font-weight: 600;
+    min-width: 120px;
+    color: var(--text-primary);
+}
+
+.history-item .hi-score {
+    font-weight: 700;
+    min-width: 40px;
+    text-align: center;
+}
+
+.history-item .hi-meta {
+    color: var(--text-secondary);
+    font-size: 12px;
+    flex: 1;
+}
+
+.history-item .hi-date {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.history-item .hi-status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 2px;
+}
+
 /* ── 반응형 ── */
 @media (max-width: 1024px) {
     .main-content { padding: 16px; }
@@ -697,28 +796,12 @@ body {
     <!-- 직접 조사 -->
     <div id="manualScanPanel">
         <div class="search-box">
-            <input type="text" id="searchKeyword" placeholder="키워드 입력 (API 기본분석) 또는 헬프스토어에서 캡처">
-            <button class="btn btn-primary" id="btnScan">조사하기</button>
-            <button class="btn btn-capture" id="btnCaptureGuide" title="헬프스토어에서 쿠팡 실데이터를 가져옵니다">캡처 안내</button>
+            <input type="text" id="searchKeyword" placeholder="키워드를 입력하세요 (예: 고체 탈취제, 남자 깔창)">
+            <button class="btn btn-primary" id="btnWingScan" title="쿠팡윙 실데이터 + 키워드 분석">스캔</button>
+            <button class="btn btn-sm btn-secondary" id="btnScan">키워드만</button>
+            <button class="btn btn-sm btn-secondary" id="btnWingLogin" title="쿠팡윙 로그인 (첫 1회)">윙 로그인</button>
         </div>
-
-        <!-- 캡처 안내 패널 -->
-        <div id="captureGuide" class="card" style="display:none; margin-top:12px; border-color:var(--accent);">
-            <div class="card-header">
-                <span class="card-title" style="color:var(--accent)">헬프스토어 캡처 사용법</span>
-                <button class="btn-close" onclick="document.getElementById('captureGuide').style.display='none'">&times;</button>
-            </div>
-            <div style="font-size:13px; line-height:1.8; color:var(--text-secondary);">
-                <p><strong style="color:var(--text-primary)">STEP 1.</strong> 아래 코드를 북마크바에 드래그하거나, 브라우저 북마크로 추가하세요:</p>
-                <div style="background:var(--bg-input); border:1px solid var(--border); border-radius:3px; padding:10px 14px; margin:8px 0; position:relative;">
-                    <code id="bookmarkletCode" style="font-size:11px; word-break:break-all; color:var(--accent); display:block; max-height:60px; overflow:auto;"></code>
-                    <button class="btn-copy" onclick="copyBookmarklet()" style="position:absolute; top:6px; right:6px; background:var(--accent); color:#fff; border:none; padding:3px 10px; border-radius:3px; font-size:11px; cursor:pointer;">복사</button>
-                </div>
-                <p><strong style="color:var(--text-primary)">STEP 2.</strong> <a href="https://helpstore.shop/keyword/keyword_analyze_coupang/" target="_blank" style="color:var(--accent);">헬프스토어 쿠팡 분석 페이지</a>에서 키워드를 검색하세요.</p>
-                <p><strong style="color:var(--text-primary)">STEP 3.</strong> 상품 데이터가 로드되면, 북마클릿을 클릭하세요. 자동으로 이 앱에 전송됩니다!</p>
-                <p style="color:var(--text-muted); font-size:12px; margin-top:8px;">* 쿠팡윙 로그인 + 헬프스토어 확장 프로그램이 필요합니다</p>
-            </div>
-        </div>
+        <div id="wingStatus" style="display:none; margin-bottom:12px; padding:8px 14px; border-radius:var(--radius); font-size:12px;"></div>
 
         <!-- 조사 결과 영역 -->
         <div id="scanResult" style="display:none;">
@@ -745,10 +828,10 @@ body {
         <!-- 빈 상태 -->
         <div id="scanEmpty" class="empty-state">
             <div class="empty-icon">&#x1F50D;</div>
-            <div class="empty-title">키워드를 입력하거나 헬프스토어에서 캡처하세요</div>
+            <div class="empty-title">키워드를 입력하세요</div>
             <div class="empty-desc">
-                <strong>조사하기</strong> — 키워드 입력으로 기본 분석 (검색량/경쟁도)<br>
-                <strong>캡처 안내</strong> — 헬프스토어에서 쿠팡 실데이터 가져오기 (매출/판매량/클릭수)
+                <strong>스캔</strong> — 쿠팡윙 실데이터(매출/판매량) + 키워드 분석 통합<br>
+                <small style="color:var(--text-muted)">Chrome에서 wing.coupang.com에 로그인된 상태여야 합니다</small>
             </div>
         </div>
     </div>
@@ -779,30 +862,18 @@ body {
         </div>
     </div>
 
-    <!-- 과거 조사 목록 -->
-    <div class="card" style="margin-top: 20px;">
-        <div class="card-header">
-            <span class="card-title">조사 기록</span>
-            <span class="card-subtitle" id="scanHistoryCount"></span>
-        </div>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>키워드</th>
-                    <th>유형</th>
-                    <th>기회점수</th>
-                    <th>상위10 평균매출</th>
-                    <th>매출균등도</th>
-                    <th>광고의존도</th>
-                    <th>조사일</th>
-                    <th>상태</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody id="scanHistoryBody"></tbody>
-        </table>
-        <div id="scanHistoryEmpty" class="empty-state" style="padding: 30px;">
-            <div class="empty-desc">아직 조사 기록이 없습니다</div>
+    <!-- 과거 조사 목록 (드롭다운) -->
+    <div class="history-dropdown" style="margin-top: 20px;">
+        <button class="history-toggle" id="btnToggleHistory" onclick="toggleHistory()">
+            <span>조사 기록</span>
+            <span class="history-count" id="scanHistoryCount">0</span>
+            <span class="history-arrow" id="historyArrow">&#9660;</span>
+        </button>
+        <div id="historyPanel" style="display:none;">
+            <div id="scanHistoryBody"></div>
+            <div id="scanHistoryEmpty" style="display:none; padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">
+                아직 조사 기록이 없습니다
+            </div>
         </div>
     </div>
 </div>
@@ -1090,42 +1161,86 @@ searchInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') btnScan.click();
 });
 
-// 캡처 안내 토글
-document.getElementById('btnCaptureGuide').addEventListener('click', () => {
-    const guide = document.getElementById('captureGuide');
-    guide.style.display = guide.style.display === 'none' ? 'block' : 'none';
-});
 
-// 북마클릿 코드 생성
-const BOOKMARKLET_CODE = `javascript:void(function(){var k=document.querySelector('#keyword');if(!k||!k.value){alert('키워드를 먼저 검색하세요');return}var ps=[];document.querySelectorAll('.keyword_analyze_coupang .listProducts li').forEach(function(li,i){var p={ranking:i+1};var a=li.querySelector('strong a');if(a){p.name=a.textContent.trim();p.url=a.href||''}var sp=li.querySelector(':scope > span');if(sp)p.category=sp.textContent.trim();li.querySelectorAll('dl').forEach(function(dl){var dts=dl.querySelectorAll('dt');var dds=dl.querySelectorAll('dd');for(var j=0;j<dts.length;j++){var dt=dts[j].textContent.trim();var dd=dds[j]?dds[j].textContent.trim():'';if(dt==='브랜드')p.brand=dd;else if(dt==='제조사')p.manufacturer=dd;else if(dt==='가격')p.price=parseInt(dd.replace(/[^0-9]/g,''))||0;else if(dt==='리뷰')p.reviews=parseInt(dd.replace(/[^0-9]/g,''))||0;else if(dt==='클릭수')p.clicks=parseInt(dd.replace(/[^0-9]/g,''))||0;else if(dt==='판매량')p.sales=parseInt(dd.replace(/[^0-9]/g,''))||0;else if(dt==='전환율')p.cvr=parseFloat(dd)||0;else if(dt.indexOf('판매금액')>=0)p.revenue=parseInt(dd.replace(/[^0-9]/g,''))||0}});var kb=li.querySelector('.btnShowKeyword');if(kb)p.categoryCode=kb.getAttribute('data-category-id')||'';ps.push(p)});if(ps.length===0){alert('상품 데이터가 없습니다. 검색 결과가 로드될 때까지 기다려주세요.');return}fetch('http://localhost:8090/api/scan/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keyword:k.value,products:ps})}).then(function(r){return r.json()}).then(function(d){if(d.success)alert('전송 완료! '+d.products+'개 상품 → 분석기로 전달됨');else alert('오류: '+d.error)}).catch(function(e){alert('연결 실패: 분석기(localhost:8090)가 실행중인지 확인하세요')})})()`;
-
-document.getElementById('bookmarkletCode').textContent = BOOKMARKLET_CODE;
-
-function copyBookmarklet() {
-    navigator.clipboard.writeText(BOOKMARKLET_CODE).then(() => {
-        const btn = document.querySelector('.btn-copy');
-        btn.textContent = '복사됨!';
-        setTimeout(() => btn.textContent = '복사', 1500);
-    });
+function showWingStatus(msg, type) {
+    const el = document.getElementById('wingStatus');
+    el.style.display = 'block';
+    el.textContent = msg;
+    el.style.background = type === 'success' ? 'rgba(16,185,129,0.1)' :
+                           type === 'error' ? 'rgba(239,68,68,0.1)' : 'rgba(59,130,246,0.1)';
+    el.style.color = type === 'success' ? 'var(--success)' :
+                     type === 'error' ? 'var(--danger)' : 'var(--accent)';
+    if (type !== 'info') setTimeout(() => el.style.display = 'none', 5000);
 }
 
-// 외부에서 캡처 데이터가 도착하면 자동으로 결과 표시
-// (window.postMessage로도 받을 수 있게)
-window.addEventListener('message', async (e) => {
-    if (e.data && e.data.type === 'helpstore-capture-done' && e.data.scan_id) {
-        document.getElementById('scanEmpty').style.display = 'none';
-        document.getElementById('scanResult').style.display = 'block';
-        pollScanResult(e.data.scan_id, e.data.keyword, 30);
+// 윙 로그인 버튼
+document.getElementById('btnWingLogin').addEventListener('click', async () => {
+    const btn = document.getElementById('btnWingLogin');
+    btn.disabled = true;
+    btn.textContent = '로그인 중...';
+    showWingStatus('브라우저를 여는 중...', 'info');
+
+    try {
+        await fetch('/api/wing/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' });
+        // 폴링
+        const poll = async () => {
+            const res = await fetch('/api/wing/login/poll');
+            const data = await res.json();
+            if (data.status === 'logged_in') {
+                showWingStatus(data.message, 'success');
+                btn.disabled = false; btn.textContent = '윙 로그인';
+            } else if (data.status === 'failed') {
+                showWingStatus(data.message, 'error');
+                btn.disabled = false; btn.textContent = '윙 로그인';
+            } else {
+                setTimeout(poll, 1000);
+            }
+        };
+        poll();
+    } catch (err) {
+        showWingStatus('서버 연결 실패', 'error');
+        btn.disabled = false; btn.textContent = '윙 로그인';
     }
 });
 
-// 조사하기 버튼 (API 모드)
+// 윙 스캔 버튼 (쿠팡 실데이터)
+document.getElementById('btnWingScan').addEventListener('click', async () => {
+    const keyword = searchInput.value.trim();
+    if (!keyword) { searchInput.focus(); return; }
+
+    const btn = document.getElementById('btnWingScan');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner"></span> 윙 스캔중...';
+
+    try {
+        const res = await fetch('/api/scan/wing', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ keyword })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            document.getElementById('scanEmpty').style.display = 'none';
+            document.getElementById('scanResult').style.display = 'block';
+            pollScanResult(data.scan_id, keyword, 60);
+        } else {
+            showWingStatus(data.error || '스캔 실패', 'error');
+        }
+    } catch (err) {
+        showWingStatus('서버 연결 실패', 'error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '윙 스캔';
+});
+
+// 키워드 분석 버튼 (API 모드 — 키워드 데이터만)
 btnScan.addEventListener('click', async () => {
     const keyword = searchInput.value.trim();
     if (!keyword) return;
 
     btnScan.disabled = true;
-    btnScan.innerHTML = '<span class="loading-spinner"></span> 조사중...';
+    btnScan.innerHTML = '<span class="loading-spinner"></span> 분석중...';
 
     try {
         const res = await fetch('/api/scan/manual', {
@@ -1142,9 +1257,9 @@ btnScan.addEventListener('click', async () => {
         }
     } catch (err) {
         console.error('scan error:', err);
-        btnScan.disabled = false;
-        btnScan.textContent = '조사하기';
     }
+    btnScan.disabled = false;
+    btnScan.textContent = '키워드 분석';
 });
 
 async function pollScanResult(scanId, keyword, maxAttempts = 30) {
@@ -1213,43 +1328,44 @@ async function showScanResult(scanId, scanSummary) {
         `;
 
         if (hasCdpData) {
-            // CDP 데이터 상세 지표
+            // 상위3 매출 합 계산
+            const sortedByRev = [...products].sort((a,b) => (b.revenue_monthly||0) - (a.revenue_monthly||0));
+            const top3sum = sortedByRev.slice(0,3).reduce((s,p) => s + (p.revenue_monthly||0), 0);
+            const restSum = sortedByRev.slice(3).reduce((s,p) => s + (p.revenue_monthly||0), 0);
+
             statsHtml += `
                 <div class="stat-card">
-                    <div class="stat-label">상위10 평균매출</div>
-                    <div class="stat-number" style="font-size:16px;">${formatNumber(scan.top10_avg_revenue)}원</div>
+                    <div class="stat-label">1~3등 매출 합</div>
+                    <div class="stat-number" style="font-size:15px;">${formatNumber(top3sum)}원</div>
+                    <div class="stat-sub">나머지 합: ${formatNumber(restSum)}원</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">상위10 평균판매량</div>
-                    <div class="stat-number">${formatNumber(scan.top10_avg_sales)}</div>
+                    <div class="stat-label">진입 기대매출 (4~10등)</div>
+                    <div class="stat-number" style="font-size:15px;">${formatNumber(scan.top10_avg_revenue)}원</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">상위10 평균가격</div>
-                    <div class="stat-number" style="font-size:16px;">${formatNumber(scan.top10_avg_price)}원</div>
+                    <div class="stat-label">상위3 점유율</div>
+                    <div class="stat-number" style="color: ${scan.revenue_concentration < 50 ? 'var(--success)' : scan.revenue_concentration < 70 ? 'var(--warning)' : 'var(--danger)'}">${scan.revenue_concentration ? scan.revenue_concentration.toFixed(1) + '%' : '-'}</div>
+                    <div class="stat-sub">${scan.revenue_concentration < 50 ? '분산형' : scan.revenue_concentration < 70 ? '보통' : '독점'}</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">1위 점유율</div>
-                    <div class="stat-number" style="color: ${scan.revenue_concentration < 25 ? 'var(--success)' : scan.revenue_concentration < 40 ? 'var(--warning)' : 'var(--danger)'}">${scan.revenue_concentration ? scan.revenue_concentration.toFixed(1) + '%' : '-'}</div>
-                    <div class="stat-sub">${scan.revenue_concentration < 25 ? '분산형 (좋음)' : scan.revenue_concentration < 40 ? '보통' : '독점형 (위험)'}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">매출균등도</div>
-                    <div class="stat-number">${scan.revenue_equality ? scan.revenue_equality.toFixed(1) + '%' : '-'}</div>
-                    <div class="stat-sub">10위/1위 비율</div>
+                    <div class="stat-label">300만+ 판매자</div>
+                    <div class="stat-number" style="color: ${scan.revenue_equality > 40 ? 'var(--success)' : scan.revenue_equality > 20 ? 'var(--warning)' : 'var(--danger)'}">${scan.revenue_equality ? scan.revenue_equality.toFixed(0) + '%' : '-'}</div>
+                    <div class="stat-sub">시장 활성도</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">신상품 진입률</div>
                     <div class="stat-number" style="color: ${scan.new_product_rate > 20 ? 'var(--success)' : 'var(--warning)'}">${scan.new_product_rate ? scan.new_product_rate.toFixed(1) + '%' : '-'}</div>
-                    <div class="stat-sub">리뷰 100개 미만 비율</div>
+                    <div class="stat-sub">리뷰 100개 미만</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">광고 의존도</div>
-                    <div class="stat-number" style="color: ${scan.ad_dependency < 20 ? 'var(--success)' : scan.ad_dependency < 40 ? 'var(--warning)' : 'var(--danger)'}">${scan.ad_dependency ? scan.ad_dependency.toFixed(1) + '%' : '-'}</div>
+                    <div class="stat-label">신상품 가중치</div>
+                    <div class="stat-number">${scan.ad_dependency ? scan.ad_dependency.toFixed(1) : '-'}</div>
+                    <div class="stat-sub">매출/리뷰/1000</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">수집 상품</div>
-                    <div class="stat-number">${products.length}</div>
-                    <div class="stat-sub">개</div>
+                    <div class="stat-number">${products.length}개</div>
                 </div>
             `;
         } else {
@@ -1328,8 +1444,7 @@ async function showScanResult(scanId, scanSummary) {
             document.getElementById('productList').innerHTML = `
                 <div class="card-header"><span class="card-title">상위 상품</span></div>
                 <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">
-                    상품 데이터를 보려면 CDP 모드를 켜고 조사해주세요<br>
-                    <small style="font-size:11px;opacity:0.7;">Chrome 디버그 모드 필요: chrome --remote-debugging-port=9222</small>
+                    상품 데이터를 보려면 <strong>윙 스캔</strong>을 사용하세요
                 </div>`;
         }
 
@@ -1402,34 +1517,51 @@ async function loadStats() {
     }
 }
 
+function toggleHistory() {
+    const panel = document.getElementById('historyPanel');
+    const arrow = document.getElementById('historyArrow');
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        arrow.classList.add('open');
+    } else {
+        panel.style.display = 'none';
+        arrow.classList.remove('open');
+    }
+}
+
 async function loadScanHistory() {
     try {
         const res = await fetch('/api/scans');
         const data = await res.json();
         if (data.success) {
-            const tbody = document.getElementById('scanHistoryBody');
+            const container = document.getElementById('scanHistoryBody');
             const empty = document.getElementById('scanHistoryEmpty');
+            const countEl = document.getElementById('scanHistoryCount');
+
+            countEl.textContent = data.scans.length;
 
             if (data.scans.length === 0) {
                 empty.style.display = 'block';
-                tbody.innerHTML = '';
+                container.innerHTML = '';
                 return;
             }
 
             empty.style.display = 'none';
-            tbody.innerHTML = data.scans.map(s => `
-                <tr>
-                    <td><strong>${s.keyword}</strong></td>
-                    <td><span class="status-badge">${s.scan_type === 'auto' ? '자동' : '직접'}</span></td>
-                    <td>${s.opportunity_score ? `<span class="score-badge ${getScoreClass(s.opportunity_score)}">${s.opportunity_score.toFixed(1)}</span>` : '-'}</td>
-                    <td>${s.top10_avg_revenue ? formatNumber(s.top10_avg_revenue) + '원' : '-'}</td>
-                    <td>${s.revenue_equality ? s.revenue_equality.toFixed(2) : '-'}</td>
-                    <td>${s.ad_dependency ? s.ad_dependency.toFixed(1) + '%' : '-'}</td>
-                    <td>${formatDate(s.scanned_at)}</td>
-                    <td><span class="status-badge status-${s.status}">${getStatusText(s.status)}</span></td>
-                    <td><button class="btn btn-sm btn-secondary" onclick="viewScanDetail(${s.id})">상세</button></td>
-                </tr>
-            `).join('');
+            container.innerHTML = data.scans.map(s => {
+                const score = s.opportunity_score ? s.opportunity_score.toFixed(1) : '-';
+                const scoreColor = getScoreColor(s.opportunity_score);
+                const revenue = s.top10_avg_revenue ? formatNumber(s.top10_avg_revenue) + '원' : '';
+                const rate300 = s.revenue_equality ? s.revenue_equality.toFixed(0) + '%' : '';
+                const meta = [revenue ? '기대매출 ' + revenue : '', rate300 ? '300만+ ' + rate300 : ''].filter(Boolean).join(' · ');
+
+                return `<div class="history-item" onclick="viewScanDetail(${s.id})">
+                    <span class="hi-keyword">${s.keyword}</span>
+                    <span class="hi-score" style="color:${scoreColor}">${score}</span>
+                    <span class="hi-meta">${meta || '-'}</span>
+                    <span class="hi-date">${formatDate(s.scanned_at)}</span>
+                    <span class="hi-status status-${s.status}">${getStatusText(s.status)}</span>
+                </div>`;
+            }).join('');
         }
     } catch (err) {
         console.error('스캔 기록 로딩 에러:', err);

@@ -1,0 +1,404 @@
+"""
+헬프스토어 + 확장 프로그램 자동화 (Sync Playwright)
+1. Playwright에 헬프스토어 확장 로드
+2. 쿠팡윙 로그인 (확장이 윙 API 호출하려면 필요)
+3. 헬프스토어 로그인
+4. 쿠팡 분석 페이지에서 키워드 검색 → DOM 파싱
+"""
+
+import os
+import logging
+import threading
+import queue
+import glob
+
+logger = logging.getLogger(__name__)
+
+WING_BASE = 'https://wing.coupang.com'
+WING_ID = 'becorelab'
+WING_PW = 'becolab@2026'
+HELPSTORE_BASE = 'https://helpstore.shop'
+HELPSTORE_ID = 'becorelab'
+HELPSTORE_PW = 'qlzhdjfoq2023!!'
+COUPANG_PAGE = f'{HELPSTORE_BASE}/keyword/keyword_analyze_coupang/'
+
+STATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.wing_profile')
+
+# 헬프스토어 확장 프로그램 경로 찾기
+def _find_extension():
+    ext_base = os.path.join(
+        os.environ.get('LOCALAPPDATA', ''),
+        'Google', 'Chrome', 'User Data', 'Default', 'Extensions',
+        'nfbjgieajobfohijlkaaplipbiofblef'
+    )
+    if os.path.isdir(ext_base):
+        versions = sorted(os.listdir(ext_base), reverse=True)
+        for v in versions:
+            p = os.path.join(ext_base, v)
+            if os.path.isdir(p) and os.path.exists(os.path.join(p, 'manifest.json')):
+                return p
+    return ''
+
+
+# ─── 워커 스레드 ───
+_task_queue = queue.Queue()
+_worker = None
+_pw = None
+_ctx = None
+_page = None
+_logged_in = False
+_wing_ok = False
+
+
+def _worker_loop():
+    global _pw, _ctx, _page, _logged_in, _wing_ok
+    while True:
+        task = _task_queue.get()
+        if task is None:
+            break
+        action, args, event, holder = task
+        try:
+            if action == 'login':
+                holder['result'] = _do_full_login()
+            elif action == 'search':
+                holder['result'] = _do_search(args['keyword'])
+            elif action == 'status':
+                holder['result'] = {'logged_in': _logged_in, 'wing_ok': _wing_ok, 'has_browser': _ctx is not None}
+            elif action == 'debug_html':
+                holder['result'] = _debug_first_li()
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            holder['error'] = str(e)
+        finally:
+            event.set()
+
+
+def _ensure_worker():
+    global _worker
+    if _worker and _worker.is_alive():
+        return
+    _worker = threading.Thread(target=_worker_loop, daemon=True)
+    _worker.start()
+
+
+def _send(action, args=None, timeout=600):
+    _ensure_worker()
+    event = threading.Event()
+    holder = {}
+    _task_queue.put((action, args or {}, event, holder))
+    event.wait(timeout=timeout)
+    if 'error' in holder:
+        raise Exception(holder['error'])
+    return holder.get('result')
+
+
+# ─── 브라우저 작업 (워커 스레드에서만) ───
+def _start_browser():
+    global _pw, _ctx, _page
+    if _ctx:
+        return
+
+    from playwright.sync_api import sync_playwright
+    os.makedirs(STATE_DIR, exist_ok=True)
+
+    ext_path = _find_extension()
+    logger.info(f'확장 프로그램: {ext_path or "없음"}')
+
+    launch_args = ['--disable-blink-features=AutomationControlled']
+    if ext_path:
+        launch_args.extend([
+            f'--load-extension={ext_path}',
+            f'--disable-extensions-except={ext_path}',
+        ])
+
+    _pw = sync_playwright().start()
+    _ctx = _pw.chromium.launch_persistent_context(
+        user_data_dir=STATE_DIR,
+        headless=False,
+        viewport={'width': 1200, 'height': 800},
+        args=launch_args,
+    )
+    _page = _ctx.pages[0] if _ctx.pages else _ctx.new_page()
+    logger.info('브라우저 시작 완료')
+
+
+def _do_full_login():
+    """윙 로그인 → 헬프스토어 로그인 → 준비 완료"""
+    global _logged_in, _wing_ok
+
+    _start_browser()
+
+    # 1) 쿠팡윙 로그인
+    logger.info('쿠팡윙 로그인 시도...')
+    _page.goto(WING_BASE, wait_until='domcontentloaded', timeout=20000)
+    _page.wait_for_timeout(3000)
+
+    url = _page.url
+    if '/login' in url or 'xauth' in url or 'login.coupang.com' in url:
+        try:
+            _page.locator('input[name="username"], input[name="email"], input[type="text"]').first.fill(WING_ID)
+            _page.wait_for_timeout(300)
+            _page.locator('input[name="password"], input[type="password"]').first.fill(WING_PW)
+            _page.wait_for_timeout(300)
+            _page.locator('button[type="submit"], input[type="submit"], #kc-login').first.click()
+            _page.wait_for_url('**/wing.coupang.com/**', timeout=30000)
+            _page.wait_for_timeout(2000)
+            _wing_ok = True
+            logger.info('쿠팡윙 로그인 성공!')
+        except Exception as e:
+            logger.warning(f'윙 자동 로그인 실패: {e}')
+            # 수동 대기
+            for i in range(120):
+                _page.wait_for_timeout(1000)
+                if 'wing.coupang.com' in _page.url and '/login' not in _page.url:
+                    _wing_ok = True
+                    break
+    else:
+        _wing_ok = True
+        logger.info('쿠팡윙 이미 로그인됨')
+
+    if not _wing_ok:
+        return {'success': False, 'message': '쿠팡윙 로그인 실패'}
+
+    # 2) 헬프스토어 로그인
+    logger.info('헬프스토어 로그인 시도...')
+    _page.goto(f'{HELPSTORE_BASE}/login', wait_until='domcontentloaded', timeout=15000)
+    _page.wait_for_timeout(2000)
+
+    url = _page.url
+    if '/login' in url:
+        try:
+            _page.locator('#loginId').fill(HELPSTORE_ID)
+            _page.wait_for_timeout(300)
+            _page.locator('#loginPw').fill(HELPSTORE_PW)
+            _page.wait_for_timeout(300)
+            _page.locator('#btnLogin').click()
+            _page.wait_for_timeout(3000)
+            logger.info('헬프스토어 로그인 성공!')
+        except Exception as e:
+            logger.warning(f'헬프스토어 로그인 실패: {e}')
+
+    # 3) 쿠팡 분석 페이지로 이동
+    _page.goto(COUPANG_PAGE, wait_until='domcontentloaded', timeout=15000)
+    _page.wait_for_timeout(2000)
+
+    _logged_in = True
+    # 브라우저 최소화
+    _page.evaluate('window.resizeTo(1,1); window.moveTo(-2000,-2000)')
+
+    return {'success': True, 'message': '로그인 완료! (윙 + 헬프스토어)'}
+
+
+def _do_search(keyword):
+    """헬프스토어 쿠팡 분석 페이지에서 검색 → DOM 파싱"""
+    global _logged_in
+    from analyzer.helpstore import CoupangProduct
+
+    if not _ctx:
+        _start_browser()
+    if not _logged_in:
+        # 자동 로그인 시도
+        result = _do_full_login()
+        if not result.get('success'):
+            raise Exception('WING_LOGIN_REQUIRED')
+
+    # 쿠팡 분석 페이지 확인
+    if 'keyword_analyze_coupang' not in _page.url:
+        _page.goto(COUPANG_PAGE, wait_until='domcontentloaded', timeout=15000)
+        _page.wait_for_timeout(2000)
+
+    # extension/page로 리다이렉트 되면 확장 미감지
+    if '/extension/page' in _page.url:
+        raise Exception('헬프스토어 확장 프로그램이 감지되지 않습니다')
+
+    # 키워드 입력 + 검색
+    search_input = _page.locator('#keyword')
+    search_input.fill('')
+    search_input.type(keyword, delay=30)
+    _page.wait_for_timeout(300)
+    _page.locator('#btnSearch').click()
+
+    # 결과 로딩 대기 (확장이 윙 API 호출 → DOM 렌더)
+    try:
+        _page.wait_for_selector(
+            '.keyword_analyze_coupang .listProducts li',
+            timeout=45000
+        )
+        logger.info(f'상품 리스트 로딩 완료: {keyword}')
+    except:
+        # 상품이 없을 수 있음 — 페이지 상태 확인
+        logger.warning(f'상품 로딩 타임아웃: {keyword}')
+        # extension/page 리다이렉트 확인
+        if '/extension/page' in _page.url:
+            raise Exception('확장 프로그램 또는 쿠팡윙 로그인 문제')
+        return []
+
+    # 윙 데이터(판매량/매출) 로딩 대기 — dl.type2 안에 판매량 데이터가 채워질 때까지
+    try:
+        _page.wait_for_selector(
+            '.keyword_analyze_coupang .listProducts li dl.type2 dd',
+            timeout=30000
+        )
+        logger.info('판매량 데이터 로딩 감지')
+    except:
+        logger.warning('판매량 데이터 로딩 타임아웃 — 기본 데이터만 사용')
+
+    _page.wait_for_timeout(5000)  # 모든 상품 데이터 안정화 대기
+
+    # DOM에서 상품 데이터 파싱
+    # type1: 가격, 리뷰(점수)
+    # type2: 노출증가, 클릭수, 클릭율, 광고비중
+    products_data = _page.evaluate('''() => {
+        function parseNum(s) {
+            if (!s) return 0;
+            // "4,147(4.5)" → 4147, "500~1,000(100.0%)" → 500, "9,900원" → 9900
+            const m = s.replace(/,/g, '').match(/^([0-9]+)/);
+            return m ? parseInt(m[1]) : 0;
+        }
+        function parseFloat2(s) {
+            if (!s) return 0;
+            const m = s.match(/([0-9.]+)/);
+            return m ? parseFloat(m[1]) : 0;
+        }
+
+        const products = [];
+        document.querySelectorAll('.keyword_analyze_coupang .listProducts li').forEach((li, i) => {
+            const p = { ranking: i + 1, price: 0, reviews: 0, clicks: 0, sales: 0, cvr: 0, revenue: 0, adWeight: 0, ctr: 0 };
+
+            // 상품명 + URL
+            const a = li.querySelector('strong a');
+            if (a) { p.name = a.innerText.trim(); p.url = a.href || ''; }
+
+            // 카테고리
+            const sp = li.querySelector(':scope > span');
+            if (sp) p.category = sp.innerText.trim();
+
+            // type1: 가격, 리뷰
+            const dl1 = li.querySelector('dl.type1');
+            if (dl1) {
+                let dt = '';
+                for (const c of dl1.children) {
+                    if (c.tagName === 'DT') dt = c.innerText.trim();
+                    else if (c.tagName === 'DD') {
+                        const raw = c.innerText.trim();
+                        if (dt === '가격') p.price = parseNum(raw);
+                        else if (dt === '리뷰') p.reviews = parseNum(raw);
+                        else if (dt === '브랜드') p.brand = raw;
+                        else if (dt === '제조사') p.manufacturer = raw;
+                        else if (dt === '판매량') p.sales = parseNum(raw);
+                        else if (dt.includes('판매금액')) p.revenue = parseNum(raw);
+                        else if (dt === '클릭수') p.clicks = parseNum(raw);
+                        else if (dt === '전환율') p.cvr = parseFloat2(raw);
+                        dt = '';
+                    }
+                }
+            }
+
+            // type2: 노출증가, 클릭수, 클릭율, 광고비중
+            const dl2 = li.querySelector('dl.type2');
+            if (dl2) {
+                let dt = '';
+                for (const c of dl2.children) {
+                    if (c.tagName === 'DT') dt = c.innerText.trim();
+                    else if (c.tagName === 'DD') {
+                        const raw = c.innerText.trim();
+                        if (dt === '클릭수') p.clicks = parseNum(raw);
+                        else if (dt === '클릭율') p.ctr = parseFloat2(raw);
+                        else if (dt === '광고비중') p.adWeight = parseFloat2(raw);
+                        else if (dt === '판매량') p.sales = parseNum(raw);
+                        else if (dt.includes('판매금액')) p.revenue = parseNum(raw);
+                        else if (dt === '전환율') p.cvr = parseFloat2(raw);
+                        else if (dt === '리뷰') p.reviews = parseNum(raw);
+                        dt = '';
+                    }
+                }
+            }
+
+            // 카테고리 코드
+            const kwBtn = li.querySelector('.btnShowKeyword');
+            if (kwBtn) p.categoryCode = kwBtn.getAttribute('data-category-id') || '';
+
+            products.push(p);
+        });
+        return products;
+    }''')
+
+    # CoupangProduct 변환 — 판매량 데이터가 있는 상품만 (랭킹순 40개)
+    # 상위 노출 상품 (노출증가/광고비중만 있는 것)은 제외
+    products = []
+    rank = 0
+    for rp in products_data:
+        # 판매량 또는 매출 데이터가 없으면 상위 노출 상품 → 스킵
+        if rp.get('sales', 0) == 0 and rp.get('revenue', 0) == 0:
+            continue
+        rank += 1
+        sales = rp.get('sales', 0)
+        price = rp.get('price', 0)
+        revenue = rp.get('revenue', 0)
+        if revenue == 0 and sales > 0 and price > 0:
+            revenue = sales * price
+
+        products.append(CoupangProduct(
+            ranking=rank,
+            product_name=rp.get('name', ''),
+            brand=rp.get('brand', ''),
+            manufacturer=rp.get('manufacturer', ''),
+            price=price, sales_monthly=sales, revenue_monthly=revenue,
+            review_count=rp.get('reviews', 0),
+            click_count=rp.get('clicks', 0),
+            conversion_rate=rp.get('cvr', 0),
+            page_views=rp.get('clicks', 0),
+            category=rp.get('category', ''),
+            category_code=rp.get('categoryCode', ''),
+            product_url=rp.get('url', ''),
+        ))
+
+    logger.info(f'헬프스토어 파싱 완료: {keyword} → {len(products)}개')
+    return products
+
+
+def _debug_first_li():
+    """디버그: 페이지의 모든 listProducts 섹션 확인"""
+    if not _page:
+        return 'no page'
+    if 'keyword_analyze_coupang' not in _page.url:
+        _page.goto(COUPANG_PAGE, wait_until='domcontentloaded', timeout=15000)
+        _page.wait_for_timeout(2000)
+
+    _page.locator('#keyword').fill('')
+    _page.locator('#keyword').type('남자 깔창', delay=30)
+    _page.locator('#btnSearch').click()
+    try:
+        _page.wait_for_selector('.listProducts li', timeout=45000)
+    except:
+        pass
+    _page.wait_for_timeout(10000)
+
+    return _page.evaluate('''() => {
+        const result = [];
+        // 모든 .listProducts 찾기
+        document.querySelectorAll('.listProducts').forEach((list, idx) => {
+            const parent = list.parentElement;
+            const parentId = parent ? (parent.id || parent.className || parent.tagName) : 'unknown';
+            const lis = list.querySelectorAll('li');
+            const firstLi = lis[0];
+            let sample = firstLi ? firstLi.outerHTML.substring(0, 800) : 'empty';
+            result.push(`\\n=== LIST #${idx} (parent: ${parentId}, items: ${lis.length}) ===\\n${sample}`);
+        });
+        return result.join('\\n');
+    }''')
+
+
+# ─── 외부 API ───
+def wing_ensure_login():
+    return _send('login', timeout=600)
+
+def wing_search(keyword):
+    return _send('search', {'keyword': keyword}, timeout=120)
+
+def get_wing_status():
+    try:
+        return _send('status', timeout=5)
+    except:
+        return {'logged_in': False, 'wing_ok': False, 'has_browser': False}
