@@ -836,8 +836,8 @@ def _run_goldbox(max_scan: int):
             _goldbox_state['phase'] = 'crawling'
             _goldbox_state['current'] = '골드박스 페이지 로딩...'
 
-            from analyzer.wing import _send
-            products = _send('goldbox_crawl', {'url': GOLDBOX_URL}, timeout=120)
+            # 골드박스는 공개 페이지 → 별도 Playwright로 크롤링 (Wing 워커 안 씀)
+            products = _crawl_goldbox_direct(GOLDBOX_URL)
             _goldbox_state['products'] = products
             _goldbox_state['current'] = f'{len(products)}개 상품 수집 완료'
 
@@ -947,6 +947,107 @@ def _run_goldbox(max_scan: int):
             _goldbox_state['current'] = str(e)
         finally:
             _goldbox_state['running'] = False
+
+
+def _crawl_goldbox_direct(url: str) -> list:
+    """골드박스 크롤링 — 별도 Playwright (Wing 워커와 독립)"""
+    from playwright.sync_api import sync_playwright
+    import re
+
+    print('[GOLDBOX] 크롤링 시작...')
+    pw = sync_playwright().start()
+    browser = pw.chromium.launch(
+        headless=False,
+        args=['--disable-blink-features=AutomationControlled']
+    )
+    page = browser.new_page()
+
+    try:
+        page.goto(url, wait_until='domcontentloaded', timeout=30000)
+        page.wait_for_timeout(5000)
+
+        # 페이지에 수집 스크립트 주입 — 스크롤하면서 실시간 수집
+        page.evaluate(r'''() => {
+            window.__goldbox_items = {};
+            window.__goldbox_collect = () => {
+                document.querySelectorAll('a[href*="/vp/products/"], a[href*="/pb/products/"]').forEach(a => {
+                    const href = a.href || '';
+                    const pid = href.match(/products\/(\d+)/);
+                    if (!pid || window.__goldbox_items[pid[1]]) return;
+
+                    let name = '';
+                    const img = a.querySelector('img');
+                    if (img && img.alt && img.alt.length > 3) {
+                        name = img.alt.trim();
+                    } else {
+                        const parent = a.closest('[class*="product"], [class*="item"], [class*="deal"], li, div');
+                        if (parent) {
+                            const texts = [];
+                            parent.querySelectorAll('span, p, div, strong, em').forEach(el => {
+                                const t = el.innerText?.trim();
+                                if (t && t.length > 5 && t.length < 100 && /[가-힣]/.test(t)) texts.push(t);
+                            });
+                            if (texts.length > 0) name = texts.sort((a,b) => b.length - a.length)[0];
+                        }
+                        if (!name) name = a.innerText?.trim().substring(0, 80);
+                    }
+
+                    if (!name || name.length < 4 || !/[가-힣]/.test(name)) return;
+                    if (/전체|삭제|검색|필터|더보기|로그인|장바구니|카테고리/.test(name)) return;
+
+                    let price = 0, discount = '';
+                    const parent = a.closest('[class*="product"], [class*="item"], [class*="deal"], li, div');
+                    if (parent) {
+                        const m = parent.innerText.match(/[\d,]+원/g);
+                        if (m) price = parseInt(m[0].replace(/[^0-9]/g, '')) || 0;
+                        const d = parent.innerText.match(/(\d+)%/);
+                        if (d) discount = d[0];
+                    }
+
+                    window.__goldbox_items[pid[1]] = { name, price, discount, url: href };
+                });
+            };
+        }''')
+
+        # 스크롤하면서 수집
+        no_change = 0
+        prev_total = 0
+        for i in range(300):
+            page.evaluate('window.scrollBy(0, 500)')
+            page.wait_for_timeout(300)
+
+            # 5회마다 수집 + 체크
+            if i % 5 == 4:
+                page.evaluate('window.__goldbox_collect()')
+                total = page.evaluate('Object.keys(window.__goldbox_items).length')
+
+                if i % 15 == 14:
+                    print(f'[GOLDBOX] 스크롤 {i+1}회, 누적: {total}개')
+
+                if total == prev_total:
+                    no_change += 1
+                    if no_change >= 6:  # 30회 스크롤 무변화 → 종료
+                        break
+                else:
+                    no_change = 0
+                prev_total = total
+
+        # 마지막 수집
+        page.evaluate('window.__goldbox_collect()')
+
+        # 결과 가져오기
+        products = page.evaluate('Object.values(window.__goldbox_items)')
+        print(f'[GOLDBOX] 수집 완료: {len(products)}개')
+        return products
+
+    except Exception as e:
+        print(f'[GOLDBOX] 크롤링 에러: {e}')
+        import traceback
+        traceback.print_exc()
+        return []
+    finally:
+        browser.close()
+        pw.stop()
 
 
 def _extract_keywords_from_products(products: list) -> list:

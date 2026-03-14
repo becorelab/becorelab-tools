@@ -67,9 +67,12 @@ def _worker_loop():
             elif action == 'debug_html':
                 holder['result'] = _debug_first_li()
             elif action == 'goldbox_crawl':
+                print(f'[WORKER] goldbox_crawl 시작')
                 holder['result'] = _do_goldbox_crawl(args.get('url', ''))
+                print(f'[WORKER] goldbox_crawl 완료: {len(holder["result"])}개')
         except Exception as e:
             import traceback
+            print(f'[WORKER] 에러: {action} — {e}')
             traceback.print_exc()
             holder['error'] = str(e)
         finally:
@@ -89,7 +92,10 @@ def _send(action, args=None, timeout=600):
     event = threading.Event()
     holder = {}
     _task_queue.put((action, args or {}, event, holder))
-    event.wait(timeout=timeout)
+    completed = event.wait(timeout=timeout)
+    if not completed:
+        print(f'[WING] 타임아웃: {action} ({timeout}초)')
+        raise Exception(f'{action} 타임아웃 ({timeout}초)')
     if 'error' in holder:
         raise Exception(holder['error'])
     return holder.get('result')
@@ -362,25 +368,38 @@ def _do_search(keyword):
 
 def _do_goldbox_crawl(url):
     """골드박스 페이지 크롤링 → 상품 목록 추출"""
+    global _logged_in
     if not _ctx:
         _start_browser()
+    # 골드박스는 로그인 불필요 (공개 페이지) — 하지만 브라우저가 필요
 
     page = _ctx.new_page()
     try:
+        print(f'[GOLDBOX-CRAWL] 페이지 로딩: {url[:60]}')
         page.goto(url, wait_until='domcontentloaded', timeout=30000)
         page.wait_for_timeout(5000)
 
-        # 스크롤로 lazy load 트리거
-        for _ in range(15):
-            page.evaluate('window.scrollBy(0, 1000)')
-            page.wait_for_timeout(800)
-        # 맨 위로 돌아가기
-        page.evaluate('window.scrollTo(0, 0)')
-        page.wait_for_timeout(1000)
+        # 스크롤 — 새 상품이 안 나올 때까지 반복
+        prev_count = 0
+        no_change = 0
+        for i in range(200):  # 최대 200회
+            page.evaluate('window.scrollBy(0, 600)')
+            page.wait_for_timeout(400)
 
-        # 먼저 페이지 HTML 구조 확인 (디버그)
-        html_sample = page.evaluate('() => document.body.innerHTML.substring(0, 500)')
-        logger.info(f'골드박스 페이지 샘플: {html_sample[:200]}')
+            # 10회마다 상품 수 체크
+            if i % 10 == 9:
+                curr_count = page.evaluate(
+                    """document.querySelectorAll('a[href*="/vp/products/"], a[href*="/pb/products/"]').length"""
+                )
+                if curr_count == prev_count:
+                    no_change += 1
+                    if no_change >= 3:  # 30회 스크롤해도 변화 없으면 종료
+                        break
+                else:
+                    no_change = 0
+                prev_count = curr_count
+
+        page.wait_for_timeout(2000)
 
         # 상품 추출 — 쿠팡 상품 링크 기반
         products = page.evaluate('''() => {

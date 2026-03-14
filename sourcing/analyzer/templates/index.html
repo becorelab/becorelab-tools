@@ -1033,7 +1033,6 @@ body {
             <div style="display:flex; gap:8px; align-items:center;">
                 <span style="font-size:13px; color:var(--text-secondary);">골드박스 상품을 수집하고 키워드별 시장을 분석합니다</span>
                 <div style="flex:1;"></div>
-                <input type="number" id="goldboxMaxScan" value="15" style="width:80px; background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius); color:var(--text-primary); font-size:13px; padding:8px; outline:none;" title="분석할 키워드 수">
                 <button class="btn btn-primary" id="btnGoldbox" style="background:var(--warning); color:#000; font-weight:700;">골드박스 수집</button>
             </div>
         </div>
@@ -1106,6 +1105,7 @@ body {
                 </thead>
                 <tbody id="goldboxProductsBody"></tbody>
             </table>
+            <div id="goldboxPagination"></div>
         </div>
     </div>
 
@@ -2334,7 +2334,7 @@ function viewScanDetail(scanId) {
 // ─────────────────────────────────────────────
 document.getElementById('btnGoldbox').addEventListener('click', async () => {
     const btn = document.getElementById('btnGoldbox');
-    const maxScan = parseInt(document.getElementById('goldboxMaxScan').value) || 15;
+    const maxScan = 999;  // 전체 수집
     btn.disabled = true;
     btn.textContent = '수집중...';
 
@@ -2381,28 +2381,55 @@ function pollGoldbox() {
     poll();
 }
 
+let _gbProducts = [];
+let _gbPage = 0;
+const _gbPerPage = 20;
+
 async function loadGoldboxProducts() {
     try {
         const res = await fetch('/api/goldbox/products');
         const data = await res.json();
         if (data.success && data.products.length > 0) {
+            _gbProducts = data.products;
+            _gbPage = 0;
             document.getElementById('goldboxProducts').style.display = 'block';
-            document.getElementById('goldboxProductCount').textContent = data.products.length + '개 상품';
-            document.getElementById('goldboxProductsBody').innerHTML = data.products.slice(0, 30).map((p, i) => `
-                <tr>
-                    <td>${i+1}</td>
-                    <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                        ${p.url ? '<a href="'+p.url+'" target="_blank" style="color:var(--text-primary);text-decoration:none;">'+p.name+'</a>' : p.name}
-                    </td>
-                    <td>${p.price ? formatNumber(p.price)+'원' : '-'}</td>
-                    <td style="color:var(--danger);">${p.discount || '-'}</td>
-                    <td><a href="https://www.coupang.com/np/search?component=&q=${encodeURIComponent(p.name.match(/[가-힣]{2,6}/g)?.slice(0,3).join(' ') || '')}" target="_blank" style="color:var(--cyan);text-decoration:none;font-size:12px;">${p.name.match(/[가-힣]{2,6}/g)?.slice(0,3).join(' ') || '-'}</a></td>
-                    <td><button class="btn btn-sm btn-primary" onclick="quickScan('${p.name.match(/[가-힣]{2,6}/g)?.slice(0,2).join(' ') || ''}')">스캔</button></td>
-                </tr>
-            `).join('');
+            renderGoldboxPage();
         }
     } catch(e) {}
 }
+
+function renderGoldboxPage() {
+    const total = _gbProducts.length;
+    const totalPages = Math.ceil(total / _gbPerPage);
+    const start = _gbPage * _gbPerPage;
+    const pageProducts = _gbProducts.slice(start, start + _gbPerPage);
+
+    document.getElementById('goldboxProductCount').textContent = `${total}개 상품 (${_gbPage+1}/${totalPages} 페이지)`;
+    document.getElementById('goldboxProductsBody').innerHTML = pageProducts.map((p, i) => `
+        <tr>
+            <td>${start + i + 1}</td>
+            <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                ${p.url ? '<a href="'+p.url+'" target="_blank" style="color:var(--text-primary);text-decoration:none;">'+p.name+'</a>' : p.name}
+            </td>
+            <td>${p.price ? formatNumber(p.price)+'원' : '-'}</td>
+            <td style="color:var(--danger);">${p.discount || '-'}</td>
+            <td><a href="https://www.coupang.com/np/search?component=&q=${encodeURIComponent(p.name.match(/[가-힣]{2,6}/g)?.slice(0,3).join(' ') || '')}" target="_blank" style="color:var(--cyan);text-decoration:none;font-size:12px;">${p.name.match(/[가-힣]{2,6}/g)?.slice(0,3).join(' ') || '-'}</a></td>
+            <td><button class="btn btn-sm btn-primary" onclick="quickScan('${(p.name.match(/[가-힣]{2,6}/g) || []).slice(0,2).join(' ')}')">스캔</button></td>
+        </tr>
+    `).join('');
+
+    // 페이지네이션 버튼
+    let paginationHtml = '<div style="display:flex;justify-content:center;gap:6px;margin-top:12px;">';
+    if (_gbPage > 0) paginationHtml += '<button class="btn btn-sm btn-secondary" onclick="gbPrevPage()">이전</button>';
+    paginationHtml += `<span style="padding:6px 12px;font-size:12px;color:var(--text-secondary);">${_gbPage+1} / ${totalPages}</span>`;
+    if (_gbPage < totalPages - 1) paginationHtml += '<button class="btn btn-sm btn-secondary" onclick="gbNextPage()">다음</button>';
+    paginationHtml += '</div>';
+
+    document.getElementById('goldboxPagination').innerHTML = paginationHtml;
+}
+
+function gbPrevPage() { if (_gbPage > 0) { _gbPage--; renderGoldboxPage(); } }
+function gbNextPage() { if (_gbPage < Math.ceil(_gbProducts.length / _gbPerPage) - 1) { _gbPage++; renderGoldboxPage(); } }
 
 async function loadGoldboxResults() {
     try {
