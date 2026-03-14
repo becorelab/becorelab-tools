@@ -208,6 +208,43 @@ tr:hover td{background:#1a1d2788;}
 .main-tab:hover{color:#94a3b8;}
 .main-tab.active{color:#0f766e;border-bottom-color:#0f766e;}
 
+/* DASHBOARD */
+.dashboard-section{display:none;}
+.dashboard-section.visible{display:block;}
+.dash-kpi-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
+.dash-kpi-card{background:#161b27;border:1px solid #1e293b;border-radius:6px;padding:18px 22px;flex:1;min-width:160px;}
+.dash-kpi-card .kpi-val{font-size:1.4rem;font-weight:700;color:#10b981;}
+.dash-kpi-card .kpi-lbl{font-size:.72rem;color:#64748b;margin-top:4px;}
+.dash-panel{background:#161b27;border:1px solid #1e293b;border-radius:6px;padding:20px 22px;margin-bottom:20px;}
+.dash-panel-title{font-size:.92rem;font-weight:700;color:#e2e8f0;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.dash-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.dash-bar-name{width:100px;font-size:.78rem;color:#94a3b8;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dash-bar-track{flex:1;height:22px;background:#0d1117;border-radius:4px;overflow:hidden;position:relative;}
+.dash-bar-fill{height:100%;background:linear-gradient(90deg,#0f766e,#14b8a6);border-radius:4px;transition:width .4s ease;min-width:2px;}
+.dash-bar-val{width:110px;font-size:.78rem;color:#e2e8f0;font-weight:600;text-align:right;flex-shrink:0;}
+.dash-rank-tbl{width:100%;border-collapse:collapse;}
+.dash-rank-tbl th{font-size:.72rem;color:#64748b;text-align:left;padding:6px 10px;border-bottom:1px solid #1e293b;font-weight:600;}
+.dash-rank-tbl th.num{text-align:right;}
+.dash-rank-tbl td{font-size:.8rem;color:#e2e8f0;padding:8px 10px;border-bottom:1px solid #0d1117;}
+.dash-rank-tbl td.num{text-align:right;font-variant-numeric:tabular-nums;}
+.dash-rank-tbl tr:hover{background:#1e293b33;}
+.dash-rank-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;font-size:.72rem;font-weight:700;color:#fff;}
+.dash-rank-num.gold{background:linear-gradient(135deg,#b45309,#f59e0b);}
+.dash-rank-num.silver{background:linear-gradient(135deg,#475569,#94a3b8);}
+.dash-rank-num.bronze{background:linear-gradient(135deg,#78350f,#d97706);}
+.dash-rank-num.normal{background:#1e293b;color:#64748b;}
+.dash-insights-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.dash-insight-card{background:#0d1117;border:1px solid #1e293b;border-radius:6px;padding:14px 16px;}
+.dash-insight-title{font-size:.76rem;color:#64748b;margin-bottom:6px;font-weight:600;}
+.dash-insight-val{font-size:.92rem;color:#e2e8f0;font-weight:600;}
+.dash-insight-sub{font-size:.72rem;color:#475569;margin-top:4px;}
+.dash-insight-card.positive .dash-insight-val{color:#10b981;}
+.dash-insight-card.negative .dash-insight-val{color:#ef4444;}
+.dash-insight-card.warning .dash-insight-val{color:#f59e0b;}
+.dash-insight-card.info .dash-insight-val{color:#0ea5e9;}
+.dash-empty{text-align:center;padding:60px 20px;color:#475569;font-size:.88rem;}
+@media(max-width:640px){.dash-insights-grid{grid-template-columns:1fr;}.dash-bar-name{width:70px;}}
+
 /* MONTHLY RECORDS */
 .records-section{display:none;}
 .records-section.visible{display:block;}
@@ -325,12 +362,18 @@ tr:hover td{background:#1a1d2788;}
 
     <!-- MAIN TABS -->
     <div class="main-tabs">
-      <button class="main-tab active" onclick="switchMainTab('input')">📊 정산 입력</button>
+      <button class="main-tab active" onclick="switchMainTab('dashboard')">📈 매출 대시보드</button>
+      <button class="main-tab" onclick="switchMainTab('input')">📊 정산 입력</button>
       <button class="main-tab" onclick="switchMainTab('records')">📋 월별 기록</button>
     </div>
 
+    <!-- DASHBOARD SECTION -->
+    <div id="dashboardSection" class="dashboard-section visible">
+      <div id="dashboardContent"></div>
+    </div>
+
     <!-- INPUT SECTION -->
-    <div id="inputSection">
+    <div id="inputSection" style="display:none;">
 
     <!-- 채널 파일 업로드 -->
     <div class="step-card">
@@ -536,6 +579,7 @@ function init() {
   renderChannelGrid();
   updateMonth();
   updateCostUI();
+  renderDashboard();
 }
 
 function updateCostUI() {
@@ -753,6 +797,7 @@ function loadChannelFile(input, channelId) {
       renderSidebar();
       updateSummary();
       renderResults();
+      renderDashboard();
 
       if (unmapped.length > 0) {
         showUnmappedModal(def.id, unmapped);
@@ -1510,6 +1555,7 @@ function applyModalUnmapped() {
   renderSidebar();
   updateSummary();
   renderResults();
+  renderDashboard();
   showToast('매핑 적용 완료! (자동 저장됨)', 'success');
   // 미매핑 처리 후 자동 저장
   if (currentModalChannel) autoSaveChannelToCloud(currentModalChannel);
@@ -2672,12 +2718,242 @@ function resetAll() {
 // ═══════════════════════════════════════════════════════
 // MAIN TAB SWITCH
 // ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════
+function renderDashboard() {
+  const container = document.getElementById('dashboardContent');
+  const channels = Object.values(state.channels);
+  const month = document.getElementById('settlementMonth').value || '';
+
+  if (channels.length === 0) {
+    container.innerHTML = `<div class="dash-empty">
+      <div style="font-size:2rem;margin-bottom:12px;">📈</div>
+      <div style="color:#94a3b8;font-weight:600;margin-bottom:6px;">매출 데이터가 없습니다</div>
+      <div style="font-size:.78rem;">정산 입력 탭에서 채널별 파일을 업로드하거나,<br>로그인하여 클라우드 데이터를 불러오세요.</div>
+    </div>`;
+    return;
+  }
+
+  // === Aggregate data ===
+  let totalSett = 0, totalCost = 0, totalQty = 0;
+  const channelStats = [];
+  const productMap = {};
+
+  for (const ch of channels) {
+    let chSett = 0, chCost = 0, chQty = 0;
+    for (const r of (ch.aggregated || [])) {
+      chSett += r.정산금액;
+      chCost += r.원가합계 || 0;
+      chQty += r.수량;
+      totalSett += r.정산금액;
+      totalCost += r.원가합계 || 0;
+      totalQty += r.수량;
+      // product aggregation
+      const pName = r.최종상품명;
+      if (!productMap[pName]) productMap[pName] = { name: pName, qty: 0, revenue: 0, cost: 0 };
+      productMap[pName].qty += r.수량;
+      productMap[pName].revenue += r.정산금액;
+      productMap[pName].cost += r.원가합계 || 0;
+    }
+    channelStats.push({ name: ch.name, icon: ch.icon || '', revenue: chSett, cost: chCost, qty: chQty, profit: chSett - chCost, profitRate: chSett > 0 ? (chSett - chCost) / chSett : 0 });
+  }
+
+  const totalProfit = totalSett - totalCost;
+  const totalProfitRate = totalSett > 0 ? totalProfit / totalSett : 0;
+
+  // Sort channels by revenue desc
+  channelStats.sort((a, b) => b.revenue - a.revenue);
+  const maxRevenue = channelStats.length > 0 ? channelStats[0].revenue : 1;
+
+  // Top 10 products
+  const topProducts = Object.values(productMap).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
+
+  // === 1. KPI Cards ===
+  let html = `<div class="dash-kpi-row">
+    <div class="dash-kpi-card"><div class="kpi-val">₩${fmt(totalSett)}</div><div class="kpi-lbl">총 매출금액</div></div>
+    <div class="dash-kpi-card"><div class="kpi-val" style="color:#0284c7;">${fmt(totalQty)}개</div><div class="kpi-lbl">총 판매수량</div></div>
+    <div class="dash-kpi-card"><div class="kpi-val" style="color:${totalProfit>=0?'#10b981':'#ef4444'};">₩${fmt(totalProfit)}</div><div class="kpi-lbl">총 이익</div></div>
+    <div class="dash-kpi-card"><div class="kpi-val" style="color:${totalProfitRate>=0.2?'#10b981':totalProfitRate>=0?'#f59e0b':'#ef4444'};">${fmtRate(totalProfitRate)}</div><div class="kpi-lbl">이익률</div></div>
+  </div>`;
+
+  // === 2. Channel Performance Bar Chart ===
+  html += `<div class="dash-panel">
+    <div class="dash-panel-title">📊 채널별 매출 성과${month ? ' (' + month + ')' : ''}</div>`;
+  for (const ch of channelStats) {
+    const pct = maxRevenue > 0 ? (ch.revenue / maxRevenue * 100) : 0;
+    const rateColor = ch.profitRate >= 0.2 ? '#10b981' : ch.profitRate >= 0 ? '#f59e0b' : '#ef4444';
+    html += `<div class="dash-bar-row">
+      <div class="dash-bar-name">${ch.icon} ${ch.name}</div>
+      <div class="dash-bar-track"><div class="dash-bar-fill" style="width:${pct}%;"></div></div>
+      <div class="dash-bar-val">₩${fmt(ch.revenue)} <span style="color:${rateColor};font-size:.7rem;">(${fmtRate(ch.profitRate)})</span></div>
+    </div>`;
+  }
+  html += `</div>`;
+
+  // === 3. Product TOP 10 ===
+  html += `<div class="dash-panel">
+    <div class="dash-panel-title">🏆 상품별 매출 TOP 10</div>
+    <table class="dash-rank-tbl">
+      <thead><tr><th style="width:40px;">#</th><th>상품명</th><th class="num">수량</th><th class="num">매출</th><th class="num">이익률</th></tr></thead>
+      <tbody>`;
+  topProducts.forEach((p, i) => {
+    const profit = p.revenue - p.cost;
+    const rate = p.revenue > 0 ? profit / p.revenue : 0;
+    const rateColor = rate >= 0.2 ? '#10b981' : rate >= 0 ? '#f59e0b' : '#ef4444';
+    const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'normal';
+    html += `<tr>
+      <td><span class="dash-rank-num ${rankClass}">${i + 1}</span></td>
+      <td>${p.name}</td>
+      <td class="num">${fmt(p.qty)}개</td>
+      <td class="num">₩${fmt(p.revenue)}</td>
+      <td class="num" style="color:${rateColor};">${fmtRate(rate)}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+
+  // === 4. Insights ===
+  const insights = generateInsights(channelStats, productMap, totalSett, totalProfit, totalProfitRate);
+  html += `<div class="dash-panel">
+    <div class="dash-panel-title">💡 개선점 & 인사이트</div>
+    <div class="dash-insights-grid">`;
+  for (const ins of insights) {
+    html += `<div class="dash-insight-card ${ins.type}">
+      <div class="dash-insight-title">${ins.title}</div>
+      <div class="dash-insight-val">${ins.value}</div>
+      <div class="dash-insight-sub">${ins.sub}</div>
+    </div>`;
+  }
+  html += `</div></div>`;
+
+  // === 5. Monthly Trend (if logged in and historical data exists) ===
+  html += `<div class="dash-panel" id="dashMonthlyTrend">
+    <div class="dash-panel-title">📅 기간별 성과</div>
+    <div id="dashTrendContent" style="color:#475569;font-size:.82rem;">데이터 로딩 중...</div>
+  </div>`;
+
+  container.innerHTML = html;
+
+  // Load monthly trend data async
+  loadDashboardTrend(month);
+}
+
+function generateInsights(channelStats, productMap, totalSett, totalProfit, totalProfitRate) {
+  const insights = [];
+
+  // 1. Top performing channel
+  if (channelStats.length > 0) {
+    const top = channelStats[0];
+    const share = totalSett > 0 ? (top.revenue / totalSett * 100).toFixed(1) : 0;
+    insights.push({ type: 'positive', title: '최고 매출 채널', value: `${top.icon} ${top.name}`, sub: `₩${fmt(top.revenue)} (전체의 ${share}%)` });
+  }
+
+  // 2. Lowest margin channel
+  const withRevenue = channelStats.filter(c => c.revenue > 0);
+  if (withRevenue.length > 0) {
+    const lowest = [...withRevenue].sort((a, b) => a.profitRate - b.profitRate)[0];
+    const cls = lowest.profitRate < 0 ? 'negative' : 'warning';
+    insights.push({ type: cls, title: '최저 이익률 채널', value: `${lowest.icon} ${lowest.name} (${fmtRate(lowest.profitRate)})`, sub: `이익 ₩${fmt(lowest.profit)}` });
+  }
+
+  // 3. Products with negative margin
+  const negProducts = Object.values(productMap).filter(p => (p.revenue - p.cost) < 0 && p.cost > 0);
+  if (negProducts.length > 0) {
+    const worst = negProducts.sort((a, b) => (a.revenue - a.cost) - (b.revenue - b.cost))[0];
+    insights.push({ type: 'negative', title: '적자 상품 경고', value: `${negProducts.length}개 상품 적자`, sub: `최대 적자: ${worst.name} (₩${fmt(worst.revenue - worst.cost)})` });
+  } else {
+    insights.push({ type: 'positive', title: '적자 상품', value: '적자 상품 없음', sub: '모든 상품이 흑자입니다' });
+  }
+
+  // 4. Channel concentration risk
+  if (channelStats.length > 1 && totalSett > 0) {
+    const topShare = channelStats[0].revenue / totalSett;
+    const cls = topShare > 0.5 ? 'warning' : 'positive';
+    const msg = topShare > 0.5 ? '매출 집중 위험' : '양호한 분산';
+    insights.push({ type: cls, title: '채널 집중도', value: `${msg} (${(topShare * 100).toFixed(1)}%)`, sub: `${channelStats.length}개 채널 중 1위 점유율` });
+  }
+
+  // 5. Overall margin assessment
+  if (totalSett > 0) {
+    let cls, msg;
+    if (totalProfitRate >= 0.3) { cls = 'positive'; msg = '매우 우수'; }
+    else if (totalProfitRate >= 0.2) { cls = 'positive'; msg = '양호'; }
+    else if (totalProfitRate >= 0.1) { cls = 'warning'; msg = '주의 필요'; }
+    else { cls = 'negative'; msg = '개선 필요'; }
+    insights.push({ type: cls, title: '전체 마진 평가', value: `${msg} (${fmtRate(totalProfitRate)})`, sub: `이익 ₩${fmt(totalProfit)} / 매출 ₩${fmt(totalSett)}` });
+  }
+
+  return insights;
+}
+
+async function loadDashboardTrend(currentMonth) {
+  const trendEl = document.getElementById('dashTrendContent');
+  if (!trendEl) return;
+
+  if (!currentUser || !firebaseReady) {
+    trendEl.innerHTML = '<span style="color:#475569;">로그인하면 월별 추이를 볼 수 있습니다.</span>';
+    return;
+  }
+
+  try {
+    const snapshot = await db.collection('settlements').doc(currentUser.uid).collection('months').orderBy(firebase.firestore.FieldPath.documentId(), 'desc').limit(6).get();
+    if (snapshot.empty) {
+      trendEl.innerHTML = '<span style="color:#475569;">저장된 월별 데이터가 없습니다.</span>';
+      return;
+    }
+
+    const months = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (!data.channels) return;
+      let sett = 0, cost = 0, qty = 0;
+      for (const ch of Object.values(data.channels)) {
+        for (const r of (ch.aggregated || [])) {
+          sett += r.revenue || r.settlement || 0;
+          cost += r.totalCost || 0;
+          qty += r.qty || 0;
+        }
+      }
+      months.push({ month: doc.id, revenue: sett, cost, qty, profit: sett - cost, profitRate: sett > 0 ? (sett - cost) / sett : 0 });
+    });
+
+    months.reverse(); // oldest first
+
+    if (months.length === 0) {
+      trendEl.innerHTML = '<span style="color:#475569;">저장된 월별 데이터가 없습니다.</span>';
+      return;
+    }
+
+    const maxRev = Math.max(...months.map(m => m.revenue), 1);
+    let tHtml = '<table class="dash-rank-tbl"><thead><tr><th>월</th><th class="num">매출</th><th class="num">이익</th><th class="num">이익률</th><th style="width:35%;">매출 추이</th></tr></thead><tbody>';
+    for (const m of months) {
+      const isCurrent = m.month === currentMonth;
+      const rateColor = m.profitRate >= 0.2 ? '#10b981' : m.profitRate >= 0 ? '#f59e0b' : '#ef4444';
+      const barPct = (m.revenue / maxRev * 100);
+      tHtml += `<tr style="${isCurrent ? 'background:#0f766e15;' : ''}">
+        <td style="font-weight:${isCurrent ? '700' : '400'};">${m.month}${isCurrent ? ' ←' : ''}</td>
+        <td class="num">₩${fmt(m.revenue)}</td>
+        <td class="num" style="color:${m.profit >= 0 ? '#10b981' : '#ef4444'};">₩${fmt(m.profit)}</td>
+        <td class="num" style="color:${rateColor};">${fmtRate(m.profitRate)}</td>
+        <td><div style="height:14px;background:#0d1117;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${barPct}%;background:linear-gradient(90deg,#0f766e,#14b8a6);border-radius:3px;"></div></div></td>
+      </tr>`;
+    }
+    tHtml += '</tbody></table>';
+    trendEl.innerHTML = tHtml;
+  } catch(err) {
+    console.warn('월별 추이 로드 실패:', err);
+    trendEl.innerHTML = '<span style="color:#ef4444;">데이터 로드 실패</span>';
+  }
+}
+
 function switchMainTab(tab) {
   document.querySelectorAll('.main-tab').forEach((btn, i) => {
-    btn.classList.toggle('active', (i === 0 && tab === 'input') || (i === 1 && tab === 'records'));
+    btn.classList.toggle('active', (i === 0 && tab === 'dashboard') || (i === 1 && tab === 'input') || (i === 2 && tab === 'records'));
   });
+  document.getElementById('dashboardSection').className = 'dashboard-section' + (tab === 'dashboard' ? ' visible' : '');
   document.getElementById('inputSection').style.display = tab === 'input' ? 'block' : 'none';
   document.getElementById('recordsSection').className = 'records-section' + (tab === 'records' ? ' visible' : '');
+  if (tab === 'dashboard') renderDashboard();
   if (tab === 'records') loadMonthlyRecords();
 }
 
@@ -2874,6 +3150,7 @@ async function autoLoadChannelsFromCloud() {
       renderSidebar();
       updateSummary();
       renderResults();
+      renderDashboard();
       showToast(`☁️ ${month} 정산 데이터 ${loadedCount}개 채널 불러왔어요!`, 'success');
     }
   } catch(err) {
