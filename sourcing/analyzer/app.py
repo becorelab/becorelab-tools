@@ -1765,12 +1765,12 @@ def _collect_reviews_direct(products) -> list:
         headless=False,
         args=['--disable-blink-features=AutomationControlled', '--window-position=-2000,-2000']
     )
-    page = browser.new_page()
+    context = browser.new_context(
+        user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+    )
+    page = context.new_page()
 
     try:
-        page.goto('https://www.coupang.com', wait_until='domcontentloaded', timeout=15000)
-        page.wait_for_timeout(3000)
-
         for p in products[:10]:
             url = p['product_url']
             if not url:
@@ -1781,6 +1781,10 @@ def _collect_reviews_direct(products) -> list:
             pid = pid_match.group(1)
 
             try:
+                # 상품 상세 페이지에 먼저 접속하여 쿠키/세션 컨텍스트 확보
+                page.goto(url, wait_until='domcontentloaded', timeout=15000)
+                page.wait_for_timeout(3000)
+
                 for pg in range(1, 6):  # 최대 5페이지 = 100개
                     result = page.evaluate(f'''() => {{
                         return new Promise(resolve => {{
@@ -1818,6 +1822,7 @@ def _collect_reviews_direct(products) -> list:
     except Exception as e:
         print(f'[REVIEW] 크롤링 에러: {e}')
     finally:
+        context.close()
         browser.close()
         pw.stop()
 
