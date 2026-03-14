@@ -25,13 +25,12 @@ body{font-family:'Pretendard','Spoqa Han Sans Neo',sans-serif;background:#0d1117
 ::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
 
 /* HEADER */
-header{background:linear-gradient(135deg,#0f766e 0%,#0284c7 100%);padding:18px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.4);}
-header h1{font-size:1.2rem;font-weight:700;color:#fff;}
-header p{font-size:.78rem;color:rgba(255,255,255,.7);margin-top:2px;}
-.header-badge{background:rgba(255,255,255,.15);border-radius:20px;padding:4px 12px;font-size:.75rem;color:#fff;margin-left:auto;}
+header{background:linear-gradient(90deg,#0f766e 0%,#0284c7 100%);padding:8px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,.3);}
+header h1{font-size:.88rem;font-weight:600;color:#fff;letter-spacing:.3px;}
+.header-badge{background:rgba(255,255,255,.15);border-radius:4px;padding:3px 10px;font-size:.7rem;color:#fff;margin-left:auto;}
 
 /* LAYOUT */
-.layout{display:flex;min-height:calc(100vh - 62px);}
+.layout{display:flex;min-height:calc(100vh - 40px);}
 
 /* SIDEBAR */
 .sidebar{width:220px;min-width:220px;background:#10151f;border-right:1px solid #1e293b;padding:16px 0;}
@@ -334,7 +333,7 @@ tr:hover td{background:#1a1d2788;}
 
 <header>
   <div>
-    <h1 style="font-size:1.1rem;margin:0;">Becorelab 매출 대시보드</h1>
+    <h1>Becorelab 매출 대시보드</h1>
   </div>
   <div class="header-badge" id="headerMonth">매출 월 미설정</div>
   <div class="auth-area">
@@ -557,23 +556,23 @@ function chIcon(src, size) {
   return `<span style="font-size:${size}px;line-height:1;">${src}</span>`;
 }
 const CHANNEL_DEFS = [
-  { id: 'cafe24',     name: '카페24',      icon: 'https://www.google.com/s2/favicons?domain=cafe24.com&sz=32', detect: detectCafe24,     parse: parseCafe24 },
-  { id: 'smartstore', name: '스마트스토어', icon: 'https://www.google.com/s2/favicons?domain=smartstore.naver.com&sz=32', detect: detectSmartStore, parse: parseSmartStore },
-  { id: 'coupang',    name: '로켓배송',    icon: 'https://www.google.com/s2/favicons?domain=coupang.com&sz=32', detect: detectCoupang,    parse: parseCoupang },
-  { id: '11st',       name: '11번가',      icon: 'https://www.google.com/s2/favicons?domain=11st.co.kr&sz=32', detect: detect11st,       parse: parse11st },
-  { id: 'gmarket',    name: '지마켓',      icon: 'https://www.google.com/s2/favicons?domain=gmarket.co.kr&sz=32', detect: detectGmarket,    parse: parseGmarket },
-  { id: 'auction',    name: '옥션',        icon: 'https://www.google.com/s2/favicons?domain=auction.co.kr&sz=32', detect: detectAuction,    parse: parseAuction },
-  { id: 'kakaoGift',  name: '카카오선물',  icon: 'https://www.google.com/s2/favicons?domain=gift.kakao.com&sz=32', detect: detectKakaoGift,  parse: parseKakao },
+  { id: 'cafe24',     name: '카페24',      icon: '🏪', detect: detectCafe24,     parse: parseCafe24 },
+  { id: 'smartstore', name: '스마트스토어', icon: '🟢', detect: detectSmartStore, parse: parseSmartStore },
+  { id: 'coupang',    name: '로켓배송',    icon: '🚀', detect: detectCoupang,    parse: parseCoupang },
+  { id: '11st',       name: '11번가',      icon: '🔴', detect: detect11st,       parse: parse11st },
+  { id: 'gmarket',    name: '지마켓',      icon: '🛒', detect: detectGmarket,    parse: parseGmarket },
+  { id: 'auction',    name: '옥션',        icon: '🔨', detect: detectAuction,    parse: parseAuction },
+  { id: 'kakaoGift',  name: '카카오선물',  icon: '🎁', detect: detectKakaoGift,  parse: parseKakao },
   { id: 'goodtree',   name: '굿트리',     icon: '🌳', detect: detectGoodtree,   parse: parseGroupBuy },
-  { id: 'kakao',      name: '카카오쇼핑',  icon: 'https://www.google.com/s2/favicons?domain=shopping.kakao.com&sz=32', detect: detectKakao,      parse: parseKakao },
+  { id: 'kakao',      name: '카카오쇼핑',  icon: '🟡', detect: detectKakao,      parse: parseKakao },
   { id: 'duber',      name: '두버',       icon: '🛍️', detect: detectDuber,      parse: parseGroupBuy },
-  { id: 'ohouse',     name: '오늘의집',    icon: 'https://www.google.com/s2/favicons?domain=ohou.se&sz=32', detect: detectOhouse,     parse: parseOhouse },
+  { id: 'ohouse',     name: '오늘의집',    icon: '🏠', detect: detectOhouse,     parse: parseOhouse },
   { id: 'gmholdings', name: '지엠홀딩스', icon: '🏢', detect: detectGmholdings, parse: parseGroupBuy },
-  { id: 'gs',         name: 'GS',         icon: 'https://www.google.com/s2/favicons?domain=gsshop.com&sz=32', detect: detectGS,         parse: parseGS },
+  { id: 'gs',         name: 'GS',         icon: '🟠', detect: detectGS,         parse: parseGS },
   { id: 'gogrow',     name: '고그로우',   icon: '🌸', detect: detectGogrow,     parse: parseGogrow },
-  { id: 'ably',       name: '에이블리',   icon: 'https://www.google.com/s2/favicons?domain=a-bly.com&sz=32', detect: detectAbly,       parse: parseAbly },
+  { id: 'ably',       name: '에이블리',   icon: '🎀', detect: detectAbly,       parse: parseAbly },
   { id: 'edgar',      name: '에드가',     icon: '📦', detect: detectEdgar,      parse: parseGroupBuy },
-  { id: 'ssg',        name: '신세계',     icon: 'https://www.google.com/s2/favicons?domain=ssg.com&sz=32', detect: detectSSG,        parse: parseSSG },
+  { id: 'ssg',        name: '신세계',     icon: '🏬', detect: detectSSG,        parse: parseSSG },
 ];
 
 // ═══════════════════════════════════════════════════════
