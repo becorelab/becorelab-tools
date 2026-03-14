@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BECORE LAB — Design Preview</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Pretendard',system-ui,sans-serif;
+  background:#0e0e0e;
+  color:#eee;
+  min-height:100vh;
+  padding:40px 24px 60px;
+  -webkit-font-smoothing:antialiased;
+}
+.page-header{
+  text-align:center;
+  margin-bottom:48px;
+}
+.page-header h1{
+  font-size:1.1rem;font-weight:700;
+  letter-spacing:.1em;color:#888;
+  margin-bottom:6px;
+}
+.page-header p{font-size:.78rem;color:#555}
+
+.group-label{
+  font-size:.7rem;font-weight:600;letter-spacing:.08em;
+  color:#555;text-transform:uppercase;
+  text-align:center;margin:40px 0 20px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:20px;
+  max-width:1100px;
+  margin:0 auto;
+}
+
+/* ── Each preview card ── */
+.preview{
+  border-radius:10px;
+  overflow:hidden;
+  border:1px solid #222;
+  transition:border-color .2s,transform .2s;
+  cursor:default;
+}
+.preview:hover{
+  border-color:#444;
+  transform:translateY(-3px);
+}
+
+/* Mini mockup area */
+.mockup{
+  padding:20px;
+  min-height:260px;
+  display:flex;flex-direction:column;
+}
+
+/* Info bar */
+.info{
+  padding:14px 20px;
+  background:#151515;
+  border-top:1px solid #222;
+}
+.info-name{
+  font-size:.82rem;font-weight:700;
+  margin-bottom:2px;
+}
+.info-desc{
+  font-size:.68rem;color:#777;
+  line-height:1.5;
+}
+
+/* ═══════════════════════════════════════ */
+/*  1. NOTION                             */
+/* ═══════════════════════════════════════ */
+.notion .mockup{
+  background:#fff;color:#37352f;
+  font-family:Georgia,'Times New Roman',serif;
+}
+.notion .m-header{font-size:1.05rem;font-weight:700;color:#37352f;margin-bottom:14px}
+.notion .m-sub{font-size:.65rem;color:#999;margin-bottom:12px}
+.notion .m-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.notion .m-card{
+  padding:14px;background:#f7f6f3;border-radius:3px;
+  border:1px solid #e8e5df;
+}
+.notion .m-card-title{font-size:.72rem;font-weight:700;font-family:'Pretendard',sans-serif;margin-bottom:3px;color:#37352f}
+.notion .m-card-desc{font-size:.6rem;color:#999;font-family:'Pretendard',sans-serif}
+.notion .m-card-icon{font-size:.9rem;margin-bottom:8px}
+
+/* ═══════════════════════════════════════ */
+/*  2. APPLE                              */
+/* ═══════════════════════════════════════ */
+.apple .mockup{
+  background:#000;color:#f5f5f7;
+  font-family:-apple-system,'Pretendard',sans-serif;
+}
+.apple .m-header{font-size:1.3rem;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+.apple .m-sub{font-size:.65rem;color:#86868b;margin-bottom:20px}
+.apple .m-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.apple .m-card{
+  padding:18px;background:#1d1d1f;border-radius:12px;
+}
+.apple .m-card-icon{font-size:.95rem;margin-bottom:10px}
+.apple .m-card-title{font-size:.72rem;font-weight:600;margin-bottom:2px}
+.apple .m-card-desc{font-size:.58rem;color:#86868b}
+
+/* ═══════════════════════════════════════ */
+/*  3. STRIPE                             */
+/* ═══════════════════════════════════════ */
+.stripe .mockup{
+  background:linear-gradient(135deg,#0a2540 0%,#1a1f4e 50%,#30135a 100%);
+  color:#fff;
+}
+.stripe .m-header{font-size:1rem;font-weight:700;margin-bottom:4px}
+.stripe .m-sub{font-size:.65rem;color:rgba(255,255,255,.5);margin-bottom:16px}
+.stripe .m-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stripe .m-card{
+  padding:16px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;
+  backdrop-filter:blur(10px);
+}
+.stripe .m-card-icon{font-size:.9rem;margin-bottom:8px}
+.stripe .m-card-title{font-size:.72rem;font-weight:600;margin-bottom:2px}
+.stripe .m-card-desc{font-size:.58rem;color:rgba(255,255,255,.45)}
+.stripe .m-glow{
+  position:absolute;top:-30px;right:-30px;
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(99,102,241,.3),transparent 70%);
+  pointer-events:none;
+}
+
+/* ═══════════════════════════════════════ */
+/*  4. CRAFT                              */
+/* ═══════════════════════════════════════ */
+.craft .mockup{
+  background:#fafafa;color:#1a1a1a;
+  font-family:-apple-system,'Pretendard',sans-serif;
+}
+.craft .m-header{font-size:1rem;font-weight:700;letter-spacing:-.01em;margin-bottom:4px}
+.craft .m-sub{font-size:.65rem;color:#999;margin-bottom:14px}
+.craft .m-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.craft .m-card{
+  padding:16px;background:#fff;border-radius:10px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);
+}
+.craft .m-card-icon{font-size:.9rem;margin-bottom:8px}
+.craft .m-card-title{font-size:.72rem;font-weight:600;margin-bottom:2px}
+.craft .m-card-desc{font-size:.58rem;color:#999}
+
+/* ═══════════════════════════════════════ */
+/*  5. THINGS 3                           */
+/* ═══════════════════════════════════════ */
+.things .mockup{
+  background:#fff;color:#2c2c2e;
+  font-family:-apple-system,'Pretendard',sans-serif;
+  padding:28px;
+}
+.things .m-header{font-size:.88rem;font-weight:700;color:#007aff;margin-bottom:20px}
+.things .m-sub{display:none}
+.things .m-row{display:flex;flex-direction:column;gap:0}
+.things .m-card{
+  padding:12px 0;
+  border-bottom:1px solid #f0f0f0;
+  display:flex;align-items:center;gap:10px;
+  background:transparent;border-radius:0;
+}
+.things .m-card-icon{font-size:.8rem;margin-bottom:0;flex-shrink:0;
+  width:22px;height:22px;border:2px solid #d1d1d6;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:.55rem;
+}
+.things .m-card-title{font-size:.72rem;font-weight:500}
+.things .m-card-desc{display:none}
+
+/* ═══════════════════════════════════════ */
+/*  6. ARC BROWSER                        */
+/* ═══════════════════════════════════════ */
+.arc .mockup{
+  background:linear-gradient(160deg,#1a1135 0%,#2d1b4e 50%,#1a2744 100%);
+  color:#fff;
+  display:flex;gap:0;padding:0;
+}
+.arc .m-sidebar{
+  width:70px;padding:14px 8px;
+  background:rgba(255,255,255,.04);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  border-right:1px solid rgba(255,255,255,.06);
+}
+.arc .m-sidebar-dot{
+  width:28px;height:28px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;
+}
+.arc .m-sidebar-dot:nth-child(1){background:#ff6b6b}
+.arc .m-sidebar-dot:nth-child(2){background:#845ef7}
+.arc .m-sidebar-dot:nth-child(3){background:#339af0}
+.arc .m-sidebar-dot:nth-child(4){background:#51cf66}
+.arc .m-sidebar-dot:nth-child(5){background:#fcc419}
+.arc .m-sidebar-dot:nth-child(6){background:#ff922b}
+.arc .m-content{flex:1;padding:20px}
+.arc .m-header{font-size:.92rem;font-weight:700;margin-bottom:4px}
+.arc .m-sub{font-size:.62rem;color:rgba(255,255,255,.4);margin-bottom:14px}
+.arc .m-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.arc .m-card{
+  padding:14px;
+  background:rgba(255,255,255,.06);
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.05);
+}
+.arc .m-card-icon{font-size:.85rem;margin-bottom:6px}
+.arc .m-card-title{font-size:.68rem;font-weight:600;margin-bottom:2px}
+.arc .m-card-desc{font-size:.56rem;color:rgba(255,255,255,.4)}
+
+/* ═══════════════════════════════════════ */
+/*  7. FIGMA                              */
+/* ═══════════════════════════════════════ */
+.figma .mockup{
+  background:#2c2c2c;color:#fff;
+}
+.figma .m-header{font-size:.95rem;font-weight:700;margin-bottom:4px}
+.figma .m-sub{font-size:.62rem;color:#999;margin-bottom:14px}
+.figma .m-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.figma .m-card{
+  padding:14px;border-radius:8px;
+  border:1px solid #444;
+}
+.figma .m-card:nth-child(1){background:linear-gradient(135deg,#f24e1e22,#2c2c2c);border-color:#f24e1e55}
+.figma .m-card:nth-child(2){background:linear-gradient(135deg,#a259ff22,#2c2c2c);border-color:#a259ff55}
+.figma .m-card:nth-child(3){background:linear-gradient(135deg,#0acf8322,#2c2c2c);border-color:#0acf8355}
+.figma .m-card:nth-child(4){background:linear-gradient(135deg,#1abcfe22,#2c2c2c);border-color:#1abcfe55}
+.figma .m-card-icon{font-size:.85rem;margin-bottom:6px}
+.figma .m-card-title{font-size:.7rem;font-weight:600;margin-bottom:2px}
+.figma .m-card-desc{font-size:.56rem;color:#999}
+
+/* ═══════════════════════════════════════ */
+/*  8. GUMROAD                            */
+/* ═══════════════════════════════════════ */
+.gumroad .mockup{
+  background:#fff;color:#000;
+}
+.gumroad .m-header{font-size:1.15rem;font-weight:900;margin-bottom:4px;letter-spacing:-.02em}
+.gumroad .m-sub{font-size:.65rem;color:#999;margin-bottom:14px}
+.gumroad .m-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gumroad .m-card{
+  padding:14px;background:#fff;border-radius:6px;
+  border:2px solid #000;
+  transition:all .15s;
+}
+.gumroad .m-card:nth-child(odd){border-color:#ff90e8}
+.gumroad .m-card-icon{font-size:.85rem;margin-bottom:6px}
+.gumroad .m-card-title{font-size:.72rem;font-weight:800;margin-bottom:2px}
+.gumroad .m-card-desc{font-size:.58rem;color:#777}
+.gumroad .m-accent{
+  display:inline-block;background:#ff90e8;color:#000;
+  padding:2px 8px;border-radius:3px;font-size:.55rem;font-weight:700;
+  margin-top:6px;
+}
+
+/* ═══════════════════════════════════════ */
+/*  9. MONZO                              */
+/* ═══════════════════════════════════════ */
+.monzo .mockup{
+  background:#14233c;color:#fff;
+}
+.monzo .m-header{font-size:1rem;font-weight:700;margin-bottom:4px}
+.monzo .m-sub{font-size:.62rem;color:rgba(255,255,255,.45);margin-bottom:14px}
+.monzo .m-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.monzo .m-card{
+  padding:14px;border-radius:14px;
+  background:rgba(255,255,255,.06);
+}
+.monzo .m-card:nth-child(1){background:linear-gradient(135deg,#ff5a5a33,rgba(255,255,255,.04))}
+.monzo .m-card:nth-child(2){background:linear-gradient(135deg,#ff8a6533,rgba(255,255,255,.04))}
+.monzo .m-card-icon{
+  font-size:.8rem;margin-bottom:8px;
+  width:32px;height:32px;border-radius:50%;
+  background:#e4465a;display:flex;align-items:center;justify-content:center;
+}
+.monzo .m-card:nth-child(2) .m-card-icon{background:#ff8a65}
+.monzo .m-card:nth-child(3) .m-card-icon{background:#42a5f5}
+.monzo .m-card:nth-child(4) .m-card-icon{background:#ab47bc}
+.monzo .m-card-title{font-size:.7rem;font-weight:600;margin-bottom:2px}
+.monzo .m-card-desc{font-size:.56rem;color:rgba(255,255,255,.4)}
+
+/* ═══════════════════════════════════════ */
+/*  + SUPABASE (현재)                      */
+/* ═══════════════════════════════════════ */
+.supa .mockup{
+  background:#171717;color:#ededed;
+}
+.supa .m-header{font-size:.95rem;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.supa .m-header::after{content:'';width:5px;height:5px;background:#3ecf8e;border-radius:50%}
+.supa .m-sub{font-size:.62rem;color:#6b6b6b;margin-bottom:14px}
+.supa .m-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.supa .m-card{
+  padding:14px;background:#1c1c1c;border-radius:6px;
+  border:1px solid #2e2e2e;
+}
+.supa .m-card-icon{font-size:.85rem;margin-bottom:6px}
+.supa .m-card-title{font-size:.7rem;font-weight:600;margin-bottom:2px}
+.supa .m-card-desc{font-size:.56rem;color:#6b6b6b}
+.supa .m-card-link{font-size:.56rem;color:#3ecf8e;margin-top:6px}
+
+@media(max-width:480px){
+  .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>BECORE LAB — DESIGN PREVIEW</h1>
+  <p>대시보드 디자인 시안 비교 (10종)</p>
+</div>
+
+<!-- ── 미니멀 / 프리미엄 ── -->
+<div class="group-label">Minimal · Premium</div>
+<div class="grid">
+
+  <!-- 1. Notion -->
+  <div class="preview notion">
+    <div class="mockup">
+      <div class="m-header">📋 BECORE LAB</div>
+      <div class="m-sub">비코어랩 업무 도구</div>
+      <div class="m-row">
+        <div class="m-card"><div class="m-card-icon">🔍</div><div class="m-card-title">소싱</div><div class="m-card-desc">알리바바 상품 검색</div></div>
+        <div class="m-card"><div class="m-card-icon">🚀</div><div class="m-card-title">로켓 미리보기</div><div class="m-card-desc">쿠팡 로켓그로스</div></div>
+        <div class="m-card"><div class="m-card-icon">📦</div><div class="m-card-title">발주 대시보드</div><div class="m-card-desc">재고 현황 관리</div></div>
+        <div class="m-card"><div class="m-card-icon">💰</div><div class="m-card-title">매출 정산</div><div class="m-card-desc">채널별 매출 리포트</div></div>
+      </div>
+    </div>
+    <div class="info">
+      <div class="info-name">Notion</div>
+      <div class="info-desc">화이트 + 세리프 헤딩, 넓은 여백, 블록 기반 레이아웃</div>
+    </div>
+  </div>
+
+  <!-- 2. Apple -->
+  <div class="preview apple">
+    <div class="mockup">
+      <div class="m-header">BECORE LAB</div>
+      <div class="m-sub">비코어랩 업무 도구</div>
+      <div class="m-row">
+        <div class="m-card"><div class="m-card-icon">🔍</div><div class="m-card-title">소싱</div><div class="m-card-desc">알리바바 상품 검색</div></div>
+        <div class="m-card"><div class="m-card-icon">🚀</div><div class="m-card-title">로켓 미리보기</div><div class="m-card-desc">쿠팡 로켓그로스</div></div>
+        <div class="m-card"><div class="m-card-icon">📦</div><div class="m-card-title">발주 대시보드</div><div class="m-card-desc">재고 현황 관리</div></div>
+        <div class="m-card"><div class="m-card-icon">💰</div><div class="m-card-title">매출 정산</div><div class="m-card-desc">채널별 매출 리포트</div></div>
+      </div>
+    </div>
+    <div class="info">
+      <div class="info-name">Apple</div>
+      <div class="info-desc">극한의 미니멀, SF Pro 폰트, 여백의 미, 다크 배경</div>
+    </div>
+  </div>
+
+  <!-- 3. Stripe -->
+  <div class="preview stripe">
+    <div class="mockup" style="position:relative;overflow:hidden">
+      <div class="m-glow"></div>
+      <div class="m-header">BECORE LAB</div>
+      <div class="m-sub">비코어랩 업무 도구</div>
+      <div class="m-row">
+        <div class="m-card"><div class="m-card-icon">🔍</div><div class="m-card-title">소싱</div><div class="m-card-desc">알리바바 상품 검색</div></div>
+        <div class="m-card"><div class="m-card-icon">🚀</div><div class="m-card-title">로켓 미리보기</div><div class="m-card-desc">쿠팡 로켓그로스</div></div>
+        <div class="m-card"><div class="m-card-icon">📦</div><div class="m-card-title">발주 대시보드</div><div class="m-card-desc">재고 현황 관리</div></div>
+        <div class="m-card"><div class="m-card-icon">💰</div><div class="m-card-title">매출 정산</div><div class="m-card-desc">채널별 매출 리포트</div></div>
+      </div>
+    </div>
+    <div class="info">
+      <div class="info-name">Stripe</div>
+      <div class="info-desc">딥 블루~퍼플 그라데이션, 글래스모피즘, 프리미엄 입체감</div>
+    </div>
+  </div>
+
+  <!-- 4. Craft -->
+  <div class="preview craft">
+    <div class="mockup">
+      <div class="m-header">BECORE LAB</div>
+      <div class="m-sub">비코어랩 업무 도구</div>
+      <div class="m-row">
+        <div class="m-card"><div class="m-card-icon">🔍</div><div class="m-card-title">소싱</div><div class="m-card-desc">알리바바 상품 검색</div></div>
+        <div class="m-card"><div class="m-card-icon">🚀</div><div class="m-card-title">로켓 미리보기</div><div class="m-card-desc">쿠팡 로켓그로스</div></div>
+        <div class="m-card"><div class="m-card-icon">📦</div><div class="m-card-title">발주 대시보드</div><div class="m-card-desc">재고 현황 관리</div></div>
+        <div class="m-card"><div class="m-card-icon">💰</div><div class="m-card-title">매출 정산</div><div class="m-card-desc">채널별 매출 리포트</div></div>
+      </div>
+    </div>
+    <div class="info">
+      <div class="info-name">Craft</div>
+      <div class="info-desc">Apple 감성 + 문서 중심, 부드러운 그림자, 라이트 톤</div>
+    </div>
+  </div>
+
+  <!-- 5. Things 3 -->
+  <div class="preview things">
+    <div class="mockup">
+      <div class="m-header">BECORE LAB</div>
+      <div class="m-row">
+        <div class="m-card"><div class="m-card-icon">🔍</div><div class="m-card-title">소싱</div></div>
+        <div class="m-card"><div class="m-card-icon">🚀</div><div class="m-card-title">로켓 미리보기</div></div>
+        <div class="m-card"><div class="m-card-icon">📦</div><div class="m-card-title">발주 대시보드</div></div>
+        <div class="m-card"><div class="m-card-icon">💰</div><div class="m-card-title">매출 정산</div></div>
+        <div class="m-card"><div class="m-card-icon">📸</div><div class="m-card-title">인스타그램</div></div>
+        <div class="m-card"><div class="m-card-icon">🏠</div><div class="m-card-title">브랜드 페이지</div></div>
+      </div>
+    </div>
+    <div class="info">
+      <div class="info-name">Things 3</div>
+      <div class="info-desc">초미니멀 태스크 리스트, 체크박스 UI, 넓은 여백, 차분한 톤</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── 컬러풀 / 플레이풀 ── -->
+<div class="group-label">Colorful · Playful</div>
+<div class="grid">
+
+  <!-- 6. Arc Browser -->
+  <div class="preview arc">
+    <div class="mockup">
+      <div class="m-sidebar">
+        <div class="m-sidebar-dot">🔍</div>
+        <div class="m-sidebar-dot">🚀</div>
+        <div class="m-sidebar-dot">📦</div>
+        <div class="m-sidebar-dot">💰</div>
+        <div class="m-sidebar-dot">📸</div>
+        <div class="m-sidebar-dot">🏠</div>
+      </div>
+      <div class="m-content">
+        <div class="m-header">BECORE LAB</div>
+        <div class="m-sub">비코어랩 업무 도구</div>
+        <div class="m-row">
+          <div class="m-card"><div class="m-card-icon">🔍</div><div class="m-card-title">소싱</div><div class="m-card-desc">알리바바 상품 검색</div></div>
+          <div class="m-card"><div class="m-card-icon">🚀</div><div class="m-card-title">로켓 미리보기</div><div class="m-card-desc">쿠팡 로켓그로스</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="info">
+      <div class="info-name">Arc Browser</div>
+      <div class="info-desc">컬러풀 사이드바 내비게이션, 장난기 있는 UI, 활기찬 느낌</div>
+    </div>
+  </div>
+
+  <!-- 7. Figma -->
+  <div class="preview figma">
+    <div class="mockup">
+      <div class="m-header">BECORE LAB</div>
+      <div class="m-sub">비코어랩 업무 도구</div>
+      <div class="m-row">
+        <div class="m-card"><div class="m-card-icon">🔍</div><div class="m-card-title">소싱</div><div class="m-card-desc">알리바바 상품 검색</div></div>
+        <div class="m-card"><div class="m-card-icon">🚀</div><div class="m-card-title">로켓 미리보기</div><div class="m-card-desc">쿠팡 로켓그로스</div></div>
+        <div class="m-card"><div class="m-card-icon">📦</div><div class="m-card-title">발주 대시보드</div><div class="m-card-desc">재고 현황 관리</div></div>
+        <div class="m-card"><div class="m-card-icon">💰</div><div class="m-card-title">매출 정산</div><div class="m-card-desc">채널별 매출 리포트</div></div>
+      </div>
+    </div>
+    <div class="info">
+      <div class="info-name">Figma</div>
+      <div class="info-desc">다채로운 색상 보더, 다크 캔버스, 모던하고 플레이풀한 느낌</div>
+    </div>
+  </div>
+
+  <!-- 8. Gumroad -->
+  <div class="preview gumroad">
+    <div class="mockup">
+      <div class="m-header">BECORE LAB</div>
+      <div class="m-sub">비코어랩 업무 도구</div>
+      <div class="m-row">
+        <div class="m-card"><div class="m-card-icon">🔍</div><div class="m-card-title">소싱</div><div class="m-card-desc">알리바바 상품 검색</div><div class="m-accent">SERVER</div></div>
+        <div class="m-card"><div class="m-card-icon">🚀</div><div class="m-card-title">로켓 미리보기</div><div class="m-card-desc">쿠팡 로켓그로스</div></div>
+        <div class="m-card"><div class="m-card-icon">📦</div><div class="m-card-title">발주 대시보드</div><div class="m-card-desc">재고 현황 관리</div></div>
+        <div class="m-card"><div class="m-card-icon">💰</div><div class="m-card-title">매출 정산</div><div class="m-card-desc">채널별 매출 리포트</div></div>
+      </div>
+    </div>
+    <div class="info">
+      <div class="info-name">Gumroad</div>
+      <div class="info-desc">핑크 악센트, 볼드 타이포, 두꺼운 보더, 인디 감성</div>
+    </div>
+  </div>
+
+  <!-- 9. Monzo -->
+  <div class="preview monzo">
+    <div class="mockup">
+      <div class="m-header">BECORE LAB</div>
+      <div class="m-sub">비코어랩 업무 도구</div>
+      <div class="m-row">
+        <div class="m-card"><div class="m-card-icon">🔍</div><div class="m-card-title">소싱</div><div class="m-card-desc">알리바바 상품 검색</div></div>
+        <div class="m-card"><div class="m-card-icon">🚀</div><div class="m-card-title">로켓 미리보기</div><div class="m-card-desc">쿠팡 로켓그로스</div></div>
+        <div class="m-card"><div class="m-card-icon">📦</div><div class="m-card-title">발주 대시보드</div><div class="m-card-desc">재고 현황 관리</div></div>
+        <div class="m-card"><div class="m-card-icon">💰</div><div class="m-card-title">매출 정산</div><div class="m-card-desc">채널별 매출 리포트</div></div>
+      </div>
+    </div>
+    <div class="info">
+      <div class="info-name">Monzo</div>
+      <div class="info-desc">코랄/핫핑크, 둥근 카드, 컬러 아이콘, 핀테크 느낌</div>
+    </div>
+  </div>
+
+  <!-- 10. Supabase (현재) -->
+  <div class="preview supa">
+    <div class="mockup">
+      <div class="m-header">BECORE LAB</div>
+      <div class="m-sub">비코어랩 업무 도구</div>
+      <div class="m-row">
+        <div class="m-card"><div class="m-card-icon">🔍</div><div class="m-card-title">소싱</div><div class="m-card-desc">알리바바 상품 검색</div><div class="m-card-link">Open →</div></div>
+        <div class="m-card"><div class="m-card-icon">🚀</div><div class="m-card-title">로켓 미리보기</div><div class="m-card-desc">쿠팡 로켓그로스</div><div class="m-card-link">Open →</div></div>
+        <div class="m-card"><div class="m-card-icon">📦</div><div class="m-card-title">발주 대시보드</div><div class="m-card-desc">재고 현황 관리</div><div class="m-card-link">Open →</div></div>
+        <div class="m-card"><div class="m-card-icon">💰</div><div class="m-card-title">매출 정산</div><div class="m-card-desc">채널별 매출 리포트</div><div class="m-card-link">Open →</div></div>
+      </div>
+    </div>
+    <div class="info">
+      <div class="info-name">Supabase (현재)</div>
+      <div class="info-desc">다크 그레이 + 그린 악센트, 얇은 보더, 개발자 감성</div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center;margin-top:48px;font-size:.7rem;color:#444">
+  마음에 드는 스타일 번호를 알려주세요 — 바로 적용해드릴게요 ✨
+</div>
+
+</body>
+</html>

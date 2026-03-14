@@ -1,0 +1,301 @@
+<!DOCTYPE html><html lang="ko"><head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, target-densityDpi=device-dpi">
+	<link rel="shortcut icon" href="/assets/icon/favicon.ico">
+	<script type="text/javascript" async="" src="//kissingsky.weblog.cafe24.com/weblog.html?uid=kissingsky_2&amp;udim=1280*720&amp;uref=&amp;url=https://helpstore.shop/login&amp;t=1773467124379"></script><script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-J1WZJ3G6N4&amp;cx=c&amp;gtm=4e63b1"></script><script async="" src="//kissingsky.weblog.cafe24.com/weblog.js?v=1773467124318"></script><script src="/assets/js/jquery-3.7.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+	<script src="/assets/js/swiper-bundle.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+	<script src="/assets/js/ui.js"></script>
+	<script src="/assets/jquery.validate.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.6.0/clipboard.min.js"></script>
+	<script src="https://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+	<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.min.js"></script>
+	<script src="/assets/js/common.js?ver=20250902"></script>
+	
+	
+		<script src="/assets/js/pagejs/commons.min.js?ver=1773467124742"></script>
+	
+	
+	
+		
+	
+		
+			<script src="/assets/js/pagejs/login.min.js?ver=1773467124742"></script>
+		
+		
+		
+	
+	<script>
+	const isLogin = false;
+	const pType = 'F';
+	</script>
+	<script src="/assets/js/hbutil.js?ver=20251120"></script>
+	<link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/common.css">
+	<title>헬프스토어 로그인</title>
+	<meta name="description" content="헬프스토어 로그인">
+	<meta name="keywords" content="키워드도구,아이템소싱,카테고리검색,키워드검색,순위추적,랭킹추척,키워드,부업,헬프스토어,스마트스토어,쿠팡,스마트스토어 판매량,경쟁상품분석,최적화진단">
+	<meta property="og:title" content="헬프스토어 로그인">
+	<meta property="og:description" content="헬프스토어 로그인">
+	<meta property="og:image" content="/static/img/logo.png">
+	<meta property="og:type" content="website">
+	</head><body><preference name="KeyboardShrinksView" value="false">
+	
+	<!-- 리포트2.0 로그분석코드 시작 -->
+	<script type="text/javascript">
+	var sTime = new Date().getTime();
+	(function(i,s,o,g,r,a,m){i['webObject']=g;i['webUid']=r;a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})
+	(window,document,'script','//kissingsky.weblog.cafe24.com/weblog.js?v='+sTime,'kissingsky_2');
+	</script>
+	<!-- 리포트2.0 로그분석코드 완료 -->
+	
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-145406571-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'UA-145406571-1');
+	</script>
+
+
+<div class="overlay" style="display:none;z-index:10000;">
+	<div class="loader"></div>
+</div>
+	
+
+
+
+<script>
+jQuery.validator.setDefaults({
+	onkeyup:false,
+	onclick:false,
+	onfocusout:false,
+	showErrors:function(errorMap, errorList){
+		if(this.numberOfInvalids()) { // 에러가 있을 때만..        
+        	alert(errorList[0].message);
+        	$(errorList[0].element).focus();
+		}
+	}
+});
+</script>
+<style>
+.kakao-login-btn {
+	width:100% !important;
+	margin-bottom:30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 55px;
+  padding: 0 20px;
+  background-color: #FEE500;
+  color: #000000 !important;
+  text-decoration: none;
+  border-radius: 12px;
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  transition: background-color 0.2s;
+}
+
+.kakao-login-btn:hover {
+  background-color: #FADA00; /* 호버 시 약간 어둡게 */
+}
+
+/* 말풍선 몸통 */
+.kakao-symbol {
+  position: relative;
+  width: 18px;
+  height: 16px;
+  background-color: #000000;
+  border-radius: 50% / 50%; /* 타원형 */
+  margin-right: 8px;
+  margin-top: -1px; /* 텍스트와 정렬 맞춤 */
+}
+
+/* 말풍선 꼬리 */
+.kakao-symbol::after {
+  content: "";
+  position: absolute;
+  right: 2px;
+  bottom: -2px;
+  border-top: 5px solid #000000;
+  border-left: 2px solid transparent;
+  border-right: 2px solid transparent;
+  transform: rotate(-35deg); /* 꼬리 각도 */
+}
+</style>
+<form id="loginForm" novalidate="novalidate">
+<section class="login">
+	<header>
+		<p>온라인 셀러들의 데이터 도구, <em>헬프스토어</em></p>
+		<h1><span>HELP STORE</span></h1>
+	</header>
+		<a href="/kakao/login" class="kakao-login-btn" id="btnKakaoLogin">
+		  <span class="kakao-symbol"></span>
+		  <span class="kakao-text">카카오 로그인</span>
+		</a>
+		
+		
+		<input type="text" placeholder="아이디를 입력하세요." id="loginId" name="loginId">
+		<input type="password" placeholder="비밀번호를 입력하세요." id="loginPw" name="loginPw">
+	
+		<button type="button" class="primaryLarge" id="btnLogin"><span>아이디/비번으로 로그인</span></button>
+	<div>
+		<button type="button" id="btnStartFindId">아이디 찾기</button>
+		<button type="button" id="btnStartFindPw">비밀번호 찾기</button>
+	</div>
+	<p>아직 회원이 아니신가요?</p>
+	<a href="/kakao/login" class="kakao-login-btn" id="btnKakaoLogin">
+		  <span class="kakao-symbol"></span>
+		  <span class="kakao-text">카카오 계정으로 시작하기</span>
+		</a>
+		
+	<button type="button" class="secondaryLarge" onclick="location.href='/join'"><span>이메일 회원가입</span></button>
+	<a href="/">홈으로 가기</a>
+</section>
+</form>
+
+<!-- Popup : 아이디 찾기 -->
+<div class="popup" id="findId" style="display: none;">
+	<section class="type1 find">
+		<header>
+			<h2>아이디 찾기</h2>
+			<button type="button" class="close"><span>닫기</span></button>
+		</header>
+		<input type="tel" class="textfield" id="tPhoneNo" placeholder="휴대전화번호를 입력해주세요.">
+		<div id="resultMsg" style="display:flex;justify-content:center;">
+			
+		</div>
+		<footer class="buttons">
+			<button type="button" class="tertiaryMedium close"><span>닫기</span></button>
+			<button type="button" class="primaryMedium" id="btnFindId"><span>찾기</span></button>
+		</footer>
+	</section>
+</div>
+<!-- //Popup : 아이디 찾기 -->
+
+
+
+
+<!-- Popup : 비밀번호 찾기 -->
+<div class="popup" id="findPw" style="display: none;">	
+	<section class="type1 find">
+		<header>
+			<h2>비밀번호 찾기</h2>
+			<button type="button" class="close"><span>닫기</span></button>
+		</header>
+		<input type="text" class="textfield" placeholder="로그인 아이디를 입력해주세요." name="loginId" id="findLoginId">
+		<input type="email" class="textfield" placeholder="이메일을 입력해주세요." name="email" id="email">
+		<footer class="buttons">
+			<button type="button" class="tertiaryMedium close"><span>취소</span></button>
+			<button type="button" class="primaryMedium" id="btnFindPw"><span>찾기</span></button>
+		</footer>
+	</section>
+</div>
+<!-- //Popup : 비밀번호 찾기 -->
+<!-- Popup : 비밀번호 찾기 2 -->
+<div class="popup" id="findPw2" style="display: none;">
+	<section class="alert">
+		<header>
+			<h2>비밀번호 찾기</h2>
+		</header>
+				
+		<footer class="buttons">
+			<button type="button" class="primaryMedium close"><span>확인</span></button>
+		</footer>
+	</section>
+</div>
+<!-- //Popup : 비밀번호 찾기 2 -->
+
+
+
+<form id="findIdForm" onsubmit="return false;" style="display:none;" novalidate="novalidate">
+	<input type="text" class="textfield" name="phoneNo" id="phoneNo" placeholder="휴대전화번호를 입력해주세요.">
+</form>
+
+
+<form id="findPwForm" onsubmit="return false;" style="display:none;" novalidate="novalidate">
+	<input type="text" name="loginId" id="findLoginId" class="form-control" placeholder="로그인아이디">
+	<input type="text" name="email" id="email" class="form-control" placeholder="이메일">
+</form>
+
+
+
+	
+<div class="popup" id="framepopup" style="display: none;">
+	<section>
+		<header>
+			<h2 id="frametitle"></h2>
+			<button type="button" class="close"><span>닫기</span></button>
+		</header>
+		<div class="inputGroup">
+			<iframe id="popupframe" style="width:100%;height:100%;overflow-y:auto;" scrolling="yes" frameborder="0"></iframe>
+		</div>
+		<footer class="buttons">
+			<button type="button" class="tertiaryMedium close"><span>닫기</span></button>
+		</footer>
+	</section>
+</div>
+	
+<div class="popup" id="alertpopup" style="display: none;">
+	<section>
+		<header>
+			<h2>알림</h2>
+			<button type="button" class="close"><span>닫기</span></button>
+		</header>
+		<div class="inputGroup" id="alertmsg"></div>
+		<footer class="buttons">
+			<button type="button" class="tertiaryMedium close"><span>닫기</span></button>
+		</footer>
+	</section>
+</div>
+
+
+
+
+
+
+<div class="popup" id="popupComplete" style="display: none;">
+	<section class="alert">
+	<header>
+		<h2>안내</h2>
+	</header>
+	<p>복사되었습니다.</p>
+	<footer class="buttons">
+		<button type="button" class="primaryMedium close"><span>확인</span></button>
+	</footer>
+	</section>
+</div>
+<!-- //Popup : 복사 완료 -->
+
+<!-- Popup : 캡챠해제 -->
+<div class="popup" id="protect" style="display: none;">
+	<section class="type1">
+		<header>
+			<h2>네이버 검색 제한</h2>
+			<button type="button" class="close"><span>닫기</span></button>
+		</header>
+		<div class="inputGroup">
+			<label class="title" for="storeUrl">잦은 검색으로 네이버 차단이 발생할수 있습니다.</label>
+			<label class="title" for="storeUrl">네이버 로그인 및 검색 캡챠 해제를 완료해주세요</label>
+			<div class="withBtn">
+<!-- 				<input type="text" placeholder="인증할 스토어 주소를 입력하세요." class="textfield" id="storeUrl"> -->
+<!-- 				<button type="button" class="secondaryMedium"><span>이메일 확인</span></button> -->
+			</div>
+		</div>
+<!-- 		<dl class="box"> -->
+<!-- 			<dt>상점명</dt><dd>삼천리자전거 프리미엄샵</dd> -->
+<!-- 			<dt>인증받을 이메일</dt><dd>harris31@naver.com</dd> -->
+<!-- 		</dl> -->
+		<footer class="buttons">
+			<a type="button" class="primaryMedium" href="https://search.shopping.naver.com/search/all?query=팝마트" target="_blank"><span>캡챠 풀러 가기</span></a>
+<!-- 			<p>*상점명과 이메일이 틀리시다면 <u>관리자에게 문의</u>하세요.</p> -->
+		</footer>
+	</section>
+</div>
+<!-- //Popup : 캡챠해제--></preference></body></html>

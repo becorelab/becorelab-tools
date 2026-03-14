@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(export:*)",
+      "Bash(py:*)",
+      "Bash(PYTHONIOENCODING=utf-8 py:*)",
+      "Bash(ls:*)",
+      "Bash(gh api:*)",
+      "Bash(gh repo:*)",
+      "Bash(PYTHONIOENCODING=utf-8 python:*)",
+      "Bash(where python:*)",
+      "Bash(/c/Users/pnp28/AppData/Local/Programs/Python/Python312/python:*)",
+      "Bash(PYTHONIOENCODING=utf-8 /c/Users/pnp28/AppData/Local/Programs/Python/Python312/python:*)",
+      "Bash(cd:*)",
+      "WebFetch(domain:becorelab.github.io)",
+      "Bash(cp:*)",
+      "Bash(PYTHONIOENCODING=utf-8 \"/c/Users/pnp28/AppData/Local/Programs/Python/Python312/python.exe\" -c \"\nimport sys, io, os, json\nsys.stdout = io.TextIOWrapper\\(sys.stdout.buffer, encoding='utf-8'\\)\nimport openpyxl\n\nfolder = r'C:\\\\Users\\\\pnp28\\\\claude\\\\accounting\\\\채널별 품명 리스트\\\\2026.02'\nresults = {}\n\nfor fname in os.listdir\\(folder\\):\n    if not fname.endswith\\('.xlsx'\\):\n        continue\n    fpath = os.path.join\\(folder, fname\\)\n    try:\n        wb = openpyxl.load_workbook\\(fpath, read_only=True, data_only=True\\)\n        sheets = wb.sheetnames\n        has_it = '품명리스트' in sheets\n        if has_it:\n            results[fname] = True\n        else:\n            results[fname] = sheets\n        wb.close\\(\\)\n    except Exception as e:\n        results[fname] = f'ERROR: {e}'\n\nfor fname, val in results.items\\(\\):\n    if val is True:\n        print\\(f'[O] {fname} -> HAS 품명리스트'\\)\n    else:\n        print\\(f'[X] {fname} -> sheets: {val}'\\)\n\")",
+      "Read(//c/Users/pnp28/bin/**)",
+      "Read(//c/Users/pnp28/**)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh\" api repos/becorelab/hub/contents/accounting/sales.html --jq '.content' 2>/dev/null | head -1 | base64 -d 2>/dev/null | head -c 500)",
+      "Bash(PYTHONIOENCODING=utf-8 \"/c/Users/pnp28/AppData/Local/Programs/Python/Python312/python.exe\" merge_mappings.py)"
+    ]
+  }
+}

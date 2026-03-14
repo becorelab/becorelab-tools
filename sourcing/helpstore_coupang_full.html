@@ -1,0 +1,492 @@
+<!DOCTYPE html><html lang="ko"><head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- 	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, target-densityDpi=device-dpi"> -->
+	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=0.5, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, target-densityDpi=device-dpi">
+	<link rel="shortcut icon" href="/assets/icon/favicon.ico">
+	<script type="text/javascript" async="" src="//kissingsky.weblog.cafe24.com/weblog.html?uid=kissingsky_2&amp;udim=1280*720&amp;uref=https://helpstore.shop/keyword/keyword_analyze_coupang/&amp;url=https://helpstore.shop/extension/page?url=/keyword/keyword_analyze_coupang/&amp;t=1773467231790"></script><script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-J1WZJ3G6N4&amp;cx=c&amp;gtm=4e63b1"></script><script async="" src="//kissingsky.weblog.cafe24.com/weblog.js?v=1773467231768"></script><script src="/assets/js/jquery-3.7.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+	<script src="/assets/js/swiper-bundle.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+	<script src="/assets/js/ui.js?ver=20251228"></script>
+	<script src="/assets/jquery.validate.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.6.0/clipboard.min.js"></script>
+	<script src="https://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+	<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.min.js"></script>
+	
+	
+	<script src="/assets/js/common.js?ver=20260305"></script>
+	
+	
+		<script src="/assets/js/pagejs/commons.min.js?ver=1773467232853"></script>
+		
+			<script src="/assets/js/pagejs/extensionPage.min.js?ver=1773467232853"></script>
+		
+	
+	
+	
+		
+	
+	<script>
+	const isLogin = true;
+	const pType = 'P';
+	</script>
+	<script src="/assets/js/hbutil.js?ver=20251227"></script>
+	<link rel="stylesheet" href="/assets/css/style.css?ver=202510">
+	<link rel="stylesheet" href="/assets/css/common.css?ver=20250904">
+	<title>헬프스토어</title>
+	<meta name="description" content="헬프스토어">
+	<meta name="keywords" content="키워드도구,아이템소싱,카테고리검색,키워드검색,순위추적,랭킹추척,키워드,부업,헬프스토어,스마트스토어,쿠팡,스마트스토어 판매량,경쟁상품분석,최적화진단">
+	<meta property="og:title" content="헬프스토어">
+	<meta property="og:description" content="헬프스토어">
+	<meta property="og:image" content="/static/img/logo.png">
+	<meta property="og:type" content="website">
+	</head><body><preference name="KeyboardShrinksView" value="false">
+	
+	<!-- 리포트2.0 로그분석코드 시작 -->
+	<script type="text/javascript">
+	var sTime = new Date().getTime();
+	(function(i,s,o,g,r,a,m){i['webObject']=g;i['webUid']=r;a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})
+	(window,document,'script','//kissingsky.weblog.cafe24.com/weblog.js?v='+sTime,'kissingsky_2');
+	</script>
+	<!-- 리포트2.0 로그분석코드 완료 -->
+	
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-145406571-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'UA-145406571-1');
+	</script>
+
+	
+	<style>
+		.progress-text{
+			vertical-align:baseline;
+			margin:0;
+			margin-left:20px;
+			padding:0;
+			border:0;
+			outline:0;
+			background:transparent;
+			font-size:2em;
+		}	
+	</style>
+	<script>
+	$(function(){
+		
+	})
+	</script>
+	<script>
+	setInterval(function(){
+		$.ajax({
+			type: 'GET',
+			url: '/session',	
+			success: function(result){
+			},
+			error: function(){
+				
+			}
+		});	
+	}, 120000);
+	</script>
+
+
+
+<div class="overlay" style="display:none;z-index:10000;">
+	<div class="loader"></div>
+	<div class="progress-text">-</div>
+</div>
+	<!-- Menu -->
+	
+
+
+
+
+
+
+<script>
+$(function(){
+	
+	var href = window.location.pathname;
+
+	if(href.startsWith('/item')){
+		$('.menuItem').addClass('current');
+	}else if(href.startsWith('/keyword/keyword_analyze_coupang')){		
+		$('.menuKeywordCoupang').addClass('current');
+	}else if(href.startsWith('/keyword')){		
+		$('.menuKeyword').addClass('current');
+	}else if(href.startsWith('/strategy') || href.startsWith('/estimate') || href.startsWith('/bid')){
+		$('.menuAd').addClass('current');
+	}else if(href.startsWith('/rank') || href.startsWith('/fast') || href.startsWith('/coupang')){
+		$('.menuRanking').addClass('current');
+	}else if(href.startsWith('/analysis') || href.startsWith('/tracking') || href.startsWith('/optcheck') || href.startsWith('/extract')){
+		$('.menuAnalyze').addClass('current');
+	}else if(href.startsWith('/clip')){
+		$('.menuClip').addClass('current');
+	}else if(href.startsWith('/board/notice')){
+		$('.menuNotice').addClass('current');
+	}else if(href.startsWith('/optimize')){
+		$('.menuOptimize').addClass('current');
+	}else if(href.startsWith('/my/course')){
+		$('.menuCourse').addClass('current');
+	}
+	
+	getExtensionVersion().then((version) => {
+		if (version) {
+			$('#currentVersion').text('v.' + version);
+		} else {
+			$('#currentVersion').text('미설치');
+			
+		}
+	});
+});
+</script>
+
+
+
+<nav id="menu">
+	<button type="button" class="toggle" onclick="$('body').toggleClass('menuClosed');"><span>메뉴 접기/펼치기</span></button>
+	<!-- 로그인 정보 -->
+	
+	
+		
+			
+			
+			
+			
+			
+				<div class="info type2" onclick="location.href='/my'">
+					<strong>비코어랩님</strong>
+					<span>멤버십</span>
+					<p id="currentVersion">-</p>
+				</div>
+				
+			
+		
+		
+	
+  
+		
+
+    <!-- //로그인 정보 -->
+
+	<!-- 메뉴 -->
+	<div class="menu">
+		<a href="/item" class="menuItem"><span>아이템</span></a>
+		<a href="/keyword" class="menuKeyword"><span>키워드</span></a>
+		<a href="/keyword/keyword_analyze_coupang" class="menuKeywordCoupang"><span>키워드-쿠팡</span></a>
+		<a href="/strategy" class="menuAd"><span>광고</span></a>
+		<a href="/rank" class="menuRanking"><span>순위</span></a>
+		<a href="/tracking" class="menuAnalyze"><span>분석</span></a>
+		<a href="/optimize" class="menuOptimize"><span>최적화</span></a>
+		<hr>
+		<a href="/my/course" class="menuCourse"><span>강의실</span></a>
+		<a href="/clip" class="menuClip"><span>추천 영상</span></a>
+		
+<!-- 		<a href="/board/notice/list"	class="menuNotice"><span>공지 및 뉴스</span></a> -->
+	</div>
+	<!-- //메뉴 -->
+</nav>
+	<!-- //Menu -->
+
+  <div id="container">
+  	
+	<!-- Header -->
+	<header id="header">
+    	
+
+
+
+
+
+
+<style>
+	#naverStatus {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-family: sans-serif;
+		padding: 6px 12px;
+		border-radius: 9999px;
+		transition: background-color 0.3s;
+	}
+	.status-dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		transition: background-color 0.3s;
+	}
+	.status-text {
+		font-size: 14px;
+		font-weight: bold;
+	}
+	.logged-in {
+		background-color: #03c75a;
+		color: white;
+	}
+	.logged-out {
+		background-color: #ccc;
+		color: black;
+	}
+	
+	#coupangStatus {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-family: sans-serif;
+		padding: 6px 12px;
+		border-radius: 9999px;
+		transition: background-color 0.3s;
+	}
+	.logged-inC {
+		background-color: #d93d34;
+		color: white;
+	}
+	
+ 	#wingStatus { 
+ 		display: inline-flex; 
+ 		align-items: center; 
+ 		gap: 8px; 
+ 		font-family: sans-serif; 
+ 		padding: 6px 12px; 
+ 		border-radius: 9999px; 
+ 		transition: background-color 0.3s; 
+ 	} 
+ 	.logged-inW { 
+ 		background-color: #661919; 
+ 		color: white; 
+ 	} 
+</style>
+<script>
+$(function(){	
+	getExtensionVersion().then(async (version) => {
+		if (version) {
+			const isLoginNaver = await sendReceiveProcess('isLoginNaver', 'isLoginNaverResult', {  });
+			if(isLoginNaver){
+// 			if(isLoginNaver.success){
+				$('#naverStatus').removeClass('logged-out').addClass('logged-in')
+				$('#statusDot').css('background-color', 'white');
+				$('#statusText').text('네이버연동');
+			}	else{
+				$('#naverStatus').removeClass('logged-in').addClass('logged-out')
+				$('#statusDot').css('background-color', 'blank');
+				$('#statusText').text('네이버미연동');
+			}
+			
+			const isLoginCoupang = await isCoupangLogin();
+			if(isLoginCoupang){
+// 			if(isLoginCoupang.success){
+				$('#coupangStatus').removeClass('logged-out').addClass('logged-inC')
+				$('#statusDotC').css('background-color', 'white');
+				$('#statusTextC').text('쿠팡연동');
+			}	else{
+				$('#coupangStatus').removeClass('logged-inC').addClass('logged-out')
+				$('#statusDotC').css('background-color', 'blank');
+				$('#statusTextC').text('쿠팡미연동');
+			}
+			
+			const isLoginWing = await isWingLogin();
+			if(isLoginWing){
+				$('#wingStatus').removeClass('logged-out').addClass('logged-inW')
+				$('#statusDotW').css('background-color', 'white');
+				$('#statusTextW').text('윙 연동완료');
+			}	else{
+				$('#wingStatus').removeClass('logged-inW').addClass('logged-out')
+				$('#statusDotW').css('background-color', 'blank');
+				$('#statusTextW').text('윙 미연동');
+			}
+		}else{
+			$('#statusText').text('확장 프로그램을 설치하세요');
+			$('.coupangStatus').hide();
+			$('.wingStatus').hide();
+		}
+	});
+	
+});
+
+</script>
+<h1>
+	<a href="/"><span>HELP STORE</span></a>
+		
+	<div id="naverStatus" class="logged-out">
+		<div class="status-dot" id="statusDot" style="background:black;"></div>
+		<div class="status-text" "="" id="statusText">확인 중...</div>
+	</div>
+	<div id="coupangStatus" class="logged-out">
+		<div class="status-dot" id="statusDotC" style="background:black;"></div>
+		<div class="status-text" id="statusTextC">확인 중...</div>
+	</div>
+	
+
+	<div id="wingStatus" class="logged-out">
+		<div class="status-dot" id="statusDotW" style="background:black;"></div>
+		<div class="status-text" id="statusTextW">확인 중...</div>
+	</div>
+	<div class="tooltip show">
+		<button type="button">
+			<span>
+				도움말 보기
+			</span>
+		</button>
+		<div style="left: -70px;">
+			미연동시 검색 차단이 발생할수 있습니다.<br>연동하려면 새 탭에서 네이버,쿠팡,윙  로그인하세요.
+		</div>
+	</div>		
+</h1>
+      
+<div class="swiper">
+	<ul class="swiper-wrapper">
+		
+			
+			
+			
+		
+		<!-- item -->
+		
+<!-- 		<li class="swiper-slide"> -->
+<!-- 			<a href=""> -->
+<!-- 				<img src="/assets/@temp/@banner.png" alt="NYT 21세기 최고의 책 100대 도서 쇼퍼백 증정"> -->
+<!-- 			</a> -->
+<!-- 		</li> -->
+	</ul>
+	<div class="pagination"></div>
+</div>
+<div class="shortcut">
+	<a href="/membership/monthly">멤버십</a>
+	<a href="https://rainy-cyclamen-990.notion.site/HELPSTORE-e45258ee9bf244f995176361f5fff649" target="_blank">사용 가이드</a>
+</div>
+
+
+    </header>
+    <!-- //Header -->
+  
+    <!-- Contents -->
+    
+    
+
+
+
+
+
+
+
+<script>
+const url = '/keyword/keyword_analyze_coupang/';
+</script>
+
+<section class="mainIntro" style="min-height:700px;">
+      <h2>확장 프로그램을 <em>설치</em>하세요.</h2>
+      <p><span>HELP STORE</span></p>
+      <span>
+			네이버와 쿠팡의 검색제한 강화 조치로 확장 프로그램이 필요합니다.<br>
+			시크릿 모드에서는 반드시 <span style="color:red;">'시크릿 모드에서 허용'</span> 체크되어야 합니다.<br>
+			<a style="color:blue;" href="https://rainy-cyclamen-990.notion.site/2ae3a1f718ca80e4b3dce21dc4a23c0b" target="_blank">[설치매뉴얼]</a> 참조<br>
+      </span>
+      <a href="https://chromewebstore.google.com/detail/helpstore/nfbjgieajobfohijlkaaplipbiofblef?hl=ko" target="_blank" class="primaryLarge"><span>설치하러 가기</span></a>
+    </section>
+    
+    <!-- //Contents -->
+
+    <!-- Footer -->
+    
+
+<div class="jumpToTop"><button type="button"><span>맨 위로 스크롤 이동</span></button></div>
+<footer id="footer">
+	<h1><span>HELP STORE</span></h1>
+	<div>
+		<a href="/board/notice/348" target="_blank">오픈 채팅</a>
+		<a href="https://pf.kakao.com/_MwBxlxb" target="_blank">관리자 문의</a>
+	</div>
+		
+	<p>
+		인천광역시 연수구 컨벤시아대로 204 인천스타트업파크 인스타Ⅰ 523호 (주)더멀리미디어 김철우<br>
+		개인정보관리책임자 김철우 | 사업자등록번호 : 811-81-02182 | 070-8095-2504<br>
+		문의 <a href="mailto:customer.helpstore@gmail.com">cs@helpstore.shop</a>
+	</p>
+	
+	
+</footer>
+    <!-- //Footer -->
+  </div>
+	
+
+  <!-- //Script -->
+  
+
+<div class="popup" id="framepopup" style="display: none;">
+	<section>
+		<header>
+			<h2 id="frametitle"></h2>
+			<button type="button" class="close"><span>닫기</span></button>
+		</header>
+		<div class="inputGroup">
+			<iframe id="popupframe" style="width:100%;height:100%;overflow-y:auto;" scrolling="yes" frameborder="0"></iframe>
+		</div>
+		<footer class="buttons">
+			<button type="button" class="tertiaryMedium close"><span>닫기</span></button>
+		</footer>
+	</section>
+</div>
+
+<div class="popup" id="alertpopup" style="display: none;">
+	<section>
+		<header>
+			<h2>알림</h2>
+			<button type="button" class="close"><span>닫기</span></button>
+		</header>
+		<div class="inputGroup" id="alertmsg"></div>
+		<footer class="buttons">
+			<button type="button" class="tertiaryMedium close"><span>닫기</span></button>
+		</footer>
+	</section>
+</div>
+
+
+
+
+
+
+<div class="popup" id="popupComplete" style="display: none;">
+	<section class="alert">
+	<header>
+		<h2>안내</h2>
+	</header>
+	<p>복사되었습니다.</p>
+	<footer class="buttons">
+		<button type="button" class="primaryMedium close"><span>확인</span></button>
+	</footer>
+	</section>
+</div>
+<!-- //Popup : 복사 완료 -->
+
+
+<!-- Popup : 캡챠해제 -->
+<div class="popup" id="protect" style="display: none;">
+	<section class="type1">
+		<header>
+			<h2>네이버 검색 제한</h2>
+			<button type="button" class="close"><span>닫기</span></button>
+		</header>
+		<div class="inputGroup">
+			<label class="title" for="storeUrl"></label>
+			<div class="withBtn">
+<!-- 				<input type="text" placeholder="인증할 스토어 주소를 입력하세요." class="textfield" id="storeUrl"> -->
+<!-- 				<button type="button" class="secondaryMedium"><span>이메일 확인</span></button> -->
+			</div>
+		</div>
+<!-- 		<dl class="box"> -->
+<!-- 			<dt>상점명</dt><dd>삼천리자전거 프리미엄샵</dd> -->
+<!-- 			<dt>인증받을 이메일</dt><dd>harris31@naver.com</dd> -->
+<!-- 		</dl> -->
+		<footer class="buttons">
+			<a type="button" class="primaryMedium href" target="_blank"><span></span></a>
+<!-- 			<p>*상점명과 이메일이 틀리시다면 <u>관리자에게 문의</u>하세요.</p> -->
+		</footer>
+	</section>
+</div>
+<!-- //Popup : 캡챠해제-->
+</preference></body></html>

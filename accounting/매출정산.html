@@ -109,7 +109,11 @@ td{padding:9px 12px;border-bottom:1px solid #111827;vertical-align:middle;}
 td.num{text-align:right;font-variant-numeric:tabular-nums;}
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:#1a1d2788;}
-.unmapped-badge{background:#f59e0b22;color:#f59e0b;font-size:.7rem;padding:2px 6px;border-radius:4px;}
+.unmapped-badge{background:#f59e0b22;color:#f59e0b;font-size:.7rem;padding:2px 6px;border-radius:4px;cursor:pointer;}
+.unmapped-badge:hover{background:#f59e0b44;}
+.inline-map-input{background:#0d1117;border:1px solid #f59e0b;color:#e2e8f0;border-radius:4px;padding:4px 8px;font-size:.8rem;width:200px;margin-left:8px;font-family:inherit;}
+.inline-map-btn{background:#f59e0b;color:#000;border:none;border-radius:4px;padding:4px 10px;font-size:.75rem;cursor:pointer;margin-left:4px;font-weight:600;}
+.inline-map-btn:hover{background:#d97706;}
 .profit-pos{color:#10b981;font-weight:600;}
 .profit-neg{color:#ef4444;font-weight:600;}
 
@@ -1446,6 +1450,59 @@ function applyUnmapped() {
   applyModalUnmapped();
 }
 
+// 인라인 매핑: 미매핑 뱃지 클릭 시 바로 입력
+function inlineMap(badge, oldName) {
+  // 이미 입력창이 열려있으면 무시
+  if (badge.parentElement.querySelector('.inline-map-input')) return;
+  const knownNames = [...state.allProductNames].sort();
+  const datalistId = 'dl_' + Math.random().toString(36).substr(2,6);
+  badge.insertAdjacentHTML('afterend',
+    `<input class="inline-map-input" list="${datalistId}" placeholder="최종상품명 입력 후 Enter" autofocus/>` +
+    `<datalist id="${datalistId}">${knownNames.map(n => '<option value="'+n+'">').join('')}</datalist>` +
+    `<button class="inline-map-btn" onclick="applyInlineMap(this,'${oldName.replace(/'/g,"\\'")}')">적용</button>`
+  );
+  const input = badge.parentElement.querySelector('.inline-map-input');
+  input.focus();
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') applyInlineMap(input.nextElementSibling.nextElementSibling, oldName);
+  });
+}
+
+function applyInlineMap(btn, oldName) {
+  const input = btn.parentElement.querySelector('.inline-map-input');
+  const newName = input.value.trim();
+  if (!newName) { showToast('상품명을 입력해주세요', 'error'); return; }
+
+  // 모든 채널에서 해당 상품명 업데이트
+  for (const ch of Object.values(state.channels)) {
+    for (const r of ch.results || []) {
+      if (r.최종상품명 === oldName && !r.매핑) {
+        r.최종상품명 = newName;
+        r.매핑 = true;
+      }
+    }
+    if (ch.unmapped) ch.unmapped = ch.unmapped.filter(u => u.key !== oldName);
+    ch.aggregated = aggregateResults(ch.results || []);
+    applyCosting(ch.aggregated);
+  }
+
+  // 사용자 매핑 영구 저장
+  state.userNameMap[oldName] = newName;
+  state.allProductNames.add(newName);
+  saveUserNameMapToCloud();
+
+  // 모든 채널 클라우드 저장
+  for (const chId of Object.keys(state.channels)) {
+    autoSaveChannelToCloud(chId);
+  }
+
+  renderChannelGrid();
+  renderSidebar();
+  updateSummary();
+  renderResults();
+  showToast(`"${newName}" 매핑 완료! (자동 저장됨)`, 'success');
+}
+
 // ═══════════════════════════════════════════════════════
 // RESULTS RENDERING
 // ═══════════════════════════════════════════════════════
@@ -1528,7 +1585,7 @@ function renderTable() {
     const profitCls = r.이익 >= 0 ? 'profit-pos' : 'profit-neg';
     const rateCls = (r.이익률||0) >= 0.2 ? 'profit-pos' : (r.이익률||0) >= 0 ? '' : 'profit-neg';
     return `<tr>
-      <td>${r.최종상품명}${!r.매핑 ? ' <span class="unmapped-badge">미매핑</span>' : ''}</td>
+      <td>${r.최종상품명}${!r.매핑 ? ' <span class="unmapped-badge" onclick="inlineMap(this,\''+r.최종상품명.replace(/'/g,"\\'")+'\')">미매핑</span>' : ''}</td>
       <td class="num">${fmt(r.수량)}</td>
       <td class="num">₩${fmt(r.정산금액)}</td>
       <td class="num">${r.원가단가 ? '₩'+fmt(r.원가단가) : '-'}</td>
