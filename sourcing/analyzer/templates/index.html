@@ -830,8 +830,8 @@ body {
     <button class="tab-btn active" data-tab="scan">
         <span class="tab-icon">&#x1F50D;</span> 시장스캔
     </button>
-    <button class="tab-btn" data-tab="opportunity">
-        <span class="tab-icon">&#x1F4CA;</span> 기회분석
+    <button class="tab-btn" data-tab="insight">
+        <span class="tab-icon">&#x1F4CA;</span> 마켓 인사이트
     </button>
     <button class="tab-btn" data-tab="rfq">
         <span class="tab-icon">&#x1F4DD;</span> RFQ
@@ -1140,7 +1140,7 @@ body {
 <!-- ═══════════════════════════════════════════ -->
 <!-- 탭 2: 기회분석 -->
 <!-- ═══════════════════════════════════════════ -->
-<div class="tab-panel" id="tab-opportunity">
+<div class="tab-panel" id="tab-insight">
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-label">총 분석</div>
@@ -1846,7 +1846,7 @@ function filterOpportunities(filter) {
 
 async function loadOpportunities() {
     try {
-        const res = await fetch('/api/opportunities');
+        const res = await fetch('/api/opportunities?status=' + _oppFilter);
         const data = await res.json();
         if (data.success) {
             const tbody = document.getElementById('opportunityBody');
@@ -1862,10 +1862,7 @@ async function loadOpportunities() {
             const top = all[0];
             if (top) document.getElementById('oppTopScore').textContent = top.opportunity_score?.toFixed(1) || '-';
 
-            // 필터 적용
-            let filtered = all;
-            if (_oppFilter === 'go') filtered = all.filter(s => s.status === 'go');
-            else if (_oppFilter === 'scanned') filtered = all.filter(s => s.status === 'scanned');
+            let filtered = all; // 서버에서 이미 필터링됨
 
             if (filtered.length === 0) {
                 empty.style.display = 'block';
@@ -2339,10 +2336,33 @@ async function loadAutoResults() {
     } catch (e) {}
 }
 
+function switchToTab(tabName) {
+    var allBtns = document.querySelectorAll('.tab-btn');
+    var allPanels = document.querySelectorAll('.tab-panel');
+    allBtns.forEach(function(b) { b.classList.remove('active'); });
+    allPanels.forEach(function(p) { p.classList.remove('active'); });
+    for (var i = 0; i < allBtns.length; i++) {
+        if (allBtns[i].dataset.tab === tabName) {
+            allBtns[i].classList.add('active');
+            break;
+        }
+    }
+    var panel = document.getElementById('tab-' + tabName);
+    if (panel) panel.classList.add('active');
+    loadTabData(tabName);
+}
+
 function loadTabData(tab) {
     switch (tab) {
-        case 'scan': loadScanHistory(); break;
-        case 'opportunity': loadOpportunities(); break;
+        case 'scan':
+            loadScanHistory();
+            // 마지막 본 스캔 결과 복원
+            if (_currentScanId) {
+                document.getElementById('scanEmpty').style.display = 'none';
+                document.getElementById('scanResult').style.display = 'block';
+            }
+            break;
+        case 'insight': loadOpportunities(); break;
         case 'rfq': loadRfqList(); break;
         case 'quotes': break;
         case 'history': loadHistory(); break;
@@ -2538,10 +2558,8 @@ async function markScan(scanId, status) {
             loadScanHistory();
             loadStats();
             if (status === 'go') {
-                // GO → 기회분석 탭 클릭 시뮬레이션
-                _oppFilter = 'go';
-                const oppTab = document.querySelector('.tab-btn[data-tab="opportunity"]');
-                if (oppTab) oppTab.click();
+                window.location.href = '/?tab=insight';
+                return;
             }
         }
     } catch(e) { console.error('markScan error:', e); }
@@ -2752,6 +2770,14 @@ function quickScan(keyword) {
 // ─────────────────────────────────────────────
 loadStats();
 loadScanHistory();
+
+// URL 파라미터로 탭 이동
+const urlParams = new URLSearchParams(window.location.search);
+const tabParam = urlParams.get('tab');
+if (tabParam) {
+    if (tabParam === 'insight') _oppFilter = 'go';
+    switchToTab(tabParam);
+}
 </script>
 
 </body>

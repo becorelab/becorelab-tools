@@ -1710,13 +1710,15 @@ def _collect_reviews_direct(products) -> list:
 
     all_reviews = []
     pw = sync_playwright().start()
-    browser = pw.chromium.launch(headless=True, args=['--disable-blink-features=AutomationControlled'])
+    browser = pw.chromium.launch(
+        headless=False,
+        args=['--disable-blink-features=AutomationControlled', '--window-position=-2000,-2000']
+    )
     page = browser.new_page()
 
     try:
-        # 쿠팡 메인 접속 (쿠키 설정)
         page.goto('https://www.coupang.com', wait_until='domcontentloaded', timeout=15000)
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(3000)
 
         for p in products[:10]:
             url = p['product_url']
@@ -1791,12 +1793,24 @@ def update_scan_status(scan_id):
 def get_opportunities():
     """기회점수 랭킹 조회"""
     db = get_db()
-    scans = db.execute('''
-        SELECT * FROM market_scans
-        WHERE opportunity_score IS NOT NULL
-        ORDER BY opportunity_score DESC
-        LIMIT 50
-    ''').fetchall()
+    status_filter = request.args.get('status', '')
+
+    if status_filter == 'go':
+        scans = db.execute('''
+            SELECT * FROM market_scans WHERE status = 'go'
+            ORDER BY opportunity_score DESC
+        ''').fetchall()
+    elif status_filter == 'scanned':
+        scans = db.execute('''
+            SELECT * FROM market_scans WHERE status = 'scanned' AND opportunity_score IS NOT NULL
+            ORDER BY opportunity_score DESC LIMIT 50
+        ''').fetchall()
+    else:
+        scans = db.execute('''
+            SELECT * FROM market_scans WHERE opportunity_score IS NOT NULL
+            ORDER BY opportunity_score DESC LIMIT 50
+        ''').fetchall()
+
     return jsonify({'success': True, 'opportunities': [dict(s) for s in scans]})
 
 
