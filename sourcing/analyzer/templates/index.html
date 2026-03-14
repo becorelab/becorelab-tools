@@ -2411,6 +2411,7 @@ async function loadGoldboxResults() {
                     <td>${formatNumber(r.entry_revenue)}원</td>
                     <td>${r.new_weight}</td>
                     <td onclick="event.stopPropagation()">
+                        <button class="btn btn-sm btn-primary" onclick="quickScan('${r.keyword}')" style="margin-right:4px;">분석</button>
                         <button class="btn btn-sm btn-success" onclick="markScan(${r.scan_id},'go')">GO</button>
                         <button class="btn btn-sm" onclick="markScan(${r.scan_id},'pass')" style="background:var(--danger);color:#fff;margin-left:2px;">PASS</button>
                     </td>
