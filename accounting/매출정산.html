@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
-<title>iLBiA 매출 정산 대시보드</title>
+<title>Becorelab 매출 대시보드</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4/dist/jspreadsheet.js"></script>
@@ -334,10 +334,9 @@ tr:hover td{background:#1a1d2788;}
 
 <header>
   <div>
-    <h1>📊 iLBiA 매출 정산 대시보드</h1>
-    <p>채널별 정산 파일을 업로드하면 자동으로 집계해드려요</p>
+    <h1 style="font-size:1.1rem;margin:0;">Becorelab 매출 대시보드</h1>
   </div>
-  <div class="header-badge" id="headerMonth">정산 월 미설정</div>
+  <div class="header-badge" id="headerMonth">매출 월 미설정</div>
   <div class="auth-area">
     <div id="authProfile" class="auth-profile" style="display:none;"></div>
     <button id="authBtn" class="auth-btn" onclick="handleAuth()">🔑 Google 로그인</button>
@@ -2777,10 +2776,11 @@ function renderDashboard() {
     <div class="dash-kpi-card"><div class="kpi-val" style="color:${totalProfitRate>=0.2?'#10b981':totalProfitRate>=0?'#f59e0b':'#ef4444'};">${fmtRate(totalProfitRate)}</div><div class="kpi-lbl">이익률</div></div>
   </div>`;
 
-  // === 2. Channel Performance Bar Chart ===
+  // === 2. Channel TOP 5 ===
+  const top5channels = channelStats.slice(0, 5);
   html += `<div class="dash-panel">
-    <div class="dash-panel-title">📊 채널별 매출 성과${month ? ' (' + month + ')' : ''}</div>`;
-  for (const ch of channelStats) {
+    <div class="dash-panel-title">📊 채널별 매출 TOP 5${month ? ' (' + month + ')' : ''}</div>`;
+  for (const ch of top5channels) {
     const pct = maxRevenue > 0 ? (ch.revenue / maxRevenue * 100) : 0;
     const rateColor = ch.profitRate >= 0.2 ? '#10b981' : ch.profitRate >= 0 ? '#f59e0b' : '#ef4444';
     html += `<div class="dash-bar-row">
@@ -2788,6 +2788,10 @@ function renderDashboard() {
       <div class="dash-bar-track"><div class="dash-bar-fill" style="width:${pct}%;"></div></div>
       <div class="dash-bar-val">₩${fmt(ch.revenue)} <span style="color:${rateColor};font-size:.7rem;">(${fmtRate(ch.profitRate)})</span></div>
     </div>`;
+  }
+  if (channelStats.length > 5) {
+    const restRevenue = channelStats.slice(5).reduce((s,c) => s + c.revenue, 0);
+    html += `<div style="text-align:right;font-size:.72rem;color:#64748b;margin-top:6px;">외 ${channelStats.length - 5}개 채널 ₩${fmt(restRevenue)}</div>`;
   }
   html += `</div>`;
 
