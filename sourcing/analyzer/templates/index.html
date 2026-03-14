@@ -2294,9 +2294,16 @@ async function markScan(scanId, status) {
         });
         const data = await res.json();
         if (data.success) {
-            showWingStatus(status === 'go' ? 'GO 판정! 후보 리스트에 추가됨' : 'PASS 처리됨', status === 'go' ? 'success' : 'error');
             loadScanHistory();
             loadStats();
+            if (status === 'go') {
+                // GO → 기회분석 탭으로 이동
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                document.querySelector('[data-tab="opportunity"]').classList.add('active');
+                document.getElementById('tab-opportunity').classList.add('active');
+                loadOpportunities();
+            }
         }
     } catch(e) {}
 }
