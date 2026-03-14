@@ -228,6 +228,63 @@ tr:hover td{background:#1a1d2788;}
 .cloud-save-btn:hover{background:#0369a1;}
 .cloud-save-btn:disabled{opacity:.5;cursor:not-allowed;}
 .no-records{text-align:center;padding:60px 20px;color:#475569;font-size:.88rem;}
+
+/* ═══ CHANNEL DETAIL PANEL ═══ */
+.detail-panel{background:#161b27;border:1px solid #1e293b;border-radius:6px;padding:20px;margin-bottom:16px;display:none;}
+.detail-panel.active{display:block;}
+.detail-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.detail-panel-header h3{font-size:1rem;font-weight:700;color:#e2e8f0;}
+.detail-panel-close{background:none;border:1px solid #334155;color:#94a3b8;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:.78rem;}
+.detail-panel-close:hover{background:#1e293b;color:#e2e8f0;}
+
+/* KPI Cards */
+.detail-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+.detail-kpi{background:#0d1117;border:1px solid #1e293b;border-radius:4px;padding:12px 14px;}
+.detail-kpi .kpi-val{font-size:1.15rem;font-weight:700;color:#e2e8f0;}
+.detail-kpi .kpi-lbl{font-size:.7rem;color:#64748b;margin-top:3px;}
+.detail-kpi .kpi-delta{font-size:.7rem;margin-top:4px;font-weight:500;}
+.kpi-delta.up{color:#10b981;}
+.kpi-delta.down{color:#ef4444;}
+.kpi-delta.neutral{color:#64748b;}
+
+/* Detail body: product bars + trend chart */
+.detail-body{display:grid;grid-template-columns:1fr 340px;gap:16px;margin-bottom:16px;}
+@media(max-width:900px){.detail-body{grid-template-columns:1fr;}}
+
+/* Product breakdown */
+.detail-products{background:#0d1117;border:1px solid #1e293b;border-radius:4px;padding:14px;}
+.detail-products h4{font-size:.82rem;font-weight:600;color:#94a3b8;margin-bottom:10px;}
+.prod-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:.78rem;}
+.prod-rank{width:22px;height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.7rem;flex-shrink:0;}
+.prod-rank.gold{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;}
+.prod-rank.silver{background:linear-gradient(135deg,#94a3b8,#64748b);color:#fff;}
+.prod-rank.bronze{background:linear-gradient(135deg,#b45309,#92400e);color:#fff;}
+.prod-rank.normal{background:#1e293b;color:#64748b;}
+.prod-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#cbd5e1;}
+.prod-bar-wrap{width:120px;height:14px;background:#1e293b;border-radius:2px;flex-shrink:0;overflow:hidden;}
+.prod-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,#0ea5e9,#0284c7);min-width:2px;}
+.prod-vals{display:flex;gap:10px;flex-shrink:0;color:#94a3b8;}
+.prod-vals span{min-width:70px;text-align:right;}
+.prod-profit-pos{color:#10b981!important;}
+.prod-profit-neg{color:#ef4444!important;}
+
+/* Trend chart */
+.detail-trend{background:#0d1117;border:1px solid #1e293b;border-radius:4px;padding:14px;}
+.detail-trend h4{font-size:.82rem;font-weight:600;color:#94a3b8;margin-bottom:10px;}
+.trend-svg-wrap{width:100%;height:180px;}
+.trend-svg-wrap svg{width:100%;height:100%;}
+.trend-loading{text-align:center;padding:40px 0;color:#475569;font-size:.78rem;}
+
+/* Insights */
+.detail-insights{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;}
+.insight-card{background:#0d1117;border-radius:4px;padding:12px 14px;border-left:3px solid #334155;display:flex;gap:10px;align-items:flex-start;}
+.insight-card.warn{border-left-color:#f59e0b;}
+.insight-card.danger{border-left-color:#ef4444;}
+.insight-card.success{border-left-color:#10b981;}
+.insight-card.info{border-left-color:#0ea5e9;}
+.insight-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px;}
+.insight-text{font-size:.78rem;color:#cbd5e1;line-height:1.5;}
+.insight-text strong{color:#e2e8f0;}
 </style>
 </head>
 <body>
@@ -321,6 +378,26 @@ tr:hover td{background:#1a1d2788;}
 
       <!-- 채널별 탭 -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="resultTabs"></div>
+
+      <!-- 채널 상세 분석 패널 -->
+      <div class="detail-panel" id="detailPanel">
+        <div class="detail-panel-header">
+          <h3 id="detailPanelTitle">채널 상세 분석</h3>
+          <button class="detail-panel-close" onclick="closeDetailPanel()">닫기 ✕</button>
+        </div>
+        <div class="detail-kpi-row" id="detailKpiRow"></div>
+        <div class="detail-body">
+          <div class="detail-products" id="detailProducts">
+            <h4>상품별 매출 구성 (Top 20)</h4>
+            <div id="detailProductList"></div>
+          </div>
+          <div class="detail-trend" id="detailTrend">
+            <h4>월별 정산 추이 (최근 6개월)</h4>
+            <div class="trend-svg-wrap" id="trendChart"></div>
+          </div>
+        </div>
+        <div class="detail-insights" id="detailInsights"></div>
+      </div>
 
       <!-- 뷰 모드 토글 -->
       <div class="view-toggle">
@@ -419,6 +496,8 @@ const state = {
   channels: {},      // channelId → { name, results, unmapped, aggregated }
   allProductNames: new Set(), // known 최종상품명 for dropdown
   currentTab: 'all',
+  detailChannel: null,    // currently shown detail panel channel name
+  historyCache: {},       // month -> Firestore doc data cache
 };
 
 // Channel definitions
@@ -1542,6 +1621,386 @@ function switchTab(tabId) {
     btn.className = 'btn ' + (state.currentTab === tabs[i].id ? 'btn-primary' : 'btn-secondary') + ' btn-sm';
   });
   renderTable();
+
+  // Detail panel: show for specific channels, hide for "전체 종합"
+  if (tabId === 'all') {
+    closeDetailPanel();
+  } else {
+    state.detailChannel = tabId;
+    renderDetailPanel(tabId);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// CHANNEL DETAIL ANALYSIS
+// ═══════════════════════════════════════════════════════
+function closeDetailPanel() {
+  state.detailChannel = null;
+  document.getElementById('detailPanel').classList.remove('active');
+}
+
+function renderDetailPanel(channelName) {
+  const panel = document.getElementById('detailPanel');
+  const ch = Object.values(state.channels).find(c => c.name === channelName);
+  if (!ch) { panel.classList.remove('active'); return; }
+
+  panel.classList.add('active');
+  const def = CHANNEL_DEFS.find(d => d.name === channelName);
+  document.getElementById('detailPanelTitle').textContent = (def ? def.icon + ' ' : '') + channelName + ' 상세 분석';
+
+  const data = (ch.aggregated || []).slice().sort((a, b) => b.정산금액 - a.정산금액);
+
+  // KPI Summary
+  let totalSett = 0, totalQty = 0, totalCost = 0, totalProfit = 0;
+  for (const r of data) {
+    totalSett += r.정산금액;
+    totalQty += r.수량;
+    totalCost += r.원가합계 || 0;
+    totalProfit += r.이익 || 0;
+  }
+  const profitRate = totalSett > 0 ? totalProfit / totalSett : 0;
+
+  // Load previous month data for delta comparison
+  const month = document.getElementById('settlementMonth').value;
+  const prevMonth = getPrevMonth(month);
+  const prevData = getPrevMonthChannelSummary(prevMonth, channelName);
+
+  const kpiItems = [
+    { label: '총 정산금액', value: '₩' + fmt(totalSett), color: '#10b981', prev: prevData ? prevData.settlement : null },
+    { label: '총 판매수량', value: fmt(totalQty) + '개', color: '#0284c7', prev: prevData ? prevData.qty : null },
+    { label: '총 이익', value: '₩' + fmt(totalProfit), color: totalProfit >= 0 ? '#10b981' : '#ef4444', prev: prevData ? prevData.profit : null },
+    { label: '이익률', value: fmtRate(profitRate), color: profitRate >= 0.2 ? '#10b981' : profitRate >= 0 ? '#f59e0b' : '#ef4444', prev: prevData ? prevData.profitRate : null, isRate: true },
+  ];
+
+  document.getElementById('detailKpiRow').innerHTML = kpiItems.map(k => {
+    let deltaHtml = '';
+    if (k.prev !== null && k.prev !== undefined) {
+      if (k.isRate) {
+        const diff = (profitRate - k.prev) * 100;
+        const cls = diff > 0 ? 'up' : diff < 0 ? 'down' : 'neutral';
+        deltaHtml = `<div class="kpi-delta ${cls}">${diff > 0 ? '▲' : diff < 0 ? '▼' : '—'} ${Math.abs(diff).toFixed(1)}%p 전월비</div>`;
+      } else {
+        const cur = k.label.includes('수량') ? totalQty : k.label.includes('이익') ? totalProfit : totalSett;
+        const diff = k.prev > 0 ? ((cur - k.prev) / k.prev) * 100 : 0;
+        const cls = diff > 0 ? 'up' : diff < 0 ? 'down' : 'neutral';
+        deltaHtml = `<div class="kpi-delta ${cls}">${diff > 0 ? '▲' : diff < 0 ? '▼' : '—'} ${Math.abs(diff).toFixed(1)}% 전월비</div>`;
+      }
+    } else {
+      deltaHtml = '<div class="kpi-delta neutral">— 전월 데이터 없음</div>';
+    }
+    return `<div class="detail-kpi">
+      <div class="kpi-val" style="color:${k.color}">${k.value}</div>
+      <div class="kpi-lbl">${k.label}</div>
+      ${deltaHtml}
+    </div>`;
+  }).join('');
+
+  // Product breakdown (Top 20)
+  const top20 = data.slice(0, 20);
+  const maxSett = top20.length > 0 ? top20[0].정산금액 : 1;
+  document.getElementById('detailProductList').innerHTML = top20.map((r, i) => {
+    const rankCls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'normal';
+    const barW = maxSett > 0 ? Math.max(2, (r.정산금액 / maxSett) * 100) : 2;
+    const pr = r.이익률 !== undefined ? r.이익률 : (r.정산금액 > 0 ? (r.이익 || 0) / r.정산금액 : 0);
+    const profitCls = (r.이익 || 0) >= 0 ? 'prod-profit-pos' : 'prod-profit-neg';
+    return `<div class="prod-row">
+      <div class="prod-rank ${rankCls}">${i + 1}</div>
+      <div class="prod-name" title="${r.최종상품명}">${r.최종상품명}</div>
+      <div class="prod-bar-wrap"><div class="prod-bar" style="width:${barW}%"></div></div>
+      <div class="prod-vals">
+        <span>${fmt(r.수량)}개</span>
+        <span>₩${fmt(r.정산금액)}</span>
+        <span class="${profitCls}">${fmtRate(pr)}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Insights
+  generateInsights(channelName, data, totalSett, totalQty, totalProfit, profitRate);
+
+  // Monthly trend chart
+  loadChannelHistory(channelName);
+}
+
+function getPrevMonth(month) {
+  if (!month) return null;
+  const [y, m] = month.split('-').map(Number);
+  const pm = m === 1 ? 12 : m - 1;
+  const py = m === 1 ? y - 1 : y;
+  return `${py}-${String(pm).padStart(2, '0')}`;
+}
+
+function getPrevMonthChannelSummary(prevMonth, channelName) {
+  if (!prevMonth || !state.historyCache[prevMonth]) return null;
+  const doc = state.historyCache[prevMonth];
+  if (!doc.channels || !doc.channels[channelName]) return null;
+  return doc.channels[channelName].summary || null;
+}
+
+function updateDetailKPIs(channelName) {
+  const ch = Object.values(state.channels).find(c => c.name === channelName);
+  if (!ch) return;
+  const data = (ch.aggregated || []);
+  let totalSett = 0, totalQty = 0, totalProfit = 0;
+  for (const r of data) { totalSett += r.정산금액; totalQty += r.수량; totalProfit += r.이익 || 0; }
+  const profitRate = totalSett > 0 ? totalProfit / totalSett : 0;
+  const month = document.getElementById('settlementMonth').value;
+  const prevMonth = getPrevMonth(month);
+  const prevData = getPrevMonthChannelSummary(prevMonth, channelName);
+
+  const kpiItems = [
+    { label: '총 정산금액', value: '₩' + fmt(totalSett), color: '#10b981', prev: prevData ? prevData.settlement : null, cur: totalSett },
+    { label: '총 판매수량', value: fmt(totalQty) + '개', color: '#0284c7', prev: prevData ? prevData.qty : null, cur: totalQty },
+    { label: '총 이익', value: '₩' + fmt(totalProfit), color: totalProfit >= 0 ? '#10b981' : '#ef4444', prev: prevData ? prevData.profit : null, cur: totalProfit },
+    { label: '이익률', value: fmtRate(profitRate), color: profitRate >= 0.2 ? '#10b981' : profitRate >= 0 ? '#f59e0b' : '#ef4444', prev: prevData ? prevData.profitRate : null, isRate: true },
+  ];
+
+  document.getElementById('detailKpiRow').innerHTML = kpiItems.map(k => {
+    let deltaHtml = '';
+    if (k.prev !== null && k.prev !== undefined) {
+      if (k.isRate) {
+        const diff = (profitRate - k.prev) * 100;
+        const cls = diff > 0 ? 'up' : diff < 0 ? 'down' : 'neutral';
+        deltaHtml = `<div class="kpi-delta ${cls}">${diff > 0 ? '▲' : diff < 0 ? '▼' : '—'} ${Math.abs(diff).toFixed(1)}%p 전월비</div>`;
+      } else {
+        const diff = k.prev > 0 ? ((k.cur - k.prev) / k.prev) * 100 : 0;
+        const cls = diff > 0 ? 'up' : diff < 0 ? 'down' : 'neutral';
+        deltaHtml = `<div class="kpi-delta ${cls}">${diff > 0 ? '▲' : diff < 0 ? '▼' : '—'} ${Math.abs(diff).toFixed(1)}% 전월비</div>`;
+      }
+    } else {
+      deltaHtml = '<div class="kpi-delta neutral">— 전월 데이터 없음</div>';
+    }
+    return `<div class="detail-kpi">
+      <div class="kpi-val" style="color:${k.color}">${k.value}</div>
+      <div class="kpi-lbl">${k.label}</div>
+      ${deltaHtml}
+    </div>`;
+  }).join('');
+
+  // Also re-render insights with MoM data
+  const allData = data.slice().sort((a, b) => b.정산금액 - a.정산금액);
+  generateInsights(channelName, allData, totalSett, totalQty, totalProfit, profitRate);
+}
+
+async function loadChannelHistory(channelName) {
+  const chartEl = document.getElementById('trendChart');
+  if (!currentUser || !firebaseReady) {
+    chartEl.innerHTML = '<div class="trend-loading">로그인하면 월별 추이를 확인할 수 있어요</div>';
+    return;
+  }
+
+  chartEl.innerHTML = '<div class="trend-loading">불러오는 중...</div>';
+
+  try {
+    // Get last 6 months
+    const month = document.getElementById('settlementMonth').value;
+    const months = [];
+    let [y, m] = month.split('-').map(Number);
+    for (let i = 0; i < 6; i++) {
+      months.unshift(`${y}-${String(m).padStart(2, '0')}`);
+      m--;
+      if (m < 1) { m = 12; y--; }
+    }
+
+    // Load missing months from Firestore
+    const toLoad = months.filter(mo => !state.historyCache[mo]);
+    for (const mo of toLoad) {
+      try {
+        const doc = await db.collection('settlements').doc(currentUser.uid).collection('months').doc(mo).get();
+        state.historyCache[mo] = doc.exists ? doc.data() : null;
+      } catch (e) {
+        state.historyCache[mo] = null;
+      }
+    }
+
+    // Also fill current month from live state
+    const currentMonth = month;
+    if (!state.historyCache[currentMonth] || Object.keys(state.channels).length > 0) {
+      // Build from live data
+      const liveChannels = {};
+      for (const ch of Object.values(state.channels)) {
+        let chQty=0, chSett=0, chCost=0, chProfit=0;
+        for (const r of ch.aggregated || []) { chQty+=r.수량; chSett+=r.정산금액; chCost+=r.원가합계||0; chProfit+=r.이익||0; }
+        liveChannels[ch.name] = {
+          summary: { qty:chQty, settlement:chSett, cost:chCost, profit:chProfit, profitRate: chSett>0?chProfit/chSett:0 }
+        };
+      }
+      state.historyCache[currentMonth] = { channels: liveChannels };
+    }
+
+    // Re-render KPI deltas now that prev month might be loaded
+    const prevMonth = getPrevMonth(month);
+    if (state.historyCache[prevMonth] && state.detailChannel === channelName) {
+      updateDetailKPIs(channelName);
+    }
+
+    // Extract channel settlement data per month
+    const values = months.map(mo => {
+      const d = state.historyCache[mo];
+      if (!d || !d.channels || !d.channels[channelName]) return 0;
+      return (d.channels[channelName].summary || {}).settlement || 0;
+    });
+
+    renderTrendSVG(chartEl, months, values);
+  } catch (err) {
+    chartEl.innerHTML = '<div class="trend-loading">추이 데이터를 불러올 수 없습니다</div>';
+    console.warn('Trend load error:', err);
+  }
+}
+
+function renderTrendSVG(container, labels, values) {
+  const w = 310, h = 160, padL = 50, padR = 10, padT = 15, padB = 30;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+  const maxVal = Math.max(...values, 1);
+
+  const points = values.map((v, i) => {
+    const x = padL + (i / Math.max(labels.length - 1, 1)) * plotW;
+    const y = padT + plotH - (v / maxVal) * plotH;
+    return { x, y, v };
+  });
+
+  const polyline = points.map(p => `${p.x},${p.y}`).join(' ');
+
+  // Gradient fill area
+  const areaPath = `M${points[0].x},${padT + plotH} ` +
+    points.map(p => `L${p.x},${p.y}`).join(' ') +
+    ` L${points[points.length-1].x},${padT + plotH} Z`;
+
+  // Grid lines
+  const gridLines = [0, 0.25, 0.5, 0.75, 1].map(frac => {
+    const y = padT + plotH - frac * plotH;
+    const val = maxVal * frac;
+    const label = val >= 1000000 ? (val/1000000).toFixed(1)+'M' : val >= 1000 ? Math.round(val/1000)+'K' : Math.round(val);
+    return `<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="#1e293b" stroke-width="1"/>
+    <text x="${padL-5}" y="${y+4}" text-anchor="end" fill="#475569" font-size="9">${label}</text>`;
+  }).join('');
+
+  // X labels
+  const xLabels = labels.map((l, i) => {
+    const x = padL + (i / Math.max(labels.length - 1, 1)) * plotW;
+    const shortLabel = l.substring(5); // MM part
+    return `<text x="${x}" y="${h-5}" text-anchor="middle" fill="#64748b" font-size="9">${shortLabel}월</text>`;
+  }).join('');
+
+  // Dots + value labels
+  const dots = points.map((p, i) => {
+    const valLabel = values[i] >= 1000000 ? (values[i]/1000000).toFixed(1)+'M' : values[i] >= 1000 ? Math.round(values[i]/1000)+'K' : values[i];
+    return `<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#0ea5e9" stroke="#0d1117" stroke-width="1.5"/>
+    ${values[i] > 0 ? `<text x="${p.x}" y="${p.y - 8}" text-anchor="middle" fill="#94a3b8" font-size="8">₩${valLabel}</text>` : ''}`;
+  }).join('');
+
+  container.innerHTML = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.02"/>
+      </linearGradient>
+    </defs>
+    ${gridLines}
+    <path d="${areaPath}" fill="url(#trendGrad)"/>
+    <polyline points="${polyline}" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+    ${xLabels}
+  </svg>`;
+}
+
+function generateInsights(channelName, data, totalSett, totalQty, totalProfit, profitRate) {
+  const insights = [];
+
+  // Top product
+  if (data.length > 0) {
+    const top = data[0];
+    const share = totalSett > 0 ? (top.정산금액 / totalSett * 100).toFixed(1) : 0;
+    insights.push({
+      icon: '🏆', severity: 'info',
+      text: `<strong>${top.최종상품명}</strong>이(가) 정산금액 1위 (₩${fmt(top.정산금액)}, 전체의 ${share}%)`
+    });
+  }
+
+  // Concentration risk (single product > 50%)
+  if (data.length > 0 && totalSett > 0) {
+    const topShare = data[0].정산금액 / totalSett;
+    if (topShare > 0.5) {
+      insights.push({
+        icon: '⚠️', severity: 'warn',
+        text: `<strong>매출 집중 위험:</strong> 1위 상품이 전체의 ${(topShare*100).toFixed(1)}%를 차지합니다. 상품 다각화를 검토하세요.`
+      });
+    }
+  }
+
+  // Low margin warnings (<10%)
+  const lowMarginProducts = data.filter(r => {
+    const rate = r.이익률 !== undefined ? r.이익률 : (r.정산금액 > 0 ? (r.이익||0)/r.정산금액 : 0);
+    return rate < 0.1 && rate >= 0 && r.정산금액 > 0;
+  });
+  if (lowMarginProducts.length > 0) {
+    const names = lowMarginProducts.slice(0, 3).map(r => r.최종상품명).join(', ');
+    insights.push({
+      icon: '📉', severity: 'danger',
+      text: `<strong>저마진 상품 ${lowMarginProducts.length}개:</strong> ${names}${lowMarginProducts.length > 3 ? ' 외' : ''} (이익률 10% 미만)`
+    });
+  }
+
+  // Negative margin products
+  const negProducts = data.filter(r => (r.이익 || 0) < 0 && r.정산금액 > 0);
+  if (negProducts.length > 0) {
+    const names = negProducts.slice(0, 3).map(r => r.최종상품명).join(', ');
+    insights.push({
+      icon: '🚨', severity: 'danger',
+      text: `<strong>적자 상품 ${negProducts.length}개:</strong> ${names}${negProducts.length > 3 ? ' 외' : ''} — 원가 재검토 필요`
+    });
+  }
+
+  // Overall margin assessment
+  if (profitRate >= 0.25) {
+    insights.push({
+      icon: '✅', severity: 'success',
+      text: `채널 이익률 <strong>${fmtRate(profitRate)}</strong>로 양호합니다.`
+    });
+  } else if (profitRate >= 0.1) {
+    insights.push({
+      icon: '💡', severity: 'warn',
+      text: `채널 이익률 <strong>${fmtRate(profitRate)}</strong> — 마진 개선 여지가 있습니다.`
+    });
+  } else if (profitRate >= 0) {
+    insights.push({
+      icon: '⚠️', severity: 'danger',
+      text: `채널 이익률 <strong>${fmtRate(profitRate)}</strong>로 낮습니다. 가격/원가 전략을 재검토하세요.`
+    });
+  }
+
+  // MoM comparison
+  const month = document.getElementById('settlementMonth').value;
+  const prevMonth = getPrevMonth(month);
+  const prevData = getPrevMonthChannelSummary(prevMonth, channelName);
+  if (prevData && prevData.settlement > 0) {
+    const growth = ((totalSett - prevData.settlement) / prevData.settlement) * 100;
+    if (growth > 10) {
+      insights.push({
+        icon: '📈', severity: 'success',
+        text: `전월 대비 정산금액 <strong>+${growth.toFixed(1)}%</strong> 성장! (₩${fmt(prevData.settlement)} → ₩${fmt(totalSett)})`
+      });
+    } else if (growth < -10) {
+      insights.push({
+        icon: '📉', severity: 'warn',
+        text: `전월 대비 정산금액 <strong>${growth.toFixed(1)}%</strong> 감소. (₩${fmt(prevData.settlement)} → ₩${fmt(totalSett)})`
+      });
+    }
+  }
+
+  // Product count
+  insights.push({
+    icon: '📦', severity: 'info',
+    text: `총 <strong>${data.length}개</strong> 상품, 평균 단가 ₩${fmt(totalQty > 0 ? Math.round(totalSett / totalQty) : 0)}/개`
+  });
+
+  document.getElementById('detailInsights').innerHTML = insights.map(ins =>
+    `<div class="insight-card ${ins.severity}">
+      <div class="insight-icon">${ins.icon}</div>
+      <div class="insight-text">${ins.text}</div>
+    </div>`
+  ).join('');
 }
 
 function renderTable() {
