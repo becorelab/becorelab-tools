@@ -1,5 +1,5 @@
 """
-비코어랩 쿠팡 소싱 기회 분석기 — 메인 Flask 앱
+비코어랩 쿠팡 마켓 파인더 — 메인 Flask 앱
 포트: 8090 (기존 sourcing_app.py 8080과 분리)
 """
 
@@ -1617,6 +1617,57 @@ def get_scan_detail(scan_id):
     })
 
 
+# === 쿠팡 키워드 API ===
+_coupang_kw_cache = {}  # keyword → {autocomplete, related, ts}
+
+@app.route('/api/scan/<int:scan_id>/keywords')
+def api_scan_keywords(scan_id):
+    """스캔 키워드 데이터 통합 반환 (변형 + 쿠팡 자동완성 + 연관)"""
+    db = get_db()
+    scan = db.execute('SELECT keyword FROM market_scans WHERE id = ?', (scan_id,)).fetchone()
+    if not scan:
+        return jsonify({'success': False, 'error': '조사 기록 없음'})
+
+    keyword = scan['keyword']
+
+    # DB에서 키워드 변형 조회
+    variants = db.execute('''
+        SELECT * FROM keyword_variants WHERE scan_id = ?
+    ''', (scan_id,)).fetchall()
+
+    # 쿠팡 자동완성/연관 — 캐시 확인
+    import time
+    cached = _coupang_kw_cache.get(keyword)
+    if cached and (time.time() - cached.get('ts', 0)) < 3600:
+        autocomplete = cached['autocomplete']
+        related = cached['related']
+    else:
+        # 헬프스토어 API로 연관 키워드 수집 (Wing 워커 데드락 방지)
+        try:
+            api = get_helpstore()
+            related_kws = api.get_related_keywords(keyword)
+            autocomplete = [kw.keyword for kw in related_kws[:15]
+                           if kw.total_search >= 1000 and not kw.is_brand]
+            related = [kw.keyword for kw in related_kws[15:30]
+                      if kw.total_search >= 500]
+            _coupang_kw_cache[keyword] = {
+                'autocomplete': autocomplete,
+                'related': related,
+                'ts': time.time()
+            }
+        except Exception as e:
+            print(f'[KEYWORDS] 키워드 수집 실패: {e}')
+            autocomplete = []
+            related = []
+
+    return jsonify({
+        'success': True,
+        'variants': [dict(v) for v in variants],
+        'autocomplete': autocomplete,
+        'related': related
+    })
+
+
 # === 리뷰 분석 ===
 _review_state = {}  # scan_id → {status, reviews, analysis}
 
@@ -1944,6 +1995,6 @@ if __name__ == '__main__':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
     init_db()
-    print("\n[BECORELAB] Sourcing Opportunity Analyzer v0.1")
+    print("\n[BECORELAB] Market Finder v0.1")
     print("[BECORELAB] http://localhost:8090\n")
     app.run(host='0.0.0.0', port=8090, debug=True, use_reloader=False)

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>소싱 기회 분석기 — 비코어랩</title>
+<title>마켓 파인더 — 비코어랩</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/css/SpoqaHanSansNeo.css" rel="stylesheet">
@@ -180,7 +180,7 @@ body {
     margin-top: 2px;
 }
 
-/* ── 시장스캔 탭 ── */
+/* ── 키워드 스캔 탭 ── */
 .scan-mode-toggle {
     display: flex;
     gap: 8px;
@@ -634,6 +634,68 @@ body {
     background: rgba(16, 185, 129, 0.08);
 }
 
+/* ── 키워드 분석 3섹션 ── */
+.kw-section {
+    padding: 12px 14px 8px;
+    border-bottom: 1px solid var(--border);
+}
+.kw-section:last-child { border-bottom: none; }
+
+.kw-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--cyan);
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+}
+
+.kw-chips-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 28px;
+    align-items: center;
+}
+
+.kw-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 12px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: var(--cyan);
+    background: rgba(0, 229, 255, 0.06);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    text-decoration: none;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+.kw-chip:hover {
+    background: rgba(0, 229, 255, 0.14);
+    border-color: var(--cyan);
+    color: #fff;
+}
+.kw-chip--active {
+    border-color: var(--success);
+    background: rgba(16, 185, 129, 0.08);
+    color: var(--success);
+}
+.kw-chip--active:hover {
+    background: rgba(16, 185, 129, 0.16);
+    border-color: var(--success);
+    color: #fff;
+}
+.kw-chip-vol {
+    font-size: 10px;
+    opacity: 0.7;
+    margin-left: 2px;
+}
+.kw-empty {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
 /* ── 카테고리 트리 ── */
 .cat-tree { max-height: 500px; overflow-y: auto; }
 
@@ -808,6 +870,7 @@ body {
     .form-row { grid-template-columns: 1fr; }
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -815,7 +878,7 @@ body {
 <header class="header">
     <div class="header-title">
         <span class="logo">BECORELAB</span>
-        <span>소싱 기회 분석기</span>
+        <span>마켓 파인더</span>
     </div>
     <div class="header-stats" id="headerStats">
         <span>스캔<span class="stat-value" id="statTotalScans">0</span></span>
@@ -828,7 +891,7 @@ body {
 <!-- 탭 네비게이션 -->
 <nav class="tab-nav">
     <button class="tab-btn active" data-tab="scan">
-        <span class="tab-icon">&#x1F50D;</span> 시장스캔
+        <span class="tab-icon">&#x1F50D;</span> 키워드 스캔
     </button>
     <button class="tab-btn" data-tab="insight">
         <span class="tab-icon">&#x1F4CA;</span> 마켓 인사이트
@@ -845,7 +908,7 @@ body {
 </nav>
 
 <!-- ═══════════════════════════════════════════ -->
-<!-- 탭 1: 시장스캔 -->
+<!-- 탭 1: 키워드 스캔 -->
 <!-- ═══════════════════════════════════════════ -->
 <div class="main-content">
 <div class="tab-panel active" id="tab-scan">
@@ -1186,7 +1249,7 @@ body {
             <tbody id="opportunityBody"></tbody>
         </table>
         <div id="opportunityEmpty" class="empty-state" style="padding: 30px;">
-            <div class="empty-desc">시장스캔 데이터가 분석되면 여기에 표시됩니다</div>
+            <div class="empty-desc">키워드 스캔 데이터가 분석되면 여기에 표시됩니다</div>
         </div>
     </div>
 </div>
@@ -1666,18 +1729,66 @@ async function showScanResult(scanId, scanSummary) {
 
         document.getElementById('scanStats').innerHTML = statsHtml;
 
-        // 키워드 변형 (쿠팡 띄어쓰기)
-        let variantHtml = '<div class="card-header"><span class="card-title">쿠팡 키워드 변형</span></div>';
-        variantHtml += '<div style="padding:12px; display:flex; flex-wrap:wrap; gap:6px;">';
+        // 키워드 분석 — 3개 섹션 (변형 + 연관 + 자동완성)
+        let kwSectionHtml = '';
+
+        // 1) 쿠팡 키워드 변형 (띄어쓰기)
+        kwSectionHtml += '<div class="kw-section">';
+        kwSectionHtml += '<div class="kw-section-title">쿠팡 키워드 변형 <span style="font-weight:400;color:var(--text-muted);font-size:11px;">(띄어쓰기)</span></div>';
+        kwSectionHtml += '<div class="kw-chips-wrap">';
         if (variants.length > 0) {
             for (const v of variants) {
-                variantHtml += `<a href="https://www.coupang.com/np/search?component=&q=${encodeURIComponent(v.variant_keyword)}" target="_blank" class="keyword-chip ${v.search_volume > 0 ? 'recommended' : ''}" style="text-decoration:none;">"${v.variant_keyword}"</a>`;
+                const hasVol = v.search_volume > 0;
+                kwSectionHtml += `<a href="https://www.coupang.com/np/search?component=&q=${encodeURIComponent(v.variant_keyword)}" target="_blank" class="kw-chip ${hasVol ? 'kw-chip--active' : ''}">${v.variant_keyword}${hasVol ? ' <span class="kw-chip-vol">'+formatNumber(v.search_volume)+'</span>' : ''}</a>`;
             }
         } else {
-            variantHtml += '<span style="color:var(--text-muted);font-size:13px">변형 없음</span>';
+            kwSectionHtml += '<span class="kw-empty">변형 없음</span>';
         }
-        variantHtml += '</div>';
-        document.getElementById('keywordList').innerHTML = variantHtml;
+        kwSectionHtml += '</div></div>';
+
+        // 2) 쿠팡 연관 키워드 — 로딩 플레이스홀더
+        kwSectionHtml += '<div class="kw-section">';
+        kwSectionHtml += '<div class="kw-section-title">쿠팡 연관 키워드</div>';
+        kwSectionHtml += '<div class="kw-chips-wrap" id="kwRelated"><span class="kw-empty" style="color:var(--text-muted);">로딩 중...</span></div>';
+        kwSectionHtml += '</div>';
+
+        // 3) 쿠팡 자동완성
+        kwSectionHtml += '<div class="kw-section">';
+        kwSectionHtml += '<div class="kw-section-title">쿠팡 자동완성</div>';
+        kwSectionHtml += '<div class="kw-chips-wrap" id="kwAutocomplete"><span class="kw-empty" style="color:var(--text-muted);">로딩 중...</span></div>';
+        kwSectionHtml += '</div>';
+
+        document.getElementById('keywordList').innerHTML = kwSectionHtml;
+
+        // 비동기로 쿠팡 키워드 데이터 로드
+        fetch(`/api/scan/${scanId}/keywords`).then(r => r.json()).then(kwData => {
+            if (!kwData.success) return;
+
+            // 연관 키워드
+            const relEl = document.getElementById('kwRelated');
+            if (kwData.related && kwData.related.length > 0) {
+                relEl.innerHTML = kwData.related.map(kw =>
+                    `<a href="https://www.coupang.com/np/search?component=&q=${encodeURIComponent(kw)}" target="_blank" class="kw-chip">${kw}</a>`
+                ).join('');
+            } else {
+                relEl.innerHTML = '<span class="kw-empty">연관 키워드 없음</span>';
+            }
+
+            // 자동완성
+            const acEl = document.getElementById('kwAutocomplete');
+            if (kwData.autocomplete && kwData.autocomplete.length > 0) {
+                acEl.innerHTML = kwData.autocomplete.map(kw =>
+                    `<a href="https://www.coupang.com/np/search?component=&q=${encodeURIComponent(kw)}" target="_blank" class="kw-chip">${kw}</a>`
+                ).join('');
+            } else {
+                acEl.innerHTML = '<span class="kw-empty">자동완성 데이터 없음</span>';
+            }
+        }).catch(() => {
+            const relEl = document.getElementById('kwRelated');
+            const acEl = document.getElementById('kwAutocomplete');
+            if (relEl) relEl.innerHTML = '<span class="kw-empty">로드 실패 (브라우저 미실행)</span>';
+            if (acEl) acEl.innerHTML = '<span class="kw-empty">로드 실패 (브라우저 미실행)</span>';
+        });
 
         // 상품 리스트
         if (products.length > 0) {
@@ -1893,99 +2004,602 @@ async function loadOpportunities() {
     } catch(e) { console.error('기회분석 로딩 에러:', e); }
 }
 
+// ─── 마켓 인사이트 모달 (6탭) ───
+let _insightCharts = {};
+function _destroyInsightCharts() {
+    Object.values(_insightCharts).forEach(c => { try { c.destroy(); } catch(e){} });
+    _insightCharts = {};
+}
+function _destroyChart(name) {
+    if (_insightCharts[name]) { try { _insightCharts[name].destroy(); } catch(e){} delete _insightCharts[name]; }
+}
+
 function viewScanWithReview(scanId) {
-    // 기회분석 탭에서 리뷰 분석 모달 표시
     _currentScanId = scanId;
 
-    // 모달 생성
-    let modal = document.getElementById('reviewModal');
+    let modal = document.getElementById('insightModal');
     if (!modal) {
         modal = document.createElement('div');
-        modal.id = 'reviewModal';
-        modal.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;';
+        modal.id = 'insightModal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
         modal.innerHTML = `
-            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;width:90%;max-width:900px;max-height:85vh;overflow-y:auto;padding:24px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                    <span style="font-size:16px;font-weight:700;">리뷰 분석</span>
-                    <button onclick="document.getElementById('reviewModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">&times;</button>
-                </div>
-                <div id="reviewModalContent">
-                    <div style="text-align:center;padding:40px;"><span class="loading-spinner"></span> 리뷰 수집 중...</div>
-                </div>
-            </div>
-        `;
+<div id="insightBox" style="background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;width:95%;max-width:1400px;height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 60px rgba(0,0,0,0.6);">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg-card);flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:17px;font-weight:800;background:linear-gradient(135deg,#ff6b2b,#ff9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">MARKET INSIGHT</span>
+            <span id="insightKeyword" style="font-size:14px;color:var(--text-secondary);font-weight:500;"></span>
+        </div>
+        <button onclick="_destroyInsightCharts();document.getElementById('insightModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;padding:4px 8px;line-height:1;">&times;</button>
+    </div>
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg-card);flex-shrink:0;padding:0 24px;" id="insightTabBar">
+        <button class="ins-tab active" data-tab="structure" onclick="_switchInsightTab('structure',this)">시장구조</button>
+        <button class="ins-tab" data-tab="price" onclick="_switchInsightTab('price',this)">가격대</button>
+        <button class="ins-tab" data-tab="newprod" onclick="_switchInsightTab('newprod',this)">신상품</button>
+        <button class="ins-tab" data-tab="keywords" onclick="_switchInsightTab('keywords',this)">키워드</button>
+        <button class="ins-tab" data-tab="profit" onclick="_switchInsightTab('profit',this)">수익성</button>
+        <button class="ins-tab" data-tab="review" onclick="_switchInsightTab('review',this)">리뷰</button>
+    </div>
+    <div id="insightContent" style="flex:1;overflow-y:auto;padding:24px;">
+        <div style="text-align:center;padding:80px 0;color:var(--text-muted);">데이터 로딩 중...</div>
+    </div>
+</div>
+<style>
+.ins-tab{background:none;border:none;color:var(--text-muted);font-size:13px;font-weight:600;padding:12px 20px;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.ins-tab:hover{color:var(--text-secondary);}
+.ins-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.ins-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;}
+.ins-kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:4px;padding:16px;text-align:center;}
+.ins-kpi-card .label{font-size:11px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.5px;text-transform:uppercase;}
+.ins-kpi-card .value{font-size:22px;font-weight:800;}
+.ins-kpi-card .sub{font-size:11px;color:var(--text-secondary);margin-top:4px;}
+.ins-verdict{padding:16px 20px;border-radius:4px;margin-top:16px;font-size:14px;font-weight:600;line-height:1.6;border-left:3px solid;}
+.ins-verdict.good{background:rgba(0,230,118,0.08);border-color:var(--success);color:var(--success);}
+.ins-verdict.warn{background:rgba(255,171,0,0.08);border-color:var(--warning);color:var(--warning);}
+.ins-verdict.bad{background:rgba(255,82,82,0.08);border-color:var(--danger);color:var(--danger);}
+.ins-chart-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:4px;padding:20px;margin-bottom:20px;}
+.ins-section-title{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ins-section-title .dot{width:8px;height:8px;border-radius:2px;display:inline-block;}
+.profit-input{background:var(--bg-input);border:1px solid var(--border);border-radius:3px;color:var(--text-primary);padding:8px 12px;font-size:14px;width:100%;font-family:inherit;}
+.profit-input:focus{outline:none;border-color:var(--accent);}
+.profit-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+.profit-label{font-size:11px;color:var(--text-muted);margin-bottom:6px;}
+.profit-result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:20px;}
+.profit-result-card{background:var(--bg-card);border:1px solid var(--border);border-radius:4px;padding:20px;text-align:center;}
+.profit-result-card .title{font-size:12px;color:var(--text-muted);margin-bottom:8px;}
+.profit-result-card .amount{font-size:24px;font-weight:800;}
+.profit-result-card .detail{font-size:11px;color:var(--text-secondary);margin-top:6px;}
+.kw-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:3px;font-size:13px;color:var(--text-secondary);margin:4px;text-decoration:none;transition:border-color .15s;}
+.kw-chip:hover{border-color:var(--accent);color:var(--text-primary);}
+.kw-chip .vol{font-size:11px;color:var(--text-muted);}
+</style>`;
         document.body.appendChild(modal);
     }
     modal.style.display = 'flex';
-    document.getElementById('reviewModalContent').innerHTML = '<div style="text-align:center;padding:40px;"><span class="loading-spinner"></span> 리뷰 수집 중...</div>';
+    _destroyInsightCharts();
+    document.getElementById('insightContent').innerHTML = '<div style="text-align:center;padding:80px 0;color:var(--text-muted);"><span class="loading-spinner"></span> 데이터 로딩 중...</div>';
+    document.querySelectorAll('.ins-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.ins-tab[data-tab="structure"]').classList.add('active');
 
-    // 리뷰 분석 시작
-    fetch(`/api/scan/${scanId}/reviews`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-    }).then(() => {
-        // 폴링
+    fetch(`/api/scan/${scanId}`).then(r=>r.json()).then(data => {
+        if(!data.success) { document.getElementById('insightContent').innerHTML='<div style="padding:40px;color:var(--danger);">데이터 로딩 실패</div>'; return; }
+        window._insightData = data;
+        document.getElementById('insightKeyword').textContent = data.scan.keyword || '';
+        _renderInsightTab('structure');
+    }).catch(e => {
+        document.getElementById('insightContent').innerHTML='<div style="padding:40px;color:var(--danger);">서버 연결 실패</div>';
+    });
+}
+
+function _switchInsightTab(tab, btn) {
+    document.querySelectorAll('.ins-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    _renderInsightTab(tab);
+}
+
+function _renderInsightTab(tab) {
+    _destroyInsightCharts();
+    const data = window._insightData;
+    if(!data) return;
+    const el = document.getElementById('insightContent');
+    const products = (data.products||[]).slice();
+    const scan = data.scan||{};
+    const keywords = data.keywords||[];
+    const variants = data.variants||[];
+
+    switch(tab) {
+        case 'structure': _renderStructureTab(el, products, scan); break;
+        case 'price': _renderPriceTab(el, products, scan); break;
+        case 'newprod': _renderNewProductTab(el, products, scan); break;
+        case 'keywords': _renderKeywordsTab(el, keywords, variants, scan); break;
+        case 'profit': _renderProfitTab(el, products, scan); break;
+        case 'review': _renderReviewTab(el, scan); break;
+    }
+}
+
+// ── 1. 시장구조 탭 ──
+function _renderStructureTab(el, products, scan) {
+    const sorted = [...products].sort((a,b) => (b.revenue_monthly||0) - (a.revenue_monthly||0));
+    const totalRev = sorted.reduce((s,p) => s + (p.revenue_monthly||0), 0);
+    const top1Share = totalRev > 0 ? ((sorted[0]?.revenue_monthly||0) / totalRev * 100) : 0;
+    const top3Rev = sorted.slice(0,3).reduce((s,p) => s + (p.revenue_monthly||0), 0);
+    const top3Share = totalRev > 0 ? (top3Rev / totalRev * 100) : 0;
+    const equality = scan.revenue_equality || (sorted.length >= 10 && sorted[0].revenue_monthly > 0 ? (sorted[9].revenue_monthly / sorted[0].revenue_monthly) : 0);
+
+    let verdictClass, verdictText;
+    if (top1Share < 15 && equality > 0.3) {
+        verdictClass = 'good'; verdictText = '상위 쏠림 없음 — 신규 진입에 유리한 시장';
+    } else if (top1Share < 25) {
+        verdictClass = 'warn'; verdictText = '상위 쏠림 보통 — 차별화 전략 필요';
+    } else {
+        verdictClass = 'bad'; verdictText = '독점 시장 — 진입 주의, 강력한 차별화 필수';
+    }
+
+    el.innerHTML = `
+        <div class="ins-kpi">
+            <div class="ins-kpi-card"><div class="label">1위 점유율</div><div class="value" style="color:${top1Share>25?'var(--danger)':top1Share>15?'var(--warning)':'var(--success)'}">${top1Share.toFixed(1)}%</div><div class="sub">${sorted[0]?.product_name?.substring(0,20)||'-'}</div></div>
+            <div class="ins-kpi-card"><div class="label">상위 3 점유율</div><div class="value" style="color:${top3Share>50?'var(--danger)':'var(--cyan)'}">${top3Share.toFixed(1)}%</div></div>
+            <div class="ins-kpi-card"><div class="label">매출균등도</div><div class="value" style="color:${equality>0.3?'var(--success)':equality>0.15?'var(--warning)':'var(--danger)'}">${(equality*100).toFixed(0)}%</div><div class="sub">10위/1위 매출비율</div></div>
+            <div class="ins-kpi-card"><div class="label">전체 시장 규모</div><div class="value" style="color:var(--text-primary)">${totalRev>=100000000?(totalRev/100000000).toFixed(1)+'억':totalRev>=10000?(totalRev/10000).toFixed(0)+'만':formatNumber(totalRev)}원</div><div class="sub">상위 ${sorted.length}개 합산</div></div>
+        </div>
+        <div class="ins-chart-wrap">
+            <div class="ins-section-title"><span class="dot" style="background:var(--accent);"></span>상위 ${Math.min(40,sorted.length)}개 상품 매출</div>
+            <div style="height:350px;position:relative;"><canvas id="chartStructure"></canvas></div>
+        </div>
+        <div class="ins-verdict ${verdictClass}">${verdictText}</div>
+    `;
+    const labels = sorted.slice(0,40).map((_,i) => (i+1)+'위');
+    const values = sorted.slice(0,40).map(p => (p.revenue_monthly||0)/10000);
+    const colors = values.map((_,i) => i<3 ? '#ff5252' : 'rgba(0,229,255,0.7)');
+    const ctx = document.getElementById('chartStructure').getContext('2d');
+    _insightCharts.structure = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [{ data: values, backgroundColor: colors, borderRadius: 2, barPercentage: 0.85 }] },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => formatNumber(Math.round(c.raw)) + '만원' } } },
+            scales: {
+                x: { ticks: { color: '#5c6478', font: { size: 10 } }, grid: { display: false } },
+                y: { ticks: { color: '#5c6478', font: { size: 10 }, callback: v => formatNumber(v)+'만' }, grid: { color: 'rgba(42,47,64,0.5)' } }
+            }
+        }
+    });
+}
+
+// ── 2. 가격대 탭 ──
+function _renderPriceTab(el, products, scan) {
+    const prices = products.map(p => p.price||0).filter(p => p>0);
+    if (prices.length === 0) { el.innerHTML='<div style="padding:40px;color:var(--text-muted);">가격 데이터 없음</div>'; return; }
+
+    const minP = Math.min(...prices), maxP = Math.max(...prices), avgP = Math.round(prices.reduce((s,p)=>s+p,0)/prices.length);
+    const step = 5000;
+    const bucketStart = Math.floor(minP/step)*step;
+    const bucketEnd = Math.ceil(maxP/step)*step;
+    const buckets = {};
+    const bucketRevenue = {};
+    for(let b=bucketStart; b<bucketEnd; b+=step) { buckets[b]=0; bucketRevenue[b]=0; }
+    products.forEach(p => {
+        if(!p.price || p.price<=0) return;
+        const b = Math.floor(p.price/step)*step;
+        buckets[b] = (buckets[b]||0)+1;
+        bucketRevenue[b] = (bucketRevenue[b]||0) + (p.revenue_monthly||0);
+    });
+
+    const bucketKeys = Object.keys(buckets).map(Number).sort((a,b)=>a-b);
+    const bestBucket = bucketKeys.reduce((best,b) => (bucketRevenue[b]||0) > (bucketRevenue[best]||0) ? b : best, bucketKeys[0]);
+
+    el.innerHTML = `
+        <div class="ins-kpi">
+            <div class="ins-kpi-card"><div class="label">최저가</div><div class="value" style="color:var(--cyan)">${formatNumber(minP)}원</div></div>
+            <div class="ins-kpi-card"><div class="label">평균가</div><div class="value" style="color:var(--text-primary)">${formatNumber(avgP)}원</div></div>
+            <div class="ins-kpi-card"><div class="label">최고가</div><div class="value" style="color:var(--purple)">${formatNumber(maxP)}원</div></div>
+            <div class="ins-kpi-card"><div class="label">최다 매출 가격대</div><div class="value" style="color:var(--accent)">${formatNumber(bestBucket)}~${formatNumber(bestBucket+step)}원</div></div>
+        </div>
+        <div class="ins-chart-wrap">
+            <div class="ins-section-title"><span class="dot" style="background:var(--purple);"></span>가격대별 상품 분포</div>
+            <div style="height:320px;position:relative;"><canvas id="chartPrice"></canvas></div>
+        </div>
+        <div class="ins-chart-wrap">
+            <div class="ins-section-title"><span class="dot" style="background:var(--accent);"></span>가격대별 매출</div>
+            <div style="height:320px;position:relative;"><canvas id="chartPriceRev"></canvas></div>
+        </div>
+        <div class="ins-verdict good">추천 진입가: <strong>${formatNumber(bestBucket)}~${formatNumber(bestBucket+step)}원</strong> 구간이 매출 최대 — 이 가격대에서 경쟁력 확보 권장</div>
+    `;
+
+    const labels = bucketKeys.map(b => (b/10000>=1 ? (b/10000)+'만' : formatNumber(b))+'~'+(((b+step)/10000)>=1 ? ((b+step)/10000)+'만' : formatNumber(b+step)));
+    const countData = bucketKeys.map(b => buckets[b]);
+    const revData = bucketKeys.map(b => (bucketRevenue[b]||0)/10000);
+    const countColors = bucketKeys.map(b => b===bestBucket ? '#ff6b2b' : 'rgba(179,136,255,0.7)');
+    const revColors = bucketKeys.map(b => b===bestBucket ? '#ff6b2b' : 'rgba(0,229,255,0.7)');
+
+    const ctx1 = document.getElementById('chartPrice').getContext('2d');
+    _insightCharts.price = new Chart(ctx1, {
+        type: 'bar',
+        data: { labels, datasets: [{ data: countData, backgroundColor: countColors, borderRadius: 2 }] },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>c.raw+'개 상품' } } }, scales:{ x:{ticks:{color:'#5c6478',font:{size:10}},grid:{display:false}}, y:{ticks:{color:'#5c6478',font:{size:10}},grid:{color:'rgba(42,47,64,0.5)'}} } }
+    });
+    const ctx2 = document.getElementById('chartPriceRev').getContext('2d');
+    _insightCharts.priceRev = new Chart(ctx2, {
+        type: 'bar',
+        data: { labels, datasets: [{ data: revData, backgroundColor: revColors, borderRadius: 2 }] },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>formatNumber(Math.round(c.raw))+'만원' } } }, scales:{ x:{ticks:{color:'#5c6478',font:{size:10}},grid:{display:false}}, y:{ticks:{color:'#5c6478',font:{size:10},callback:v=>formatNumber(v)+'만'},grid:{color:'rgba(42,47,64,0.5)'}} } }
+    });
+}
+
+// ── 3. 신상품 탭 ──
+function _renderNewProductTab(el, products, scan) {
+    const newThreshold = 100;
+    const allWithRev = products.filter(p => (p.revenue_monthly||0)>0);
+    const newProds = products.filter(p => (p.review_count||0) < newThreshold);
+    const newProdsWithRev = newProds.filter(p => (p.revenue_monthly||0)>0);
+    const newRate = products.length > 0 ? (newProds.length/products.length*100) : 0;
+    const totalAvgRev = allWithRev.length > 0 ? allWithRev.reduce((s,p)=>s+(p.revenue_monthly||0),0)/allWithRev.length : 0;
+    const newAvgRev = newProdsWithRev.length > 0 ? newProdsWithRev.reduce((s,p)=>s+(p.revenue_monthly||0),0)/newProdsWithRev.length : 0;
+    const top10 = [...products].sort((a,b)=>(b.revenue_monthly||0)-(a.revenue_monthly||0)).slice(0,10);
+    const newInTop10 = top10.filter(p => (p.review_count||0) < newThreshold).length;
+    const newRevRatio = totalAvgRev > 0 ? (newAvgRev/totalAvgRev*100) : 0;
+
+    let verdictClass, verdictText;
+    if (newRate >= 30 && newInTop10 >= 3) {
+        verdictClass = 'good'; verdictText = '신상품도 잘 팔림 — GO! 진입 적기';
+    } else if (newRate >= 15 || newInTop10 >= 1) {
+        verdictClass = 'warn'; verdictText = '신상품 진입 가능 — 차별화 포인트 필요';
+    } else {
+        verdictClass = 'bad'; verdictText = '기존 강자 독점 — 신상품 진입 어려움';
+    }
+
+    el.innerHTML = `
+        <div class="ins-kpi">
+            <div class="ins-kpi-card"><div class="label">신상품 비율</div><div class="value" style="color:${newRate>=30?'var(--success)':newRate>=15?'var(--warning)':'var(--danger)'}">${newRate.toFixed(1)}%</div><div class="sub">리뷰 ${newThreshold}개 미만</div></div>
+            <div class="ins-kpi-card"><div class="label">신상품 수</div><div class="value" style="color:var(--cyan)">${newProds.length}개</div><div class="sub">전체 ${products.length}개 중</div></div>
+            <div class="ins-kpi-card"><div class="label">Top10 내 신상품</div><div class="value" style="color:${newInTop10>=3?'var(--success)':newInTop10>=1?'var(--warning)':'var(--danger)'}">${newInTop10}개</div></div>
+            <div class="ins-kpi-card"><div class="label">신상품 평균 매출</div><div class="value" style="color:var(--text-primary)">${newAvgRev>=10000?formatNumber(Math.round(newAvgRev/10000))+'만':formatNumber(Math.round(newAvgRev))}원</div><div class="sub">전체 대비 ${newRevRatio.toFixed(0)}%</div></div>
+        </div>
+        <div class="ins-chart-wrap">
+            <div class="ins-section-title"><span class="dot" style="background:var(--success);"></span>리뷰 수 vs 매출 (신상품 하이라이트)</div>
+            <div style="height:380px;position:relative;"><canvas id="chartNewProd"></canvas></div>
+        </div>
+        ${newProdsWithRev.length > 0 ? `
+        <div class="ins-chart-wrap">
+            <div class="ins-section-title"><span class="dot" style="background:var(--cyan);"></span>주목할 신상품 (매출순)</div>
+            <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead><tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left;padding:8px;color:var(--text-muted);font-weight:600;">순위</th>
+                        <th style="text-align:left;padding:8px;color:var(--text-muted);font-weight:600;">상품명</th>
+                        <th style="text-align:right;padding:8px;color:var(--text-muted);font-weight:600;">가격</th>
+                        <th style="text-align:right;padding:8px;color:var(--text-muted);font-weight:600;">월매출</th>
+                        <th style="text-align:right;padding:8px;color:var(--text-muted);font-weight:600;">리뷰</th>
+                    </tr></thead>
+                    <tbody>${[...newProdsWithRev].sort((a,b)=>(b.revenue_monthly||0)-(a.revenue_monthly||0)).slice(0,10).map(p => `
+                        <tr style="border-bottom:1px solid rgba(42,47,64,0.3);">
+                            <td style="padding:8px;color:var(--text-secondary);">${p.ranking||'-'}</td>
+                            <td style="padding:8px;color:var(--text-primary);max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.product_name||'-'}</td>
+                            <td style="padding:8px;text-align:right;color:var(--text-secondary);">${formatNumber(p.price||0)}원</td>
+                            <td style="padding:8px;text-align:right;color:var(--accent);font-weight:700;">${formatNumber(p.revenue_monthly||0)}원</td>
+                            <td style="padding:8px;text-align:right;color:var(--cyan);">${formatNumber(p.review_count||0)}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>` : ''}
+        <div class="ins-verdict ${verdictClass}">${verdictText}</div>
+    `;
+
+    const scatterData = products.filter(p=>(p.revenue_monthly||0)>0).map(p => ({
+        x: p.review_count||0,
+        y: (p.revenue_monthly||0)/10000,
+        name: (p.product_name||'').substring(0,25)
+    }));
+    const newScatter = scatterData.filter(d => d.x < newThreshold);
+    const oldScatter = scatterData.filter(d => d.x >= newThreshold);
+
+    const ctx = document.getElementById('chartNewProd').getContext('2d');
+    _insightCharts.newprod = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                { label: '신상품', data: newScatter, backgroundColor: 'rgba(0,230,118,0.8)', pointRadius: 7, pointHoverRadius: 10 },
+                { label: '기존상품', data: oldScatter, backgroundColor: 'rgba(91,103,120,0.5)', pointRadius: 5, pointHoverRadius: 8 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#9ba3b8', font: { size: 11 } } },
+                tooltip: { callbacks: { label: c => `${c.raw.name} | 리뷰 ${formatNumber(c.raw.x)} | 매출 ${formatNumber(Math.round(c.raw.y))}만원` } }
+            },
+            scales: {
+                x: { title: { display: true, text: '리뷰 수', color: '#5c6478' }, ticks: { color: '#5c6478' }, grid: { color: 'rgba(42,47,64,0.5)' } },
+                y: { title: { display: true, text: '월매출 (만원)', color: '#5c6478' }, ticks: { color: '#5c6478', callback: v=>formatNumber(v)+'만' }, grid: { color: 'rgba(42,47,64,0.5)' } }
+            }
+        }
+    });
+}
+
+// ── 4. 키워드 탭 ──
+function _renderKeywordsTab(el, keywords, variants, scan) {
+    const mainKw = scan.keyword || '';
+    const hasKeywords = keywords.length > 0;
+    const hasVariants = variants.length > 0;
+
+    let kwHtml = '';
+    if (hasKeywords) {
+        const sorted = [...keywords].sort((a,b)=>(b.search_volume||0)-(a.search_volume||0));
+        kwHtml = `
+        <div class="ins-chart-wrap">
+            <div class="ins-section-title"><span class="dot" style="background:var(--cyan);"></span>유입 키워드 (검색량순)</div>
+            <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead><tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left;padding:8px;color:var(--text-muted);">키워드</th>
+                        <th style="text-align:right;padding:8px;color:var(--text-muted);">검색량</th>
+                        <th style="text-align:right;padding:8px;color:var(--text-muted);">클릭수</th>
+                        <th style="text-align:right;padding:8px;color:var(--text-muted);">클릭율</th>
+                        <th style="text-align:right;padding:8px;color:var(--text-muted);">광고비중</th>
+                    </tr></thead>
+                    <tbody>${sorted.slice(0,30).map(k => `
+                        <tr style="border-bottom:1px solid rgba(42,47,64,0.3);">
+                            <td style="padding:8px;"><a href="https://www.coupang.com/np/search?component=&q=${encodeURIComponent(k.keyword)}" target="_blank" style="color:var(--accent);text-decoration:underline;">${k.keyword}</a></td>
+                            <td style="padding:8px;text-align:right;color:var(--text-secondary);">${formatNumber(k.search_volume||0)}</td>
+                            <td style="padding:8px;text-align:right;color:var(--text-secondary);">${formatNumber(k.click_count||0)}</td>
+                            <td style="padding:8px;text-align:right;color:var(--cyan);">${(k.click_rate||0).toFixed(1)}%</td>
+                            <td style="padding:8px;text-align:right;color:${(k.ad_weight||0)>50?'var(--danger)':'var(--text-secondary)'};">${(k.ad_weight||0).toFixed(0)}%</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>`;
+    }
+
+    let variantHtml = '';
+    if (hasVariants) {
+        variantHtml = `
+        <div class="ins-chart-wrap">
+            <div class="ins-section-title"><span class="dot" style="background:var(--warning);"></span>쿠팡 띄어쓰기 변형</div>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">쿠팡은 띄어쓰기에 따라 다른 검색 결과를 보여줍니다. 변형 키워드도 확인하세요.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                ${variants.map(v => `<a href="https://www.coupang.com/np/search?component=&q=${encodeURIComponent(v.variant_keyword)}" target="_blank" class="kw-chip">${v.variant_keyword} ${v.search_volume ? '<span class="vol">'+formatNumber(v.search_volume)+'</span>' : ''}</a>`).join('')}
+            </div>
+            ${variants.some(v=>v.opportunity_note) ? '<div style="margin-top:12px;font-size:13px;color:var(--text-secondary);">'+variants.filter(v=>v.opportunity_note).map(v=>'<div style="padding:4px 0;">'+v.variant_keyword+': '+v.opportunity_note+'</div>').join('')+'</div>' : ''}
+        </div>`;
+    }
+
+    if (!hasKeywords && !hasVariants) {
+        el.innerHTML = `
+            <div style="text-align:center;padding:60px 0;">
+                <div style="font-size:48px;margin-bottom:16px;opacity:0.3;">&#128269;</div>
+                <div style="font-size:15px;color:var(--text-muted);margin-bottom:8px;">키워드 데이터가 아직 없습니다</div>
+                <p style="font-size:13px;color:var(--text-muted);">시장 스캔 시 키워드 분석이 포함되면 이곳에 표시됩니다.</p>
+            </div>
+            <div class="ins-chart-wrap">
+                <div class="ins-section-title"><span class="dot" style="background:var(--accent);"></span>쿠팡 검색</div>
+                <a href="https://www.coupang.com/np/search?component=&q=${encodeURIComponent(mainKw)}" target="_blank" class="kw-chip" style="font-size:15px;padding:10px 20px;">${mainKw}</a>
+            </div>
+        `;
+        return;
+    }
+
+    el.innerHTML = `
+        <div class="ins-kpi">
+            <div class="ins-kpi-card"><div class="label">메인 키워드</div><div class="value" style="color:var(--accent);font-size:16px;">${mainKw}</div></div>
+            <div class="ins-kpi-card"><div class="label">유입 키워드</div><div class="value" style="color:var(--cyan)">${keywords.length}개</div></div>
+            <div class="ins-kpi-card"><div class="label">변형 키워드</div><div class="value" style="color:var(--warning)">${variants.length}개</div></div>
+            ${scan.recommended_keyword ? `<div class="ins-kpi-card"><div class="label">추천 진입 키워드</div><div class="value" style="color:var(--success);font-size:14px;">${scan.recommended_keyword}</div></div>` : ''}
+        </div>
+        ${kwHtml}
+        ${variantHtml}
+    `;
+}
+
+// ── 5. 수익성 탭 ──
+function _renderProfitTab(el, products, scan) {
+    const priced = products.filter(p=>(p.price||0)>0);
+    const avgPrice = priced.length > 0 ? Math.round(priced.reduce((s,p)=>s+(p.price||0),0)/priced.length) : 15000;
+
+    el.innerHTML = `
+        <div class="ins-chart-wrap">
+            <div class="ins-section-title"><span class="dot" style="background:var(--success);"></span>수익 시뮬레이터</div>
+            <div class="profit-row">
+                <div><div class="profit-label">목표 판매가 (원)</div><input type="number" class="profit-input" id="profitPrice" value="${avgPrice}" oninput="_calcProfit()"></div>
+                <div><div class="profit-label">예상 원가 (원)</div><input type="number" class="profit-input" id="profitCost" value="${Math.round(avgPrice*0.3)}" oninput="_calcProfit()"></div>
+                <div><div class="profit-label">쿠팡 수수료 (%)</div><input type="number" class="profit-input" id="profitFee" value="10.8" step="0.1" oninput="_calcProfit()"></div>
+                <div><div class="profit-label">광고비 비중 (%)</div><input type="number" class="profit-input" id="profitAd" value="15" step="1" oninput="_calcProfit()"></div>
+            </div>
+            <div class="profit-row" style="grid-template-columns:1fr 1fr;">
+                <div><div class="profit-label">배송비 (원, 로켓배송 기준)</div><input type="number" class="profit-input" id="profitShip" value="3000" oninput="_calcProfit()"></div>
+                <div><div class="profit-label">기타 비용 (원)</div><input type="number" class="profit-input" id="profitEtc" value="0" oninput="_calcProfit()"></div>
+            </div>
+        </div>
+        <div id="profitResult"></div>
+    `;
+    _calcProfit();
+}
+
+function _calcProfit() {
+    const price = parseFloat(document.getElementById('profitPrice')?.value||0);
+    const cost = parseFloat(document.getElementById('profitCost')?.value||0);
+    const feeRate = parseFloat(document.getElementById('profitFee')?.value||0)/100;
+    const adRate = parseFloat(document.getElementById('profitAd')?.value||0)/100;
+    const ship = parseFloat(document.getElementById('profitShip')?.value||0);
+    const etc = parseFloat(document.getElementById('profitEtc')?.value||0);
+
+    if (price <= 0) return;
+
+    const fee = Math.round(price * feeRate);
+    const adCost = Math.round(price * adRate);
+    const totalCost = cost + fee + adCost + ship + etc;
+    const margin = price - totalCost;
+    const marginRate = (margin / price * 100);
+    const breakEvenUnits = margin > 0 ? Math.ceil(500000 / margin) : 0;
+
+    const scenarios = [
+        { label: '월 100개', units: 100 },
+        { label: '월 300개', units: 300 },
+        { label: '월 500개', units: 500 },
+        { label: '월 1,000개', units: 1000 }
+    ];
+
+    const container = document.getElementById('profitResult');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="ins-kpi" style="margin-bottom:20px;">
+            <div class="ins-kpi-card"><div class="label">개당 마진</div><div class="value" style="color:${margin>0?'var(--success)':'var(--danger)'}">${formatNumber(Math.round(margin))}원</div></div>
+            <div class="ins-kpi-card"><div class="label">마진율</div><div class="value" style="color:${marginRate>20?'var(--success)':marginRate>10?'var(--warning)':'var(--danger)'}">${marginRate.toFixed(1)}%</div></div>
+            <div class="ins-kpi-card"><div class="label">쿠팡 수수료</div><div class="value" style="color:var(--text-secondary)">${formatNumber(fee)}원</div></div>
+            <div class="ins-kpi-card"><div class="label">광고비/개</div><div class="value" style="color:var(--text-secondary)">${formatNumber(adCost)}원</div></div>
+        </div>
+        <div class="ins-chart-wrap">
+            <div class="ins-section-title"><span class="dot" style="background:var(--success);"></span>판매 시나리오별 월 수익</div>
+            <div class="profit-result-grid">
+                ${scenarios.map(s => {
+                    const profit = margin * s.units;
+                    const revenue = price * s.units;
+                    return `<div class="profit-result-card">
+                        <div class="title">${s.label} 판매</div>
+                        <div class="amount" style="color:${profit>0?'var(--success)':'var(--danger)'}">${profit>=10000?formatNumber(Math.round(profit/10000))+'만':formatNumber(Math.round(profit))}원</div>
+                        <div class="detail">매출 ${revenue>=10000?formatNumber(Math.round(revenue/10000))+'만':formatNumber(Math.round(revenue))}원</div>
+                    </div>`;
+                }).join('')}
+            </div>
+        </div>
+        <div class="ins-chart-wrap">
+            <div class="ins-section-title"><span class="dot" style="background:var(--warning);"></span>원가 구조</div>
+            <div style="display:flex;gap:24px;align-items:center;">
+                <div style="width:220px;height:220px;position:relative;"><canvas id="chartCostPie"></canvas></div>
+                <div style="flex:1;">
+                    <div style="font-size:13px;color:var(--text-secondary);line-height:2.2;">
+                        <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(42,47,64,0.3);padding:4px 0;"><span>판매가</span><strong style="color:var(--text-primary)">${formatNumber(Math.round(price))}원</strong></div>
+                        <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(42,47,64,0.3);padding:4px 0;"><span style="color:#ff6b2b;">원가</span><strong>${formatNumber(Math.round(cost))}원 (${(cost/price*100).toFixed(1)}%)</strong></div>
+                        <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(42,47,64,0.3);padding:4px 0;"><span style="color:#b388ff;">수수료</span><strong>${formatNumber(fee)}원 (${(feeRate*100).toFixed(1)}%)</strong></div>
+                        <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(42,47,64,0.3);padding:4px 0;"><span style="color:#ffab00;">광고비</span><strong>${formatNumber(adCost)}원 (${(adRate*100).toFixed(1)}%)</strong></div>
+                        <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(42,47,64,0.3);padding:4px 0;"><span style="color:#00e5ff;">배송비</span><strong>${formatNumber(Math.round(ship))}원</strong></div>
+                        ${etc>0?`<div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(42,47,64,0.3);padding:4px 0;"><span style="color:#5c6478;">기타</span><strong>${formatNumber(Math.round(etc))}원</strong></div>`:''}
+                        <div style="display:flex;justify-content:space-between;padding:4px 0;font-weight:700;"><span style="color:${margin>0?'var(--success)':'var(--danger)'};">순이익</span><strong style="color:${margin>0?'var(--success)':'var(--danger)'}">${formatNumber(Math.round(margin))}원 (${marginRate.toFixed(1)}%)</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        ${margin > 0 ? `<div class="ins-verdict good">손익분기점: 월 고정비 50만원 기준 <strong>월 ${formatNumber(breakEvenUnits)}개</strong> 판매 시 손익분기</div>` : `<div class="ins-verdict bad">현재 원가 구조로는 적자 — 원가 절감 또는 판매가 인상 필요</div>`}
+    `;
+
+    _destroyChart('costPie');
+    const pieCtx = document.getElementById('chartCostPie');
+    if (pieCtx) {
+        _insightCharts.costPie = new Chart(pieCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['원가','수수료','광고비','배송비','기타','이익'],
+                datasets: [{ data: [cost, fee, adCost, ship, etc, Math.max(margin,0)], backgroundColor: ['#ff6b2b','#b388ff','#ffab00','#00e5ff','#5c6478','#00e676'], borderWidth: 0 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '65%',
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.label + ': ' + formatNumber(Math.round(c.raw)) + '원' } } }
+            }
+        });
+    }
+}
+
+// ── 6. 리뷰 탭 ──
+function _renderReviewTab(el, scan) {
+    const scanId = scan.id;
+    el.innerHTML = `
+        <div style="text-align:center;padding:40px 0;">
+            <div style="font-size:15px;color:var(--text-secondary);margin-bottom:16px;">상위 상품의 리뷰를 수집하고 AI로 분석합니다</div>
+            <button id="btnInsightReview" onclick="_startInsightReview(${scanId})" style="background:linear-gradient(135deg,#ff6b2b,#ff9500);border:none;color:#fff;padding:12px 32px;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;">리뷰 분석 시작</button>
+        </div>
+        <div id="insightReviewContent"></div>
+    `;
+
+    fetch(`/api/scan/${scanId}/reviews`).then(r=>r.json()).then(data => {
+        if (data.status === 'done' && data.analysis) {
+            _displayInsightReview(data);
+            document.getElementById('btnInsightReview').textContent = '다시 분석';
+        }
+    }).catch(()=>{});
+}
+
+function _startInsightReview(scanId) {
+    const btn = document.getElementById('btnInsightReview');
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.textContent = '수집 중...';
+    document.getElementById('insightReviewContent').innerHTML = '<div style="text-align:center;padding:30px;"><span class="loading-spinner"></span> 리뷰 수집 중...</div>';
+
+    fetch(`/api/scan/${scanId}/reviews`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' }).then(()=>{
         const poll = async () => {
             const res = await fetch(`/api/scan/${scanId}/reviews`);
             const data = await res.json();
             if (data.status === 'collecting') {
-                document.getElementById('reviewModalContent').innerHTML = `<div style="text-align:center;padding:40px;"><span class="loading-spinner"></span> 리뷰 수집 중... (${data.review_count}개)</div>`;
+                document.getElementById('insightReviewContent').innerHTML = `<div style="text-align:center;padding:30px;"><span class="loading-spinner"></span> 리뷰 수집 중... (${data.review_count||0}개)</div>`;
                 setTimeout(poll, 2000);
             } else if (data.status === 'analyzing') {
-                document.getElementById('reviewModalContent').innerHTML = `<div style="text-align:center;padding:40px;"><span class="loading-spinner"></span> ${data.review_count}개 리뷰 AI 분석 중...</div>`;
+                document.getElementById('insightReviewContent').innerHTML = `<div style="text-align:center;padding:30px;"><span class="loading-spinner"></span> ${data.review_count||0}개 리뷰 AI 분석 중...</div>`;
                 setTimeout(poll, 2000);
             } else if (data.status === 'done' && data.analysis) {
-                let html = '';
-                const a = data.analysis;
-                if (a._source === 'claude') {
-                    html = `
-                        <div style="margin-bottom:20px;">
-                            <div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:8px;">요약 (${data.review_count}개 리뷰)</div>
-                            <div style="font-size:14px;color:var(--text-secondary);line-height:2;">${a.summary || ''}</div>
-                        </div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
-                            <div><div style="font-size:15px;font-weight:700;color:var(--success);margin-bottom:8px;">장점</div>${(a.pros||[]).map(p=>'<div style="font-size:14px;padding:4px 0;color:var(--text-secondary);">+ '+p+'</div>').join('')}</div>
-                            <div><div style="font-size:15px;font-weight:700;color:var(--danger);margin-bottom:8px;">단점/불만</div>${(a.cons||[]).map(c=>'<div style="font-size:14px;padding:4px 0;color:var(--text-secondary);">- '+c+'</div>').join('')}</div>
-                        </div>
-                        <div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:var(--cyan);margin-bottom:8px;">인기 제품 형태</div>${(a.popular_types||[]).map(t=>'<div style="font-size:14px;padding:5px 0;color:var(--text-secondary);"><strong style="color:var(--text-primary);">'+t.type+'</strong> — '+t.reason+'</div>').join('')}</div>
-                        <div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:var(--warning);margin-bottom:8px;">소싱 포인트</div>${(a.sourcing_tips||[]).map((t,i)=>'<div style="font-size:14px;padding:4px 0;color:var(--text-secondary);">'+(i+1)+'. '+t+'</div>').join('')}</div>
-                        <div><div style="font-size:15px;font-weight:700;color:var(--purple);margin-bottom:8px;">차별화 아이디어</div>${(a.differentiation||[]).map((d,i)=>'<div style="font-size:14px;padding:4px 0;color:var(--text-secondary);">'+(i+1)+'. '+d+'</div>').join('')}</div>
-                    `;
-                } else if (a.total_reviews > 0) {
-                    html = `
-                        <div style="margin-bottom:16px;">
-                            <div style="font-size:15px;font-weight:700;margin-bottom:8px;">기본 분석 (${a.total_reviews}개 리뷰)</div>
-                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
-                                <div style="background:var(--bg-input);padding:12px;border-radius:4px;text-align:center;">
-                                    <div style="font-size:11px;color:var(--text-muted);">평균 평점</div>
-                                    <div style="font-size:20px;font-weight:700;">${a.avg_rating || '-'}</div>
-                                </div>
-                                <div style="background:var(--bg-input);padding:12px;border-radius:4px;text-align:center;">
-                                    <div style="font-size:11px;color:var(--text-muted);">긍정 비율</div>
-                                    <div style="font-size:20px;font-weight:700;color:var(--success);">${a.positive_ratio || 0}%</div>
-                                </div>
-                                <div style="background:var(--bg-input);padding:12px;border-radius:4px;text-align:center;">
-                                    <div style="font-size:11px;color:var(--text-muted);">리뷰 수</div>
-                                    <div style="font-size:20px;font-weight:700;">${a.total_reviews}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">자주 언급되는 키워드</div>
-                        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                            ${(a.top_keywords||[]).map(([kw,c])=>'<span style="padding:4px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:3px;font-size:13px;color:var(--text-secondary);">'+kw+' ('+c+')</span>').join('')}
-                        </div>
-                    `;
-                } else {
-                    html = '<div style="font-size:14px;color:var(--danger);padding:20px;">리뷰를 수집하지 못했습니다. 쿠팡윙 로그인 상태를 확인해주세요.</div>';
-                }
-                document.getElementById('reviewModalContent').innerHTML = html;
+                _displayInsightReview(data);
+                btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 분석';
             } else {
-                document.getElementById('reviewModalContent').innerHTML = '<div style="padding:20px;color:var(--danger);">분석 실패</div>';
+                document.getElementById('insightReviewContent').innerHTML = '<div style="padding:20px;color:var(--danger);">분석 실패</div>';
+                btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
             }
         };
         poll();
     });
+}
+
+function _displayInsightReview(data) {
+    const a = data.analysis;
+    let html = '';
+    if (a._source === 'claude') {
+        html = `
+            <div class="ins-chart-wrap">
+                <div class="ins-section-title"><span class="dot" style="background:var(--accent);"></span>AI 요약 (${data.review_count||0}개 리뷰)</div>
+                <div style="font-size:14px;color:var(--text-secondary);line-height:2;">${a.summary || ''}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                <div class="ins-chart-wrap">
+                    <div class="ins-section-title"><span class="dot" style="background:var(--success);"></span>장점</div>
+                    ${(a.pros||[]).map(p=>'<div style="font-size:13px;padding:5px 0;color:var(--text-secondary);">+ '+p+'</div>').join('')}
+                </div>
+                <div class="ins-chart-wrap">
+                    <div class="ins-section-title"><span class="dot" style="background:var(--danger);"></span>단점/불만</div>
+                    ${(a.cons||[]).map(c=>'<div style="font-size:13px;padding:5px 0;color:var(--text-secondary);">- '+c+'</div>').join('')}
+                </div>
+            </div>
+            <div class="ins-chart-wrap">
+                <div class="ins-section-title"><span class="dot" style="background:var(--cyan);"></span>인기 제품 형태</div>
+                ${(a.popular_types||[]).map(t=>'<div style="font-size:13px;padding:6px 0;color:var(--text-secondary);"><strong style="color:var(--text-primary);">'+t.type+'</strong> — '+t.reason+'</div>').join('')}
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div class="ins-chart-wrap">
+                    <div class="ins-section-title"><span class="dot" style="background:var(--warning);"></span>소싱 포인트</div>
+                    ${(a.sourcing_tips||[]).map((t,i)=>'<div style="font-size:13px;padding:4px 0;color:var(--text-secondary);">'+(i+1)+'. '+t+'</div>').join('')}
+                </div>
+                <div class="ins-chart-wrap">
+                    <div class="ins-section-title"><span class="dot" style="background:var(--purple);"></span>차별화 아이디어</div>
+                    ${(a.differentiation||[]).map((d,i)=>'<div style="font-size:13px;padding:4px 0;color:var(--text-secondary);">'+(i+1)+'. '+d+'</div>').join('')}
+                </div>
+            </div>
+        `;
+    } else if (a.total_reviews > 0) {
+        html = `
+            <div class="ins-kpi" style="margin-bottom:16px;">
+                <div class="ins-kpi-card"><div class="label">평균 평점</div><div class="value">${a.avg_rating||'-'}</div></div>
+                <div class="ins-kpi-card"><div class="label">긍정 비율</div><div class="value" style="color:var(--success);">${a.positive_ratio||0}%</div></div>
+                <div class="ins-kpi-card"><div class="label">리뷰 수</div><div class="value">${a.total_reviews}</div></div>
+            </div>
+            <div class="ins-chart-wrap">
+                <div class="ins-section-title"><span class="dot" style="background:var(--cyan);"></span>자주 언급되는 키워드</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                    ${(a.top_keywords||[]).map(([kw,c])=>'<span class="kw-chip">'+kw+' ('+c+')</span>').join('')}
+                </div>
+            </div>
+        `;
+    } else {
+        html = '<div style="font-size:14px;color:var(--danger);padding:20px;">리뷰를 수집하지 못했습니다.</div>';
+    }
+    document.getElementById('insightReviewContent').innerHTML = html;
 }
 
 async function loadRfqList() {

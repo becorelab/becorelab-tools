@@ -72,6 +72,8 @@ def _worker_loop():
                 print(f'[WORKER] goldbox_crawl 완료: {len(holder["result"])}개')
             elif action == 'collect_reviews':
                 holder['result'] = _do_collect_reviews(args.get('product_url', ''), args.get('max_reviews', 30))
+            elif action == 'coupang_keywords':
+                holder['result'] = _do_coupang_keywords(args.get('keyword', ''))
         except Exception as e:
             import traceback
             print(f'[WORKER] 에러: {action} — {e}')
@@ -547,6 +549,82 @@ def _do_goldbox_crawl(url):
         page.close()
 
 
+def _do_coupang_keywords(keyword: str) -> dict:
+    """쿠팡 자동완성 + 연관 키워드 수집"""
+    if not _ctx:
+        _start_browser()
+
+    # 쿠팡 도메인에서 API 호출해야 CORS 통과
+    page = _ctx.new_page()
+    try:
+        page.goto('https://www.coupang.com', wait_until='domcontentloaded', timeout=15000)
+        page.wait_for_timeout(2000)
+
+        # 1) 자동완성 API
+        autocomplete = page.evaluate('''(keyword) => {
+            return new Promise(resolve => {
+                fetch('https://www.coupang.com/api/v2/search/autocomplete?keyword=' + encodeURIComponent(keyword), {
+                    credentials: 'include',
+                    headers: { 'accept': 'application/json' }
+                })
+                .then(r => r.json())
+                .then(d => resolve(d))
+                .catch(e => resolve({error: e.toString()}));
+            });
+        }''', keyword)
+
+        autocomplete_keywords = []
+        if not autocomplete.get('error'):
+            # 자동완성 결과 파싱 — 구조는 다양할 수 있음
+            items = autocomplete.get('keywords', [])
+            if isinstance(items, list):
+                for item in items:
+                    if isinstance(item, str):
+                        autocomplete_keywords.append(item)
+                    elif isinstance(item, dict):
+                        kw = item.get('keyword') or item.get('name') or item.get('text', '')
+                        if kw:
+                            autocomplete_keywords.append(kw)
+
+        # 2) 연관 검색어 — 검색 결과 페이지의 연관 키워드
+        related_keywords = []
+        try:
+            page.goto(f'https://www.coupang.com/np/search?component=&q={keyword}',
+                       wait_until='domcontentloaded', timeout=15000)
+            page.wait_for_timeout(3000)
+
+            related_keywords = page.evaluate('''() => {
+                const keywords = [];
+                // 연관 검색어 영역
+                document.querySelectorAll('.search-related-keyword a, .related-search a, [class*="relatedKeyword"] a, [class*="related-keyword"] a').forEach(a => {
+                    const text = a.innerText?.trim();
+                    if (text && text.length > 1 && text.length < 30) {
+                        keywords.push(text);
+                    }
+                });
+                // 추천 검색어도 시도
+                if (keywords.length === 0) {
+                    document.querySelectorAll('[class*="recommend"] a, [class*="suggest"] a').forEach(a => {
+                        const text = a.innerText?.trim();
+                        if (text && text.length > 1 && text.length < 30 && /[가-힣]/.test(text)) {
+                            keywords.push(text);
+                        }
+                    });
+                }
+                return keywords;
+            }''')
+        except Exception as e:
+            logger.warning(f'연관 키워드 수집 실패: {e}')
+
+        logger.info(f'쿠팡 키워드 수집: {keyword} → 자동완성 {len(autocomplete_keywords)}개, 연관 {len(related_keywords)}개')
+        return {
+            'autocomplete': autocomplete_keywords,
+            'related': related_keywords
+        }
+    finally:
+        page.close()
+
+
 def _debug_first_li():
     """디버그: 페이지의 모든 listProducts 섹션 확인"""
     if not _page:
@@ -591,3 +669,7 @@ def get_wing_status():
         return _send('status', timeout=5)
     except:
         return {'logged_in': False, 'wing_ok': False, 'has_browser': False}
+
+
+def wing_coupang_keywords(keyword):
+    return _send('coupang_keywords', {'keyword': keyword}, timeout=60)
