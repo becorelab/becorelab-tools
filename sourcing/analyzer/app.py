@@ -191,6 +191,20 @@ def init_db():
             FOREIGN KEY (rfq_id) REFERENCES rfqs(id)
         );
 
+        -- 골드박스 일별 기록
+        CREATE TABLE IF NOT EXISTS goldbox_daily (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            crawled_date TEXT NOT NULL,          -- YYYY-MM-DD
+            product_name TEXT,
+            price INTEGER,
+            discount TEXT,
+            product_url TEXT,
+            extracted_keyword TEXT,
+            crawled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_goldbox_date ON goldbox_daily(crawled_date);
+
         -- 인덱스
         CREATE INDEX IF NOT EXISTS idx_scans_keyword ON market_scans(keyword);
         CREATE INDEX IF NOT EXISTS idx_scans_score ON market_scans(opportunity_score DESC);
@@ -726,6 +740,273 @@ def api_explore_start():
         'success': True,
         'message': f'{len(seeds)}개 시드로 카테고리 탐색 시작!'
     })
+
+
+# === 골드박스 ===
+GOLDBOX_URL = 'https://pages.coupang.com/p/121237?sourceType=gm_crm_goldbox&subSourceType=gm_crm_gwsrtcut'
+
+_goldbox_state = {
+    'running': False,
+    'phase': '',
+    'products': [],
+    'keywords': [],
+    'scanned': 0,
+    'total': 0,
+    'current': '',
+    'results': [],
+}
+
+
+@app.route('/api/goldbox/start', methods=['POST'])
+def api_goldbox_start():
+    """골드박스 수집 + 분석 시작"""
+    if _goldbox_state['running']:
+        return jsonify({'success': False, 'error': '이미 진행 중'})
+
+    data = request.get_json(silent=True) or {}
+    max_scan = data.get('max_scan', 15)
+
+    _goldbox_state.update({
+        'running': True, 'phase': 'crawling', 'products': [],
+        'keywords': [], 'scanned': 0, 'total': 0, 'current': '', 'results': [],
+    })
+
+    thread = threading.Thread(target=_run_goldbox, args=(max_scan,), daemon=True)
+    thread.start()
+    return jsonify({'success': True, 'message': '골드박스 수집 시작!'})
+
+
+@app.route('/api/goldbox/status')
+def api_goldbox_status():
+    return jsonify({
+        'success': True,
+        'phase': _goldbox_state['phase'],
+        'products': len(_goldbox_state['products']),
+        'scanned': _goldbox_state['scanned'],
+        'total': _goldbox_state['total'],
+        'current': _goldbox_state['current'],
+        'running': _goldbox_state['running'],
+        'result_count': len(_goldbox_state['results']),
+    })
+
+
+@app.route('/api/goldbox/products')
+def api_goldbox_products():
+    return jsonify({'success': True, 'products': _goldbox_state['products']})
+
+
+@app.route('/api/goldbox/history')
+def api_goldbox_history():
+    """골드박스 일별 기록"""
+    db = get_db()
+    # 날짜별 상품 수
+    dates = db.execute('''
+        SELECT crawled_date, COUNT(*) as count
+        FROM goldbox_daily
+        GROUP BY crawled_date
+        ORDER BY crawled_date DESC
+        LIMIT 30
+    ''').fetchall()
+    return jsonify({'success': True, 'dates': [dict(d) for d in dates]})
+
+
+@app.route('/api/goldbox/history/<date>')
+def api_goldbox_history_date(date):
+    """특정 날짜의 골드박스 상품"""
+    db = get_db()
+    products = db.execute('''
+        SELECT * FROM goldbox_daily
+        WHERE crawled_date = ?
+        ORDER BY id
+    ''', (date,)).fetchall()
+    return jsonify({'success': True, 'date': date, 'products': [dict(p) for p in products]})
+
+
+@app.route('/api/goldbox/results')
+def api_goldbox_results():
+    results = sorted(_goldbox_state['results'], key=lambda r: r.get('score', 0), reverse=True)
+    return jsonify({'success': True, 'results': results})
+
+
+def _run_goldbox(max_scan: int):
+    """골드박스 크롤링 → 키워드 추출 → 윙 스캔"""
+    with app.app_context():
+        try:
+            # Phase 1: 골드박스 페이지 크롤링
+            _goldbox_state['phase'] = 'crawling'
+            _goldbox_state['current'] = '골드박스 페이지 로딩...'
+
+            from analyzer.wing import _send
+            products = _send('goldbox_crawl', {'url': GOLDBOX_URL}, timeout=120)
+            _goldbox_state['products'] = products
+            _goldbox_state['current'] = f'{len(products)}개 상품 수집 완료'
+
+            # DB에 일별 저장
+            import re
+            today = datetime.now().strftime('%Y-%m-%d')
+            db = get_db()
+            for p in products:
+                words = re.findall(r'[가-힣]{2,6}', p.get('name', ''))
+                extracted = ' '.join(words[:3]) if words else ''
+                db.execute('''
+                    INSERT INTO goldbox_daily (crawled_date, product_name, price, discount, product_url, extracted_keyword)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (today, p.get('name', ''), p.get('price', 0), p.get('discount', ''), p.get('url', ''), extracted))
+            db.commit()
+            print(f'[GOLDBOX] {today} — {len(products)}개 상품 DB 저장')
+
+            if not products:
+                _goldbox_state['phase'] = 'error'
+                _goldbox_state['current'] = '상품을 찾을 수 없습니다'
+                return
+
+            # Phase 2: 키워드 추출
+            _goldbox_state['phase'] = 'extracting'
+            keywords = _extract_keywords_from_products(products)
+            _goldbox_state['keywords'] = keywords
+            _goldbox_state['total'] = min(len(keywords), max_scan)
+
+            # Phase 3: 윙 스캔
+            _goldbox_state['phase'] = 'scanning'
+            api = get_helpstore()
+            db = get_db()
+
+            for i, kw in enumerate(keywords[:max_scan]):
+                if not _goldbox_state['running']:
+                    break
+
+                _goldbox_state['current'] = kw
+                _goldbox_state['scanned'] = i
+
+                try:
+                    # 윙 스캔
+                    cursor = db.execute(
+                        "INSERT INTO market_scans (keyword, scan_type, status) VALUES (?, 'goldbox', 'scanning')",
+                        (kw,))
+                    db.commit()
+                    scan_id = cursor.lastrowid
+
+                    scan_products = wing_search(kw)
+
+                    for p in scan_products:
+                        db.execute('''
+                            INSERT INTO products (scan_id, ranking, product_name, brand,
+                                manufacturer, price, sales_monthly, revenue_monthly,
+                                review_count, click_count, conversion_rate, page_views,
+                                category, category_code, product_url)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ''', (scan_id, p.ranking, p.product_name, p.brand,
+                              p.manufacturer, p.price, p.sales_monthly,
+                              p.revenue_monthly, p.review_count, p.click_count,
+                              p.conversion_rate, p.page_views, p.category,
+                              p.category_code, p.product_url))
+
+                    related = api.get_related_keywords(kw)
+                    opp = calculate_opportunity(products=scan_products, related_keywords=related, keyword=kw)
+
+                    db.execute('''
+                        UPDATE market_scans SET status='scanned', category=?, opportunity_score=?,
+                            top10_avg_revenue=?, top10_avg_sales=?, top10_avg_price=?,
+                            revenue_concentration=?, revenue_equality=?,
+                            new_product_rate=?, ad_dependency=?,
+                            recommended_keyword=?, updated_at=CURRENT_TIMESTAMP
+                        WHERE id=?
+                    ''', (scan_products[0].category if scan_products else '', round(opp.total_score, 1),
+                          opp.top4_10_avg_revenue, opp.top4_10_avg_sales, opp.top4_10_avg_price,
+                          round(opp.top3_share*100, 1), round(opp.sellers_over_3m_rate*100, 1),
+                          round(opp.new_product_rate*100, 1), round(opp.avg_new_product_weight, 1),
+                          opp.recommended_keyword, scan_id))
+                    db.commit()
+
+                    _goldbox_state['results'].append({
+                        'scan_id': scan_id, 'keyword': kw,
+                        'score': round(opp.total_score, 1), 'grade': opp.grade,
+                        'top3_share': round(opp.top3_share*100, 1),
+                        'sellers_3m': opp.sellers_over_3m,
+                        'sellers_3m_rate': round(opp.sellers_over_3m_rate*100, 1),
+                        'entry_revenue': opp.top4_10_avg_revenue,
+                        'new_weight': round(opp.avg_new_product_weight, 1),
+                        'products': len(scan_products),
+                    })
+                except Exception as e:
+                    print(f'[GOLDBOX] 스캔 에러: {kw} — {e}')
+                    if 'LOGIN_REQUIRED' in str(e):
+                        _goldbox_state['phase'] = 'login_required'
+                        break
+
+                import time
+                time.sleep(2)
+
+            _goldbox_state['scanned'] = min(len(keywords), max_scan)
+            _goldbox_state['phase'] = 'done'
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            _goldbox_state['phase'] = 'error'
+            _goldbox_state['current'] = str(e)
+        finally:
+            _goldbox_state['running'] = False
+
+
+def _extract_keywords_from_products(products: list) -> list:
+    """
+    골드박스 상품명 → 헬프스토어 연관키워드 → 쇼핑 키워드 추출
+
+    핵심: 브랜드 키워드(셀렉스프로틴)가 아닌 제품군 키워드(단백질 쉐이크)를 찾기
+    방법: 상품명에서 개별 일반명사를 추출 → 헬프스토어 검색 → 쇼핑 키워드 수집
+    """
+    import re
+    api = get_helpstore()
+    shopping_keywords = {}
+    searched = set()
+
+    for p in products[:30]:
+        name = p.get('name', '')
+        words = re.findall(r'[가-힣]{2,6}', name)
+
+        for word in words:
+            # 이미 검색한 단어 스킵
+            if word in searched:
+                continue
+            searched.add(word)
+
+            # 1글자나 너무 일반적인 단어 스킵
+            if len(word) < 2:
+                continue
+            # 브랜드명 스킵 (상품명 첫 단어는 보통 브랜드)
+            if word == words[0] and len(words) > 2:
+                continue
+
+            try:
+                related = api.get_related_keywords(word)
+                for kw in related:
+                    if kw.is_brand:
+                        continue
+                    if kw.total_search < 3000:
+                        continue
+                    if kw.product_count < 100:
+                        continue
+                    if _is_noise_keyword(kw.keyword):
+                        continue
+                    # 브랜드명이 키워드에 포함되면 제외
+                    if words[0] in kw.keyword:
+                        continue
+                    if kw.keyword not in shopping_keywords:
+                        shopping_keywords[kw.keyword] = kw.total_search
+
+                import time
+                time.sleep(0.3)
+            except Exception:
+                pass
+
+    # 검색량 높은 순 정렬 + 중복 제거
+    sorted_kws = sorted(shopping_keywords.items(), key=lambda x: x[1], reverse=True)
+    result = [kw for kw, _ in sorted_kws]
+    print(f'[GOLDBOX] 상품 {len(products)}개 → 쇼핑 키워드 {len(result)}개 추출')
+    for kw, vol in sorted_kws[:10]:
+        print(f'  {kw}: {vol:,}')
+    return result
 
 
 # === 노이즈 키워드 필터 ===

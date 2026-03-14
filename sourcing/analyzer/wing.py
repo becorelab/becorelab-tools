@@ -66,6 +66,8 @@ def _worker_loop():
                 holder['result'] = {'logged_in': _logged_in, 'wing_ok': _wing_ok, 'has_browser': _ctx is not None}
             elif action == 'debug_html':
                 holder['result'] = _debug_first_li()
+            elif action == 'goldbox_crawl':
+                holder['result'] = _do_goldbox_crawl(args.get('url', ''))
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -356,6 +358,111 @@ def _do_search(keyword):
 
     logger.info(f'헬프스토어 파싱 완료: {keyword} → {len(products)}개')
     return products
+
+
+def _do_goldbox_crawl(url):
+    """골드박스 페이지 크롤링 → 상품 목록 추출"""
+    if not _ctx:
+        _start_browser()
+
+    page = _ctx.new_page()
+    try:
+        page.goto(url, wait_until='domcontentloaded', timeout=30000)
+        page.wait_for_timeout(5000)
+
+        # 스크롤로 lazy load 트리거
+        for _ in range(15):
+            page.evaluate('window.scrollBy(0, 1000)')
+            page.wait_for_timeout(800)
+        # 맨 위로 돌아가기
+        page.evaluate('window.scrollTo(0, 0)')
+        page.wait_for_timeout(1000)
+
+        # 먼저 페이지 HTML 구조 확인 (디버그)
+        html_sample = page.evaluate('() => document.body.innerHTML.substring(0, 500)')
+        logger.info(f'골드박스 페이지 샘플: {html_sample[:200]}')
+
+        # 상품 추출 — 쿠팡 상품 링크 기반
+        products = page.evaluate('''() => {
+            const items = [];
+            const seen = new Set();
+
+            // 방법1: 상품 링크 (coupang.com/vp/products/) 찾기
+            document.querySelectorAll('a[href*="/vp/products/"], a[href*="/pb/products/"]').forEach(a => {
+                const href = a.href || '';
+                // 중복 URL 제거
+                const pid = href.match(/products\/(\d+)/);
+                if (pid && seen.has(pid[1])) return;
+                if (pid) seen.add(pid[1]);
+
+                // 상품명: 링크 안의 이미지 alt 또는 텍스트
+                let name = '';
+                const img = a.querySelector('img');
+                if (img && img.alt && img.alt.length > 3) {
+                    name = img.alt.trim();
+                } else {
+                    // 부모 or 형제에서 텍스트 찾기
+                    const parent = a.closest('[class*="product"], [class*="item"], [class*="deal"], li, div');
+                    if (parent) {
+                        // 이름 후보: 가장 긴 텍스트 노드
+                        const texts = [];
+                        parent.querySelectorAll('span, p, div, strong, em').forEach(el => {
+                            const t = el.innerText?.trim();
+                            if (t && t.length > 5 && t.length < 100 && /[가-힣]/.test(t)) {
+                                texts.push(t);
+                            }
+                        });
+                        if (texts.length > 0) {
+                            name = texts.sort((a,b) => b.length - a.length)[0];
+                        }
+                    }
+                    if (!name) {
+                        name = a.innerText?.trim().substring(0, 80);
+                    }
+                }
+
+                // 필터: 진짜 상품인지 확인
+                if (!name || name.length < 4) return;
+                if (!/[가-힣]/.test(name)) return;  // 한글 없으면 제외
+                if (/전체|삭제|검색|필터|더보기|로그인|장바구니|카테고리/.test(name)) return;
+
+                // 가격 찾기
+                let price = 0;
+                let discount = '';
+                const parent = a.closest('[class*="product"], [class*="item"], [class*="deal"], li, div');
+                if (parent) {
+                    const priceTexts = parent.innerText.match(/[\d,]+원/g);
+                    if (priceTexts) {
+                        price = parseInt(priceTexts[0].replace(/[^0-9]/g, '')) || 0;
+                    }
+                    const discMatch = parent.innerText.match(/(\d+)%/);
+                    if (discMatch) discount = discMatch[0];
+                }
+
+                items.push({ name, price, discount, url: href });
+            });
+
+            return items;
+        }''')
+
+        # 추가 필터: 너무 짧거나 중복 이름 제거
+        seen_names = set()
+        filtered = []
+        for p in products:
+            name = p.get('name', '').strip()
+            if len(name) < 5:
+                continue
+            # 이름 앞 20자로 중복 체크
+            key = name[:20]
+            if key in seen_names:
+                continue
+            seen_names.add(key)
+            filtered.append(p)
+
+        logger.info(f'골드박스 {len(filtered)}개 상품 수집 (원본 {len(products)}개)')
+        return filtered
+    finally:
+        page.close()
 
 
 def _debug_first_li():

@@ -84,9 +84,9 @@ def calculate_opportunity(products: list, inflow_keywords: list = None,
     if total_revenue > 0:
         score.top3_share = score.top3_revenue_sum / total_revenue
 
-    # 점수: 상위3 점유율 50% 미만 = 100점, 80% 이상 = 0점
+    # 점수: 상위3 점유율 30% 미만 = 100점, 80% 이상 = 0점
     score.concentration_score = max(0, min(100,
-        (0.80 - score.top3_share) / 0.30 * 100
+        (0.80 - score.top3_share) / 0.50 * 100
     ))
 
     # ─── 2. 시장 활성도 (25%) ───
@@ -94,9 +94,9 @@ def calculate_opportunity(products: list, inflow_keywords: list = None,
     score.sellers_over_3m = sum(1 for p in sorted_products if p.revenue_monthly >= 3_000_000)
     score.sellers_over_3m_rate = score.sellers_over_3m / len(sorted_products) if sorted_products else 0
 
-    # 점수: 50% 이상 = 100점, 15% 이하 = 0점
+    # 점수: 65% 이상 = 100점, 15% 이하 = 0점
     score.activity_score = max(0, min(100,
-        (score.sellers_over_3m_rate - 0.15) / 0.35 * 100
+        (score.sellers_over_3m_rate - 0.15) / 0.50 * 100
     ))
 
     # ─── 3. 진입 기대 매출 (20%) ───
@@ -111,11 +111,11 @@ def calculate_opportunity(products: list, inflow_keywords: list = None,
         score.top4_10_avg_sales = int(sum(sales) / len(sales))
         score.top4_10_avg_price = int(sum(prices) / len(prices)) if prices else 0
 
-    # 점수: 1,000만원 이상 = 100점, 100만원 이하 = 0점 (로그 스케일)
+    # 점수: 5,000만원 이상 = 100점, 100만원 이하 = 0점 (로그 스케일)
     if score.top4_10_avg_revenue > 0:
         score.entry_revenue_score = max(0, min(100,
             (math.log10(max(score.top4_10_avg_revenue, 1)) - math.log10(1_000_000)) /
-            (math.log10(10_000_000) - math.log10(1_000_000)) * 100
+            (math.log10(50_000_000) - math.log10(1_000_000)) * 100
         ))
 
     # ─── 4. 시장 수요 신호 (15%) ───
@@ -133,9 +133,9 @@ def calculate_opportunity(products: list, inflow_keywords: list = None,
     score.avg_new_product_weight = sum(weights) / len(weights) if weights else 0
 
     # 점수: 신상품 진입률 + 신상품 가중치 조합
-    # 진입률 30%+ = 50점, 가중치 50+ = 50점
-    rate_score = min(50, score.new_product_rate / 0.30 * 50)
-    weight_score = min(50, score.avg_new_product_weight / 50 * 50)
+    # 진입률 40%+ = 50점, 가중치 100+ = 50점
+    rate_score = min(50, score.new_product_rate / 0.40 * 50)
+    weight_score = min(50, score.avg_new_product_weight / 100 * 50)
     score.demand_signal_score = rate_score + weight_score
 
     # ─── 보조 지표 (표시용) ───
