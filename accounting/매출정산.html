@@ -312,9 +312,9 @@ tr:hover td{background:#1a1d2788;}
   <aside class="sidebar">
     <div class="sidebar-label">채널 현황</div>
     <div class="sidebar-section" id="sidebarChannels"></div>
-    <div class="sidebar-label" style="margin-top:8px;">정산 합계</div>
+    <div class="sidebar-label" style="margin-top:8px;">매출 합계</div>
     <div class="sidebar-total">
-      <div class="label">총 정산금액</div>
+      <div class="label">총 매출금액</div>
       <div class="val" id="sidebarTotal">₩ 0</div>
       <div class="sub" id="sidebarProfit">이익 ₩ 0</div>
     </div>
@@ -373,7 +373,7 @@ tr:hover td{background:#1a1d2788;}
 
     <!-- STEP 4: 결과 -->
     <div class="consolidated" id="resultSection" style="display:none;">
-      <h2>📈 정산 종합 결과 <span style="font-size:.75rem;color:#64748b;font-weight:400;" id="resultMonth"></span></h2>
+      <h2>📈 매출 종합 결과 <span style="font-size:.75rem;color:#64748b;font-weight:400;" id="resultMonth"></span></h2>
       <div class="skill-badges">
         <span class="skill-badge excel">ExcelJS 서식 내보내기</span>
         <span class="skill-badge edit">Jspreadsheet 인라인 편집</span>
@@ -585,17 +585,25 @@ function fmtRate(n) {
 
 function renderSidebar() {
   const container = document.getElementById('sidebarChannels');
-  container.innerHTML = CHANNEL_DEFS.map(ch => {
+  // 매출순 정렬: 데이터 있는 채널 먼저 (매출 내림차순), 없는 채널은 뒤에
+  const sorted = [...CHANNEL_DEFS].sort((a, b) => {
+    const aRev = state.channels[a.id] ? (state.channels[a.id].aggregated || []).reduce((s,r) => s + (r.정산금액||0), 0) : -1;
+    const bRev = state.channels[b.id] ? (state.channels[b.id].aggregated || []).reduce((s,r) => s + (r.정산금액||0), 0) : -1;
+    return bRev - aRev;
+  });
+  container.innerHTML = sorted.map(ch => {
     const d = state.channels[ch.id];
-    let cls = '', label = '대기';
+    let cls = '', label = '대기', revText = '';
     if (d) {
       const hasUnmapped = d.unmapped && d.unmapped.length > 0;
       cls = hasUnmapped ? 'warn' : 'done';
       label = hasUnmapped ? `미매핑 ${d.unmapped.length}` : '완료';
+      const rev = (d.aggregated || []).reduce((s,r) => s + (r.정산금액||0), 0);
+      if (rev > 0) revText = `<div style="font-size:.65rem;color:#64748b;">₩${fmt(rev)}</div>`;
     }
-    return `<div class="ch-item" onclick="openChannelModal('${ch.id}')" style="cursor:pointer;">
+    return `<div class="ch-item" onclick="openChannelModal('${ch.id}')" style="cursor:pointer;" title="${ch.name} 상세 분석">
       <div class="ch-icon">${ch.icon}</div>
-      <div class="ch-name">${ch.name}</div>
+      <div class="ch-name">${ch.name}${revText}</div>
       <div class="ch-status ${cls}" title="${label}"></div>
     </div>`;
   }).join('');
@@ -1602,9 +1610,9 @@ function renderResults() {
   const profitRate = totalSett > 0 ? totalProfit / totalSett : 0;
 
   document.getElementById('sumCards').innerHTML = `
-    <div class="sum-card"><div class="val">₩${fmt(totalSett)}</div><div class="lbl">총 정산금액</div></div>
+    <div class="sum-card"><div class="val">₩${fmt(totalSett)}</div><div class="lbl">총 매출금액</div></div>
     <div class="sum-card"><div class="val" style="color:#0284c7;">${fmt(totalQty)}개</div><div class="lbl">총 판매수량</div></div>
-    <div class="sum-card"><div class="val" style="color:${totalProfit>=0?'#10b981':'#ef4444'};">₩${fmt(totalProfit)}</div><div class="lbl">총 이익 (정산기준)</div></div>
+    <div class="sum-card"><div class="val" style="color:${totalProfit>=0?'#10b981':'#ef4444'};">₩${fmt(totalProfit)}</div><div class="lbl">총 이익</div></div>
     <div class="sum-card"><div class="val" style="color:${profitRate>=0.2?'#10b981':profitRate>=0?'#f59e0b':'#ef4444'};">${fmtRate(profitRate)}</div><div class="lbl">이익률</div></div>
   `;
 
@@ -1640,15 +1648,15 @@ function openChannelModal(channelId) {
   const def = CHANNEL_DEFS.find(d => d.id === channelId);
   if (!def) return;
   const ch = state.channels[channelId];
-  if (!ch) return;
+  const channelName = ch ? ch.name : def.name;
 
-  state.detailChannel = ch.name;
+  state.detailChannel = channelName;
   const overlay = document.getElementById('channelModalOverlay');
-  document.getElementById('channelModalTitle').textContent = def.icon + ' ' + ch.name + ' 상세 분석';
+  document.getElementById('channelModalTitle').textContent = def.icon + ' ' + channelName + ' 상세 분석';
   overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  renderModalContent(ch.name);
+  renderModalContent(channelName);
 }
 
 function closeChannelModal() {
@@ -1664,9 +1672,18 @@ document.addEventListener('keydown', function(e) {
 
 function renderModalContent(channelName) {
   const ch = Object.values(state.channels).find(c => c.name === channelName);
-  if (!ch) return;
+  const data = ch ? (ch.aggregated || []).slice().sort((a, b) => b.정산금액 - a.정산금액) : [];
 
-  const data = (ch.aggregated || []).slice().sort((a, b) => b.정산금액 - a.정산금액);
+  // 데이터 없으면 과거 데이터만 표시
+  if (!ch || data.length === 0) {
+    document.getElementById('modalKpiRow').innerHTML = `
+      <div class="detail-kpi"><div class="detail-kpi-val">-</div><div class="detail-kpi-label">이번 달 데이터 없음</div></div>`;
+    document.getElementById('modalProductList').innerHTML = '<p style="color:#64748b;padding:20px;">이번 달 매출 데이터가 없습니다. 과거 데이터는 아래 트렌드에서 확인하세요.</p>';
+    document.getElementById('modalInsights').innerHTML = '';
+    // 과거 트렌드는 로드 시도
+    loadChannelHistoryModal(channelName);
+    return;
+  }
 
   // KPI Summary
   let totalSett = 0, totalQty = 0, totalCost = 0, totalProfit = 0;
@@ -2982,7 +2999,7 @@ async function loadMonthlyRecords() {
         </div>
         <div class="record-body" id="recordBody-${monthId}">
           <div class="record-summary">
-            <div class="record-stat"><div class="rv">₩${fmt(ts.settlement || 0)}</div><div class="rl">총 정산금액</div></div>
+            <div class="record-stat"><div class="rv">₩${fmt(ts.settlement || 0)}</div><div class="rl">총 매출금액</div></div>
             <div class="record-stat"><div class="rv" style="color:#0284c7;">${fmt(ts.qty || 0)}개</div><div class="rl">총 판매수량</div></div>
             <div class="record-stat"><div class="rv" style="color:${profitColor};">₩${fmt(ts.profit || 0)}</div><div class="rl">총 이익</div></div>
             <div class="record-stat"><div class="rv" style="color:${profitColor};">${profitRate}</div><div class="rl">이익률</div></div>
