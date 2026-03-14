@@ -269,34 +269,10 @@ tr:hover td{background:#1a1d2788;}
     <!-- INPUT SECTION -->
     <div id="inputSection">
 
-    <!-- STEP 1: 원가 파일 -->
-    <div class="step-card">
-      <div class="step-header" onclick="toggleStep(1)">
-        <div class="step-num" id="stepNum1">1</div>
-        <div>
-          <div class="step-title">원가 파일 업로드</div>
-          <div style="font-size:.75rem;color:#64748b;margin-top:2px;">「온라인 매출정산.xlsx」의 원가 시트를 불러옵니다</div>
-        </div>
-        <div class="step-sub" id="costStatus">⏳ 대기 중</div>
-      </div>
-      <div class="step-body open" id="stepBody1">
-        <div class="drop-zone" id="costDrop">
-          <input type="file" accept=".xlsx,.xls" onchange="loadCostFile(this)"/>
-          <div class="icon">📂</div>
-          <p><strong>온라인 매출정산.xlsx</strong> 파일을 여기에 드롭하거나 클릭해서 선택하세요</p>
-          <p style="margin-top:6px;font-size:.72rem;">원가 시트의 제품명 → 판관비포함원가(부가세포함) 데이터를 읽습니다</p>
-        </div>
-        <div id="costResult" style="display:none;margin-top:12px;">
-          <div id="costSummary" style="display:flex;align-items:center;gap:10px;"></div>
-          <div id="costDetailWrap" style="display:none;max-height:260px;overflow-y:auto;border-radius:6px;margin-top:8px;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- STEP 2: 채널 파일 -->
+    <!-- 채널 파일 업로드 -->
     <div class="step-card">
       <div class="step-header" onclick="toggleStep(2)">
-        <div class="step-num" id="stepNum2">2</div>
+        <div class="step-num" id="stepNum2">1</div>
         <div>
           <div class="step-title">채널별 정산 파일 업로드</div>
           <div style="font-size:.75rem;color:#64748b;margin-top:2px;">각 채널의 원본 파일을 올리면 자동으로 상품명 매핑 + 정산금 계산</div>
@@ -313,7 +289,7 @@ tr:hover td{background:#1a1d2788;}
       </div>
     </div>
 
-    <!-- STEP 3: 미매핑 처리 -->
+    <!-- STEP 2: 미매핑 처리 -->
     <div class="step-card" id="step3Card" style="display:none;">
       <div class="step-header" onclick="toggleStep(3)">
         <div class="step-num" id="stepNum3">3</div>
