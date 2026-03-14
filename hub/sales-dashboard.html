@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>iLBiA 매출 대시보드</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e17;--card:#12172b;--border:#1e293b;
+  --text:#e2e8f0;--text-dim:#94a3b8;--text-muted:#64748b;
+  --teal:#14b8a6;--teal-dim:#0d9488;--teal-bg:rgba(20,184,166,.12);
+  --green:#22c55e;--red:#ef4444;--yellow:#eab308;--blue:#3b82f6;
+  --radius:5px;
+}
+html{font-size:14px}
+body{
+  font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text);
+  min-height:100vh;line-height:1.5;
+}
+a{color:var(--teal);text-decoration:none}
+
+/* Layout */
+.container{max-width:1440px;margin:0 auto;padding:20px 24px 60px}
+
+/* Header */
+.header{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  padding:16px 0 24px;border-bottom:1px solid var(--border);margin-bottom:24px;
+}
+.header-left{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.header h1{font-size:1.5rem;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
+.header h1 span{color:var(--teal);font-weight:800}
+.month-selector{
+  background:var(--card);border:1px solid var(--border);color:var(--text);
+  padding:8px 14px;border-radius:var(--radius);font-family:inherit;font-size:.9rem;
+  cursor:pointer;outline:none;
+}
+.month-selector:focus{border-color:var(--teal)}
+.header-right{display:flex;align-items:center;gap:12px}
+.user-info{font-size:.85rem;color:var(--text-dim)}
+.btn{
+  padding:8px 18px;border:1px solid var(--border);border-radius:var(--radius);
+  background:var(--card);color:var(--text);font-family:inherit;font-size:.85rem;
+  cursor:pointer;transition:all .2s;
+}
+.btn:hover{border-color:var(--teal);color:var(--teal)}
+.btn-primary{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
+.btn-primary:hover{background:var(--teal-dim)}
+
+/* Loading */
+.loading-overlay{
+  position:fixed;inset:0;background:rgba(10,14,23,.85);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+}
+.loading-overlay.hidden{display:none}
+.spinner{
+  width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--teal);
+  border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:var(--text-dim);font-size:.9rem}
+
+/* Login */
+.login-screen{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:80vh;gap:20px;
+}
+.login-screen h2{font-size:1.3rem;font-weight:600}
+.login-screen p{color:var(--text-dim);font-size:.9rem}
+.login-screen.hidden{display:none}
+.dashboard.hidden{display:none}
+
+/* KPI Cards */
+.kpi-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;
+}
+.kpi-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px 22px;position:relative;overflow:hidden;
+}
+.kpi-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--teal),transparent);
+}
+.kpi-label{font-size:.8rem;color:var(--text-muted);margin-bottom:6px;font-weight:500}
+.kpi-value{font-size:1.6rem;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+.kpi-change{font-size:.78rem;font-weight:500;display:flex;align-items:center;gap:4px}
+.kpi-change.up{color:var(--green)}
+.kpi-change.down{color:var(--red)}
+.kpi-change.neutral{color:var(--text-muted)}
+
+/* Charts Grid */
+.charts-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;
+}
+.chart-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;
+}
+.chart-card h3{font-size:.95rem;font-weight:600;margin-bottom:16px;color:var(--text)}
+.chart-wrap{position:relative;width:100%;height:280px}
+.chart-wrap canvas{width:100%!important;height:100%!important}
+
+/* Section Title */
+.section-title{
+  font-size:1.1rem;font-weight:700;margin:32px 0 16px;
+  padding-left:10px;border-left:3px solid var(--teal);
+}
+
+/* Table */
+.table-wrap{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  overflow-x:auto;margin-bottom:24px;
+}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+thead th{
+  text-align:left;padding:12px 14px;color:var(--text-muted);font-weight:600;
+  border-bottom:1px solid var(--border);white-space:nowrap;font-size:.78rem;
+  text-transform:uppercase;letter-spacing:.04em;
+}
+thead th.right,tbody td.right{text-align:right}
+tbody tr{border-bottom:1px solid rgba(30,41,59,.5);transition:background .15s}
+tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
+tbody tr:hover{background:rgba(20,184,166,.06)}
+tbody td{padding:10px 14px;white-space:nowrap}
+.change-up{color:var(--green);font-weight:500}
+.change-down{color:var(--red);font-weight:500}
+
+/* Product Analysis */
+.product-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;
+}
+.product-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;
+}
+.product-card h3{font-size:.95rem;font-weight:600;margin-bottom:16px}
+
+.margin-list{max-height:420px;overflow-y:auto}
+.margin-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 10px;border-bottom:1px solid rgba(30,41,59,.4);font-size:.83rem;
+}
+.margin-item:last-child{border-bottom:none}
+.margin-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:12px}
+.margin-bar-wrap{width:80px;height:6px;background:var(--border);border-radius:3px;margin-right:10px}
+.margin-bar{height:100%;border-radius:3px}
+.margin-val{width:52px;text-align:right;font-weight:600;font-size:.82rem}
+
+/* Placeholder */
+.placeholder-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;
+}
+.placeholder-card{
+  background:var(--card);border:1px dashed var(--border);border-radius:var(--radius);
+  padding:40px 20px;text-align:center;
+}
+.placeholder-card h3{font-size:.95rem;font-weight:600;margin-bottom:8px;color:var(--text-dim)}
+.placeholder-card p{font-size:.82rem;color:var(--text-muted)}
+
+/* Empty State */
+.empty-state{
+  text-align:center;padding:60px 20px;color:var(--text-muted);
+}
+.empty-state p{font-size:.95rem;margin-bottom:6px}
+
+/* Responsive */
+@media(max-width:1024px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .charts-grid,.product-grid,.placeholder-grid{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .kpi-grid{grid-template-columns:1fr}
+  .header{flex-direction:column;align-items:flex-start}
+  .container{padding:12px 14px 40px}
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">데이터를 불러오는 중...</div>
+</div>
+
+<div class="container">
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <h2>iLBiA 매출 대시보드</h2>
+    <p>Google 계정으로 로그인하여 매출 데이터를 확인하세요.</p>
+    <button class="btn btn-primary" onclick="signIn()">Google 로그인</button>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="dashboard hidden" id="dashboard">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <h1><span>iLBiA</span> 매출 대시보드</h1>
+        <input type="month" class="month-selector" id="monthSelector">
+      </div>
+      <div class="header-right">
+        <span class="user-info" id="userInfo"></span>
+        <button class="btn" onclick="signOut()">로그아웃</button>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi-card">
+        <div class="kpi-label">이번 달 매출</div>
+        <div class="kpi-value" id="kpiRevenue">-</div>
+        <div class="kpi-change neutral" id="kpiRevenueChange">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">판매수량</div>
+        <div class="kpi-value" id="kpiQty">-</div>
+        <div class="kpi-change neutral" id="kpiQtyChange">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">평균 객단가</div>
+        <div class="kpi-value" id="kpiAOV">-</div>
+        <div class="kpi-change neutral" id="kpiAOVChange">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">영업이익률</div>
+        <div class="kpi-value" id="kpiMargin">-</div>
+        <div class="kpi-change neutral" id="kpiMarginChange">-</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>월별 매출 추이</h3>
+        <div class="chart-wrap"><canvas id="chartTrend"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>채널별 매출 비교</h3>
+        <div class="chart-wrap"><canvas id="chartChannelBar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>채널별 매출 비중</h3>
+        <div class="chart-wrap"><canvas id="chartChannelDonut"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>제품별 매출 TOP 10</h3>
+        <div class="chart-wrap"><canvas id="chartProductTop"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Channel Table -->
+    <h2 class="section-title">채널별 현황</h2>
+    <div class="table-wrap">
+      <table id="channelTable">
+        <thead>
+          <tr>
+            <th>채널</th>
+            <th class="right">매출</th>
+            <th class="right">판매수량</th>
+            <th class="right">객단가</th>
+            <th class="right">원가합계</th>
+            <th class="right">순이익</th>
+            <th class="right">이익률</th>
+            <th class="right">전월비</th>
+          </tr>
+        </thead>
+        <tbody id="channelTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Product Analysis -->
+    <h2 class="section-title">제품별 분석</h2>
+    <div class="product-grid">
+      <div class="product-card">
+        <h3>제품별 판매량 랭킹 (Top 15)</h3>
+        <div class="chart-wrap" style="height:380px"><canvas id="chartProductRank"></canvas></div>
+      </div>
+      <div class="product-card">
+        <h3>제품별 마진율</h3>
+        <div class="margin-list" id="marginList"></div>
+      </div>
+    </div>
+
+    <!-- Marketing Placeholder -->
+    <h2 class="section-title">마케팅 성과</h2>
+    <div class="placeholder-grid">
+      <div class="placeholder-card">
+        <h3>ROAS (광고 수익률)</h3>
+        <p>데이터 연동 준비 중</p>
+      </div>
+      <div class="placeholder-card">
+        <h3>신규 vs 재구매</h3>
+        <p>데이터 연동 준비 중</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─── Firebase Init ───
+const firebaseConfig = {
+  apiKey: "AIzaSyA9hNsb_TYqIumJMFjRmfC-vYdbmrL5bwo",
+  authDomain: "becorelab-tools.firebaseapp.com",
+  projectId: "becorelab-tools",
+  storageBucket: "becorelab-tools.firebasestorage.app",
+  messagingSenderId: "412290833122",
+  appId: "1:412290833122:web:2c2e40d0e2e1807aba9821"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+// ─── State ───
+let currentUser = null;
+let allMonthsData = {};
+let chartInstances = {};
+
+// ─── Utils ───
+const fmt = n => {
+  if (n == null || isNaN(n)) return '-';
+  if (Math.abs(n) >= 1e8) return (n / 1e8).toFixed(1) + '억';
+  if (Math.abs(n) >= 1e4) return (n / 1e4).toFixed(0) + '만';
+  return n.toLocaleString('ko-KR');
+};
+const fmtFull = n => (n == null || isNaN(n)) ? '-' : n.toLocaleString('ko-KR');
+const fmtPct = n => (n == null || isNaN(n)) ? '-' : n.toFixed(1) + '%';
+const prevMonth = ym => {
+  const [y, m] = ym.split('-').map(Number);
+  const d = new Date(y, m - 2, 1);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+};
+const getMonthsRange = (ym, count) => {
+  const months = [];
+  let [y, m] = ym.split('-').map(Number);
+  for (let i = 0; i < count; i++) {
+    months.unshift(y + '-' + String(m).padStart(2, '0'));
+    m--; if (m < 1) { m = 12; y--; }
+  }
+  return months;
+};
+
+// ─── Channel Colors ───
+const CHANNEL_COLORS = [
+  '#14b8a6','#3b82f6','#a855f7','#f97316','#ec4899',
+  '#eab308','#22c55e','#ef4444','#06b6d4','#8b5cf6',
+  '#f43f5e','#84cc16','#d946ef','#0ea5e9','#fb923c',
+  '#64748b','#fbbf24','#4ade80'
+];
+
+// ─── Auth ───
+function signIn() {
+  auth.signInWithPopup(provider).catch(e => alert('로그인 실패: ' + e.message));
+}
+function signOut() {
+  auth.signOut();
+}
+auth.onAuthStateChanged(user => {
+  currentUser = user;
+  if (user) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    document.getElementById('userInfo').textContent = user.displayName || user.email;
+    initMonth();
+    loadAllData();
+  } else {
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('dashboard').classList.add('hidden');
+    hideLoading();
+  }
+});
+
+// ─── Month Selector ───
+function initMonth() {
+  const sel = document.getElementById('monthSelector');
+  const now = new Date();
+  sel.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  sel.addEventListener('change', () => loadAllData());
+}
+function getSelectedMonth() {
+  return document.getElementById('monthSelector').value;
+}
+
+// ─── Data Loading ───
+async function loadMonthData(userId, ym) {
+  if (allMonthsData[ym] !== undefined) return allMonthsData[ym];
+  try {
+    const doc = await db.collection('settlements').doc(userId)
+      .collection('months').doc(ym).get();
+    allMonthsData[ym] = doc.exists ? doc.data() : null;
+  } catch (e) {
+    console.warn('Load error for', ym, e);
+    allMonthsData[ym] = null;
+  }
+  return allMonthsData[ym];
+}
+
+async function loadAllData() {
+  if (!currentUser) return;
+  showLoading();
+  const uid = currentUser.uid;
+  const ym = getSelectedMonth();
+  const months = getMonthsRange(ym, 12);
+  allMonthsData = {};
+  await Promise.all(months.map(m => loadMonthData(uid, m)));
+  renderAll(ym, months);
+  hideLoading();
+}
+
+function showLoading() { document.getElementById('loadingOverlay').classList.remove('hidden'); }
+function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
+
+// ─── Extraction Helpers ───
+function extractSummary(data) {
+  if (!data || !data.summary) return { totalSettlement: 0, totalCost: 0, totalProfit: 0, profitRate: 0, totalQty: 0 };
+  const s = data.summary;
+  return {
+    totalSettlement: Number(s.totalSettlement) || 0,
+    totalCost: Number(s.totalCost) || 0,
+    totalProfit: Number(s.totalProfit) || 0,
+    profitRate: Number(s.profitRate) || 0,
+    totalQty: Number(s.totalQty) || 0
+  };
+}
+
+function extractChannels(data) {
+  if (!data || !data.channels) return {};
+  const result = {};
+  for (const [ch, val] of Object.entries(data.channels)) {
+    const items = val.aggregated || [];
+    let revenue = 0, qty = 0, cost = 0, profit = 0;
+    items.forEach(it => {
+      revenue += Number(it['정산금액']) || 0;
+      qty += Number(it['수량']) || 0;
+      cost += Number(it['원가합계']) || 0;
+      profit += Number(it['이익']) || 0;
+    });
+    result[ch] = { revenue, qty, cost, profit, margin: revenue ? (profit / revenue * 100) : 0 };
+  }
+  return result;
+}
+
+function extractProducts(data) {
+  if (!data || !data.channels) return [];
+  const map = {};
+  for (const [ch, val] of Object.entries(data.channels)) {
+    (val.aggregated || []).forEach(it => {
+      const name = it['최종상품명'] || '(미분류)';
+      if (!map[name]) map[name] = { name, revenue: 0, qty: 0, cost: 0, profit: 0 };
+      map[name].revenue += Number(it['정산금액']) || 0;
+      map[name].qty += Number(it['수량']) || 0;
+      map[name].cost += Number(it['원가합계']) || 0;
+      map[name].profit += Number(it['이익']) || 0;
+    });
+  }
+  const arr = Object.values(map);
+  arr.forEach(p => { p.margin = p.revenue ? (p.profit / p.revenue * 100) : 0; });
+  return arr;
+}
+
+// ─── Render All ───
+function renderAll(ym, months) {
+  const cur = allMonthsData[ym];
+  const prev = allMonthsData[prevMonth(ym)];
+  renderKPI(cur, prev);
+  renderTrendChart(months);
+  renderChannelCharts(cur);
+  renderChannelTable(cur, prev);
+  renderProductAnalysis(cur);
+}
+
+// ─── KPI ───
+function renderKPI(cur, prev) {
+  const s = extractSummary(cur);
+  const p = extractSummary(prev);
+
+  setKPI('kpiRevenue', fmtFull(s.totalSettlement) + '원', 'kpiRevenueChange', s.totalSettlement, p.totalSettlement);
+  setKPI('kpiQty', fmtFull(s.totalQty) + '개', 'kpiQtyChange', s.totalQty, p.totalQty);
+
+  const aov = s.totalQty ? Math.round(s.totalSettlement / s.totalQty) : 0;
+  const prevAov = p.totalQty ? Math.round(p.totalSettlement / p.totalQty) : 0;
+  setKPI('kpiAOV', fmtFull(aov) + '원', 'kpiAOVChange', aov, prevAov);
+
+  const margin = s.totalSettlement ? (s.totalProfit / s.totalSettlement * 100) : 0;
+  const prevMargin = p.totalSettlement ? (p.totalProfit / p.totalSettlement * 100) : 0;
+  document.getElementById('kpiMargin').textContent = fmtPct(margin);
+  const mDiff = margin - prevMargin;
+  const mEl = document.getElementById('kpiMarginChange');
+  if (!cur || !prev) { mEl.textContent = '-'; mEl.className = 'kpi-change neutral'; }
+  else {
+    const arrow = mDiff > 0 ? '▲' : mDiff < 0 ? '▼' : '―';
+    mEl.textContent = arrow + ' ' + Math.abs(mDiff).toFixed(1) + '%p';
+    mEl.className = 'kpi-change ' + (mDiff > 0 ? 'up' : mDiff < 0 ? 'down' : 'neutral');
+  }
+}
+
+function setKPI(valId, valText, changeId, cur, prev) {
+  document.getElementById(valId).textContent = valText;
+  const el = document.getElementById(changeId);
+  if (!prev || prev === 0) { el.textContent = '-'; el.className = 'kpi-change neutral'; return; }
+  const pct = ((cur - prev) / prev * 100);
+  const arrow = pct > 0 ? '▲' : pct < 0 ? '▼' : '―';
+  el.textContent = arrow + ' ' + Math.abs(pct).toFixed(1) + '%';
+  el.className = 'kpi-change ' + (pct > 0 ? 'up' : pct < 0 ? 'down' : 'neutral');
+}
+
+// ─── Trend Chart ───
+function renderTrendChart(months) {
+  const labels = months.map(m => {
+    const [y, mo] = m.split('-');
+    return mo + '월';
+  });
+  const revenues = months.map(m => {
+    const s = extractSummary(allMonthsData[m]);
+    return s.totalSettlement;
+  });
+  const profits = months.map(m => {
+    const s = extractSummary(allMonthsData[m]);
+    return s.totalProfit;
+  });
+
+  destroyChart('chartTrend');
+  chartInstances['chartTrend'] = new Chart(document.getElementById('chartTrend'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: '매출',
+          data: revenues,
+          borderColor: '#14b8a6',
+          backgroundColor: 'rgba(20,184,166,.1)',
+          fill: true,
+          tension: .35,
+          pointRadius: 4,
+          pointBackgroundColor: '#14b8a6',
+          borderWidth: 2
+        },
+        {
+          label: '순이익',
+          data: profits,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,.08)',
+          fill: true,
+          tension: .35,
+          pointRadius: 3,
+          pointBackgroundColor: '#3b82f6',
+          borderWidth: 2
+        }
+      ]
+    },
+    options: chartOptions({ yCallback: v => fmt(v) + '원' })
+  });
+}
+
+// ─── Channel Charts ───
+function renderChannelCharts(data) {
+  const channels = extractChannels(data);
+  const sorted = Object.entries(channels).sort((a, b) => b[1].revenue - a[1].revenue);
+  const labels = sorted.map(e => e[0]);
+  const revenues = sorted.map(e => e[1].revenue);
+  const colors = labels.map((_, i) => CHANNEL_COLORS[i % CHANNEL_COLORS.length]);
+
+  // Horizontal Bar
+  destroyChart('chartChannelBar');
+  chartInstances['chartChannelBar'] = new Chart(document.getElementById('chartChannelBar'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label: '매출', data: revenues, backgroundColor: colors, borderRadius: 3, barThickness: 18 }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => fmtFull(ctx.raw) + '원' } } },
+      scales: {
+        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', callback: v => fmt(v) } },
+        y: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } }
+      }
+    }
+  });
+
+  // Donut
+  destroyChart('chartChannelDonut');
+  chartInstances['chartChannelDonut'] = new Chart(document.getElementById('chartChannelDonut'), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data: revenues, backgroundColor: colors, borderWidth: 0 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 11 }, padding: 8, boxWidth: 12 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+              const pct = total ? (ctx.raw / total * 100).toFixed(1) : 0;
+              return ctx.label + ': ' + fmtFull(ctx.raw) + '원 (' + pct + '%)';
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Product Top 10 (stacked bar)
+  const products = extractProducts(data).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
+  destroyChart('chartProductTop');
+  chartInstances['chartProductTop'] = new Chart(document.getElementById('chartProductTop'), {
+    type: 'bar',
+    data: {
+      labels: products.map(p => p.name.length > 14 ? p.name.slice(0, 14) + '…' : p.name),
+      datasets: [
+        { label: '원가', data: products.map(p => p.cost), backgroundColor: '#ef4444aa', borderRadius: 2 },
+        { label: '이익', data: products.map(p => p.profit), backgroundColor: '#14b8a6cc', borderRadius: 2 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#94a3b8', font: { size: 11 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtFull(ctx.raw) + '원' } }
+      },
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 }, maxRotation: 45 } },
+        y: { stacked: true, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', callback: v => fmt(v) } }
+      }
+    }
+  });
+}
+
+// ─── Channel Table ───
+function renderChannelTable(curData, prevData) {
+  const cur = extractChannels(curData);
+  const prev = extractChannels(prevData);
+  const sorted = Object.entries(cur).sort((a, b) => b[1].revenue - a[1].revenue);
+  const tbody = document.getElementById('channelTableBody');
+
+  if (sorted.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-muted)">데이터가 없습니다</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = sorted.map(([ch, d]) => {
+    const aov = d.qty ? Math.round(d.revenue / d.qty) : 0;
+    const prevRev = prev[ch] ? prev[ch].revenue : 0;
+    let changeHtml = '-';
+    if (prevRev > 0) {
+      const pct = ((d.revenue - prevRev) / prevRev * 100);
+      const cls = pct > 0 ? 'change-up' : pct < 0 ? 'change-down' : '';
+      const arrow = pct > 0 ? '▲' : pct < 0 ? '▼' : '―';
+      changeHtml = `<span class="${cls}">${arrow} ${Math.abs(pct).toFixed(1)}%</span>`;
+    }
+    return `<tr>
+      <td>${ch}</td>
+      <td class="right">${fmtFull(d.revenue)}원</td>
+      <td class="right">${fmtFull(d.qty)}</td>
+      <td class="right">${fmtFull(aov)}원</td>
+      <td class="right">${fmtFull(d.cost)}원</td>
+      <td class="right">${fmtFull(d.profit)}원</td>
+      <td class="right">${fmtPct(d.margin)}</td>
+      <td class="right">${changeHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── Product Analysis ───
+function renderProductAnalysis(data) {
+  const products = extractProducts(data);
+
+  // Top 15 by qty
+  const byQty = [...products].sort((a, b) => b.qty - a.qty).slice(0, 15);
+  destroyChart('chartProductRank');
+  chartInstances['chartProductRank'] = new Chart(document.getElementById('chartProductRank'), {
+    type: 'bar',
+    data: {
+      labels: byQty.map(p => p.name.length > 16 ? p.name.slice(0, 16) + '…' : p.name),
+      datasets: [{
+        label: '판매수량',
+        data: byQty.map(p => p.qty),
+        backgroundColor: CHANNEL_COLORS.slice(0, 15),
+        borderRadius: 3,
+        barThickness: 16
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => fmtFull(ctx.raw) + '개' } } },
+      scales: {
+        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+        y: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+      }
+    }
+  });
+
+  // Margin List
+  const byMargin = [...products].filter(p => p.revenue > 0).sort((a, b) => b.margin - a.margin);
+  const ml = document.getElementById('marginList');
+  if (byMargin.length === 0) {
+    ml.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted)">데이터가 없습니다</div>';
+    return;
+  }
+  ml.innerHTML = byMargin.map(p => {
+    const color = p.margin >= 50 ? 'var(--green)' : p.margin >= 20 ? 'var(--yellow)' : 'var(--red)';
+    const w = Math.min(Math.max(p.margin, 0), 100);
+    return `<div class="margin-item">
+      <span class="margin-name" title="${p.name}">${p.name}</span>
+      <div class="margin-bar-wrap"><div class="margin-bar" style="width:${w}%;background:${color}"></div></div>
+      <span class="margin-val" style="color:${color}">${fmtPct(p.margin)}</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── Chart Helpers ───
+function destroyChart(id) {
+  if (chartInstances[id]) { chartInstances[id].destroy(); chartInstances[id] = null; }
+}
+function chartOptions(opts = {}) {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { color: '#94a3b8', font: { size: 11 } } },
+      tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtFull(ctx.raw) + '원' } }
+    },
+    scales: {
+      x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+      y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', callback: opts.yCallback || (v => v) } }
+    }
+  };
+}
+</script>
+</body>
+</html>
