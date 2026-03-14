@@ -361,7 +361,7 @@ tr:hover td{background:#1a1d2788;}
     <!-- MAIN TABS -->
     <div class="main-tabs">
       <button class="main-tab active" onclick="switchMainTab('dashboard')">📈 매출 대시보드</button>
-      <button class="main-tab" onclick="switchMainTab('input')">📊 정산 입력</button>
+      <button class="main-tab" onclick="switchMainTab('input')">📊 매출 입력</button>
       <button class="main-tab" onclick="switchMainTab('records')">📋 월별 기록</button>
     </div>
 
@@ -378,15 +378,15 @@ tr:hover td{background:#1a1d2788;}
       <div class="step-header" onclick="toggleStep(2)">
         <div class="step-num" id="stepNum2">1</div>
         <div>
-          <div class="step-title">채널별 정산 파일 업로드</div>
-          <div style="font-size:.75rem;color:#64748b;margin-top:2px;">각 채널의 원본 파일을 올리면 자동으로 상품명 매핑 + 정산금 계산</div>
+          <div class="step-title">채널별 매출 파일 업로드</div>
+          <div style="font-size:.75rem;color:#64748b;margin-top:2px;">각 채널의 원본 파일을 올리면 자동으로 상품명 매핑 + 매출금 계산</div>
         </div>
         <div class="step-sub" id="channelStatus">0 / 9 완료</div>
       </div>
       <div class="step-body open" id="stepBody2">
-        <!-- 정산 월 설정 -->
+        <!-- 매출 월 설정 -->
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-          <span style="font-size:.82rem;color:#94a3b8;">정산 월:</span>
+          <span style="font-size:.82rem;color:#94a3b8;">매출 월:</span>
           <input type="month" id="settlementMonth" value="2026-01" style="background:#0d1117;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:5px 10px;font-size:.82rem;font-family:inherit;" onchange="updateMonth()"/>
         </div>
         <div class="ch-grid" id="channelGrid"></div>
@@ -435,11 +435,11 @@ tr:hover td{background:#1a1d2788;}
         <div class="detail-kpi-row" id="detailKpiRow"></div>
         <div class="detail-body">
           <div class="detail-products" id="detailProducts">
-            <h4>상품별 매출 구성 (Top 20)</h4>
+            <h4>상품별 매출 구성 (Top 10)</h4>
             <div id="detailProductList"></div>
           </div>
           <div class="detail-trend" id="detailTrend">
-            <h4>월별 정산 추이 (최근 6개월)</h4>
+            <h4>월별 매출 추이 (최근 6개월)</h4>
             <div class="trend-svg-wrap" id="trendChart"></div>
           </div>
         </div>
@@ -460,7 +460,7 @@ tr:hover td{background:#1a1d2788;}
       <!-- 다운로드 -->
       <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
         <button class="cloud-save-btn" id="cloudSaveBtn" onclick="saveToCloud()" style="display:none;">💾 클라우드 저장</button>
-        <button class="btn btn-success" onclick="downloadFinalReport()">⬇️ 최종 정산 파일 다운로드</button>
+        <button class="btn btn-success" onclick="downloadFinalReport()">⬇️ 최종 매출 파일 다운로드</button>
         <button class="btn btn-secondary" onclick="downloadExcel()">⬇️ Excel 다운로드 (기본)</button>
         <button class="btn btn-secondary" onclick="resetAll()">🔄 초기화</button>
       </div>
@@ -596,7 +596,7 @@ function updateCostUI() {
 
 function updateMonth() {
   const m = document.getElementById('settlementMonth').value;
-  document.getElementById('headerMonth').textContent = m ? m + ' 정산' : '정산 월 미설정';
+  document.getElementById('headerMonth').textContent = m ? m + ' 매출' : '매출 월 미설정';
   // 월 변경 시: 로컬 데이터 초기화 + 해당 월 클라우드 데이터 불러오기
   state.channels = {};
   state.allProductNames = new Set();
@@ -670,7 +670,7 @@ function renderChannelGrid() {
       const agg = d.aggregated || [];
       const totalQty = agg.reduce((s,r) => s + r.수량, 0);
       const totalSet = agg.reduce((s,r) => s + r.정산금액, 0);
-      statHtml = `<div class="ch-card-stat">수량 <span>${fmt(totalQty)}</span>개 · 정산 <span>₩${fmt(totalSet)}</span></div>`;
+      statHtml = `<div class="ch-card-stat">수량 <span>${fmt(totalQty)}</span>개 · 매출 <span>₩${fmt(totalSet)}</span></div>`;
     }
     return `<div class="ch-card ${d ? (d.unmapped&&d.unmapped.length?'has-unmapped':'loaded') : ''}" id="chCard_${ch.id}">
       <div class="ch-card-top">
@@ -807,7 +807,7 @@ function loadChannelFile(input, channelId) {
         showUnmappedModal(def.id, unmapped);
         showToast(`${def.name}: 미매핑 상품 ${unmapped.length}건 확인 필요`, 'warn');
       } else {
-        showToast(`${def.name} 정산 완료! ${results.length}건`, 'success');
+        showToast(`${def.name} 매출 처리 완료! ${results.length}건`, 'success');
       }
       // 자동 클라우드 저장
       autoSaveChannelToCloud(def.id);
@@ -1751,7 +1751,7 @@ function renderModalContent(channelName) {
   const prevData = getPrevMonthChannelSummary(prevMonth, channelName);
 
   const kpiItems = [
-    { label: '총 정산금액', value: '₩' + fmt(totalSett), color: '#10b981', prev: prevData ? prevData.settlement : null },
+    { label: '총 매출금액', value: '₩' + fmt(totalSett), color: '#10b981', prev: prevData ? prevData.settlement : null },
     { label: '총 판매수량', value: fmt(totalQty) + '개', color: '#0284c7', prev: prevData ? prevData.qty : null },
     { label: '총 이익', value: '₩' + fmt(totalProfit), color: totalProfit >= 0 ? '#10b981' : '#ef4444', prev: prevData ? prevData.profit : null },
     { label: '이익률', value: fmtRate(profitRate), color: profitRate >= 0.2 ? '#10b981' : profitRate >= 0 ? '#f59e0b' : '#ef4444', prev: prevData ? prevData.profitRate : null, isRate: true },
@@ -1780,8 +1780,8 @@ function renderModalContent(channelName) {
     </div>`;
   }).join('');
 
-  // Product breakdown (Top 20)
-  const top20 = data.slice(0, 20);
+  // Product breakdown (Top 10)
+  const top20 = data.slice(0, 10);
   const maxSett = top20.length > 0 ? top20[0].정산금액 : 1;
   document.getElementById('modalProductList').innerHTML = top20.map((r, i) => {
     const rankCls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'normal';
@@ -1847,7 +1847,7 @@ function updateDetailKPIs(channelName) {
   const prevData = getPrevMonthChannelSummary(prevMonth, channelName);
 
   const kpiItems = [
-    { label: '총 정산금액', value: '₩' + fmt(totalSett), color: '#10b981', prev: prevData ? prevData.settlement : null, cur: totalSett },
+    { label: '총 매출금액', value: '₩' + fmt(totalSett), color: '#10b981', prev: prevData ? prevData.settlement : null, cur: totalSett },
     { label: '총 판매수량', value: fmt(totalQty) + '개', color: '#0284c7', prev: prevData ? prevData.qty : null, cur: totalQty },
     { label: '총 이익', value: '₩' + fmt(totalProfit), color: totalProfit >= 0 ? '#10b981' : '#ef4444', prev: prevData ? prevData.profit : null, cur: totalProfit },
     { label: '이익률', value: fmtRate(profitRate), color: profitRate >= 0.2 ? '#10b981' : profitRate >= 0 ? '#f59e0b' : '#ef4444', prev: prevData ? prevData.profitRate : null, isRate: true },
@@ -1911,9 +1911,10 @@ async function loadChannelHistoryModal(channelName) {
       }
     }
 
-    // Also fill current month from live state
+    // Always rebuild current month from live data (avoid stale cache)
     const currentMonth = month;
-    if (!state.historyCache[currentMonth] || Object.keys(state.channels).length > 0) {
+    delete state.historyCache[currentMonth];
+    if (Object.keys(state.channels).length > 0) {
       // Build from live data
       const liveChannels = {};
       for (const ch of Object.values(state.channels)) {
@@ -2012,7 +2013,7 @@ function generateInsights(channelName, data, totalSett, totalQty, totalProfit, p
     const share = totalSett > 0 ? (top.정산금액 / totalSett * 100).toFixed(1) : 0;
     insights.push({
       icon: '🏆', severity: 'info',
-      text: `<strong>${top.최종상품명}</strong>이(가) 정산금액 1위 (₩${fmt(top.정산금액)}, 전체의 ${share}%)`
+      text: `<strong>${top.최종상품명}</strong>이(가) 매출금액 1위 (₩${fmt(top.정산금액)}, 전체의 ${share}%)`
     });
   }
 
@@ -2077,12 +2078,12 @@ function generateInsights(channelName, data, totalSett, totalQty, totalProfit, p
     if (growth > 10) {
       insights.push({
         icon: '📈', severity: 'success',
-        text: `전월 대비 정산금액 <strong>+${growth.toFixed(1)}%</strong> 성장! (₩${fmt(prevData.settlement)} → ₩${fmt(totalSett)})`
+        text: `전월 대비 매출금액 <strong>+${growth.toFixed(1)}%</strong> 성장! (₩${fmt(prevData.settlement)} → ₩${fmt(totalSett)})`
       });
     } else if (growth < -10) {
       insights.push({
         icon: '📉', severity: 'warn',
-        text: `전월 대비 정산금액 <strong>${growth.toFixed(1)}%</strong> 감소. (₩${fmt(prevData.settlement)} → ₩${fmt(totalSett)})`
+        text: `전월 대비 매출금액 <strong>${growth.toFixed(1)}%</strong> 감소. (₩${fmt(prevData.settlement)} → ₩${fmt(totalSett)})`
       });
     }
   }
@@ -2153,7 +2154,7 @@ function renderTable() {
     <thead><tr>
       <th>최종상품명</th>
       <th class="num">수량</th>
-      <th class="num">정산금액</th>
+      <th class="num">매출금액</th>
       <th class="num">원가/개</th>
       <th class="num">원가합계</th>
       <th class="num">이익</th>
@@ -2253,7 +2254,7 @@ function renderSpreadsheet() {
     columns: [
       { type:'text', title:'최종상품명', width:200 },
       { type:'numeric', title:'수량', width:80, mask:'#,##0' },
-      { type:'numeric', title:'정산금액', width:130, mask:'#,##0' },
+      { type:'numeric', title:'매출금액', width:130, mask:'#,##0' },
       { type:'numeric', title:'원가/개', width:100, mask:'#,##0' },
       { type:'numeric', title:'원가합계', width:130, mask:'#,##0' },
       { type:'numeric', title:'이익', width:130, mask:'#,##0' },
@@ -2304,7 +2305,7 @@ async function downloadFinalReport() {
   const wb = new ExcelJS.Workbook();
   wb.creator = 'iLBiA 매출정산 대시보드';
   wb.created = new Date();
-  const month = document.getElementById('settlementMonth').value || '정산';
+  const month = document.getElementById('settlementMonth').value || '매출';
   const monthLabel = month.replace('-', '년 ') + '월';
 
   // 스타일 정의
@@ -2631,7 +2632,7 @@ async function downloadFinalReport() {
   // ─────────────────────────────────────────────
   for (const ch of orderedChannels) {
     const ws = wb.addWorksheet(ch.name.substring(0,31));
-    const hRow = ws.addRow(['최종상품명','수량','정산금액','원가/개','원가합계','이익','이익률']);
+    const hRow = ws.addRow(['최종상품명','수량','매출금액','원가/개','원가합계','이익','이익률']);
     hRow.eachCell(cell => { cell.fill = tealFill; cell.font = whiteFont; cell.border = borders; cell.alignment = { horizontal:'center', vertical:'middle' }; });
     hRow.height = 24;
 
@@ -2661,7 +2662,7 @@ async function downloadFinalReport() {
   a.download = `iLBiA_온라인매출정산_${month}.xlsx`;
   a.click();
   URL.revokeObjectURL(url);
-  showToast('최종 정산 파일 다운로드 완료!', 'success');
+  showToast('최종 매출 파일 다운로드 완료!', 'success');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2669,11 +2670,11 @@ async function downloadFinalReport() {
 // ═══════════════════════════════════════════════════════
 function downloadExcel() {
   const wb = XLSX.utils.book_new();
-  const month = document.getElementById('settlementMonth').value || '정산';
+  const month = document.getElementById('settlementMonth').value || '매출';
 
   // 채널별 시트
   for (const ch of Object.values(state.channels)) {
-    const rows = [['최종상품명','수량','정산금액','원가/개','원가합계','이익','이익률']];
+    const rows = [['최종상품명','수량','매출금액','원가/개','원가합계','이익','이익률']];
     for (const r of ch.aggregated || []) {
       rows.push([r.최종상품명, r.수량, r.정산금액, r.원가단가||0, r.원가합계||0, r.이익||0, r.이익률||0]);
     }
@@ -2692,7 +2693,7 @@ function downloadExcel() {
       allMap[r.최종상품명].이익 += r.이익||0;
     }
   }
-  const allRows = [['최종상품명','수량','정산금액합계','원가합계','이익','이익률']];
+  const allRows = [['최종상품명','수량','매출금액합계','원가합계','이익','이익률']];
   for (const r of Object.values(allMap).sort((a,b) => b.정산금액-a.정산금액)) {
     const rate = r.정산금액 > 0 ? r.이익 / r.정산금액 : 0;
     allRows.push([r.최종상품명, r.수량, r.정산금액, r.원가합계, r.이익, rate]);
@@ -2734,7 +2735,7 @@ function renderDashboard() {
     container.innerHTML = `<div class="dash-empty">
       <div style="font-size:2rem;margin-bottom:12px;">📈</div>
       <div style="color:#94a3b8;font-weight:600;margin-bottom:6px;">매출 데이터가 없습니다</div>
-      <div style="font-size:.78rem;">정산 입력 탭에서 채널별 파일을 업로드하거나,<br>로그인하여 클라우드 데이터를 불러오세요.</div>
+      <div style="font-size:.78rem;">매출 입력 탭에서 채널별 파일을 업로드하거나,<br>로그인하여 클라우드 데이터를 불러오세요.</div>
     </div>`;
     return;
   }
@@ -3160,7 +3161,7 @@ async function autoLoadChannelsFromCloud() {
       updateSummary();
       renderResults();
       renderDashboard();
-      showToast(`☁️ ${month} 정산 데이터 ${loadedCount}개 채널 불러왔어요!`, 'success');
+      showToast(`☁️ ${month} 매출 데이터 ${loadedCount}개 채널 불러왔어요!`, 'success');
     }
   } catch(err) {
     console.warn('채널 자동 불러오기 실패:', err);
@@ -3175,10 +3176,10 @@ async function saveToCloud() {
   if (!firebaseReady) { showToast('Firebase 설정이 필요해요', 'warn'); return; }
 
   const month = document.getElementById('settlementMonth').value;
-  if (!month) { showToast('정산 월을 설정해주세요', 'warn'); return; }
+  if (!month) { showToast('매출 월을 설정해주세요', 'warn'); return; }
 
   const channels = Object.values(state.channels);
-  if (channels.length === 0) { showToast('정산 데이터가 없어요', 'warn'); return; }
+  if (channels.length === 0) { showToast('매출 데이터가 없어요', 'warn'); return; }
 
   const btn = document.getElementById('cloudSaveBtn');
   btn.disabled = true;
@@ -3231,7 +3232,7 @@ async function saveToCloud() {
 
     btn.disabled = false;
     btn.textContent = '💾 클라우드 저장';
-    showToast(`${month} 정산 데이터를 클라우드에 저장했어요!`, 'success');
+    showToast(`${month} 매출 데이터를 클라우드에 저장했어요!`, 'success');
   } catch (err) {
     btn.disabled = false;
     btn.textContent = '💾 클라우드 저장';
@@ -3245,7 +3246,7 @@ async function saveToCloud() {
 async function loadMonthlyRecords() {
   const wrap = document.getElementById('recordsList');
   if (!currentUser) {
-    wrap.innerHTML = '<div class="no-records">🔑 Google 로그인하면 저장된 월별 정산 기록을 볼 수 있어요</div>';
+    wrap.innerHTML = '<div class="no-records">🔑 Google 로그인하면 저장된 월별 매출 기록을 볼 수 있어요</div>';
     return;
   }
   if (!firebaseReady) {
@@ -3260,7 +3261,7 @@ async function loadMonthlyRecords() {
       .collection('months').orderBy('savedAt', 'desc').get();
 
     if (snapshot.empty) {
-      wrap.innerHTML = '<div class="no-records">저장된 정산 기록이 없어요.<br>정산 입력 탭에서 정산 후 💾 클라우드 저장을 눌러보세요!</div>';
+      wrap.innerHTML = '<div class="no-records">저장된 매출 기록이 없어요.<br>매출 입력 탭에서 데이터 업로드 후 💾 클라우드 저장을 눌러보세요!</div>';
       return;
     }
 
@@ -3290,8 +3291,28 @@ async function loadMonthlyRecords() {
             <div class="record-stat"><div class="rv" style="color:${profitColor};">₩${fmt(ts.profit || 0)}</div><div class="rl">총 이익</div></div>
             <div class="record-stat"><div class="rv" style="color:${profitColor};">${profitRate}</div><div class="rl">이익률</div></div>
           </div>
+          ${(() => {
+            const chStats = channelNames.map(ch => {
+              const s = data.channels[ch].summary || {};
+              return { name: ch, settlement: s.settlement || 0, profit: s.profit || 0, profitRate: s.profitRate || 0 };
+            }).sort((a, b) => b.settlement - a.settlement);
+            const maxRev = chStats.length > 0 ? chStats[0].settlement : 1;
+            return '<div class="dash-panel" style="margin:12px 0 16px 0;padding:14px 16px;">' +
+              '<div class="dash-panel-title">채널별 매출 비중</div>' +
+              chStats.map(c => {
+                const barW = maxRev > 0 ? Math.max(2, (c.settlement / maxRev) * 100) : 2;
+                const profitCls = c.profit >= 0 ? '#10b981' : '#ef4444';
+                const rate = (c.profitRate * 100).toFixed(1) + '%';
+                return '<div class="dash-bar-row">' +
+                  '<div class="dash-bar-name">' + c.name + '</div>' +
+                  '<div class="dash-bar-track"><div class="dash-bar-fill" style="width:' + barW + '%"></div></div>' +
+                  '<div class="dash-bar-val">₩' + fmt(c.settlement) + ' <span style="color:' + profitCls + ';font-size:.7rem;">(' + rate + ')</span></div>' +
+                '</div>';
+              }).join('') +
+            '</div>';
+          })()}
           <div class="tbl-wrap"><table>
-            <thead><tr><th>채널</th><th class="num">수량</th><th class="num">정산금액</th><th class="num">원가</th><th class="num">이익</th><th class="num">이익률</th></tr></thead>
+            <thead><tr><th>채널</th><th class="num">수량</th><th class="num">매출금액</th><th class="num">원가</th><th class="num">이익</th><th class="num">이익률</th></tr></thead>
             <tbody>
               ${channelNames.map(ch => {
                 const s = data.channels[ch].summary || {};
@@ -3332,7 +3353,7 @@ function toggleRecord(monthId) {
 }
 
 async function deleteRecord(monthId) {
-  if (!confirm(`${monthId} 정산 기록을 삭제할까요?`)) return;
+  if (!confirm(`${monthId} 매출 기록을 삭제할까요?`)) return;
   if (!currentUser || !firebaseReady) return;
 
   try {
@@ -3367,7 +3388,7 @@ init();
           <div id="modalProductList"></div>
         </div>
         <div class="detail-trend" id="modalTrend">
-          <h4>월별 정산 추이 (최근 6개월)</h4>
+          <h4>월별 매출 추이 (최근 6개월)</h4>
           <div class="trend-svg-wrap" id="modalTrendChart"></div>
         </div>
       </div>
