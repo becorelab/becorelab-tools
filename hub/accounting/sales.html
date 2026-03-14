@@ -353,7 +353,7 @@ tr:hover td{background:#1a1d2788;}
       <!-- 다운로드 -->
       <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
         <button class="cloud-save-btn" id="cloudSaveBtn" onclick="saveToCloud()" style="display:none;">💾 클라우드 저장</button>
-        <button class="btn btn-success" onclick="downloadExcelStyled()">⬇️ Excel 다운로드 (서식 포함)</button>
+        <button class="btn btn-success" onclick="downloadFinalReport()">⬇️ 최종 정산 파일 다운로드</button>
         <button class="btn btn-secondary" onclick="downloadExcel()">⬇️ Excel 다운로드 (기본)</button>
         <button class="btn btn-secondary" onclick="resetAll()">🔄 초기화</button>
       </div>
@@ -1658,128 +1658,273 @@ function renderSpreadsheet() {
 }
 
 // ═══════════════════════════════════════════════════════
-// EXCELJS STYLED EXPORT
+// FINAL REPORT EXPORT (대표님 최종 정산 파일 형태)
 // ═══════════════════════════════════════════════════════
-async function downloadExcelStyled() {
+async function downloadFinalReport() {
   const wb = new ExcelJS.Workbook();
   wb.creator = 'iLBiA 매출정산 대시보드';
   wb.created = new Date();
   const month = document.getElementById('settlementMonth').value || '정산';
+  const monthLabel = month.replace('-', '년 ') + '월';
 
-  const headerFill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF0F766E' } };
-  const headerFont = { bold:true, color:{ argb:'FFFFFFFF' }, size:11, name:'맑은 고딕' };
-  const borderStyle = { style:'thin', color:{ argb:'FF334155' } };
-  const borders = { top:borderStyle, left:borderStyle, bottom:borderStyle, right:borderStyle };
+  // 스타일 정의
+  const tealFill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF0F766E' } };
+  const darkFill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1A1D27' } };
+  const lightFill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFF0FDFA' } };
+  const groupFill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1E3A5F' } };
+  const whiteFont = { bold:true, color:{ argb:'FFFFFFFF' }, size:11, name:'맑은 고딕' };
+  const boldFont = { bold:true, size:11, name:'맑은 고딕' };
+  const normalFont = { size:10, name:'맑은 고딕' };
+  const borderThin = { style:'thin', color:{ argb:'FFD1D5DB' } };
+  const borders = { top:borderThin, left:borderThin, bottom:borderThin, right:borderThin };
   const numFmt = '#,##0';
   const rateFmt = '0.0%';
 
-  // 채널별 시트
-  for (const ch of Object.values(state.channels)) {
-    const ws = wb.addWorksheet(ch.name.substring(0,31));
+  // 채널 그룹 매핑 (대표님 파일 구조)
+  const channelGroups = {
+    '자사몰': ['cafe24', 'smartstore'],
+    '카카오': ['kakaoGift', 'kakao'],
+    '커머스': ['coupang'],
+    '외부몰': ['11st', 'gmarket', 'auction', 'ohouse', 'ssg', 'gs', 'ably'],
+    '공동구매': ['goodtree', 'duber', 'gmholdings', 'edgar', 'gogrow'],
+  };
 
-    // 헤더 행
-    const headerRow = ws.addRow(['최종상품명','수량','정산금액','원가/개','원가합계','이익','이익률']);
-    headerRow.eachCell((cell) => {
-      cell.fill = headerFill;
-      cell.font = headerFont;
-      cell.border = borders;
-      cell.alignment = { horizontal:'center', vertical:'middle' };
-    });
-    headerRow.height = 24;
+  // CHANNEL_DEFS 순서대로 로드된 채널 정렬
+  const orderedChannels = CHANNEL_DEFS.filter(d => state.channels[d.id]).map(d => ({
+    id: d.id, name: d.name, icon: d.icon, ...state.channels[d.id]
+  }));
 
-    // 데이터 행
-    let totalSett = 0, totalCost = 0, totalProfit = 0, totalQty = 0;
-    for (const r of ch.aggregated || []) {
-      const row = ws.addRow([
-        r.최종상품명, r.수량, r.정산금액, r.원가단가||0, r.원가합계||0, r.이익||0, r.이익률||0
-      ]);
-      row.getCell(2).numFmt = numFmt;
-      row.getCell(3).numFmt = numFmt;
-      row.getCell(4).numFmt = numFmt;
-      row.getCell(5).numFmt = numFmt;
-      row.getCell(6).numFmt = numFmt;
-      row.getCell(7).numFmt = rateFmt;
-      // 이익 색상
-      if ((r.이익||0) >= 0) {
-        row.getCell(6).font = { color:{ argb:'FF10B981' }, bold:true };
-      } else {
-        row.getCell(6).font = { color:{ argb:'FFEF4444' }, bold:true };
+  // ─────────────────────────────────────────────
+  // Sheet 1: 온라인 매출정산 (전 채널 상품 통합)
+  // ─────────────────────────────────────────────
+  const ws1 = wb.addWorksheet('온라인 매출정산');
+
+  // 타이틀
+  const titleRow = ws1.addRow([`${monthLabel} 온라인 매출 현황`]);
+  titleRow.getCell(1).font = { bold:true, size:14, name:'맑은 고딕' };
+  ws1.addRow([]);
+
+  // 헤더
+  const h1 = ws1.addRow(['구분','입점몰','','브랜드','상품명','판매수량','매출액','개별원가','원가합계','이익','이익률']);
+  h1.eachCell(cell => { cell.fill = tealFill; cell.font = whiteFont; cell.border = borders; cell.alignment = { horizontal:'center', vertical:'middle' }; });
+  h1.height = 26;
+
+  let grandQty = 0, grandRevenue = 0, grandCost = 0, grandProfit = 0;
+
+  // 그룹별로 데이터 출력
+  for (const [groupName, channelIds] of Object.entries(channelGroups)) {
+    const groupChannels = channelIds.filter(id => state.channels[id]);
+    if (groupChannels.length === 0) continue;
+
+    let groupQty = 0, groupRevenue = 0, groupCost = 0, groupProfit = 0;
+    let isFirstInGroup = true;
+
+    for (const chId of groupChannels) {
+      const def = CHANNEL_DEFS.find(d => d.id === chId);
+      const ch = state.channels[chId];
+      if (!ch || !ch.aggregated) continue;
+
+      let isFirstInChannel = true;
+      let chQty = 0, chRevenue = 0, chCost = 0, chProfit = 0;
+
+      for (const r of ch.aggregated.sort((a,b) => b.정산금액 - a.정산금액)) {
+        const qty = r.수량 || 0;
+        const revenue = r.정산금액 || 0;
+        const unitCost = r.원가단가 || 0;
+        const totalCost = r.원가합계 || 0;
+        const profit = r.이익 || 0;
+        const rate = revenue > 0 ? profit / revenue : 0;
+
+        const row = ws1.addRow([
+          isFirstInGroup ? groupName : '',
+          isFirstInChannel ? def.name : '',
+          '',
+          '일비아',
+          r.최종상품명,
+          qty, revenue, unitCost, totalCost, profit, rate
+        ]);
+
+        row.eachCell(cell => { cell.border = borders; cell.font = normalFont; });
+        row.getCell(6).numFmt = numFmt;
+        row.getCell(7).numFmt = numFmt;
+        row.getCell(8).numFmt = numFmt;
+        row.getCell(9).numFmt = numFmt;
+        row.getCell(10).numFmt = numFmt;
+        row.getCell(11).numFmt = rateFmt;
+        if (profit >= 0) {
+          row.getCell(10).font = { color:{ argb:'FF10B981' }, bold:true, size:10, name:'맑은 고딕' };
+        } else {
+          row.getCell(10).font = { color:{ argb:'FFEF4444' }, bold:true, size:10, name:'맑은 고딕' };
+        }
+
+        chQty += qty; chRevenue += revenue; chCost += totalCost; chProfit += profit;
+        isFirstInGroup = false;
+        isFirstInChannel = false;
       }
-      row.eachCell(cell => { cell.border = borders; });
-      totalSett += r.정산금액;
-      totalCost += r.원가합계||0;
-      totalProfit += r.이익||0;
-      totalQty += r.수량;
+
+      // 채널 소계
+      if (ch.aggregated.length > 1) {
+        const subRow = ws1.addRow(['','',`${def.name} 소계`,'','', chQty, chRevenue, '', chCost, chProfit, chRevenue > 0 ? chProfit/chRevenue : 0]);
+        subRow.eachCell(cell => { cell.fill = lightFill; cell.font = boldFont; cell.border = borders; });
+        [6,7,9,10].forEach(c => subRow.getCell(c).numFmt = numFmt);
+        subRow.getCell(11).numFmt = rateFmt;
+      }
+
+      groupQty += chQty; groupRevenue += chRevenue; groupCost += chCost; groupProfit += chProfit;
     }
 
-    // 합계 행
-    const sumFill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1A1D27' } };
-    const sumFont = { bold:true, size:11, name:'맑은 고딕' };
-    const sumRow = ws.addRow(['합계', totalQty, totalSett, '', totalCost, totalProfit, totalSett > 0 ? totalProfit/totalSett : 0]);
-    sumRow.eachCell((cell) => {
-      cell.fill = sumFill;
-      cell.font = sumFont;
-      cell.border = borders;
-    });
-    sumRow.getCell(2).numFmt = numFmt;
-    sumRow.getCell(3).numFmt = numFmt;
-    sumRow.getCell(5).numFmt = numFmt;
-    sumRow.getCell(6).numFmt = numFmt;
-    sumRow.getCell(7).numFmt = rateFmt;
+    // 그룹 소계
+    const gRow = ws1.addRow([`${groupName} 합계`,'','','','', groupQty, groupRevenue, '', groupCost, groupProfit, groupRevenue > 0 ? groupProfit/groupRevenue : 0]);
+    gRow.eachCell(cell => { cell.fill = groupFill; cell.font = whiteFont; cell.border = borders; });
+    [6,7,9,10].forEach(c => gRow.getCell(c).numFmt = numFmt);
+    gRow.getCell(11).numFmt = rateFmt;
 
-    // 열 너비
-    ws.columns = [
-      { width:28 }, { width:10 }, { width:16 }, { width:14 }, { width:16 }, { width:16 }, { width:10 }
-    ];
+    grandQty += groupQty; grandRevenue += groupRevenue; grandCost += groupCost; grandProfit += groupProfit;
   }
 
-  // 종합 시트
-  const wsAll = wb.addWorksheet('종합');
-  const allHeader = wsAll.addRow(['최종상품명','수량','정산금액합계','원가합계','이익','이익률']);
-  allHeader.eachCell(cell => {
-    cell.fill = headerFill;
-    cell.font = headerFont;
-    cell.border = borders;
-    cell.alignment = { horizontal:'center', vertical:'middle' };
-  });
-  allHeader.height = 24;
+  // 그룹에 속하지 않은 채널 처리
+  const groupedIds = new Set(Object.values(channelGroups).flat());
+  const ungrouped = orderedChannels.filter(ch => !groupedIds.has(ch.id));
+  if (ungrouped.length > 0) {
+    let ugQty = 0, ugRevenue = 0, ugCost = 0, ugProfit = 0;
+    let isFirst = true;
+    for (const ch of ungrouped) {
+      let isFirstInCh = true;
+      for (const r of (ch.aggregated || []).sort((a,b) => b.정산금액 - a.정산금액)) {
+        const qty = r.수량||0, revenue = r.정산금액||0, totalCost = r.원가합계||0, profit = r.이익||0;
+        const row = ws1.addRow([isFirst?'기타':'', isFirstInCh?ch.name:'', '', '일비아', r.최종상품명, qty, revenue, r.원가단가||0, totalCost, profit, revenue>0?profit/revenue:0]);
+        row.eachCell(cell => { cell.border = borders; cell.font = normalFont; });
+        [6,7,8,9,10].forEach(c => row.getCell(c).numFmt = numFmt);
+        row.getCell(11).numFmt = rateFmt;
+        ugQty += qty; ugRevenue += revenue; ugCost += totalCost; ugProfit += profit;
+        isFirst = false; isFirstInCh = false;
+      }
+    }
+    grandQty += ugQty; grandRevenue += ugRevenue; grandCost += ugCost; grandProfit += ugProfit;
+  }
 
-  const allMap = {};
-  for (const ch of Object.values(state.channels)) {
-    for (const r of ch.aggregated || []) {
-      if (!allMap[r.최종상품명]) allMap[r.최종상품명] = { 최종상품명:r.최종상품명, 수량:0, 정산금액:0, 원가합계:0, 이익:0 };
-      allMap[r.최종상품명].수량 += r.수량;
-      allMap[r.최종상품명].정산금액 += r.정산금액;
-      allMap[r.최종상품명].원가합계 += r.원가합계||0;
-      allMap[r.최종상품명].이익 += r.이익||0;
+  // 총합계
+  ws1.addRow([]);
+  const totalRow = ws1.addRow(['Total','','','','', grandQty, grandRevenue, '', grandCost, grandProfit, grandRevenue > 0 ? grandProfit/grandRevenue : 0]);
+  totalRow.eachCell(cell => { cell.fill = darkFill; cell.font = { bold:true, color:{argb:'FFFFFFFF'}, size:12, name:'맑은 고딕' }; cell.border = borders; });
+  [6,7,9,10].forEach(c => totalRow.getCell(c).numFmt = numFmt);
+  totalRow.getCell(11).numFmt = rateFmt;
+
+  ws1.columns = [
+    { width:12 }, { width:16 }, { width:14 }, { width:8 }, { width:32 },
+    { width:10 }, { width:16 }, { width:12 }, { width:14 }, { width:14 }, { width:10 }
+  ];
+
+  // ─────────────────────────────────────────────
+  // Sheet 2: 채널별 요약
+  // ─────────────────────────────────────────────
+  const ws2 = wb.addWorksheet('채널별 요약');
+  const t2 = ws2.addRow([`${monthLabel} 채널별 매출 요약`]);
+  t2.getCell(1).font = { bold:true, size:14, name:'맑은 고딕' };
+  ws2.addRow([]);
+
+  const h2 = ws2.addRow(['구분','채널','수량','매출금액','원가합계','이익','이익률']);
+  h2.eachCell(cell => { cell.fill = tealFill; cell.font = whiteFont; cell.border = borders; cell.alignment = { horizontal:'center', vertical:'middle' }; });
+  h2.height = 26;
+
+  let sumQty=0, sumRev=0, sumCost2=0, sumProfit2=0;
+
+  for (const [groupName, channelIds] of Object.entries(channelGroups)) {
+    const groupChannels = channelIds.filter(id => state.channels[id]);
+    if (groupChannels.length === 0) continue;
+    let isFirstInGroup = true;
+
+    for (const chId of groupChannels) {
+      const def = CHANNEL_DEFS.find(d => d.id === chId);
+      const ch = state.channels[chId];
+      if (!ch || !ch.aggregated) continue;
+      const qty = ch.aggregated.reduce((s,r) => s + (r.수량||0), 0);
+      const rev = ch.aggregated.reduce((s,r) => s + (r.정산금액||0), 0);
+      const cost = ch.aggregated.reduce((s,r) => s + (r.원가합계||0), 0);
+      const profit = ch.aggregated.reduce((s,r) => s + (r.이익||0), 0);
+      const rate = rev > 0 ? profit / rev : 0;
+
+      const row = ws2.addRow([isFirstInGroup ? groupName : '', def.name, qty, rev, cost, profit, rate]);
+      row.eachCell(cell => { cell.border = borders; cell.font = normalFont; });
+      [3,4,5,6].forEach(c => row.getCell(c).numFmt = numFmt);
+      row.getCell(7).numFmt = rateFmt;
+      if (profit >= 0) {
+        row.getCell(6).font = { color:{ argb:'FF10B981' }, bold:true, size:10, name:'맑은 고딕' };
+      } else {
+        row.getCell(6).font = { color:{ argb:'FFEF4444' }, bold:true, size:10, name:'맑은 고딕' };
+      }
+      sumQty += qty; sumRev += rev; sumCost2 += cost; sumProfit2 += profit;
+      isFirstInGroup = false;
     }
   }
-  let gTotal=0, gCost=0, gProfit=0, gQty=0;
-  for (const r of Object.values(allMap).sort((a,b) => b.정산금액-a.정산금액)) {
-    const rate = r.정산금액 > 0 ? r.이익 / r.정산금액 : 0;
-    const row = wsAll.addRow([r.최종상품명, r.수량, r.정산금액, r.원가합계, r.이익, rate]);
+
+  // 미분류 채널
+  for (const ch of ungrouped || []) {
+    const qty = (ch.aggregated||[]).reduce((s,r) => s + (r.수량||0), 0);
+    const rev = (ch.aggregated||[]).reduce((s,r) => s + (r.정산금액||0), 0);
+    const cost = (ch.aggregated||[]).reduce((s,r) => s + (r.원가합계||0), 0);
+    const profit = (ch.aggregated||[]).reduce((s,r) => s + (r.이익||0), 0);
+    const row = ws2.addRow(['기타', ch.name, qty, rev, cost, profit, rev>0?profit/rev:0]);
+    row.eachCell(cell => { cell.border = borders; cell.font = normalFont; });
+    [3,4,5,6].forEach(c => row.getCell(c).numFmt = numFmt);
+    row.getCell(7).numFmt = rateFmt;
+    sumQty += qty; sumRev += rev; sumCost2 += cost; sumProfit2 += profit;
+  }
+
+  ws2.addRow([]);
+  const totRow2 = ws2.addRow(['','Total', sumQty, sumRev, sumCost2, sumProfit2, sumRev > 0 ? sumProfit2/sumRev : 0]);
+  totRow2.eachCell(cell => { cell.fill = darkFill; cell.font = { bold:true, color:{argb:'FFFFFFFF'}, size:11, name:'맑은 고딕' }; cell.border = borders; });
+  [3,4,5,6].forEach(c => totRow2.getCell(c).numFmt = numFmt);
+  totRow2.getCell(7).numFmt = rateFmt;
+
+  ws2.columns = [{ width:12 }, { width:18 }, { width:10 }, { width:18 }, { width:16 }, { width:16 }, { width:10 }];
+
+  // ─────────────────────────────────────────────
+  // Sheet 3: 원가
+  // ─────────────────────────────────────────────
+  const ws3 = wb.addWorksheet('원가');
+  const t3 = ws3.addRow(['적용 원가 데이터']);
+  t3.getCell(1).font = { bold:true, size:14, name:'맑은 고딕' };
+  ws3.addRow([]);
+
+  const h3 = ws3.addRow(['제품명','원가(VAT별도)','원가(VAT포함)']);
+  h3.eachCell(cell => { cell.fill = tealFill; cell.font = whiteFont; cell.border = borders; cell.alignment = { horizontal:'center', vertical:'middle' }; });
+  h3.height = 26;
+
+  const costEntries = Object.entries(state.costMap || {}).sort((a,b) => a[0].localeCompare(b[0]));
+  for (const [name, cost] of costEntries) {
+    const row = ws3.addRow([name, cost, Math.round(cost * 1.1)]);
+    row.eachCell(cell => { cell.border = borders; cell.font = normalFont; });
     row.getCell(2).numFmt = numFmt;
     row.getCell(3).numFmt = numFmt;
-    row.getCell(4).numFmt = numFmt;
-    row.getCell(5).numFmt = numFmt;
-    row.getCell(6).numFmt = rateFmt;
-    if (r.이익 >= 0) {
-      row.getCell(5).font = { color:{ argb:'FF10B981' }, bold:true };
-    } else {
-      row.getCell(5).font = { color:{ argb:'FFEF4444' }, bold:true };
-    }
-    row.eachCell(cell => { cell.border = borders; });
-    gTotal += r.정산금액; gCost += r.원가합계; gProfit += r.이익; gQty += r.수량;
   }
-  const gSumRow = wsAll.addRow(['합계', gQty, gTotal, gCost, gProfit, gTotal > 0 ? gProfit/gTotal : 0]);
-  const sumFill2 = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1A1D27' } };
-  gSumRow.eachCell(cell => { cell.fill = sumFill2; cell.font = { bold:true }; cell.border = borders; });
-  gSumRow.getCell(2).numFmt = numFmt;
-  gSumRow.getCell(3).numFmt = numFmt;
-  gSumRow.getCell(4).numFmt = numFmt;
-  gSumRow.getCell(5).numFmt = numFmt;
-  gSumRow.getCell(6).numFmt = rateFmt;
-  wsAll.columns = [{ width:28 },{ width:10 },{ width:18 },{ width:16 },{ width:16 },{ width:10 }];
+  ws3.columns = [{ width:35 }, { width:18 }, { width:18 }];
+
+  // ─────────────────────────────────────────────
+  // Sheet 4: 채널별 상세 (기존 채널별 시트)
+  // ─────────────────────────────────────────────
+  for (const ch of orderedChannels) {
+    const ws = wb.addWorksheet(ch.name.substring(0,31));
+    const hRow = ws.addRow(['최종상품명','수량','정산금액','원가/개','원가합계','이익','이익률']);
+    hRow.eachCell(cell => { cell.fill = tealFill; cell.font = whiteFont; cell.border = borders; cell.alignment = { horizontal:'center', vertical:'middle' }; });
+    hRow.height = 24;
+
+    let tS=0, tC=0, tP=0, tQ=0;
+    for (const r of (ch.aggregated || []).sort((a,b) => b.정산금액 - a.정산금액)) {
+      const row = ws.addRow([r.최종상품명, r.수량, r.정산금액, r.원가단가||0, r.원가합계||0, r.이익||0, r.이익률||0]);
+      row.eachCell(cell => { cell.border = borders; cell.font = normalFont; });
+      [2,3,4,5,6].forEach(c => row.getCell(c).numFmt = numFmt);
+      row.getCell(7).numFmt = rateFmt;
+      if ((r.이익||0) >= 0) row.getCell(6).font = { color:{argb:'FF10B981'}, bold:true, size:10, name:'맑은 고딕' };
+      else row.getCell(6).font = { color:{argb:'FFEF4444'}, bold:true, size:10, name:'맑은 고딕' };
+      tS += r.정산금액; tC += r.원가합계||0; tP += r.이익||0; tQ += r.수량;
+    }
+    const sRow = ws.addRow(['합계', tQ, tS, '', tC, tP, tS > 0 ? tP/tS : 0]);
+    sRow.eachCell(cell => { cell.fill = darkFill; cell.font = { bold:true, color:{argb:'FFFFFFFF'}, size:10, name:'맑은 고딕' }; cell.border = borders; });
+    [2,3,5,6].forEach(c => sRow.getCell(c).numFmt = numFmt);
+    sRow.getCell(7).numFmt = rateFmt;
+    ws.columns = [{ width:28 },{ width:10 },{ width:16 },{ width:14 },{ width:16 },{ width:16 },{ width:10 }];
+  }
 
   // 다운로드
   const buffer = await wb.xlsx.writeBuffer();
@@ -1787,10 +1932,10 @@ async function downloadExcelStyled() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `iLBiA_매출정산_${month}_서식.xlsx`;
+  a.download = `iLBiA_온라인매출정산_${month}.xlsx`;
   a.click();
   URL.revokeObjectURL(url);
-  showToast('서식 포함 Excel 다운로드 완료!', 'success');
+  showToast('최종 정산 파일 다운로드 완료!', 'success');
 }
 
 // ═══════════════════════════════════════════════════════
