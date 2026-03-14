@@ -634,6 +634,36 @@ body {
     background: rgba(16, 185, 129, 0.08);
 }
 
+/* ── 카테고리 칩 ── */
+.cat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-secondary);
+    background: var(--bg-input);
+    user-select: none;
+}
+
+.cat-chip:hover { border-color: var(--accent); color: var(--text-primary); }
+
+.cat-chip.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.cat-chip .cat-count {
+    font-size: 10px;
+    opacity: 0.7;
+}
+
 /* ── 조사 기록 드롭다운 ── */
 .history-dropdown {
     border: 1px solid var(--border);
@@ -789,8 +819,9 @@ body {
 
     <!-- 모드 토글 -->
     <div class="scan-mode-toggle">
-        <button class="scan-mode-btn active" data-mode="manual">직접 조사</button>
-        <button class="scan-mode-btn" data-mode="auto">자동 스캔 결과</button>
+        <button class="scan-mode-btn active" data-mode="manual">스팟 분석</button>
+        <button class="scan-mode-btn" data-mode="smart">스마트 스캔</button>
+        <button class="scan-mode-btn" data-mode="discover">시장 발굴</button>
     </div>
 
     <!-- 직접 조사 -->
@@ -836,28 +867,114 @@ body {
         </div>
     </div>
 
-    <!-- 자동 스캔 결과 -->
-    <div id="autoScanPanel" style="display:none;">
+    <!-- 스마트 스캔 -->
+    <div id="smartScanPanel" style="display:none;">
+        <!-- 시드 입력 -->
         <div class="card">
             <div class="card-header">
-                <span class="card-title">자동 스캔 결과</span>
-                <span class="card-subtitle" id="autoScanCount"></span>
+                <span class="card-title">키워드 확장 스캔</span>
             </div>
-            <table class="data-table" id="autoScanTable">
+            <div style="display:flex; gap:8px; margin-bottom:12px;">
+                <input type="text" id="seedKeywords" placeholder="시드 키워드 (쉼표 구분: 깔창, 탈취제, 세제)" style="flex:1; background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius); color:var(--text-primary); font-family:inherit; font-size:14px; padding:10px 16px; outline:none;">
+                <input type="number" id="minSearch" value="3000" style="width:100px; background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius); color:var(--text-primary); font-family:inherit; font-size:13px; padding:10px; outline:none;" title="최소 검색량">
+                <input type="number" id="maxScan" value="20" style="width:80px; background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius); color:var(--text-primary); font-family:inherit; font-size:13px; padding:10px; outline:none;" title="최대 스캔 수">
+                <button class="btn btn-primary" id="btnAutoScan">스캔</button>
+                <button class="btn btn-sm btn-secondary" id="btnStopScan" style="display:none;">중지</button>
+            </div>
+        </div>
+
+        <!-- 진행 상태 (스마트 스캔 공용) -->
+        <div id="autoProgress" class="card" style="display:none; border-color:var(--accent);">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span class="loading-spinner"></span>
+                <div>
+                    <div style="font-size:14px; font-weight:600;" id="autoPhaseText">준비중...</div>
+                    <div style="font-size:12px; color:var(--text-secondary);" id="autoProgressDetail"></div>
+                </div>
+                <div style="margin-left:auto; font-size:24px; font-weight:800; color:var(--accent);" id="autoProgressCount">0/0</div>
+            </div>
+            <div style="margin-top:10px; background:var(--bg-input); border-radius:2px; height:4px; overflow:hidden;">
+                <div id="autoProgressBar" style="height:100%; background:var(--accent); width:0%; transition:width 0.3s;"></div>
+            </div>
+        </div>
+
+        <!-- 결과 테이블 -->
+        <div class="card" id="autoResultsCard" style="display:none;">
+            <div class="card-header">
+                <span class="card-title">발견된 기회</span>
+                <span class="card-subtitle" id="autoResultCount"></span>
+            </div>
+            <table class="data-table">
                 <thead>
                     <tr>
                         <th>키워드</th>
-                        <th>카테고리</th>
                         <th>기회점수</th>
-                        <th>상위10 평균매출</th>
-                        <th>매출균등도</th>
-                        <th>광고의존도</th>
-                        <th>신상품진입률</th>
-                        <th>스캔일</th>
-                        <th>상태</th>
+                        <th>상위3 점유율</th>
+                        <th>300만+ 비율</th>
+                        <th>기대매출 (4~10등)</th>
+                        <th>신상품 가중치</th>
+                        <th>검색량</th>
+                        <th>시드</th>
                     </tr>
                 </thead>
-                <tbody id="autoScanBody"></tbody>
+                <tbody id="autoResultsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 시장 발굴 -->
+    <div id="discoverPanel" style="display:none;">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">시장 발굴</span>
+                <span class="card-subtitle">카테고리별 자동 기회 탐색 — 모르는 시장에서 보석을 찾아보세요</span>
+            </div>
+            <div id="categoryGrid" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;"></div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <button class="btn btn-sm btn-secondary" onclick="selectAllCats()" style="font-size:11px;">전체 선택</button>
+                <button class="btn btn-sm btn-secondary" onclick="deselectAllCats()" style="font-size:11px;">전체 해제</button>
+                <div style="flex:1;"></div>
+                <span style="font-size:12px; color:var(--text-muted);" id="catSeedCount">0개 시드</span>
+                <input type="number" id="discoverMaxScan" value="30" style="width:80px; background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius); color:var(--text-primary); font-size:13px; padding:8px; outline:none;" title="최대 스캔 수">
+                <button class="btn btn-primary" id="btnExploreScan">발굴 시작</button>
+            </div>
+        </div>
+
+        <!-- 진행 상태 (시장 발굴용) -->
+        <div id="discoverProgress" class="card" style="display:none; border-color:var(--accent);">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span class="loading-spinner"></span>
+                <div>
+                    <div style="font-size:14px; font-weight:600;" id="discoverPhaseText">준비중...</div>
+                    <div style="font-size:12px; color:var(--text-secondary);" id="discoverDetail"></div>
+                </div>
+                <div style="margin-left:auto; font-size:24px; font-weight:800; color:var(--accent);" id="discoverCount">0/0</div>
+            </div>
+            <div style="margin-top:10px; background:var(--bg-input); border-radius:2px; height:4px; overflow:hidden;">
+                <div id="discoverBar" style="height:100%; background:var(--accent); width:0%; transition:width 0.3s;"></div>
+            </div>
+        </div>
+
+        <!-- 발굴 결과 -->
+        <div class="card" id="discoverResultsCard" style="display:none;">
+            <div class="card-header">
+                <span class="card-title">발굴된 기회</span>
+                <span class="card-subtitle" id="discoverResultCount"></span>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>키워드</th>
+                        <th>기회점수</th>
+                        <th>상위3 점유율</th>
+                        <th>300만+ 비율</th>
+                        <th>기대매출 (4~10등)</th>
+                        <th>신상품 가중치</th>
+                        <th>검색량</th>
+                        <th>카테고리</th>
+                    </tr>
+                </thead>
+                <tbody id="discoverResultsBody"></tbody>
             </table>
         </div>
     </div>
@@ -1147,7 +1264,8 @@ document.querySelectorAll('.scan-mode-btn').forEach(btn => {
         btn.classList.add('active');
         const mode = btn.dataset.mode;
         document.getElementById('manualScanPanel').style.display = mode === 'manual' ? 'block' : 'none';
-        document.getElementById('autoScanPanel').style.display = mode === 'auto' ? 'block' : 'none';
+        document.getElementById('smartScanPanel').style.display = mode === 'smart' ? 'block' : 'none';
+        document.getElementById('discoverPanel').style.display = mode === 'discover' ? 'block' : 'none';
     });
 });
 
@@ -1634,6 +1752,249 @@ async function loadHistory() {
     }
 }
 
+// ─────────────────────────────────────────────
+// 자동 스캔
+// ─────────────────────────────────────────────
+document.getElementById('btnAutoScan').addEventListener('click', async () => {
+    const input = document.getElementById('seedKeywords').value.trim();
+    if (!input) { document.getElementById('seedKeywords').focus(); return; }
+
+    const seeds = input.split(',').map(s => s.trim()).filter(Boolean);
+    const minSearch = parseInt(document.getElementById('minSearch').value) || 3000;
+    const maxScan = parseInt(document.getElementById('maxScan').value) || 20;
+
+    try {
+        const res = await fetch('/api/autoscan/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ seeds, min_search: minSearch, max_scan: maxScan })
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('btnAutoScan').style.display = 'none';
+            document.getElementById('btnStopScan').style.display = 'inline-flex';
+            document.getElementById('autoProgress').style.display = 'block';
+            pollAutoScan();
+        } else {
+            showWingStatus(data.error, 'error');
+        }
+    } catch (err) {
+        showWingStatus('서버 연결 실패', 'error');
+    }
+});
+
+// 카테고리 칩 로드
+async function loadCategories() {
+    try {
+        const res = await fetch('/api/categories');
+        const data = await res.json();
+        if (data.success) {
+            const grid = document.getElementById('categoryGrid');
+            grid.innerHTML = data.categories.map(c =>
+                `<div class="cat-chip" data-cat="${c.name}" onclick="toggleCat(this)">
+                    ${c.name} <span class="cat-count">${c.count}</span>
+                </div>`
+            ).join('');
+        }
+    } catch(e) {}
+}
+
+function toggleCat(el) {
+    el.classList.toggle('selected');
+    updateCatCount();
+}
+
+function selectAllCats() {
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.add('selected'));
+    updateCatCount();
+}
+
+function deselectAllCats() {
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('selected'));
+    updateCatCount();
+}
+
+function updateCatCount() {
+    const selected = document.querySelectorAll('.cat-chip.selected');
+    const total = [...selected].reduce((sum, el) => sum + parseInt(el.querySelector('.cat-count').textContent), 0);
+    document.getElementById('catSeedCount').textContent = `${total}개 시드`;
+}
+
+// 카테고리 탐색 (시장 발굴)
+document.getElementById('btnExploreScan').addEventListener('click', async () => {
+    const selected = [...document.querySelectorAll('.cat-chip.selected')].map(el => el.dataset.cat);
+    if (selected.length === 0) { alert('카테고리를 선택해주세요'); return; }
+
+    const maxScan = parseInt(document.getElementById('discoverMaxScan').value) || 30;
+
+    const btn = document.getElementById('btnExploreScan');
+    btn.disabled = true;
+    btn.textContent = '발굴 중...';
+
+    try {
+        const res = await fetch('/api/autoscan/explore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ categories: selected, max_scan: maxScan, min_search: 3000 })
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('discoverProgress').style.display = 'block';
+            pollDiscover();
+        } else {
+            showWingStatus(data.error, 'error');
+            btn.disabled = false;
+            btn.textContent = '발굴 시작';
+        }
+    } catch (err) {
+        showWingStatus('서버 연결 실패', 'error');
+        btn.disabled = false;
+        btn.textContent = '발굴 시작';
+    }
+});
+
+function pollDiscover() {
+    const poll = async () => {
+        try {
+            const res = await fetch('/api/autoscan/status');
+            const s = await res.json();
+
+            const phaseText = {
+                'expanding': '연관키워드 확장 중...',
+                'filtering': '후보 필터링 중...',
+                'scanning': '윙 스캔 중...',
+                'done': '발굴 완료!',
+                'error': '에러 발생',
+                'login_required': '윙 로그인 필요',
+            }[s.phase] || s.phase;
+
+            document.getElementById('discoverPhaseText').textContent = phaseText;
+            document.getElementById('discoverDetail').textContent = s.current_keyword || '';
+            document.getElementById('discoverCount').textContent = `${s.scanned}/${s.total}`;
+            const pct = s.total > 0 ? (s.scanned / s.total * 100) : 0;
+            document.getElementById('discoverBar').style.width = pct + '%';
+
+            if (s.result_count > 0) loadDiscoverResults();
+
+            if (s.running) {
+                setTimeout(poll, 2000);
+            } else {
+                document.getElementById('btnExploreScan').disabled = false;
+                document.getElementById('btnExploreScan').textContent = '발굴 시작';
+                if (s.phase === 'done') {
+                    document.getElementById('discoverProgress').style.borderColor = 'var(--success)';
+                }
+                loadDiscoverResults();
+                loadScanHistory();
+                loadStats();
+            }
+        } catch(e) { setTimeout(poll, 3000); }
+    };
+    poll();
+}
+
+async function loadDiscoverResults() {
+    try {
+        const res = await fetch('/api/autoscan/results');
+        const data = await res.json();
+        if (data.success && data.results.length > 0) {
+            document.getElementById('discoverResultsCard').style.display = 'block';
+            document.getElementById('discoverResultCount').textContent = data.results.length + '개 발견';
+            document.getElementById('discoverResultsBody').innerHTML = data.results.map(r => `
+                <tr onclick="viewScanDetail(${r.scan_id})" style="cursor:pointer;">
+                    <td><strong>${r.keyword}</strong></td>
+                    <td><span class="score-badge ${getScoreClass(r.score)}">${r.score}</span></td>
+                    <td style="color:${r.top3_share < 50 ? 'var(--success)' : r.top3_share < 70 ? 'var(--warning)' : 'var(--danger)'}">${r.top3_share}%</td>
+                    <td style="color:${r.sellers_3m_rate > 40 ? 'var(--success)' : 'var(--warning)'}">${r.sellers_3m_rate}% (${r.sellers_3m}개)</td>
+                    <td>${formatNumber(r.entry_revenue)}원</td>
+                    <td>${r.new_weight}</td>
+                    <td>${formatNumber(r.search_volume)}</td>
+                    <td style="color:var(--text-muted); font-size:11px;">${r.seed}</td>
+                </tr>
+            `).join('');
+        }
+    } catch(e) {}
+}
+
+loadCategories();
+
+document.getElementById('btnStopScan').addEventListener('click', async () => {
+    await fetch('/api/autoscan/stop', { method: 'POST' });
+    document.getElementById('btnAutoScan').style.display = 'inline-flex';
+    document.getElementById('btnStopScan').style.display = 'none';
+});
+
+function pollAutoScan() {
+    const poll = async () => {
+        try {
+            const res = await fetch('/api/autoscan/status');
+            const s = await res.json();
+
+            const phaseText = {
+                'expanding': '연관키워드 확장 중...',
+                'filtering': '후보 필터링 중...',
+                'scanning': '윙 스캔 중...',
+                'done': '완료!',
+                'error': '에러 발생',
+                'login_required': '윙 로그인 필요',
+            }[s.phase] || s.phase;
+
+            document.getElementById('autoPhaseText').textContent = phaseText;
+            document.getElementById('autoProgressDetail').textContent = s.current_keyword || '';
+            document.getElementById('autoProgressCount').textContent = `${s.scanned}/${s.total}`;
+
+            const pct = s.total > 0 ? (s.scanned / s.total * 100) : 0;
+            document.getElementById('autoProgressBar').style.width = pct + '%';
+
+            // 결과 업데이트
+            if (s.result_count > 0) {
+                loadAutoResults();
+            }
+
+            if (s.running) {
+                setTimeout(poll, 2000);
+            } else {
+                document.getElementById('btnAutoScan').style.display = 'inline-flex';
+                document.getElementById('btnStopScan').style.display = 'none';
+                if (s.phase === 'done') {
+                    document.getElementById('autoPhaseText').textContent = '스캔 완료!';
+                    document.getElementById('autoProgress').style.borderColor = 'var(--success)';
+                }
+                loadAutoResults();
+                loadScanHistory();
+                loadStats();
+            }
+        } catch (e) {
+            setTimeout(poll, 3000);
+        }
+    };
+    poll();
+}
+
+async function loadAutoResults() {
+    try {
+        const res = await fetch('/api/autoscan/results');
+        const data = await res.json();
+        if (data.success && data.results.length > 0) {
+            document.getElementById('autoResultsCard').style.display = 'block';
+            document.getElementById('autoResultCount').textContent = data.results.length + '개 발견';
+
+            document.getElementById('autoResultsBody').innerHTML = data.results.map(r => `
+                <tr onclick="viewScanDetail(${r.scan_id})" style="cursor:pointer;">
+                    <td><strong>${r.keyword}</strong></td>
+                    <td><span class="score-badge ${getScoreClass(r.score)}">${r.score}</span></td>
+                    <td style="color:${r.top3_share < 50 ? 'var(--success)' : r.top3_share < 70 ? 'var(--warning)' : 'var(--danger)'}">${r.top3_share}%</td>
+                    <td style="color:${r.sellers_3m_rate > 40 ? 'var(--success)' : 'var(--warning)'}">${r.sellers_3m_rate}% (${r.sellers_3m}개)</td>
+                    <td>${formatNumber(r.entry_revenue)}원</td>
+                    <td>${r.new_weight}</td>
+                    <td>${formatNumber(r.search_volume)}</td>
+                    <td style="color:var(--text-muted); font-size:11px;">${r.seed}</td>
+                </tr>
+            `).join('');
+        }
+    } catch (e) {}
+}
+
 function loadTabData(tab) {
     switch (tab) {
         case 'scan': loadScanHistory(); break;
@@ -1689,8 +2050,22 @@ function getStatusText(status) {
 }
 
 function viewScanDetail(scanId) {
-    // TODO: 모달 or 상세 패널
-    console.log('상세 보기:', scanId);
+    // 직접 조사 탭으로 전환 + 해당 스캔 결과 표시
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('[data-tab="scan"]').classList.add('active');
+    document.getElementById('tab-scan').classList.add('active');
+
+    // 직접 조사 모드
+    document.querySelectorAll('.scan-mode-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-mode="manual"]').classList.add('active');
+    document.getElementById('manualScanPanel').style.display = 'block';
+    document.getElementById('autoScanPanel').style.display = 'none';
+
+    // 결과 표시
+    document.getElementById('scanEmpty').style.display = 'none';
+    document.getElementById('scanResult').style.display = 'block';
+    showScanResult(scanId, {});
 }
 
 // ─────────────────────────────────────────────

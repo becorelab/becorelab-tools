@@ -664,6 +664,352 @@ def _run_scan_wing(scan_id: int, keyword: str):
             db.commit()
 
 
+# === 카테고리 탐색 ===
+from analyzer.categories import CATEGORY_SEEDS, get_all_seeds, get_category_names
+
+
+@app.route('/api/categories')
+def api_categories():
+    """탐색 가능한 카테고리 목록"""
+    cats = []
+    for name, keywords in CATEGORY_SEEDS.items():
+        cats.append({'name': name, 'count': len(keywords)})
+    return jsonify({'success': True, 'categories': cats})
+
+
+@app.route('/api/autoscan/explore', methods=['POST'])
+def api_explore_start():
+    """카테고리 탐색 시작 — 선택한 카테고리의 시드로 자동 스캔"""
+    if _auto_scan_state['running']:
+        return jsonify({'success': False, 'error': '이미 스캔 진행 중입니다'})
+
+    data = request.get_json(silent=True) or {}
+    selected_cats = data.get('categories', [])  # 빈 배열이면 전체
+    max_scan = data.get('max_scan', 30)
+    min_search = data.get('min_search', 3000)
+
+    # 시드 수집
+    if selected_cats:
+        seeds = []
+        for cat in selected_cats:
+            seeds.extend(CATEGORY_SEEDS.get(cat, []))
+    else:
+        seeds = [s['keyword'] for s in get_all_seeds()]
+
+    if not seeds:
+        return jsonify({'success': False, 'error': '카테고리를 선택해주세요'})
+
+    _auto_scan_state.update({
+        'running': True,
+        'phase': 'expanding',
+        'seed_keywords': seeds,
+        'candidates': [],
+        'scanned': 0,
+        'total': 0,
+        'current_keyword': '',
+        'results': [],
+        'errors': [],
+    })
+
+    thread = threading.Thread(
+        target=_run_autoscan,
+        args=(seeds, min_search, max_scan),
+        daemon=True
+    )
+    thread.start()
+
+    return jsonify({
+        'success': True,
+        'message': f'{len(seeds)}개 시드로 카테고리 탐색 시작!'
+    })
+
+
+# === 노이즈 키워드 필터 ===
+def _is_noise_keyword(keyword: str) -> bool:
+    """브랜드명, 제품명, 정보성 키워드 필터링"""
+    kw = keyword.lower().replace(' ', '')
+
+    # 정보성 키워드 패턴
+    info_patterns = ['추천', '순위', '비교', '후기', '리뷰', '가격', '할인', '세일',
+                     '감사제', '블프', '블랙프라이데이', '쿠폰', '최저가', '사용법',
+                     '차이', '효과', '부작용', '성분', '만들기', '방법', 'vs']
+
+    # 브랜드/스토어 패턴
+    brand_patterns = ['다이소', '이케아', '무인양품', '유니클로', '코스트코', '올리브영',
+                      '쿠팡', '네이버', '당근', '오늘의집', '마켓컬리']
+
+    for p in info_patterns:
+        if p in kw:
+            return True
+
+    for p in brand_patterns:
+        if p in kw:
+            return True
+
+    # 너무 긴 키워드 (구체적 제품명일 가능성)
+    if len(keyword.replace(' ', '')) > 15:
+        return True
+
+    # 영문만 있는 키워드 (브랜드명일 가능성)
+    import re
+    if re.match(r'^[a-zA-Z0-9\s]+$', keyword) and len(keyword) > 3:
+        return True
+
+    return False
+
+
+# === 자동 스캔 ===
+_auto_scan_state = {
+    'running': False,
+    'phase': '',           # expanding / filtering / scanning
+    'seed_keywords': [],
+    'candidates': [],      # 필터링된 후보 키워드
+    'scanned': 0,
+    'total': 0,
+    'current_keyword': '',
+    'results': [],         # 완료된 스캔 결과
+    'errors': [],
+}
+
+
+@app.route('/api/autoscan/start', methods=['POST'])
+def api_autoscan_start():
+    """자동 스캔 시작"""
+    if _auto_scan_state['running']:
+        return jsonify({'success': False, 'error': '이미 스캔 진행 중입니다'})
+
+    data = request.get_json(silent=True) or {}
+    seeds = data.get('seeds', [])
+    min_search = data.get('min_search', 3000)   # 최소 검색량
+    max_scan = data.get('max_scan', 30)          # 최대 윙 스캔 수
+
+    if not seeds:
+        return jsonify({'success': False, 'error': '시드 키워드를 입력해주세요'})
+
+    # 상태 초기화
+    _auto_scan_state.update({
+        'running': True,
+        'phase': 'expanding',
+        'seed_keywords': seeds,
+        'candidates': [],
+        'scanned': 0,
+        'total': 0,
+        'current_keyword': '',
+        'results': [],
+        'errors': [],
+    })
+
+    thread = threading.Thread(
+        target=_run_autoscan,
+        args=(seeds, min_search, max_scan),
+        daemon=True
+    )
+    thread.start()
+
+    return jsonify({
+        'success': True,
+        'message': f'시드 {len(seeds)}개로 자동 스캔 시작!'
+    })
+
+
+@app.route('/api/autoscan/status')
+def api_autoscan_status():
+    """자동 스캔 진행 상태"""
+    return jsonify({
+        'success': True,
+        **{k: v for k, v in _auto_scan_state.items() if k != 'results'},
+        'result_count': len(_auto_scan_state['results']),
+    })
+
+
+@app.route('/api/autoscan/results')
+def api_autoscan_results():
+    """자동 스캔 결과 (기회점수 순)"""
+    results = sorted(
+        _auto_scan_state['results'],
+        key=lambda r: r.get('score', 0),
+        reverse=True
+    )
+    return jsonify({'success': True, 'results': results})
+
+
+@app.route('/api/autoscan/stop', methods=['POST'])
+def api_autoscan_stop():
+    """자동 스캔 중지"""
+    _auto_scan_state['running'] = False
+    return jsonify({'success': True, 'message': '스캔 중지됨'})
+
+
+def _run_autoscan(seeds: list, min_search: int, max_scan: int):
+    """자동 스캔 백그라운드 실행"""
+    with app.app_context():
+        try:
+            # ── Phase 1: 연관키워드 확장 ──
+            _auto_scan_state['phase'] = 'expanding'
+            api = get_helpstore()
+
+            all_keywords = {}  # keyword → {search, competition, product_count}
+
+            for seed in seeds:
+                if not _auto_scan_state['running']:
+                    break
+                _auto_scan_state['current_keyword'] = f'확장: {seed}'
+
+                related = api.get_related_keywords(seed)
+                for kw in related:
+                    if kw.keyword not in all_keywords:
+                        all_keywords[kw.keyword] = {
+                            'keyword': kw.keyword,
+                            'search': kw.total_search,
+                            'competition': kw.competition,
+                            'product_count': kw.product_count,
+                            'is_brand': kw.is_brand,
+                            'seed': seed,
+                        }
+
+                import time
+                time.sleep(1)  # API 부하 방지
+
+            if not _auto_scan_state['running']:
+                return
+
+            # ── Phase 2: 필터링 ──
+            _auto_scan_state['phase'] = 'filtering'
+
+            # 필터링: 브랜드/제품명/정보성 키워드 제외
+            candidates = []
+            for kw in all_keywords.values():
+                if kw['search'] < min_search:
+                    continue
+                if kw.get('is_brand'):  # 헬프스토어 브랜드 플래그
+                    continue
+                if kw['product_count'] < 50:  # 상품수 너무 적으면 브랜드/제품명
+                    continue
+                if _is_noise_keyword(kw['keyword']):
+                    continue
+                candidates.append(kw)
+
+            # 검색량/상품수 비율 높은 순 정렬 (수요>공급)
+            for c in candidates:
+                c['ratio'] = c['search'] / max(c['product_count'], 1)
+            candidates.sort(key=lambda x: x['ratio'], reverse=True)
+
+            # 상위 N개만 스캔
+            candidates = candidates[:max_scan]
+            _auto_scan_state['candidates'] = candidates
+            _auto_scan_state['total'] = len(candidates)
+
+            print(f'[AUTO-SCAN] 연관키워드 {len(all_keywords)}개 → 후보 {len(candidates)}개 선별')
+
+            # ── Phase 3: 윙 스캔 ──
+            _auto_scan_state['phase'] = 'scanning'
+
+            for i, cand in enumerate(candidates):
+                if not _auto_scan_state['running']:
+                    break
+
+                keyword = cand['keyword']
+                _auto_scan_state['current_keyword'] = keyword
+                _auto_scan_state['scanned'] = i
+
+                try:
+                    # 윙 스캔 실행
+                    db = get_db()
+                    cursor = db.execute('''
+                        INSERT INTO market_scans (keyword, scan_type, status)
+                        VALUES (?, 'auto', 'scanning')
+                    ''', (keyword,))
+                    db.commit()
+                    scan_id = cursor.lastrowid
+
+                    products = wing_search(keyword)
+
+                    # 상품 저장
+                    for p in products:
+                        db.execute('''
+                            INSERT INTO products (scan_id, ranking, product_name, brand,
+                                manufacturer, price, sales_monthly, revenue_monthly,
+                                review_count, click_count, conversion_rate, page_views,
+                                category, category_code, product_url)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ''', (
+                            scan_id, p.ranking, p.product_name, p.brand,
+                            p.manufacturer, p.price, p.sales_monthly,
+                            p.revenue_monthly, p.review_count, p.click_count,
+                            p.conversion_rate, p.page_views, p.category,
+                            p.category_code, p.product_url
+                        ))
+
+                    # 기회점수
+                    opp = calculate_opportunity(
+                        products=products,
+                        related_keywords=api.get_related_keywords(keyword),
+                        keyword=keyword
+                    )
+
+                    # DB 업데이트
+                    db.execute('''
+                        UPDATE market_scans SET
+                            status = 'scanned', category = ?, opportunity_score = ?,
+                            top10_avg_revenue = ?, top10_avg_sales = ?, top10_avg_price = ?,
+                            revenue_concentration = ?, revenue_equality = ?,
+                            new_product_rate = ?, ad_dependency = ?,
+                            recommended_keyword = ?, updated_at = CURRENT_TIMESTAMP
+                        WHERE id = ?
+                    ''', (
+                        products[0].category if products else '',
+                        round(opp.total_score, 1),
+                        opp.top4_10_avg_revenue, opp.top4_10_avg_sales, opp.top4_10_avg_price,
+                        round(opp.top3_share * 100, 1),
+                        round(opp.sellers_over_3m_rate * 100, 1),
+                        round(opp.new_product_rate * 100, 1),
+                        round(opp.avg_new_product_weight, 1),
+                        opp.recommended_keyword, scan_id
+                    ))
+                    db.commit()
+
+                    _auto_scan_state['results'].append({
+                        'scan_id': scan_id,
+                        'keyword': keyword,
+                        'score': round(opp.total_score, 1),
+                        'grade': opp.grade,
+                        'top3_share': round(opp.top3_share * 100, 1),
+                        'sellers_3m': opp.sellers_over_3m,
+                        'sellers_3m_rate': round(opp.sellers_over_3m_rate * 100, 1),
+                        'entry_revenue': opp.top4_10_avg_revenue,
+                        'new_weight': round(opp.avg_new_product_weight, 1),
+                        'products': len(products),
+                        'seed': cand['seed'],
+                        'search_volume': cand['search'],
+                    })
+
+                    print(f'[AUTO-SCAN] {i+1}/{len(candidates)} {keyword} → {opp.total_score:.1f} ({opp.grade})')
+
+                except Exception as e:
+                    error_msg = str(e)
+                    _auto_scan_state['errors'].append(f'{keyword}: {error_msg}')
+                    print(f'[AUTO-SCAN] 에러: {keyword} — {error_msg}')
+
+                    if 'LOGIN_REQUIRED' in error_msg:
+                        _auto_scan_state['phase'] = 'login_required'
+                        break
+
+                import time
+                time.sleep(2)  # 요청 간격
+
+            _auto_scan_state['scanned'] = len(candidates)
+            _auto_scan_state['phase'] = 'done'
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            _auto_scan_state['phase'] = 'error'
+            _auto_scan_state['errors'].append(str(e))
+        finally:
+            _auto_scan_state['running'] = False
+            print(f'[AUTO-SCAN] 완료! 결과 {len(_auto_scan_state["results"])}개')
+
+
 # === 헬프스토어 캡처 (북마클릿) ===
 @app.route('/api/scan/import', methods=['POST'])
 def api_scan_import():
