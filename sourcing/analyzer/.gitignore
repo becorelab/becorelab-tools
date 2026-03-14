@@ -1,2 +1,3 @@
 .wing_profile/
 wing_cookies*
+# reviews.py에 API 키 포함 — 절대 공개 레포에 푸시하지 말 것

@@ -20,6 +20,7 @@ from analyzer.helpstore import (
 )
 from analyzer.scoring import calculate_opportunity, generate_keyword_variants, OpportunityScore
 from analyzer.wing import wing_search, wing_ensure_login, get_wing_status
+from analyzer.reviews import analyze_reviews_basic, analyze_reviews_claude
 
 app = Flask(__name__)
 
@@ -1614,6 +1615,161 @@ def get_scan_detail(scan_id):
         'keywords': [dict(k) for k in keywords],
         'variants': [dict(v) for v in variants]
     })
+
+
+# === 리뷰 분석 ===
+_review_state = {}  # scan_id → {status, reviews, analysis}
+
+
+@app.route('/api/scan/<int:scan_id>/reviews', methods=['POST'])
+def api_scan_reviews(scan_id):
+    """스캔의 상위 상품 리뷰 수집 + 분석"""
+    if scan_id in _review_state and _review_state[scan_id].get('status') == 'analyzing':
+        return jsonify({'success': True, 'message': '이미 분석 중...'})
+
+    data = request.get_json(silent=True) or {}
+    from analyzer.reviews import ANTHROPIC_API_KEY
+    api_key = data.get('api_key', '') or ANTHROPIC_API_KEY
+
+    _review_state[scan_id] = {'status': 'collecting', 'reviews': [], 'analysis': None}
+
+    thread = threading.Thread(
+        target=_run_review_analysis,
+        args=(scan_id, api_key),
+        daemon=True
+    )
+    thread.start()
+
+    return jsonify({'success': True, 'message': '리뷰 수집 시작!'})
+
+
+@app.route('/api/scan/<int:scan_id>/reviews')
+def api_get_reviews(scan_id):
+    """리뷰 분석 결과 조회"""
+    state = _review_state.get(scan_id, {})
+    return jsonify({
+        'success': True,
+        'status': state.get('status', 'none'),
+        'review_count': len(state.get('reviews', [])),
+        'analysis': state.get('analysis'),
+    })
+
+
+def _run_review_analysis(scan_id: int, api_key: str = ''):
+    """리뷰 수집 → 분석 백그라운드"""
+    with app.app_context():
+        try:
+            db = get_db()
+            scan = db.execute('SELECT keyword FROM market_scans WHERE id = ?', (scan_id,)).fetchone()
+            if not scan:
+                _review_state[scan_id] = {'status': 'error', 'reviews': [], 'analysis': None}
+                return
+
+            keyword = scan['keyword']
+            products = db.execute(
+                'SELECT * FROM products WHERE scan_id = ? ORDER BY ranking LIMIT 10',
+                (scan_id,)
+            ).fetchall()
+
+            if not products:
+                _review_state[scan_id] = {'status': 'error', 'reviews': [], 'analysis': {'error': '상품 데이터 없음'}}
+                return
+
+            # 리뷰 수집 — 별도 Playwright (Wing 워커와 독립)
+            _review_state[scan_id]['status'] = 'collecting'
+            all_reviews = _collect_reviews_direct(products)
+
+            _review_state[scan_id]['reviews'] = all_reviews
+            print(f'[REVIEW] 총 {len(all_reviews)}개 리뷰 수집 완료')
+
+            # 분석
+            _review_state[scan_id]['status'] = 'analyzing'
+            if api_key:
+                analysis = analyze_reviews_claude(all_reviews, keyword, api_key)
+            else:
+                analysis = analyze_reviews_basic(all_reviews, keyword)
+
+            _review_state[scan_id]['analysis'] = analysis
+            _review_state[scan_id]['status'] = 'done'
+            print(f'[REVIEW] 분석 완료: {keyword}')
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            _review_state[scan_id] = {
+                'status': 'error',
+                'reviews': _review_state.get(scan_id, {}).get('reviews', []),
+                'analysis': {'error': str(e)}
+            }
+
+
+def _collect_reviews_direct(products) -> list:
+    """별도 Playwright로 리뷰 수집 (Wing 워커와 독립)"""
+    from playwright.sync_api import sync_playwright
+    import re, time
+
+    all_reviews = []
+    pw = sync_playwright().start()
+    browser = pw.chromium.launch(headless=True, args=['--disable-blink-features=AutomationControlled'])
+    page = browser.new_page()
+
+    try:
+        # 쿠팡 메인 접속 (쿠키 설정)
+        page.goto('https://www.coupang.com', wait_until='domcontentloaded', timeout=15000)
+        page.wait_for_timeout(2000)
+
+        for p in products[:10]:
+            url = p['product_url']
+            if not url:
+                continue
+            pid_match = re.search(r'products/(\d+)', url)
+            if not pid_match:
+                continue
+            pid = pid_match.group(1)
+
+            try:
+                for pg in range(1, 6):  # 최대 5페이지 = 100개
+                    result = page.evaluate(f'''() => {{
+                        return new Promise(resolve => {{
+                            fetch('/next-api/review?productId={pid}&page={pg}&size=20&sortBy=DATE_DESC&ratingSummary=true', {{
+                                credentials: 'include',
+                                headers: {{ 'accept': 'application/json' }}
+                            }})
+                            .then(r => r.json())
+                            .then(d => resolve(d))
+                            .catch(e => resolve({{error: e.toString()}}));
+                        }});
+                    }}''')
+
+                    if result.get('error'):
+                        break
+
+                    review_list = result.get('data', {}).get('reviews', [])
+                    for r in review_list:
+                        all_reviews.append({
+                            'rating': r.get('rating', 0),
+                            'headline': r.get('headline', ''),
+                            'content': r.get('content', ''),
+                        })
+
+                    if len(review_list) < 20:
+                        break
+                    time.sleep(0.3)
+
+                print(f'[REVIEW] {p["product_name"][:20]} → {len(all_reviews)}개 누적')
+            except Exception as e:
+                print(f'[REVIEW] 수집 실패: {p["product_name"][:20]} — {e}')
+
+            time.sleep(0.5)
+
+    except Exception as e:
+        print(f'[REVIEW] 크롤링 에러: {e}')
+    finally:
+        browser.close()
+        pw.stop()
+
+    print(f'[REVIEW] 총 {len(all_reviews)}개 수집 완료')
+    return all_reviews
 
 
 @app.route('/api/scan/<int:scan_id>/status', methods=['PUT'])

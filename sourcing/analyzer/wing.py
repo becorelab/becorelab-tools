@@ -70,6 +70,8 @@ def _worker_loop():
                 print(f'[WORKER] goldbox_crawl 시작')
                 holder['result'] = _do_goldbox_crawl(args.get('url', ''))
                 print(f'[WORKER] goldbox_crawl 완료: {len(holder["result"])}개')
+            elif action == 'collect_reviews':
+                holder['result'] = _do_collect_reviews(args.get('product_url', ''), args.get('max_reviews', 30))
         except Exception as e:
             import traceback
             print(f'[WORKER] 에러: {action} — {e}')
@@ -364,6 +366,67 @@ def _do_search(keyword):
 
     logger.info(f'헬프스토어 파싱 완료: {keyword} → {len(products)}개')
     return products
+
+
+def _do_collect_reviews(product_url: str, max_reviews: int = 30) -> list:
+    """쿠팡 상품 리뷰 수집"""
+    import re as _re
+    if not _ctx:
+        _start_browser()
+
+    pid_match = _re.search(r'products/(\d+)', product_url)
+    if not pid_match:
+        return []
+    pid = pid_match.group(1)
+
+    # 쿠팡 도메인에 있어야 쿠키 전송됨
+    if 'coupang.com' not in (_page.url if _page else ''):
+        _page.goto('https://www.coupang.com', wait_until='domcontentloaded', timeout=15000)
+        _page.wait_for_timeout(2000)
+
+    reviews = []
+    page_size = 20
+    pages = min((max_reviews // page_size) + 1, 15)  # 최대 300개/상품
+
+    for p in range(1, pages + 1):
+        try:
+            result = _page.evaluate(f'''() => {{
+                return new Promise(resolve => {{
+                    fetch('/next-api/review?productId={pid}&page={p}&size={page_size}&sortBy=DATE_DESC&ratingSummary=true', {{
+                        credentials: 'include',
+                        headers: {{ 'accept': 'application/json' }}
+                    }})
+                    .then(r => r.json())
+                    .then(d => resolve(d))
+                    .catch(e => resolve({{error: e.toString()}}));
+                }});
+            }}''')
+
+            if result.get('error'):
+                break
+
+            data = result.get('data', {})
+            review_list = data.get('reviews', [])
+
+            for r in review_list:
+                reviews.append({
+                    'rating': r.get('rating', 0),
+                    'headline': r.get('headline', ''),
+                    'content': r.get('content', ''),
+                    'created': r.get('createdAt', ''),
+                    'helpful_count': r.get('helpfulCount', 0),
+                })
+
+            if len(review_list) < page_size:
+                break
+
+            _page.wait_for_timeout(500)
+        except Exception as e:
+            logger.error(f'리뷰 수집 에러: {e}')
+            break
+
+    logger.info(f'리뷰 {len(reviews)}개 수집 (pid={pid})')
+    return reviews
 
 
 def _do_goldbox_crawl(url):

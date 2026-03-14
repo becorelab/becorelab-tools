@@ -896,6 +896,18 @@ body {
                     <div id="keywordList"></div>
                 </div>
             </div>
+
+            <!-- 리뷰 분석 -->
+            <div class="card" id="reviewSection" style="margin-top:16px;">
+                <div class="card-header">
+                    <span class="card-title">소비자 리뷰 분석</span>
+                    <button class="btn btn-sm btn-primary" id="btnAnalyzeReviews" onclick="startReviewAnalysis()">리뷰 분석</button>
+                </div>
+                <div id="reviewResult" style="display:none;"></div>
+                <div id="reviewEmpty" style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">
+                    [리뷰 분석] 버튼을 누르면 상위 상품들의 소비자 리뷰를 수집하고 분석합니다
+                </div>
+            </div>
         </div>
 
         <!-- 빈 상태 -->
@@ -1545,6 +1557,23 @@ async function pollScanResult(scanId, keyword, maxAttempts = 30) {
 }
 
 async function showScanResult(scanId, scanSummary) {
+    _currentScanId = scanId;
+    // 리뷰 섹션 리셋
+    document.getElementById('reviewResult').style.display = 'none';
+    document.getElementById('reviewEmpty').style.display = 'block';
+    document.getElementById('btnAnalyzeReviews').disabled = false;
+    document.getElementById('btnAnalyzeReviews').textContent = '리뷰 분석';
+
+    // 이미 분석된 리뷰가 있으면 표시
+    fetch(`/api/scan/${scanId}/reviews`).then(r => r.json()).then(data => {
+        if (data.status === 'done' && data.analysis) {
+            document.getElementById('reviewEmpty').style.display = 'none';
+            document.getElementById('reviewResult').style.display = 'block';
+            renderReviewAnalysis(data.analysis, data.review_count);
+            document.getElementById('btnAnalyzeReviews').textContent = '다시 분석';
+        }
+    }).catch(() => {});
+
     // 상세 데이터 로드
     try {
         const res = await fetch(`/api/scan/${scanId}`);
@@ -1637,37 +1666,18 @@ async function showScanResult(scanId, scanSummary) {
 
         document.getElementById('scanStats').innerHTML = statsHtml;
 
-        // 연관 키워드 테이블
-        const kwSorted = keywords.sort((a, b) => (b.search_volume || 0) - (a.search_volume || 0));
-        const hasAdWeight = keywords.some(k => k.ad_weight > 0);
-        let kwHtml = `<table class="data-table"><thead><tr>
-            <th>키워드</th><th>검색량</th><th>클릭수</th><th>클릭율</th>
-            ${hasAdWeight ? '<th>광고비중</th>' : ''}
-        </tr></thead><tbody>`;
-        for (const kw of kwSorted.slice(0, 30)) {
-            const isRecommended = kw.keyword === scan.recommended_keyword;
-            kwHtml += `<tr style="${isRecommended ? 'background:rgba(16,185,129,0.08)' : ''}">
-                <td>${isRecommended ? '<strong>' : ''}${kw.keyword}${isRecommended ? ' ★</strong>' : ''}</td>
-                <td>${formatNumber(kw.search_volume)}</td>
-                <td>${formatNumber(kw.click_count)}</td>
-                <td>${kw.click_rate ? kw.click_rate.toFixed(1) + '%' : '-'}</td>
-                ${hasAdWeight ? '<td>' + (kw.ad_weight ? kw.ad_weight.toFixed(1) + '%' : '-') + '</td>' : ''}
-            </tr>`;
-        }
-        kwHtml += '</tbody></table>';
-        document.getElementById('keywordList').innerHTML = `<div class="card-header"><span class="card-title">키워드 분석 (상위 30개)</span></div>` + kwHtml;
-
-        // 키워드 변형
-        let variantHtml = '<div style="margin-top:12px"><strong style="font-size:12px;color:var(--text-secondary)">띄어쓰기 변형</strong><div style="margin-top:8px">';
+        // 키워드 변형 (쿠팡 띄어쓰기)
+        let variantHtml = '<div class="card-header"><span class="card-title">쿠팡 키워드 변형</span></div>';
+        variantHtml += '<div style="padding:12px; display:flex; flex-wrap:wrap; gap:6px;">';
         if (variants.length > 0) {
             for (const v of variants) {
-                variantHtml += `<span class="keyword-chip ${v.search_volume > 0 ? 'recommended' : ''}">"${v.variant_keyword}" ${v.search_volume > 0 ? '(' + formatNumber(v.search_volume) + ')' : ''}</span>`;
+                variantHtml += `<a href="https://www.coupang.com/np/search?component=&q=${encodeURIComponent(v.variant_keyword)}" target="_blank" class="keyword-chip ${v.search_volume > 0 ? 'recommended' : ''}" style="text-decoration:none;">"${v.variant_keyword}"</a>`;
             }
         } else {
-            variantHtml += '<span style="color:var(--text-muted);font-size:12px">변형 없음</span>';
+            variantHtml += '<span style="color:var(--text-muted);font-size:13px">변형 없음</span>';
         }
-        variantHtml += '</div></div>';
-        document.getElementById('keywordList').innerHTML += variantHtml;
+        variantHtml += '</div>';
+        document.getElementById('keywordList').innerHTML = variantHtml;
 
         // 상품 리스트
         if (products.length > 0) {
@@ -1876,6 +1886,7 @@ async function loadOpportunities() {
                     <td>${s.ad_dependency ? s.ad_dependency.toFixed(1) : '-'}</td>
                     <td><span class="status-badge status-${s.status}">${getStatusText(s.status)}</span></td>
                     <td onclick="event.stopPropagation()">
+                        <button class="btn btn-sm btn-primary" onclick="viewScanWithReview(${s.id})" style="margin-right:2px;">분석</button>
                         <button class="btn btn-sm btn-success" onclick="markScan(${s.id},'go')" ${s.status==='go'?'disabled':''}>GO</button>
                         <button class="btn btn-sm" onclick="markScan(${s.id},'pass')" style="background:var(--danger);color:#fff;margin-left:2px;" ${s.status==='pass'?'disabled':''}>PASS</button>
                     </td>
@@ -1883,6 +1894,101 @@ async function loadOpportunities() {
             `).join('');
         }
     } catch(e) { console.error('기회분석 로딩 에러:', e); }
+}
+
+function viewScanWithReview(scanId) {
+    // 기회분석 탭에서 리뷰 분석 모달 표시
+    _currentScanId = scanId;
+
+    // 모달 생성
+    let modal = document.getElementById('reviewModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'reviewModal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;';
+        modal.innerHTML = `
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;width:90%;max-width:900px;max-height:85vh;overflow-y:auto;padding:24px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <span style="font-size:16px;font-weight:700;">리뷰 분석</span>
+                    <button onclick="document.getElementById('reviewModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">&times;</button>
+                </div>
+                <div id="reviewModalContent">
+                    <div style="text-align:center;padding:40px;"><span class="loading-spinner"></span> 리뷰 수집 중...</div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    modal.style.display = 'flex';
+    document.getElementById('reviewModalContent').innerHTML = '<div style="text-align:center;padding:40px;"><span class="loading-spinner"></span> 리뷰 수집 중...</div>';
+
+    // 리뷰 분석 시작
+    fetch(`/api/scan/${scanId}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+    }).then(() => {
+        // 폴링
+        const poll = async () => {
+            const res = await fetch(`/api/scan/${scanId}/reviews`);
+            const data = await res.json();
+            if (data.status === 'collecting') {
+                document.getElementById('reviewModalContent').innerHTML = `<div style="text-align:center;padding:40px;"><span class="loading-spinner"></span> 리뷰 수집 중... (${data.review_count}개)</div>`;
+                setTimeout(poll, 2000);
+            } else if (data.status === 'analyzing') {
+                document.getElementById('reviewModalContent').innerHTML = `<div style="text-align:center;padding:40px;"><span class="loading-spinner"></span> ${data.review_count}개 리뷰 AI 분석 중...</div>`;
+                setTimeout(poll, 2000);
+            } else if (data.status === 'done' && data.analysis) {
+                let html = '';
+                const a = data.analysis;
+                if (a._source === 'claude') {
+                    html = `
+                        <div style="margin-bottom:20px;">
+                            <div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:8px;">요약 (${data.review_count}개 리뷰)</div>
+                            <div style="font-size:14px;color:var(--text-secondary);line-height:2;">${a.summary || ''}</div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+                            <div><div style="font-size:15px;font-weight:700;color:var(--success);margin-bottom:8px;">장점</div>${(a.pros||[]).map(p=>'<div style="font-size:14px;padding:4px 0;color:var(--text-secondary);">+ '+p+'</div>').join('')}</div>
+                            <div><div style="font-size:15px;font-weight:700;color:var(--danger);margin-bottom:8px;">단점/불만</div>${(a.cons||[]).map(c=>'<div style="font-size:14px;padding:4px 0;color:var(--text-secondary);">- '+c+'</div>').join('')}</div>
+                        </div>
+                        <div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:var(--cyan);margin-bottom:8px;">인기 제품 형태</div>${(a.popular_types||[]).map(t=>'<div style="font-size:14px;padding:5px 0;color:var(--text-secondary);"><strong style="color:var(--text-primary);">'+t.type+'</strong> — '+t.reason+'</div>').join('')}</div>
+                        <div style="margin-bottom:20px;"><div style="font-size:15px;font-weight:700;color:var(--warning);margin-bottom:8px;">소싱 포인트</div>${(a.sourcing_tips||[]).map((t,i)=>'<div style="font-size:14px;padding:4px 0;color:var(--text-secondary);">'+(i+1)+'. '+t+'</div>').join('')}</div>
+                        <div><div style="font-size:15px;font-weight:700;color:var(--purple);margin-bottom:8px;">차별화 아이디어</div>${(a.differentiation||[]).map((d,i)=>'<div style="font-size:14px;padding:4px 0;color:var(--text-secondary);">'+(i+1)+'. '+d+'</div>').join('')}</div>
+                    `;
+                } else if (a.total_reviews > 0) {
+                    html = `
+                        <div style="margin-bottom:16px;">
+                            <div style="font-size:15px;font-weight:700;margin-bottom:8px;">기본 분석 (${a.total_reviews}개 리뷰)</div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+                                <div style="background:var(--bg-input);padding:12px;border-radius:4px;text-align:center;">
+                                    <div style="font-size:11px;color:var(--text-muted);">평균 평점</div>
+                                    <div style="font-size:20px;font-weight:700;">${a.avg_rating || '-'}</div>
+                                </div>
+                                <div style="background:var(--bg-input);padding:12px;border-radius:4px;text-align:center;">
+                                    <div style="font-size:11px;color:var(--text-muted);">긍정 비율</div>
+                                    <div style="font-size:20px;font-weight:700;color:var(--success);">${a.positive_ratio || 0}%</div>
+                                </div>
+                                <div style="background:var(--bg-input);padding:12px;border-radius:4px;text-align:center;">
+                                    <div style="font-size:11px;color:var(--text-muted);">리뷰 수</div>
+                                    <div style="font-size:20px;font-weight:700;">${a.total_reviews}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">자주 언급되는 키워드</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                            ${(a.top_keywords||[]).map(([kw,c])=>'<span style="padding:4px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:3px;font-size:13px;color:var(--text-secondary);">'+kw+' ('+c+')</span>').join('')}
+                        </div>
+                    `;
+                } else {
+                    html = '<div style="font-size:14px;color:var(--danger);padding:20px;">리뷰를 수집하지 못했습니다. 쿠팡윙 로그인 상태를 확인해주세요.</div>';
+                }
+                document.getElementById('reviewModalContent').innerHTML = html;
+            } else {
+                document.getElementById('reviewModalContent').innerHTML = '<div style="padding:20px;color:var(--danger);">분석 실패</div>';
+            }
+        };
+        poll();
+    });
 }
 
 async function loadRfqList() {
@@ -2287,7 +2393,139 @@ function getStatusText(status) {
     return map[status] || status;
 }
 
+let _currentScanId = null;
+
+async function startReviewAnalysis() {
+    if (!_currentScanId) return;
+    const btn = document.getElementById('btnAnalyzeReviews');
+    btn.disabled = true;
+    btn.textContent = '수집중...';
+    document.getElementById('reviewEmpty').style.display = 'none';
+    document.getElementById('reviewResult').style.display = 'block';
+    document.getElementById('reviewResult').innerHTML = '<div style="padding:20px;text-align:center;"><span class="loading-spinner"></span> 리뷰 수집 중... (상위 10개 상품)</div>';
+
+    // API 키 입력 (옵션)
+    const apiKey = localStorage.getItem('anthropic_api_key') || '';
+
+    try {
+        await fetch(`/api/scan/${_currentScanId}/reviews`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ api_key: apiKey })
+        });
+        pollReviewResult(_currentScanId);
+    } catch(e) {
+        document.getElementById('reviewResult').innerHTML = '<div style="padding:20px;color:var(--danger);">연결 실패</div>';
+        btn.disabled = false;
+        btn.textContent = '리뷰 분석';
+    }
+}
+
+function pollReviewResult(scanId) {
+    const poll = async () => {
+        try {
+            const res = await fetch(`/api/scan/${scanId}/reviews`);
+            const data = await res.json();
+
+            if (data.status === 'collecting') {
+                document.getElementById('reviewResult').innerHTML = `<div style="padding:20px;text-align:center;"><span class="loading-spinner"></span> 리뷰 수집 중... (${data.review_count}개)</div>`;
+                setTimeout(poll, 2000);
+            } else if (data.status === 'analyzing') {
+                document.getElementById('reviewResult').innerHTML = `<div style="padding:20px;text-align:center;"><span class="loading-spinner"></span> ${data.review_count}개 리뷰 분석 중...</div>`;
+                setTimeout(poll, 2000);
+            } else if (data.status === 'done') {
+                renderReviewAnalysis(data.analysis, data.review_count);
+                document.getElementById('btnAnalyzeReviews').disabled = false;
+                document.getElementById('btnAnalyzeReviews').textContent = '다시 분석';
+            } else {
+                document.getElementById('reviewResult').innerHTML = `<div style="padding:20px;color:var(--danger);">분석 실패: ${data.analysis?.error || ''}</div>`;
+                document.getElementById('btnAnalyzeReviews').disabled = false;
+                document.getElementById('btnAnalyzeReviews').textContent = '리뷰 분석';
+            }
+        } catch(e) { setTimeout(poll, 3000); }
+    };
+    poll();
+}
+
+function renderReviewAnalysis(analysis, reviewCount) {
+    if (!analysis) return;
+
+    let html = '';
+
+    // Claude API 분석 결과
+    if (analysis._source === 'claude') {
+        html = `
+            <div style="margin-bottom:16px;">
+                <div style="font-size:16px; font-weight:700; color:var(--accent); margin-bottom:10px;">요약 (${reviewCount}개 리뷰 기반)</div>
+                <div style="font-size:15px; color:var(--text-secondary); line-height:2;">${analysis.summary || ''}</div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+                <div>
+                    <div style="font-size:15px; font-weight:700; color:var(--success); margin-bottom:8px;">장점</div>
+                    ${(analysis.pros || []).map(p => `<div style="font-size:14px; padding:4px 0; color:var(--text-secondary);">+ ${p}</div>`).join('')}
+                </div>
+                <div>
+                    <div style="font-size:15px; font-weight:700; color:var(--danger); margin-bottom:8px;">단점/불만</div>
+                    ${(analysis.cons || []).map(c => `<div style="font-size:14px; padding:4px 0; color:var(--text-secondary);">- ${c}</div>`).join('')}
+                </div>
+            </div>
+            <div style="margin-bottom:16px;">
+                <div style="font-size:15px; font-weight:700; color:var(--cyan); margin-bottom:8px;">인기 제품 형태</div>
+                ${(analysis.popular_types || []).map(t => `<div style="font-size:14px; padding:5px 0; color:var(--text-secondary);"><strong style="color:var(--text-primary);">${t.type}</strong> — ${t.reason}</div>`).join('')}
+            </div>
+            <div style="margin-bottom:16px;">
+                <div style="font-size:15px; font-weight:700; color:var(--warning); margin-bottom:8px;">소싱 포인트</div>
+                ${(analysis.sourcing_tips || []).map((t,i) => `<div style="font-size:14px; padding:4px 0; color:var(--text-secondary);">${i+1}. ${t}</div>`).join('')}
+            </div>
+            <div>
+                <div style="font-size:15px; font-weight:700; color:var(--purple); margin-bottom:8px;">차별화 아이디어</div>
+                ${(analysis.differentiation || []).map((d,i) => `<div style="font-size:14px; padding:4px 0; color:var(--text-secondary);">${i+1}. ${d}</div>`).join('')}
+            </div>
+        `;
+    } else {
+        // 기본 분석 결과
+        html = `
+            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px;">
+                <div class="stat-card">
+                    <div class="stat-label">리뷰 수</div>
+                    <div class="stat-number">${analysis.total_reviews || 0}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">평균 평점</div>
+                    <div class="stat-number">${analysis.avg_rating || '-'}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">긍정 비율</div>
+                    <div class="stat-number" style="color:var(--success)">${analysis.positive_ratio || 0}%</div>
+                </div>
+            </div>
+            <div style="margin-bottom:16px;">
+                <div style="font-size:12px; font-weight:700; margin-bottom:6px;">자주 언급되는 키워드</div>
+                <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                    ${(analysis.top_keywords || []).map(([kw, count]) =>
+                        `<span style="padding:3px 10px; background:var(--bg-input); border:1px solid var(--border); border-radius:3px; font-size:11px; color:var(--text-secondary);">${kw} (${count})</span>`
+                    ).join('')}
+                </div>
+            </div>
+            ${Object.entries(analysis.features || {}).map(([cat, items]) => `
+                <div style="margin-bottom:12px;">
+                    <div style="font-size:12px; font-weight:700; color:var(--cyan); margin-bottom:4px;">${cat}</div>
+                    <div style="font-size:12px; color:var(--text-secondary);">
+                        ${items.map(([name, count]) => `${name}(${count})`).join(' · ')}
+                    </div>
+                </div>
+            `).join('')}
+            <div style="margin-top:12px; padding:10px; background:var(--bg-input); border-radius:var(--radius); font-size:11px; color:var(--text-muted);">
+                Claude API 키를 설정하면 더 상세한 분석이 가능합니다
+            </div>
+        `;
+    }
+
+    document.getElementById('reviewResult').innerHTML = html;
+}
+
 async function markScan(scanId, status) {
+    console.log('markScan called:', scanId, status);
     try {
         const res = await fetch(`/api/scan/${scanId}/status`, {
             method: 'PUT',
@@ -2295,19 +2533,18 @@ async function markScan(scanId, status) {
             body: JSON.stringify({ status })
         });
         const data = await res.json();
+        console.log('markScan response:', data);
         if (data.success) {
             loadScanHistory();
             loadStats();
             if (status === 'go') {
-                // GO → 기회분석 탭으로 이동
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-                document.querySelector('[data-tab="opportunity"]').classList.add('active');
-                document.getElementById('tab-opportunity').classList.add('active');
-                loadOpportunities();
+                // GO → 기회분석 탭 클릭 시뮬레이션
+                _oppFilter = 'go';
+                const oppTab = document.querySelector('.tab-btn[data-tab="opportunity"]');
+                if (oppTab) oppTab.click();
             }
         }
-    } catch(e) {}
+    } catch(e) { console.error('markScan error:', e); }
 }
 
 function viewScanDetail(scanId) {
