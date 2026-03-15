@@ -16,6 +16,14 @@ import os
 
 REVIEW_API = 'https://www.coupang.com/next-api/review'
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
+if not ANTHROPIC_API_KEY:
+    _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+    if os.path.exists(_env_path):
+        with open(_env_path) as _f:
+            for _line in _f:
+                if _line.startswith('ANTHROPIC_API_KEY='):
+                    ANTHROPIC_API_KEY = _line.split('=', 1)[1].strip()
+                    break
 
 
 def collect_reviews_from_browser(page, product_url: str, max_reviews: int = 50) -> list:

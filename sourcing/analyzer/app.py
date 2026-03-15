@@ -2287,8 +2287,21 @@ def generate_rfq_from_scan(scan_id):
     recommendation_reason = '가장 많은 상품이 채택한 구성'
     certifications = []
 
+    # API 키 — 환경변수 → reviews.py 순서로 체크
     anthropic_key = os.environ.get('ANTHROPIC_API_KEY', '')
-    if anthropic_key:
+    if not anthropic_key:
+        try:
+            from analyzer.reviews import ANTHROPIC_API_KEY as _rfq_key
+            anthropic_key = _rfq_key
+        except:
+            pass
+    # 리뷰 분석의 chat 엔드포인트에서 쓰는 방식과 동일하게
+    if not anthropic_key:
+        for env_name in ['ANTHROPIC_API_KEY', 'CLAUDE_API_KEY']:
+            anthropic_key = os.environ.get(env_name, '')
+            if anthropic_key:
+                break
+    if anthropic_key and len(top10_names) > 0:
         try:
             prompt_text = (
                 "다음은 쿠팡에서 잘 팔리는 상위 10개 상품명입니다:\n\n"
@@ -2301,7 +2314,8 @@ def generate_rfq_from_scan(scan_id):
                 '"reason": "경쟁 적고 매출 양호", '
                 '"certifications": ["KC인증"]}'
             )
-            resp = requests.post(
+            import requests as _requests
+            resp = _requests.post(
                 'https://api.anthropic.com/v1/messages',
                 headers={
                     'x-api-key': anthropic_key,
@@ -2330,7 +2344,10 @@ def generate_rfq_from_scan(scan_id):
                     if ai_result.get('certifications'):
                         certifications = ai_result['certifications']
         except Exception as e:
-            print(f"[RFQ Generate] AI 스펙 작성 실패: {e}")
+            import traceback, sys
+            print(f"[RFQ Generate] AI 스펙 작성 실패: {e}", flush=True)
+            traceback.print_exc()
+            sys.stdout.flush()
 
     # ── 3. 목표단가 계산 ──
     req_data = request.get_json(silent=True) or {}
