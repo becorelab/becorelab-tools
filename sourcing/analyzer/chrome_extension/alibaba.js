@@ -5,8 +5,9 @@
 (function() {
     'use strict';
 
-    const params = new URLSearchParams(window.location.search);
-    const rfqId = params.get('mf_rfq_id');
+    const fullUrl = window.location.href;
+    const rfqIdMatch = fullUrl.match(/mf_rfq_id=(\d+)/);
+    const rfqId = rfqIdMatch ? rfqIdMatch[1] : null;
     if (!rfqId) return;
 
     console.log('[마켓파인더] 알리바바 RFQ 자동 채움 시작 (rfq_id=' + rfqId + ')');

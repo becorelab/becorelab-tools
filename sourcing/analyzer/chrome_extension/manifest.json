@@ -4,7 +4,7 @@
   "version": "1.2",
   "description": "쿠팡 리뷰 수집 + 알리바바 RFQ 자동 등록",
   "permissions": ["tabs", "activeTab", "scripting"],
-  "host_permissions": ["*://www.coupang.com/*", "*://sourcing.alibaba.com/*", "http://localhost:8090/*"],
+  "host_permissions": ["*://www.coupang.com/*", "*://message.alibaba.com/*", "http://localhost:8090/*"],
   "background": {
     "service_worker": "background.js"
   },
@@ -20,7 +20,7 @@
       "run_at": "document_idle"
     },
     {
-      "matches": ["*://sourcing.alibaba.com/*"],
+      "matches": ["*://message.alibaba.com/*"],
       "js": ["alibaba.js"],
       "run_at": "document_idle"
     }
