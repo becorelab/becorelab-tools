@@ -2750,15 +2750,15 @@ def parse_quotation():
 
     if api_key:
         import requests as _req
-        prompt = f"""Parse this Alibaba supplier quotation and extract information.
+        prompt = f"""Extract ALL info from this Alibaba supplier quote. Read EVERY line carefully.
 
-Supplier Response:
-{raw_text[:2000]}
+{raw_text[:3000]}
 
-Extract into JSON (use 0 if not mentioned):
-{{"supplier_name": "company name", "unit_price": 0.00, "currency": "USD", "moq": 0, "lead_time_days": 0, "sample_cost": 0.00, "certifications": "CE, ISO", "supplier_rating": 0.0, "supplier_years": 0, "shipping_terms": "FOB", "notes": "any important notes"}}
+Find: company name, price, MOQ, lead time (days), sample cost, certifications, years in business, shipping terms, payment terms.
+If "15-20 days" → use 17. If "over 8 years" → use 8.
 
-JSON only:"""
+JSON only (no other text):
+{{"supplier_name": "", "unit_price": 0, "currency": "USD", "moq": 0, "lead_time_days": 0, "sample_cost": 0, "certifications": "", "supplier_years": 0, "shipping_terms": "", "notes": ""}}"""
 
         try:
             resp = _req.post('https://api.anthropic.com/v1/messages',
