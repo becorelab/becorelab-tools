@@ -2290,7 +2290,6 @@ def generate_rfq_from_scan(scan_id):
     anthropic_key = os.environ.get('ANTHROPIC_API_KEY', '')
     if anthropic_key:
         try:
-            import httpx
             prompt_text = (
                 "다음은 쿠팡에서 잘 팔리는 상위 10개 상품명입니다:\n\n"
                 + "\n".join(f"{i+1}. {n}" for i, n in enumerate(top10_names))
@@ -2302,7 +2301,7 @@ def generate_rfq_from_scan(scan_id):
                 '"reason": "경쟁 적고 매출 양호", '
                 '"certifications": ["KC인증"]}'
             )
-            resp = httpx.post(
+            resp = requests.post(
                 'https://api.anthropic.com/v1/messages',
                 headers={
                     'x-api-key': anthropic_key,
@@ -2316,8 +2315,9 @@ def generate_rfq_from_scan(scan_id):
                 },
                 timeout=30
             )
-            if resp.status_code == 200:
+            if resp.ok:
                 ai_text = resp.json()['content'][0]['text'].strip()
+                print(f'[RFQ] AI 스펙 생성 성공: {ai_text[:100]}')
                 # JSON 블록 추출 (```json ... ``` 감싸진 경우 대비)
                 json_match = re.search(r'\{[\s\S]*\}', ai_text)
                 if json_match:
