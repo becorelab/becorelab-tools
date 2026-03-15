@@ -3,6 +3,7 @@
 
 # 스크린샷 (업로드 결과 등)
 *.png
+!sourcing/analyzer/static/team/*.png
 
 # macOS
 .DS_Store
@@ -30,6 +31,10 @@ instagram/api_session.json
 *.xls
 *.xlsx
 *.csv
+
+# 환경변수 (API 키 — 절대 커밋 금지)
+.env
+sourcing/analyzer/.env
 
 # Python
 __pycache__/

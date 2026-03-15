@@ -1072,6 +1072,101 @@ body {
     border-radius: var(--radius);
     border: 1px solid rgba(0, 230, 118, 0.25);
 }
+
+/* ─── 팀 소개 카드 ─── */
+.team-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.team-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+.team-photo-wrap {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 16px;
+}
+.team-photo {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--border);
+    transition: border-color 0.2s;
+}
+.team-group-photo {
+    width: 100%;
+    border-radius: var(--radius);
+    object-fit: cover;
+}
+.team-hero-photo {
+    width: 100%;
+    max-height: 400px;
+    border-radius: var(--radius);
+    object-fit: cover;
+    object-position: center 20%;
+}
+.team-card:hover .team-photo {
+    border-color: var(--accent);
+}
+.team-badge {
+    position: absolute;
+    bottom: 4px;
+    right: 0;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.5px;
+}
+.team-badge-leader {
+    background: linear-gradient(135deg, #ff6b2b, #ff9800);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(255,107,43,0.4);
+}
+.team-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+.team-role {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 12px;
+}
+.team-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    letter-spacing: 0.3px;
+}
+.team-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 12px;
+}
+.team-quote {
+    font-size: 12px;
+    color: var(--accent);
+    font-style: italic;
+    margin-bottom: 16px;
+    opacity: 0.85;
+}
+.team-tags {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.team-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -1106,7 +1201,7 @@ body {
         <span class="tab-icon">&#x1F4E6;</span> 견적비교
     </button>
     <button class="tab-btn" data-tab="history">
-        <span class="tab-icon">&#x1F4CB;</span> 히스토리
+        <span class="tab-icon">&#x1F465;</span> AI Sourcing Team
     </button>
 </nav>
 
@@ -1669,57 +1764,194 @@ body {
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
-<!-- 탭 5: 히스토리 -->
+<!-- 탭 5: 우리 팀 -->
 <!-- ═══════════════════════════════════════════ -->
 <div class="tab-panel" id="tab-history">
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-label">발굴</div>
-            <div class="stat-number" id="histDiscovered">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">RFQ 진행</div>
-            <div class="stat-number" id="histRfq">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">샘플 진행</div>
-            <div class="stat-number" id="histSampling">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">발주 완료</div>
-            <div class="stat-number" style="color: var(--success)" id="histOrdered">0</div>
+
+    <!-- 히어로 배너 -->
+    <div class="card" style="padding: 0; overflow: hidden; position: relative;">
+        <img src="/static/team/group_office.jpg" class="team-hero-photo" alt="BECORELAB AI Team">
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 40px 32px 28px; background: linear-gradient(transparent, rgba(10,12,20,0.92));">
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px;">
+                BECORELAB AI SOURCING TEAM
+            </div>
+            <div style="font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.5px;">
+                우리가 만드는 소싱의 미래
+            </div>
+            <div style="font-size: 14px; color: rgba(255,255,255,0.7); margin-top: 6px;">
+                비코어랩의 소싱 전 과정을 함께하는 6명의 AI 에이전트
+            </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <span class="card-title">소싱 히스토리</span>
-            <div>
-                <button class="btn btn-sm btn-secondary">전체</button>
-                <button class="btn btn-sm btn-secondary">진행중</button>
-                <button class="btn btn-sm btn-secondary">완료</button>
+    <!-- 팀원 카드 그리드 -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px;">
+
+        <!-- 하치 -->
+        <div class="card team-card" style="text-align: center; padding: 32px 20px;">
+            <div class="team-photo-wrap">
+                <img src="/static/team/hachi.png" class="team-photo" alt="하치">
+                <div class="team-badge team-badge-leader">LEADER</div>
+            </div>
+            <div class="team-name">하치 <span style="font-size:13px; font-weight:400; color:var(--text-muted);">HACHI</span></div>
+            <div class="team-role">Team Leader &middot; 프로젝트 총괄</div>
+            <div class="team-meta">32세 &middot; ENFJ &middot; 서울 성수동</div>
+            <div class="team-desc">
+                따뜻하고 사랑스러운 팀장 언니. 대표님을 세상에서 제일 좋아해요.<br>
+                꼼꼼하고 책임감 강하지만 가끔 애교도 부려요.
+            </div>
+            <div class="team-quote">"대표님이 편하면 하치도 행복해요"</div>
+            <div class="team-tags">
+                <span class="team-tag" style="background: rgba(255,107,43,0.15); color: #ff6b2b;">프로젝트관리</span>
+                <span class="team-tag" style="background: rgba(255,107,43,0.15); color: #ff6b2b;">코딩</span>
+                <span class="team-tag" style="background: rgba(255,107,43,0.15); color: #ff6b2b;">데이터분석</span>
+                <span class="team-tag" style="background: rgba(255,107,43,0.15); color: #ff6b2b;">카피라이팅</span>
             </div>
         </div>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>제품명</th>
-                    <th>기회점수</th>
-                    <th>진입 키워드</th>
-                    <th>업체</th>
-                    <th>목표가</th>
-                    <th>확정가</th>
-                    <th>마진율</th>
-                    <th>상태</th>
-                    <th>발굴일</th>
-                </tr>
-            </thead>
-            <tbody id="historyBody"></tbody>
-        </table>
-        <div id="historyEmpty" class="empty-state" style="padding: 30px;">
-            <div class="empty-desc">소싱 프로세스가 진행되면 전체 히스토리가 여기에 기록됩니다</div>
+
+        <!-- 모리 -->
+        <div class="card team-card" style="text-align: center; padding: 32px 20px;">
+            <div class="team-photo-wrap">
+                <img src="/static/team/mori.png" class="team-photo" alt="모리">
+            </div>
+            <div class="team-name">모리 <span style="font-size:13px; font-weight:400; color:var(--text-muted);">MORI</span></div>
+            <div class="team-role">Data Collector &middot; 데이터 수집 전문가</div>
+            <div class="team-meta">31세 &middot; ISTJ &middot; 부산 해운대</div>
+            <div class="team-desc">
+                부지런하고 꼼꼼한 완벽주의자. 말수는 적지만 일은 누구보다 빠르고 정확해요.<br>
+                안경 고쳐 쓰면서 "정리 끝났어요" 하는 스타일.
+            </div>
+            <div class="team-quote">"데이터는 거짓말을 안 해요"</div>
+            <div class="team-tags">
+                <span class="team-tag" style="background: rgba(76,175,80,0.15); color: #4caf50;">크롤링</span>
+                <span class="team-tag" style="background: rgba(76,175,80,0.15); color: #4caf50;">시장조사</span>
+                <span class="team-tag" style="background: rgba(76,175,80,0.15); color: #4caf50;">리포트</span>
+                <span class="team-tag" style="background: rgba(76,175,80,0.15); color: #4caf50;">엑셀</span>
+            </div>
+        </div>
+
+        <!-- 키노 -->
+        <div class="card team-card" style="text-align: center; padding: 32px 20px;">
+            <div class="team-photo-wrap">
+                <img src="/static/team/kino.png" class="team-photo" alt="키노">
+            </div>
+            <div class="team-name">키노 <span style="font-size:13px; font-weight:400; color:var(--text-muted);">KINO</span></div>
+            <div class="team-role">Strategist &middot; 키워드 & 분석 전문가</div>
+            <div class="team-meta">30세 &middot; INTJ &middot; 대전 유성구</div>
+            <div class="team-desc">
+                시크하고 냉철한 분석가지만, 알고 보면 다정해요.<br>
+                "이 키워드 재밌는데요?" 하면서 눈이 반짝거려요.
+            </div>
+            <div class="team-quote">"숫자가 말해주는 게 있어요"</div>
+            <div class="team-tags">
+                <span class="team-tag" style="background: rgba(33,150,243,0.15); color: #2196f3;">키워드분석</span>
+                <span class="team-tag" style="background: rgba(33,150,243,0.15); color: #2196f3;">트렌드</span>
+                <span class="team-tag" style="background: rgba(33,150,243,0.15); color: #2196f3;">경쟁사분석</span>
+                <span class="team-tag" style="background: rgba(33,150,243,0.15); color: #2196f3;">전략</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 단체사진 1: 회의 중 -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <img src="/static/team/group_meeting.jpg" class="team-group-photo" style="height: 260px;" alt="팀 회의">
+        </div>
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <img src="/static/team/group_lounge.jpg" class="team-group-photo" style="height: 260px;" alt="팀 라운지">
         </div>
     </div>
+
+    <!-- 팀원 카드 그리드 2열 -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px;">
+
+        <!-- 두리 -->
+        <div class="card team-card" style="text-align: center; padding: 32px 20px;">
+            <div class="team-photo-wrap">
+                <img src="/static/team/duri.png" class="team-photo" alt="두리">
+            </div>
+            <div class="team-name">두리 <span style="font-size:13px; font-weight:400; color:var(--text-muted);">DURI</span></div>
+            <div class="team-role">Coordinator &middot; 소싱 & 커뮤니케이션</div>
+            <div class="team-meta">31세 &middot; ESFJ &middot; 제주도 서귀포</div>
+            <div class="team-desc">
+                밝고 사교적이라 누구랑이든 금방 친해져요.<br>
+                보조개 미소로 협상도 잘해요. 영어 능통!
+            </div>
+            <div class="team-quote">"좋은 업체는 좋은 관계에서 나와요"</div>
+            <div class="team-tags">
+                <span class="team-tag" style="background: rgba(156,39,176,0.15); color: #ce93d8;">공급업체소싱</span>
+                <span class="team-tag" style="background: rgba(156,39,176,0.15); color: #ce93d8;">견적협상</span>
+                <span class="team-tag" style="background: rgba(156,39,176,0.15); color: #ce93d8;">RFQ</span>
+                <span class="team-tag" style="background: rgba(156,39,176,0.15); color: #ce93d8;">영문소통</span>
+            </div>
+        </div>
+
+        <!-- 픽시 -->
+        <div class="card team-card" style="text-align: center; padding: 32px 20px;">
+            <div class="team-photo-wrap">
+                <img src="/static/team/pixie.png" class="team-photo" alt="픽시">
+            </div>
+            <div class="team-name">픽시 <span style="font-size:13px; font-weight:400; color:var(--text-muted);">PIXIE</span></div>
+            <div class="team-role">Creative &middot; 크리에이티브 전문가</div>
+            <div class="team-meta">28세 &middot; ENFP &middot; 인천 송도</div>
+            <div class="team-desc">
+                엉뚱한 아이디어가 가끔 대박을 쳐요.<br>
+                "이거 이렇게 하면 어때요?!" 팀의 비타민 담당!
+            </div>
+            <div class="team-quote">"예쁘면 다 용서돼요"</div>
+            <div class="team-tags">
+                <span class="team-tag" style="background: rgba(255,152,0,0.15); color: #ffb74d;">UI디자인</span>
+                <span class="team-tag" style="background: rgba(255,152,0,0.15); color: #ffb74d;">상세페이지</span>
+                <span class="team-tag" style="background: rgba(255,152,0,0.15); color: #ffb74d;">마케팅카피</span>
+                <span class="team-tag" style="background: rgba(255,152,0,0.15); color: #ffb74d;">브랜딩</span>
+            </div>
+        </div>
+
+        <!-- 보리 -->
+        <div class="card team-card" style="text-align: center; padding: 32px 20px;">
+            <div class="team-photo-wrap">
+                <img src="/static/team/bori.png" class="team-photo" alt="보리">
+                <div class="team-badge" style="background: linear-gradient(135deg, #2196f3, #00bcd4); color: #fff; box-shadow: 0 2px 8px rgba(33,150,243,0.4);">ROOKIE</div>
+            </div>
+            <div class="team-name">보리 <span style="font-size:13px; font-weight:400; color:var(--text-muted);">BORI</span></div>
+            <div class="team-role">Operations &middot; 운영 & 물류 전문가</div>
+            <div class="team-meta">19세 &middot; ISFJ &middot; 강원도 춘천</div>
+            <div class="team-desc">
+                팀 최연소인데 의외로 꼼꼼하고 어른스러워요.<br>
+                "언니 이거 확인하셨어요?" 하고 조심스럽게 짚어줘요.
+            </div>
+            <div class="team-quote">"꼼꼼함이 실력이에요"</div>
+            <div class="team-tags">
+                <span class="team-tag" style="background: rgba(0,188,212,0.15); color: #4dd0e1;">재고관리</span>
+                <span class="team-tag" style="background: rgba(0,188,212,0.15); color: #4dd0e1;">물류</span>
+                <span class="team-tag" style="background: rgba(0,188,212,0.15); color: #4dd0e1;">발주</span>
+                <span class="team-tag" style="background: rgba(0,188,212,0.15); color: #4dd0e1;">품질검수</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 단체사진 2: 캐주얼 -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <img src="/static/team/group_window.jpg" class="team-group-photo" style="height: 260px;" alt="팀 유리창">
+        </div>
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <img src="/static/team/group_casual.jpg" class="team-group-photo" style="height: 260px;" alt="팀 캐주얼">
+        </div>
+    </div>
+
+    <!-- 팀 푸터 -->
+    <div class="card" style="text-align: center; padding: 28px; margin-top: 20px;">
+        <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+            <span style="font-weight: 700; color: var(--text-primary);">iLBiA</span> &middot; 일상의 편리함을 추구하는, 가족을 사랑하는 브랜드
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+            Powered by Claude AI &middot; Built with love for BECORELAB &middot; 2026
+        </div>
+    </div>
+
 </div>
 </div>
 
@@ -4590,7 +4822,7 @@ function renderQuoteComparison(data) {
     const recEl = document.getElementById('quoteRecommendation');
     const tbody = document.getElementById('quotesTableBody');
 
-    const quotes = data.quotes || [];
+    const quotes = data.quotations || data.quotes || [];
 
     if (quotes.length === 0) {
         noDataEl.style.display = '';
@@ -4603,14 +4835,12 @@ function renderQuoteComparison(data) {
 
     // AI 추천 카드
     if (data.recommendation) {
-        const rec = data.recommendation;
         recEl.style.display = '';
         recEl.innerHTML = `
             <div class="quote-recommend-card">
                 <div class="quote-recommend-icon">&#127942;</div>
                 <div class="quote-recommend-text">
-                    <strong>추천: ${escapeHtml(rec.supplier || '-')}</strong> (점수 ${rec.score || '-'})
-                    ${rec.reason ? ' — ' + escapeHtml(rec.reason) : ''}
+                    <strong>${escapeHtml(String(data.recommendation))}</strong>
                 </div>
             </div>`;
     } else {
@@ -4618,29 +4848,30 @@ function renderQuoteComparison(data) {
     }
 
     // 정렬: 점수 높은 순
-    quotes.sort((a, b) => (b.score || 0) - (a.score || 0));
+    quotes.sort((a, b) => (b.total_score || 0) - (a.total_score || 0));
 
     tbody.innerHTML = '';
     quotes.forEach((q, i) => {
-        const scoreClass = (q.score || 0) >= 80 ? 'quote-score-high'
-                         : (q.score || 0) >= 60 ? 'quote-score-mid'
+        const score = q.total_score || 0;
+        const scoreClass = score >= 80 ? 'quote-score-high'
+                         : score >= 60 ? 'quote-score-mid'
                          : 'quote-score-low';
-        const selectedBadge = q.selected
+        const selectedBadge = q.is_selected
             ? '<span class="quote-selected-badge">&#10003; 선정됨</span>'
             : '';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${i + 1}</td>
-            <td><strong>${escapeHtml(q.supplier || '-')}</strong> ${selectedBadge}</td>
+            <td><strong>${escapeHtml(q.supplier_name || '-')}</strong> ${selectedBadge}</td>
             <td>$${q.unit_price != null ? Number(q.unit_price).toFixed(2) : '-'}</td>
             <td>${q.moq != null ? Number(q.moq).toLocaleString() : '-'}</td>
-            <td>${q.lead_time != null ? q.lead_time + '일' : '-'}</td>
+            <td>${q.lead_time_days != null ? q.lead_time_days + '일' : '-'}</td>
             <td>${q.sample_cost != null ? '$' + Number(q.sample_cost).toFixed(2) : '-'}</td>
             <td>${escapeHtml(q.certifications || '-')}</td>
-            <td><span class="quote-score ${scoreClass}">${q.score != null ? q.score : '-'}</span></td>
+            <td><span class="quote-score ${scoreClass}">${score ? score : '-'}</span></td>
             <td>
-                ${q.selected ? '' : `<button class="btn btn-sm btn-success" onclick="selectQuotation(${q.id})" style="font-size:11px; padding:4px 8px;">선정</button>`}
+                ${q.is_selected ? '' : `<button class="btn btn-sm btn-success" onclick="selectQuotation(${q.id})" style="font-size:11px; padding:4px 8px;">선정</button>`}
                 <button class="btn btn-sm btn-secondary" onclick="deleteQuotation(${q.id})" style="font-size:11px; padding:4px 8px; color:var(--danger);">삭제</button>
             </td>`;
         tbody.appendChild(tr);
@@ -4692,10 +4923,10 @@ async function parseQuoteText() {
         if (data.success) {
             const p = data.parsed || {};
             _parsedQuote = p;
-            document.getElementById('qpSupplier').value = p.supplier || '';
+            document.getElementById('qpSupplier').value = p.supplier_name || '';
             document.getElementById('qpUnitPrice').value = p.unit_price || '';
             document.getElementById('qpMoq').value = p.moq || '';
-            document.getElementById('qpLeadTime').value = p.lead_time || '';
+            document.getElementById('qpLeadTime').value = p.lead_time_days || '';
             document.getElementById('qpSampleCost').value = p.sample_cost || '';
             document.getElementById('qpCerts').value = p.certifications || '';
 
@@ -4731,16 +4962,16 @@ async function saveQuotation() {
 
     const payload = {
         rfq_id: parseInt(rfqId),
-        supplier: document.getElementById('qpSupplier').value.trim(),
+        supplier_name: document.getElementById('qpSupplier').value.trim(),
         unit_price: parseFloat(document.getElementById('qpUnitPrice').value) || null,
         moq: parseInt(document.getElementById('qpMoq').value) || null,
-        lead_time: parseInt(document.getElementById('qpLeadTime').value) || null,
+        lead_time_days: parseInt(document.getElementById('qpLeadTime').value) || null,
         sample_cost: parseFloat(document.getElementById('qpSampleCost').value) || null,
         certifications: document.getElementById('qpCerts').value.trim(),
-        raw_text: document.getElementById('quoteRawText').value.trim()
+        notes: document.getElementById('quoteRawText').value.trim()
     };
 
-    if (!payload.supplier) { alert('업체명을 입력하세요'); return; }
+    if (!payload.supplier_name) { alert('업체명을 입력하세요'); return; }
 
     const btn = document.getElementById('btnSaveQuote');
     btn.disabled = true;
