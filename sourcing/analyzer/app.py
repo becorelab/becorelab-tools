@@ -2589,6 +2589,81 @@ Reply in JSON only:
     })
 
 
+@app.route('/api/rfq/<int:rfq_id>/auto-publish', methods=['POST'])
+def auto_publish_rfq(rfq_id):
+    """알리바바에 RFQ 자동 등록 (Playwright headed 모드)"""
+    data = request.get_json(silent=True) or {}
+    english_message = data.get('message', '')
+    product_name = data.get('product_name', '')
+    quantity = data.get('quantity', 1000)
+
+    if not english_message:
+        return jsonify({'success': False, 'error': '영문 RFQ가 필요합니다. 먼저 발행 버튼을 눌러주세요.'})
+
+    def _publish():
+        try:
+            from playwright.sync_api import sync_playwright
+            pw = sync_playwright().start()
+            browser = pw.chromium.launch(
+                headless=False,
+                args=['--disable-blink-features=AutomationControlled']
+            )
+            page = browser.new_page()
+
+            # 알리바바 RFQ 페이지 열기
+            page.goto('https://sourcing.alibaba.com/rfq/post_request.htm', wait_until='domcontentloaded', timeout=30000)
+            page.wait_for_timeout(3000)
+
+            # 로그인 필요하면 대기 (최대 2분)
+            if 'login' in page.url.lower():
+                print('[ALIBABA] 로그인 필요 — 브라우저에서 로그인해주세요')
+                for _ in range(120):
+                    page.wait_for_timeout(1000)
+                    if 'login' not in page.url.lower():
+                        break
+                page.wait_for_timeout(2000)
+
+            # RFQ 폼 채우기
+            try:
+                # 제품명
+                name_input = page.locator('input[name*="subject"], input[placeholder*="product"], input[name*="productName"], #subject').first
+                if name_input.count() > 0:
+                    name_input.fill(product_name)
+
+                # 수량
+                qty_input = page.locator('input[name*="quantity"], input[name*="qty"], input[placeholder*="quantity"]').first
+                if qty_input.count() > 0:
+                    qty_input.fill(str(quantity))
+
+                # 상세 내용
+                detail_input = page.locator('textarea[name*="detail"], textarea[name*="description"], textarea[placeholder*="detail"], textarea').first
+                if detail_input.count() > 0:
+                    detail_input.fill(english_message)
+
+                print(f'[ALIBABA] RFQ 폼 자동 채움 완료: {product_name}')
+            except Exception as e:
+                print(f'[ALIBABA] 폼 채우기 부분 실패: {e}')
+                # 실패해도 페이지는 열어둠 — 사용자가 수동으로 입력 가능
+
+            # 브라우저 열어둠 (사용자가 확인 후 직접 제출) — 2분 대기
+            page.wait_for_timeout(120000)
+
+            browser.close()
+            pw.stop()
+        except Exception as e:
+            print(f'[ALIBABA] 자동 발행 에러: {e}')
+            import traceback
+            traceback.print_exc()
+
+    import threading
+    threading.Thread(target=_publish, daemon=True).start()
+
+    return jsonify({
+        'success': True,
+        'message': '알리바바 브라우저가 열립니다. 폼이 자동 채워지면 확인 후 제출해주세요.'
+    })
+
+
 @app.route('/api/rfq/<int:rfq_id>')
 def get_rfq_detail(rfq_id):
     """RFQ 상세 + 견적 목록"""
