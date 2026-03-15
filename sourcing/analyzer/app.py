@@ -6,9 +6,11 @@
 import os
 import sys
 import json
+import re
 import sqlite3
 import threading
 from datetime import datetime
+from collections import Counter
 from flask import Flask, render_template, request, jsonify, g
 
 # 프로젝트 루트를 path에 추가
@@ -2105,14 +2107,20 @@ def api_review_chat(scan_id):
 
     review_block = '\n'.join(review_texts)
 
-    prompt = f"""다음은 쿠팡에서 "{keyword}" 키워드 상위 상품들의 소비자 리뷰 {len(reviews)}개입니다.
+    prompt = f"""당신은 쿠팡 "{keyword}" 카테고리 제품 전문가입니다.
+상위 판매 상품 {len(reviews)}개의 소비자 리뷰를 모두 읽었습니다.
 
+[리뷰 데이터]
 {review_block}
 
-위 리뷰를 기반으로 다음 질문에 답해주세요:
+[사용자 질문]
 {question}
 
-한국어로 간결하게 답해주세요."""
+위 리뷰 데이터를 참고하여 사용자의 질문에 자연스럽게 대화하듯 답해주세요.
+- 질문이 인사면 간단히 인사하고 리뷰에서 알 수 있는 것을 안내해주세요.
+- 질문이 구체적이면 리뷰 근거를 들어 답해주세요.
+- 이모지나 마크다운은 사용하지 마세요.
+- 한국어로 답해주세요."""
 
     # Claude API 호출
     api_key = os.environ.get('ANTHROPIC_API_KEY', '')
@@ -2213,6 +2221,208 @@ def create_rfq():
         json.dumps(data.get('certifications', []))
     ))
     db.commit()
+    return jsonify({'success': True, 'rfq_id': cursor.lastrowid})
+
+
+@app.route('/api/scan/<int:scan_id>/rfq/generate', methods=['POST'])
+def generate_rfq_from_scan(scan_id):
+    """GO 판정된 스캔의 상품 데이터를 분석하여 RFQ 자동 생성"""
+    db = get_db()
+
+    # 스캔 조회
+    scan = db.execute('SELECT * FROM market_scans WHERE id = ?', (scan_id,)).fetchone()
+    if not scan:
+        return jsonify({'success': False, 'error': '스캔을 찾을 수 없습니다'})
+
+    scan_dict = dict(scan)
+    if scan_dict.get('status') != 'go':
+        return jsonify({'success': False, 'error': 'GO 판정된 스캔만 RFQ 생성이 가능합니다'})
+
+    # 상위 40개 상품 조회
+    products = db.execute('''
+        SELECT * FROM products WHERE scan_id = ?
+        ORDER BY ranking ASC LIMIT 40
+    ''', (scan_id,)).fetchall()
+
+    if not products:
+        return jsonify({'success': False, 'error': '상품 데이터가 없습니다'})
+
+    products = [dict(p) for p in products]
+
+    # ── 1. 구성 분석: 상품명에서 수량/구성 패턴 추출 ──
+    comp_pattern = re.compile(r'(\d+)\s*(개입|매입|P|종|장|개|매|팩|세트|묶음)', re.IGNORECASE)
+    composition_groups = {}  # {"10개입": [products...]}
+
+    for p in products:
+        name = p.get('product_name', '') or ''
+        matches = comp_pattern.findall(name)
+        if matches:
+            # 첫 번째 매치 사용
+            qty, unit = matches[0]
+            comp_key = f"{qty}{unit}"
+        else:
+            comp_key = '단품'
+
+        if comp_key not in composition_groups:
+            composition_groups[comp_key] = []
+        composition_groups[comp_key].append(p)
+
+    composition_analysis = []
+    for comp, items in sorted(composition_groups.items(), key=lambda x: len(x[1]), reverse=True):
+        revenues = [i.get('revenue_monthly', 0) or 0 for i in items]
+        reviews = [i.get('review_count', 0) or 0 for i in items]
+        composition_analysis.append({
+            'composition': comp,
+            'count': len(items),
+            'avg_revenue': int(sum(revenues) / len(revenues)) if revenues else 0,
+            'avg_reviews': int(sum(reviews) / len(reviews)) if reviews else 0
+        })
+
+    # ── 2. AI 스펙 작성 (Claude Haiku) ──
+    top10 = products[:10]
+    top10_names = [p.get('product_name', '') for p in top10]
+
+    ai_specs = None
+    recommended_composition = composition_analysis[0]['composition'] if composition_analysis else '단품'
+    recommendation_reason = '가장 많은 상품이 채택한 구성'
+    certifications = []
+
+    anthropic_key = os.environ.get('ANTHROPIC_API_KEY', '')
+    if anthropic_key:
+        try:
+            import httpx
+            prompt_text = (
+                "다음은 쿠팡에서 잘 팔리는 상위 10개 상품명입니다:\n\n"
+                + "\n".join(f"{i+1}. {n}" for i, n in enumerate(top10_names))
+                + "\n\n이 상품들의 공통 스펙을 정리해주세요. "
+                "소재, 사이즈, 색상, 포장, 인증 등을 파악하세요.\n\n"
+                "반드시 아래 JSON 형식으로만 답변하세요 (다른 텍스트 없이):\n"
+                '{"specs": ["소재: ...", "사이즈: ...", "색상: ..."], '
+                '"recommended_composition": "8개입", '
+                '"reason": "경쟁 적고 매출 양호", '
+                '"certifications": ["KC인증"]}'
+            )
+            resp = httpx.post(
+                'https://api.anthropic.com/v1/messages',
+                headers={
+                    'x-api-key': anthropic_key,
+                    'anthropic-version': '2023-06-01',
+                    'content-type': 'application/json'
+                },
+                json={
+                    'model': 'claude-haiku-4-5-20251001',
+                    'max_tokens': 1024,
+                    'messages': [{'role': 'user', 'content': prompt_text}]
+                },
+                timeout=30
+            )
+            if resp.status_code == 200:
+                ai_text = resp.json()['content'][0]['text'].strip()
+                # JSON 블록 추출 (```json ... ``` 감싸진 경우 대비)
+                json_match = re.search(r'\{[\s\S]*\}', ai_text)
+                if json_match:
+                    ai_result = json.loads(json_match.group())
+                    ai_specs = ai_result.get('specs', [])
+                    if ai_result.get('recommended_composition'):
+                        recommended_composition = ai_result['recommended_composition']
+                    if ai_result.get('reason'):
+                        recommendation_reason = ai_result['reason']
+                    if ai_result.get('certifications'):
+                        certifications = ai_result['certifications']
+        except Exception as e:
+            print(f"[RFQ Generate] AI 스펙 작성 실패: {e}")
+
+    # ── 3. 목표단가 계산 ──
+    req_data = request.get_json(silent=True) or {}
+    commission_rate = req_data.get('commission_rate', 0.108)
+    target_margin = req_data.get('target_margin', 0.40)
+    logistics_cost = req_data.get('logistics_cost', 3000)
+    exchange_rate = req_data.get('exchange_rate', 1450)
+
+    # 시장 4~10등 평균 판매가
+    ranked_products = sorted(
+        [p for p in products if (p.get('revenue_monthly') or 0) > 0],
+        key=lambda x: x.get('revenue_monthly', 0),
+        reverse=True
+    )
+    mid_tier = ranked_products[3:10] if len(ranked_products) >= 10 else ranked_products[3:] if len(ranked_products) > 3 else ranked_products
+    if mid_tier:
+        market_avg_price = int(sum(p.get('price', 0) or 0 for p in mid_tier) / len(mid_tier))
+    else:
+        market_avg_price = int(sum(p.get('price', 0) or 0 for p in products) / len(products)) if products else 0
+
+    selling_price = market_avg_price
+    commission = int(selling_price * commission_rate)
+    margin = int(selling_price * target_margin)
+    target_cost_krw = selling_price - commission - margin - logistics_cost
+    target_cost_krw = max(target_cost_krw, 0)
+    target_price_usd = round(target_cost_krw / exchange_rate, 2)
+
+    # 추천 MOQ
+    suggested_moq = 1000
+    if target_price_usd < 1:
+        suggested_moq = 3000
+    elif target_price_usd < 3:
+        suggested_moq = 1000
+    elif target_price_usd < 10:
+        suggested_moq = 500
+    else:
+        suggested_moq = 200
+
+    # ── 4. RFQ 데이터 조립 ──
+    rfq_data = {
+        'product_name': scan_dict.get('keyword', ''),
+        'category': scan_dict.get('category', ''),
+        'composition_analysis': composition_analysis,
+        'recommended_composition': recommended_composition,
+        'recommendation_reason': recommendation_reason,
+        'specs': ai_specs or [],
+        'certifications': certifications,
+        'target_price_usd': target_price_usd,
+        'target_price_krw': target_cost_krw,
+        'market_avg_price': market_avg_price,
+        'suggested_moq': suggested_moq,
+        'calculation': {
+            'selling_price': selling_price,
+            'commission': commission,
+            'margin': margin,
+            'logistics': logistics_cost,
+            'target_cost': target_cost_krw
+        }
+    }
+
+    return jsonify({'success': True, 'rfq': rfq_data})
+
+
+@app.route('/api/rfq/save', methods=['POST'])
+def save_rfq():
+    """RFQ 폼 데이터를 rfqs 테이블에 저장"""
+    data = request.get_json(silent=True) or {}
+    db = get_db()
+
+    specs = data.get('specifications') or data.get('specs', [])
+    certs = data.get('certifications', [])
+
+    cursor = db.execute('''
+        INSERT INTO rfqs (scan_id, product_name_en, product_name_kr, category,
+                         specifications, target_price, target_price_currency,
+                         order_quantity, moq, shipping_terms, certifications, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft')
+    ''', (
+        data.get('scan_id'),
+        data.get('product_name_en', ''),
+        data.get('product_name_kr', data.get('product_name', '')),
+        data.get('category', ''),
+        json.dumps(specs if isinstance(specs, (list, dict)) else specs, ensure_ascii=False),
+        data.get('target_price') or data.get('target_price_usd'),
+        data.get('target_price_currency', 'USD'),
+        data.get('order_quantity') or data.get('suggested_moq'),
+        data.get('moq') or data.get('suggested_moq'),
+        data.get('shipping_terms', 'FOB'),
+        json.dumps(certs if isinstance(certs, list) else [certs], ensure_ascii=False)
+    ))
+    db.commit()
+
     return jsonify({'success': True, 'rfq_id': cursor.lastrowid})
 
 

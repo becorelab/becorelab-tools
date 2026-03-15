@@ -2005,6 +2005,144 @@ async function loadOpportunities() {
 }
 
 // ─── 마켓 인사이트 모달 (6탭) ───
+async function generateRFQ(scanId) {
+    let modal = document.getElementById('rfqModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'rfqModal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;';
+        document.body.appendChild(modal);
+    }
+    modal.style.display = 'flex';
+    modal.innerHTML = `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;width:90%;max-width:800px;max-height:85vh;overflow-y:auto;padding:28px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <span style="font-size:18px;font-weight:800;color:var(--accent);">RFQ 자동 생성</span>
+            <button onclick="document.getElementById('rfqModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">&times;</button>
+        </div>
+        <div id="rfqContent"><div style="text-align:center;padding:40px;"><span class="loading-spinner"></span> AI가 구성을 분석하고 있습니다...</div></div>
+    </div>`;
+
+    const res = await fetch(`/api/scan/${scanId}/rfq/generate`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' });
+    const data = await res.json();
+
+    if (!data.success) {
+        document.getElementById('rfqContent').innerHTML = `<div style="color:var(--danger);padding:20px;">${data.error}</div>`;
+        return;
+    }
+
+    const rfq = data.rfq;
+
+    // Build composition rows
+    let compRows = '';
+    (rfq.composition_analysis||[]).forEach(c => {
+        const isRec = c.composition === rfq.recommended_composition;
+        compRows += `<tr style="border-bottom:1px solid rgba(42,47,64,0.3);${isRec ? 'background:rgba(0,229,255,0.08);' : ''}">
+            <td style="padding:8px;font-weight:${isRec ? '700;color:var(--cyan)' : '400;color:var(--text-primary)'};">${c.composition} ${isRec ? '&larr; AI 추천' : ''}</td>
+            <td style="padding:8px;text-align:center;color:var(--text-secondary);">${c.count}개</td>
+            <td style="padding:8px;text-align:right;color:var(--text-secondary);">${Math.round(c.avg_revenue/10000).toLocaleString()}만원</td>
+            <td style="padding:8px;text-align:right;color:var(--text-secondary);">${Math.round(c.avg_reviews).toLocaleString()}</td>
+        </tr>`;
+    });
+
+    let recHtml = '';
+    if (rfq.recommendation_reason) {
+        recHtml = `<div style="margin-top:10px;padding:10px;background:rgba(0,229,255,0.05);border-left:3px solid var(--cyan);font-size:13px;color:var(--text-secondary);">AI 추천: ${rfq.recommendation_reason}</div>`;
+    }
+
+    let calcHtml = '';
+    if (rfq.calculation) {
+        calcHtml = `<div style="background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:16px;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:8px;">단가 산출 근거</div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:2;">
+                시장 평균 판매가: ${rfq.calculation.selling_price?.toLocaleString()}원<br>
+                쿠팡 수수료 (10.8%): -${rfq.calculation.commission?.toLocaleString()}원<br>
+                목표 마진 (40%): -${rfq.calculation.margin?.toLocaleString()}원<br>
+                물류비: -${rfq.calculation.logistics?.toLocaleString()}원<br>
+                <strong style="color:var(--accent);">목표 원가: ${rfq.calculation.target_cost?.toLocaleString()}원 &rarr; $${rfq.target_price_usd}</strong>
+            </div>
+        </div>`;
+    }
+
+    document.getElementById('rfqContent').innerHTML = `
+        <div style="background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:16px;">
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;color:var(--cyan);">구성 분석</div>
+            <table style="width:100%;font-size:13px;border-collapse:collapse;">
+                <thead>
+                    <tr style="color:var(--text-muted);border-bottom:1px solid var(--border);">
+                        <th style="padding:8px;text-align:left;">구성</th>
+                        <th style="padding:8px;text-align:center;">상품수</th>
+                        <th style="padding:8px;text-align:right;">평균매출</th>
+                        <th style="padding:8px;text-align:right;">평균리뷰</th>
+                    </tr>
+                </thead>
+                <tbody>${compRows}</tbody>
+            </table>
+            ${recHtml}
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">제품명</label>
+                <input id="rfqName" type="text" value="${rfq.product_name||''}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:14px;outline:none;">
+            </div>
+            <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">카테고리</label>
+                <input id="rfqCategory" type="text" value="${rfq.category||''}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:14px;outline:none;">
+            </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+            <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">스펙 (AI 작성)</label>
+            <textarea id="rfqSpecs" rows="4" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:13px;outline:none;resize:vertical;">${(rfq.specs||[]).join('\n')}</textarea>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">목표단가 (USD)</label>
+                <input id="rfqPrice" type="number" step="0.01" value="${rfq.target_price_usd||''}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--accent);padding:10px;font-size:16px;font-weight:700;outline:none;">
+            </div>
+            <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">수량 (MOQ)</label>
+                <input id="rfqQty" type="number" value="${rfq.suggested_moq||1000}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:14px;outline:none;">
+            </div>
+            <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">필수 인증</label>
+                <input id="rfqCerts" type="text" value="${(rfq.certifications||[]).join(', ')}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:14px;outline:none;">
+            </div>
+        </div>
+
+        ${calcHtml}
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button onclick="saveRFQ(${scanId})" style="background:var(--success);color:#000;border:none;padding:12px 28px;border-radius:var(--radius);font-weight:700;font-size:14px;cursor:pointer;">확인 저장</button>
+            <button onclick="document.getElementById('rfqModal').style.display='none'" style="background:var(--bg-secondary);color:var(--text-secondary);border:1px solid var(--border);padding:12px 28px;border-radius:var(--radius);font-size:14px;cursor:pointer;">닫기</button>
+        </div>
+    `;
+}
+
+async function saveRFQ(scanId) {
+    const data = {
+        scan_id: scanId,
+        product_name_kr: document.getElementById('rfqName').value,
+        category: document.getElementById('rfqCategory').value,
+        specifications: document.getElementById('rfqSpecs').value,
+        target_price: parseFloat(document.getElementById('rfqPrice').value),
+        order_quantity: parseInt(document.getElementById('rfqQty').value),
+        certifications: document.getElementById('rfqCerts').value.split(',').map(s=>s.trim())
+    };
+
+    const res = await fetch('/api/rfq', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (result.success) {
+        alert('RFQ 저장 완료!');
+        document.getElementById('rfqModal').style.display = 'none';
+    }
+}
+
 let _insightCharts = {};
 function _destroyInsightCharts() {
     Object.values(_insightCharts).forEach(c => { try { c.destroy(); } catch(e){} });
@@ -2029,7 +2167,10 @@ function viewScanWithReview(scanId) {
             <span style="font-size:17px;font-weight:800;background:linear-gradient(135deg,#ff6b2b,#ff9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">MARKET INSIGHT</span>
             <span id="insightKeyword" style="font-size:14px;color:var(--text-secondary);font-weight:500;"></span>
         </div>
-        <button onclick="_destroyInsightCharts();document.getElementById('insightModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;padding:4px 8px;line-height:1;">&times;</button>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <button onclick="generateRFQ(_currentScanId)" style="background:linear-gradient(135deg,#ff6b2b,#ff9500);color:#fff;border:none;padding:7px 18px;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.3px;">RFQ 생성</button>
+            <button onclick="_destroyInsightCharts();document.getElementById('insightModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;padding:4px 8px;line-height:1;">&times;</button>
+        </div>
     </div>
     <div style="display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg-card);flex-shrink:0;padding:0 24px;" id="insightTabBar">
         <button class="ins-tab active" data-tab="structure" onclick="_switchInsightTab('structure',this)">시장구조</button>
