@@ -2487,6 +2487,97 @@ def update_rfq(rfq_id):
     return jsonify({'success': True})
 
 
+@app.route('/api/rfq/<int:rfq_id>', methods=['DELETE'])
+def delete_rfq(rfq_id):
+    """RFQ 삭제"""
+    db = get_db()
+    db.execute('DELETE FROM quotations WHERE rfq_id = ?', (rfq_id,))
+    db.execute('DELETE FROM rfqs WHERE id = ?', (rfq_id,))
+    db.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/api/rfq/<int:rfq_id>/publish', methods=['POST'])
+def publish_rfq(rfq_id):
+    """RFQ 영문 변환 + 알리바바 발행 준비"""
+    db = get_db()
+    rfq = db.execute('SELECT * FROM rfqs WHERE id = ?', (rfq_id,)).fetchone()
+    if not rfq:
+        return jsonify({'success': False, 'error': 'RFQ not found'})
+
+    rfq = dict(rfq)
+    specs = rfq.get('specifications', '{}')
+    try:
+        specs_data = json.loads(specs) if isinstance(specs, str) else specs
+    except:
+        specs_data = {}
+
+    # Claude로 영문 변환
+    api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+    if not api_key:
+        try:
+            from analyzer.reviews import ANTHROPIC_API_KEY
+            api_key = ANTHROPIC_API_KEY
+        except:
+            pass
+
+    product_name_kr = rfq.get('product_name_kr', '')
+    specs_text = '\n'.join(specs_data.get('specs', [])) if isinstance(specs_data, dict) else str(specs_data)
+    certs = specs_data.get('certifications', []) if isinstance(specs_data, dict) else []
+
+    english_data = {
+        'product_name_en': product_name_kr,
+        'specs_en': specs_text,
+        'subject': f'RFQ: {product_name_kr}',
+        'message': '',
+        'target_price': rfq.get('target_price', 0),
+        'quantity': rfq.get('order_quantity', 1000),
+        'shipping': rfq.get('shipping_terms', 'FOB'),
+    }
+
+    if api_key:
+        try:
+            import requests as _req
+            prompt = f"""다음 제품 소싱 요청서를 영어로 번역해주세요. 알리바바 공급자에게 보내는 전문적인 RFQ(Request for Quotation) 형식으로 작성해주세요.
+
+제품명: {product_name_kr}
+스펙:
+{specs_text}
+인증: {', '.join(certs) if certs else '없음'}
+목표단가: ${rfq.get('target_price', 0)} USD
+수량: {rfq.get('order_quantity', 1000)}개
+배송조건: {rfq.get('shipping_terms', 'FOB')}
+
+JSON 형식으로 답변:
+{{"product_name_en": "...", "subject": "RFQ: ...", "message": "Dear Supplier,\\n\\n...", "specs_en": "..."}}"""
+
+            resp = _req.post(
+                'https://api.anthropic.com/v1/messages',
+                headers={'x-api-key': api_key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json'},
+                json={'model': 'claude-haiku-4-5-20251001', 'max_tokens': 2000, 'messages': [{'role': 'user', 'content': prompt}]},
+                timeout=30
+            )
+            if resp.ok:
+                ai_text = resp.json()['content'][0]['text']
+                import re
+                json_match = re.search(r'\{[\s\S]*\}', ai_text)
+                if json_match:
+                    english_data = json.loads(json_match.group())
+        except Exception as e:
+            print(f'[RFQ Publish] 번역 실패: {e}')
+
+    # DB 업데이트: 영문명 저장 + 상태 변경
+    db.execute('UPDATE rfqs SET product_name_en = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+               (english_data.get('product_name_en', product_name_kr), 'ready', rfq_id))
+    db.commit()
+
+    return jsonify({
+        'success': True,
+        'english_rfq': english_data,
+        'rfq_id': rfq_id
+    })
+
+
 @app.route('/api/rfq/<int:rfq_id>')
 def get_rfq_detail(rfq_id):
     """RFQ 상세 + 견적 목록"""

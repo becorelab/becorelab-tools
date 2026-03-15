@@ -1276,6 +1276,7 @@ body {
                             <th>견적수</th>
                             <th>상태</th>
                             <th>생성일</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="rfqListBody"></tbody>
@@ -3148,6 +3149,9 @@ async function loadRfqList() {
                     <td>-</td>
                     <td><span class="status-badge status-${r.status}">${getStatusText(r.status)}</span></td>
                     <td>${formatDate(r.created_at)}</td>
+                    <td onclick="event.stopPropagation()">
+                        <button onclick="deleteRFQ(${r.id})" style="background:var(--danger);color:#fff;border:none;padding:4px 10px;border-radius:3px;font-size:11px;cursor:pointer;">삭제</button>
+                    </td>
                 </tr>
             `).join('');
         }
@@ -3335,7 +3339,9 @@ async function viewRFQDetail(rfqId) {
         </div>` : ''}
 
         <div style="display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--border);padding-top:16px;">
+            <button onclick="publishRFQ(${rfqId})" style="background:linear-gradient(135deg,#ff6b2b,#ff9500);color:#fff;border:none;padding:12px 24px;border-radius:var(--radius);font-weight:700;font-size:14px;cursor:pointer;">알리바바 발행</button>
             <button onclick="updateRFQ(${rfqId})" style="background:var(--accent);color:#fff;border:none;padding:12px 24px;border-radius:var(--radius);font-weight:700;font-size:14px;cursor:pointer;">저장</button>
+            <button onclick="deleteRFQ(${rfqId}); document.getElementById('rfqDetailModal').style.display='none';" style="background:var(--danger);color:#fff;border:none;padding:12px 24px;border-radius:var(--radius);font-size:14px;cursor:pointer;">삭제</button>
             <button onclick="document.getElementById('rfqDetailModal').style.display='none'" style="background:var(--bg-secondary);color:var(--text-secondary);border:1px solid var(--border);padding:12px 24px;border-radius:var(--radius);font-size:14px;cursor:pointer;">닫기</button>
         </div>
     </div>`;
@@ -3384,6 +3390,39 @@ async function updateRFQ(rfqId) {
         loadRfqList();
     } else {
         alert('업데이트 실패: ' + (result.error || '알 수 없는 오류'));
+    }
+}
+
+async function deleteRFQ(rfqId) {
+    if (!confirm('이 RFQ를 삭제하시겠습니까?')) return;
+    const res = await fetch(`/api/rfq/${rfqId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) loadRfqList();
+}
+
+async function publishRFQ(rfqId) {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = '번역 중...';
+
+    const res = await fetch(`/api/rfq/${rfqId}/publish`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' });
+    const data = await res.json();
+
+    if (data.success) {
+        const eq = data.english_rfq;
+        const preview = `
+            <div style="background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;padding:16px;margin-top:16px;">
+                <div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:12px;">English RFQ Preview</div>
+                <div style="font-size:13px;color:var(--text-secondary);line-height:1.8;white-space:pre-wrap;">${eq.message || eq.subject || JSON.stringify(eq, null, 2)}</div>
+            </div>
+        `;
+        document.getElementById('rfqDetailModal').querySelector('div > div').insertAdjacentHTML('beforeend', preview);
+        btn.textContent = '발행 준비 완료';
+        btn.style.background = 'var(--success)';
+        btn.style.color = '#000';
+    } else {
+        btn.textContent = '발행 실패';
+        btn.disabled = false;
     }
 }
 
