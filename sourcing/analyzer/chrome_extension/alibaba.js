@@ -14,6 +14,23 @@
 
     setTimeout(async () => {
         try {
+            // "+Post an RFQ" 버튼 클릭
+            const postBtn = document.querySelector('button[class*="post"], a[class*="post"], .btn-post, [class*="Post"]');
+            if (postBtn) {
+                postBtn.click();
+                console.log('[마켓파인더] Post RFQ 버튼 클릭');
+                await sleep(3000);
+            } else {
+                // 텍스트로 찾기
+                document.querySelectorAll('button, a, span').forEach(el => {
+                    if (el.textContent.includes('Post') && el.textContent.includes('RFQ')) {
+                        el.click();
+                        console.log('[마켓파인더] Post RFQ 텍스트 매칭 클릭');
+                    }
+                });
+                await sleep(3000);
+            }
+
             // 마켓 파인더에서 영문 RFQ 데이터 가져오기
             const res = await fetch('http://localhost:8090/api/rfq/' + rfqId + '/publish', {
                 method: 'POST',
