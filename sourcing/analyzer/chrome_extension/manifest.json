@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "마켓 파인더 리뷰 수집기",
-  "version": "1.1",
-  "description": "쿠팡 상품 리뷰를 자동 수집합니다",
+  "name": "마켓 파인더",
+  "version": "1.2",
+  "description": "쿠팡 리뷰 수집 + 알리바바 RFQ 자동 등록",
   "permissions": ["tabs", "activeTab", "scripting"],
-  "host_permissions": ["*://www.coupang.com/*", "http://localhost:8090/*"],
+  "host_permissions": ["*://www.coupang.com/*", "*://sourcing.alibaba.com/*", "http://localhost:8090/*"],
   "background": {
     "service_worker": "background.js"
   },
@@ -17,6 +17,11 @@
     {
       "matches": ["*://www.coupang.com/vp/products/*"],
       "js": ["content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://sourcing.alibaba.com/*"],
+      "js": ["alibaba.js"],
       "run_at": "document_idle"
     }
   ],
