@@ -2593,55 +2593,60 @@ def auto_publish_rfq(rfq_id):
     def _publish():
         try:
             from playwright.sync_api import sync_playwright
+
+            ali_profile = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.alibaba_profile')
+            os.makedirs(ali_profile, exist_ok=True)
+
             pw = sync_playwright().start()
-            browser = pw.chromium.launch(
+            ctx = pw.chromium.launch_persistent_context(
+                user_data_dir=ali_profile,
                 headless=False,
+                viewport={'width': 1200, 'height': 800},
                 args=['--disable-blink-features=AutomationControlled']
             )
-            page = browser.new_page()
+            page = ctx.pages[0] if ctx.pages else ctx.new_page()
 
-            # 알리바바 RFQ 페이지 열기
-            page.goto('https://sourcing.alibaba.com/rfq/post_request.htm', wait_until='domcontentloaded', timeout=30000)
+            page.goto('https://rfq.alibaba.com/rfq/rfqForm.htm?newAiForm=true',
+                       wait_until='domcontentloaded', timeout=30000)
             page.wait_for_timeout(3000)
 
-            # 로그인 필요하면 대기 (최대 2분)
+            # 로그인 필요하면 대기
             if 'login' in page.url.lower():
                 print('[ALIBABA] 로그인 필요 — 브라우저에서 로그인해주세요')
                 for _ in range(120):
                     page.wait_for_timeout(1000)
                     if 'login' not in page.url.lower():
                         break
-                page.wait_for_timeout(2000)
+                page.goto('https://rfq.alibaba.com/rfq/rfqForm.htm?newAiForm=true',
+                           wait_until='domcontentloaded', timeout=30000)
+                page.wait_for_timeout(3000)
 
-            # RFQ 폼 채우기
+            # Product name
             try:
-                # 제품명
-                name_input = page.locator('input[name*="subject"], input[placeholder*="product"], input[name*="productName"], #subject').first
-                if name_input.count() > 0:
-                    name_input.fill(product_name)
-
-                # 수량
-                qty_input = page.locator('input[name*="quantity"], input[name*="qty"], input[placeholder*="quantity"]').first
-                if qty_input.count() > 0:
-                    qty_input.fill(str(quantity))
-
-                # 상세 내용
-                detail_input = page.locator('textarea[name*="detail"], textarea[name*="description"], textarea[placeholder*="detail"], textarea').first
-                if detail_input.count() > 0:
-                    detail_input.fill(english_message)
-
-                print(f'[ALIBABA] RFQ 폼 자동 채움 완료: {product_name}')
+                page.locator('input[placeholder*="enter"], input[placeholder*="roduct"]').first.fill(product_name)
+                print(f'[ALIBABA] 제품명 입력: {product_name[:30]}')
             except Exception as e:
-                print(f'[ALIBABA] 폼 채우기 부분 실패: {e}')
-                # 실패해도 페이지는 열어둠 — 사용자가 수동으로 입력 가능
+                print(f'[ALIBABA] 제품명 실패: {e}')
 
-            # 브라우저 열어둠 (사용자가 확인 후 직접 제출) — 2분 대기
-            page.wait_for_timeout(120000)
+            page.wait_for_timeout(500)
 
-            browser.close()
+            # Detailed requirements
+            try:
+                page.locator('textarea').first.fill(english_message)
+                print(f'[ALIBABA] 상세 내용 입력 ({len(english_message)}자)')
+            except Exception as e:
+                print(f'[ALIBABA] 상세 내용 실패: {e}')
+
+            print('[ALIBABA] 폼 채움 완료! 대표님 확인 후 제출해주세요.')
+
+            # 5분간 브라우저 유지
+            page.wait_for_timeout(300000)
+            ctx.close()
             pw.stop()
         except Exception as e:
-            print(f'[ALIBABA] 자동 발행 에러: {e}')
+            print(f'[ALIBABA] 에러: {e}')
+            import traceback
+            traceback.print_exc()
             import traceback
             traceback.print_exc()
 
