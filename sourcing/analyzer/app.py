@@ -2639,7 +2639,7 @@ def auto_publish_rfq(rfq_id):
                 pass
 
             try:
-                page.locator('input[placeholder*="enter"], input[placeholder*="roduct"]').first.fill(en_name)
+                page.locator('input[placeholder*="enter"], input[placeholder*="roduct"], input[placeholder*="입력"]').first.fill(en_name)
                 print(f'[ALIBABA] 제품명 입력: {en_name}')
             except Exception as e:
                 print(f'[ALIBABA] 제품명 실패: {e}')
