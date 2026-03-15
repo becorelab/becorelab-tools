@@ -2547,7 +2547,7 @@ Target: ${rfq.get('target_price', 0)}/unit, Qty: {rfq.get('order_quantity', 1000
 
 Keep message under 150 words. Include specs, price, qty, and ask for: unit price, MOQ, sample, lead time.
 
-Sign as: Becore Lab Co., Ltd. / kychung@becorelab.kr
+Sign as: Becore Lab Co., Ltd. (do NOT include email or URLs in the message - Alibaba blocks them)
 
 JSON only:
 {{"product_name_en": "...", "subject": "RFQ: ...", "message": "Dear Supplier,\\n\\n...\\n\\nBest regards,\\nBecore Lab Co., Ltd.\\nkychung@becorelab.kr", "specs_en": "..."}}"""
@@ -2621,10 +2621,26 @@ def auto_publish_rfq(rfq_id):
                            wait_until='domcontentloaded', timeout=30000)
                 page.wait_for_timeout(3000)
 
-            # Product name
+            # Product name — 영문명 사용
+            en_name = product_name
+            # publish API에서 영문명 가져오기
             try:
-                page.locator('input[placeholder*="enter"], input[placeholder*="roduct"]').first.fill(product_name)
-                print(f'[ALIBABA] 제품명 입력: {product_name[:30]}')
+                from analyzer.reviews import ANTHROPIC_API_KEY as _akey
+                if _akey:
+                    import requests as _rr
+                    _r = _rr.post('https://api.anthropic.com/v1/messages',
+                        headers={'x-api-key': _akey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json'},
+                        json={'model': 'claude-haiku-4-5-20251001', 'max_tokens': 100,
+                              'messages': [{'role': 'user', 'content': f'Translate to English product name (short, professional): {product_name}. Reply with just the English name, nothing else.'}]},
+                        timeout=10)
+                    if _r.ok:
+                        en_name = _r.json()['content'][0]['text'].strip().strip('"')
+            except:
+                pass
+
+            try:
+                page.locator('input[placeholder*="enter"], input[placeholder*="roduct"]').first.fill(en_name)
+                print(f'[ALIBABA] 제품명 입력: {en_name}')
             except Exception as e:
                 print(f'[ALIBABA] 제품명 실패: {e}')
 
