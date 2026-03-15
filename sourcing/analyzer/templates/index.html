@@ -3410,10 +3410,18 @@ async function publishRFQ(rfqId) {
 
     if (data.success) {
         const eq = data.english_rfq;
+        const rfqText = eq.message || eq.subject || JSON.stringify(eq, null, 2);
+        window._lastRfqText = rfqText;
         const preview = `
             <div style="background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;padding:16px;margin-top:16px;">
-                <div style="font-size:15px;font-weight:700;color:var(--accent);margin-bottom:12px;">English RFQ Preview</div>
-                <div style="font-size:13px;color:var(--text-secondary);line-height:1.8;white-space:pre-wrap;">${eq.message || eq.subject || JSON.stringify(eq, null, 2)}</div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <div style="font-size:15px;font-weight:700;color:var(--accent);">English RFQ Preview</div>
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="navigator.clipboard.writeText(window._lastRfqText);this.textContent='복사됨!';setTimeout(()=>this.textContent='복사',1500)" style="background:var(--cyan);color:#000;border:none;padding:6px 16px;border-radius:3px;font-size:12px;font-weight:700;cursor:pointer;">복사</button>
+                        <button onclick="window.open('https://sourcing.alibaba.com/rfq/post_request.htm','_blank')" style="background:var(--warning);color:#000;border:none;padding:6px 16px;border-radius:3px;font-size:12px;font-weight:700;cursor:pointer;">알리바바 열기</button>
+                    </div>
+                </div>
+                <div id="rfqPreviewText" style="font-size:13px;color:var(--text-secondary);line-height:1.8;white-space:pre-wrap;">${rfqText}</div>
             </div>
         `;
         document.getElementById('rfqDetailModal').querySelector('div > div').insertAdjacentHTML('beforeend', preview);
