@@ -2722,6 +2722,144 @@ def add_quotation():
     return jsonify({'success': True, 'quotation_id': cursor.lastrowid})
 
 
+@app.route('/api/quotation/parse', methods=['POST'])
+def parse_quotation():
+    """AI로 알리바바 업체 답변 파싱"""
+    data = request.get_json(silent=True) or {}
+    raw_text = data.get('text', '')
+    rfq_id = data.get('rfq_id')
+
+    if not raw_text:
+        return jsonify({'success': False, 'error': '견적 텍스트를 입력해주세요'})
+
+    from analyzer.reviews import ANTHROPIC_API_KEY
+    api_key = ANTHROPIC_API_KEY
+
+    parsed = {
+        'supplier_name': '',
+        'unit_price': 0,
+        'unit_price_currency': 'USD',
+        'moq': 0,
+        'lead_time_days': 0,
+        'sample_cost': 0,
+        'certifications': '',
+        'supplier_rating': 0,
+        'supplier_years': 0,
+        'notes': raw_text[:500]
+    }
+
+    if api_key:
+        import requests as _req
+        prompt = f"""Parse this Alibaba supplier quotation and extract information.
+
+Supplier Response:
+{raw_text[:2000]}
+
+Extract into JSON (use 0 if not mentioned):
+{{"supplier_name": "company name", "unit_price": 0.00, "currency": "USD", "moq": 0, "lead_time_days": 0, "sample_cost": 0.00, "certifications": "CE, ISO", "supplier_rating": 0.0, "supplier_years": 0, "shipping_terms": "FOB", "notes": "any important notes"}}
+
+JSON only:"""
+
+        try:
+            resp = _req.post('https://api.anthropic.com/v1/messages',
+                headers={'x-api-key': api_key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json'},
+                json={'model': 'claude-haiku-4-5-20251001', 'max_tokens': 1000,
+                      'messages': [{'role': 'user', 'content': prompt}]},
+                timeout=30)
+            if resp.ok:
+                ai_text = resp.json()['content'][0]['text']
+                json_match = re.search(r'\{[\s\S]*\}', ai_text)
+                if json_match:
+                    parsed = json.loads(json_match.group())
+        except Exception as e:
+            print(f'[QUOTE PARSE] AI 파싱 실패: {e}')
+
+    # 누락 항목 경고
+    warnings = []
+    if not parsed.get('unit_price'): warnings.append('단가 정보 없음')
+    if not parsed.get('moq'): warnings.append('MOQ 정보 없음')
+    if not parsed.get('lead_time_days'): warnings.append('리드타임 정보 없음')
+
+    return jsonify({
+        'success': True,
+        'parsed': parsed,
+        'warnings': warnings
+    })
+
+
+@app.route('/api/rfq/<int:rfq_id>/compare')
+def compare_quotations(rfq_id):
+    """견적 비교 데이터 (AI 점수 산출 포함)"""
+    db = get_db()
+    rfq = db.execute('SELECT * FROM rfqs WHERE id = ?', (rfq_id,)).fetchone()
+    quotes = db.execute('SELECT * FROM quotations WHERE rfq_id = ? ORDER BY unit_price', (rfq_id,)).fetchall()
+
+    quotes_list = [dict(q) for q in quotes]
+
+    # AI 점수 산출: 가격(40%) + 신뢰도(25%) + 조건(20%) + 속도(15%)
+    if quotes_list:
+        prices = [q['unit_price'] for q in quotes_list if q['unit_price']]
+        moqs = [q['moq'] for q in quotes_list if q['moq']]
+        leads = [q['lead_time_days'] for q in quotes_list if q['lead_time_days']]
+
+        min_price = min(prices) if prices else 1
+        max_price = max(prices) if prices else 1
+        min_moq = min(moqs) if moqs else 1
+        max_moq = max(moqs) if moqs else 1
+        min_lead = min(leads) if leads else 1
+        max_lead = max(leads) if leads else 1
+
+        for q in quotes_list:
+            price_score = (1 - (q['unit_price'] - min_price) / max(max_price - min_price, 0.01)) * 100 if q['unit_price'] else 50
+            trust_score = min(100, (q.get('supplier_rating', 0) or 0) * 20 + (q.get('supplier_years', 0) or 0) * 5)
+            condition_score = (1 - (q.get('moq', 0) - min_moq) / max(max_moq - min_moq, 1)) * 100 if q.get('moq') else 50
+            speed_score = (1 - (q.get('lead_time_days', 0) - min_lead) / max(max_lead - min_lead, 1)) * 100 if q.get('lead_time_days') else 50
+
+            q['total_score'] = round(price_score * 0.4 + trust_score * 0.25 + condition_score * 0.2 + speed_score * 0.15, 1)
+            q['price_score'] = round(price_score, 1)
+            q['trust_score'] = round(trust_score, 1)
+            q['condition_score'] = round(condition_score, 1)
+            q['speed_score'] = round(speed_score, 1)
+
+        quotes_list.sort(key=lambda x: x['total_score'], reverse=True)
+
+    # AI 추천
+    recommendation = ''
+    if quotes_list:
+        best = quotes_list[0]
+        recommendation = f"{best['supplier_name']}을 추천합니다 (점수 {best['total_score']}점). 단가 ${best['unit_price']}, MOQ {best['moq']}개"
+
+    return jsonify({
+        'success': True,
+        'rfq': dict(rfq) if rfq else {},
+        'quotations': quotes_list,
+        'recommendation': recommendation
+    })
+
+
+@app.route('/api/quotation/<int:quote_id>', methods=['DELETE'])
+def delete_quotation(quote_id):
+    """견적 삭제"""
+    db = get_db()
+    db.execute('DELETE FROM quotations WHERE id = ?', (quote_id,))
+    db.commit()
+    return jsonify({'success': True})
+
+
+@app.route('/api/quotation/<int:quote_id>/select', methods=['PUT'])
+def select_quotation(quote_id):
+    """업체 선정"""
+    db = get_db()
+    quote = db.execute('SELECT * FROM quotations WHERE id = ?', (quote_id,)).fetchone()
+    if quote:
+        rfq_id = quote['rfq_id']
+        db.execute('UPDATE quotations SET is_selected = 0 WHERE rfq_id = ?', (rfq_id,))
+        db.execute('UPDATE quotations SET is_selected = 1 WHERE id = ?', (quote_id,))
+        db.execute("UPDATE rfqs SET status = 'closed', updated_at = CURRENT_TIMESTAMP WHERE id = ?", (rfq_id,))
+        db.commit()
+    return jsonify({'success': True})
+
+
 # === 히스토리 API ===
 @app.route('/api/history')
 def get_history():

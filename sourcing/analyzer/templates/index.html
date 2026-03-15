@@ -869,6 +869,209 @@ body {
     .keyword-analysis { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
 }
+
+/* ── 견적비교 모달 ── */
+.quote-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+
+.quote-modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    width: 600px;
+    max-width: 90vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.quote-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.quote-modal-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.quote-modal-close:hover {
+    color: var(--text-primary);
+}
+
+.quote-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.quote-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+}
+
+.quote-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.quote-textarea {
+    width: 100%;
+    min-height: 140px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 12px;
+    resize: vertical;
+    transition: border-color 0.15s;
+}
+
+.quote-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.quote-parsed-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-top: 4px;
+}
+
+.quote-parsed-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.quote-parsed-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.quote-field label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.quote-input {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 8px 10px;
+}
+
+.quote-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.quote-warning {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: rgba(255, 171, 0, 0.1);
+    border: 1px solid rgba(255, 171, 0, 0.25);
+    border-radius: var(--radius);
+    font-size: 12px;
+    color: var(--warning);
+}
+
+/* 추천 카드 */
+.quote-recommend-card {
+    background: linear-gradient(135deg, rgba(0, 230, 118, 0.08), rgba(0, 229, 255, 0.05));
+    border: 1px solid rgba(0, 230, 118, 0.2);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.quote-recommend-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    line-height: 1.2;
+}
+
+.quote-recommend-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+.quote-recommend-text strong {
+    color: var(--success);
+}
+
+/* 점수 색상 (테이블 내) */
+.quote-score {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    height: 28px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.quote-score-high { background: rgba(0, 230, 118, 0.15); color: var(--success); }
+.quote-score-mid  { background: rgba(255, 171, 0, 0.15); color: var(--warning); }
+.quote-score-low  { background: rgba(255, 82, 82, 0.15); color: var(--danger); }
+
+/* 선정됨 뱃지 */
+.quote-selected-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(0, 230, 118, 0.12);
+    color: var(--success);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--radius);
+    border: 1px solid rgba(0, 230, 118, 0.25);
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -1354,40 +1557,113 @@ body {
 <!-- 탭 4: 견적비교 -->
 <!-- ═══════════════════════════════════════════ -->
 <div class="tab-panel" id="tab-quotes">
+    <!-- RFQ 선택 + 견적 추가 -->
     <div class="card">
         <div class="card-header">
             <span class="card-title">견적 비교</span>
-            <select class="btn btn-sm btn-secondary" id="quoteRfqSelect" style="font-family: inherit;">
-                <option value="">RFQ 선택</option>
-            </select>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <select class="btn btn-sm btn-secondary" id="quoteRfqSelect" onchange="loadQuoteComparison(this.value)" style="font-family: inherit; min-width: 240px;">
+                    <option value="">RFQ를 선택하세요</option>
+                </select>
+                <button class="btn btn-sm btn-primary" onclick="openAddQuoteModal()">+ 견적 추가</button>
+            </div>
         </div>
 
-        <div id="quotesContent">
+        <!-- AI 추천 카드 -->
+        <div id="quoteRecommendation" style="display: none;"></div>
+
+        <!-- 빈 상태 -->
+        <div id="quotesEmpty">
             <div class="empty-state" style="padding: 30px;">
+                <div class="empty-icon">&#128200;</div>
+                <div class="empty-title">견적 비교</div>
                 <div class="empty-desc">RFQ를 선택하면 받은 견적을 비교할 수 있습니다</div>
             </div>
         </div>
 
-        <div id="quotesGrid" class="quotes-grid" style="display:none;"></div>
-
-        <!-- 견적 비교 테이블 -->
-        <div id="quotesTable" style="display:none; margin-top: 16px;">
+        <!-- 비교 테이블 -->
+        <div id="quotesTable" style="display: none; margin-top: 16px;">
             <table class="data-table">
                 <thead>
                     <tr>
                         <th>순위</th>
                         <th>업체명</th>
-                        <th>단가</th>
+                        <th>단가(USD)</th>
                         <th>MOQ</th>
                         <th>리드타임</th>
-                        <th>샘플비</th>
-                        <th>업력</th>
-                        <th>평점</th>
-                        <th>선정</th>
+                        <th>샘플비(USD)</th>
+                        <th>인증</th>
+                        <th>점수</th>
+                        <th>액션</th>
                     </tr>
                 </thead>
                 <tbody id="quotesTableBody"></tbody>
             </table>
+        </div>
+
+        <!-- 견적 없음 (RFQ 선택했으나 견적 0건) -->
+        <div id="quotesNoData" style="display: none;">
+            <div class="empty-state" style="padding: 30px;">
+                <div class="empty-icon">&#128230;</div>
+                <div class="empty-title">아직 견적이 없습니다</div>
+                <div class="empty-desc">"+ 견적 추가" 버튼으로 알리바바 업체 답변을 붙여넣어 보세요</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 견적 추가 모달 -->
+<div class="quote-modal-overlay" id="quoteModalOverlay" style="display: none;">
+    <div class="quote-modal">
+        <div class="quote-modal-header">
+            <span class="card-title">견적 추가</span>
+            <button class="quote-modal-close" onclick="closeQuoteModal()">&times;</button>
+        </div>
+        <div class="quote-modal-body">
+            <label class="quote-label">알리바바 업체 답변을 붙여넣으세요:</label>
+            <textarea id="quoteRawText" class="quote-textarea" placeholder="업체에서 받은 메시지, 이메일 본문 등을 그대로 붙여넣으세요..."></textarea>
+            <div style="text-align: center; margin: 12px 0;">
+                <button class="btn btn-primary" onclick="parseQuoteText()" id="btnParseQuote">AI 분석</button>
+            </div>
+
+            <!-- 파싱 결과 -->
+            <div id="quoteParsedResult" style="display: none;">
+                <div class="quote-parsed-card">
+                    <div class="quote-parsed-title">파싱 결과</div>
+                    <div class="quote-parsed-grid">
+                        <div class="quote-field">
+                            <label>업체명</label>
+                            <input type="text" id="qpSupplier" class="quote-input" placeholder="업체명">
+                        </div>
+                        <div class="quote-field">
+                            <label>단가 (USD)</label>
+                            <input type="text" id="qpUnitPrice" class="quote-input" placeholder="0.00">
+                        </div>
+                        <div class="quote-field">
+                            <label>MOQ</label>
+                            <input type="text" id="qpMoq" class="quote-input" placeholder="0">
+                        </div>
+                        <div class="quote-field">
+                            <label>리드타임 (일)</label>
+                            <input type="text" id="qpLeadTime" class="quote-input" placeholder="0">
+                        </div>
+                        <div class="quote-field">
+                            <label>샘플비 (USD)</label>
+                            <input type="text" id="qpSampleCost" class="quote-input" placeholder="0.00">
+                        </div>
+                        <div class="quote-field">
+                            <label>인증</label>
+                            <input type="text" id="qpCerts" class="quote-input" placeholder="ISO, CE 등">
+                        </div>
+                    </div>
+                    <!-- 누락 경고 -->
+                    <div id="qpWarnings" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="quote-modal-footer">
+            <button class="btn btn-secondary" onclick="closeQuoteModal()">닫기</button>
+            <button class="btn btn-primary" onclick="saveQuotation()" id="btnSaveQuote" style="display: none;">저장</button>
         </div>
     </div>
 </div>
@@ -3810,7 +4086,7 @@ function loadTabData(tab) {
             break;
         case 'insight': loadOpportunities(); break;
         case 'rfq': loadRfqList(); break;
-        case 'quotes': break;
+        case 'quotes': loadQuoteRfqList(); break;
         case 'history': loadHistory(); break;
     }
 }
@@ -4258,6 +4534,257 @@ function quickScan(keyword) {
 // ─────────────────────────────────────────────
 loadStats();
 loadScanHistory();
+
+// ─────────────────────────────────────────────
+// 견적비교 탭
+// ─────────────────────────────────────────────
+let _parsedQuote = null;
+
+async function loadQuoteRfqList() {
+    try {
+        const res = await fetch('/api/rfqs');
+        const data = await res.json();
+        const select = document.getElementById('quoteRfqSelect');
+        const prev = select.value;
+        select.innerHTML = '<option value="">RFQ를 선택하세요</option>';
+        (data.rfqs || []).forEach(r => {
+            const label = r.product_name_kr || r.product_name_en || ('RFQ #' + r.id);
+            const price = r.target_price ? (' — $' + r.target_price) : '';
+            select.innerHTML += `<option value="${r.id}">${label}${price}</option>`;
+        });
+        if (prev) { select.value = prev; loadQuoteComparison(prev); }
+    } catch(e) { console.error('loadQuoteRfqList error:', e); }
+}
+
+async function loadQuoteComparison(rfqId) {
+    const emptyEl = document.getElementById('quotesEmpty');
+    const noDataEl = document.getElementById('quotesNoData');
+    const tableEl = document.getElementById('quotesTable');
+    const recEl = document.getElementById('quoteRecommendation');
+
+    if (!rfqId) {
+        emptyEl.style.display = '';
+        noDataEl.style.display = 'none';
+        tableEl.style.display = 'none';
+        recEl.style.display = 'none';
+        return;
+    }
+
+    emptyEl.style.display = 'none';
+
+    try {
+        const res = await fetch(`/api/rfq/${rfqId}/compare`);
+        const data = await res.json();
+        renderQuoteComparison(data);
+    } catch(e) {
+        console.error('loadQuoteComparison error:', e);
+        noDataEl.style.display = '';
+        tableEl.style.display = 'none';
+        recEl.style.display = 'none';
+    }
+}
+
+function renderQuoteComparison(data) {
+    const noDataEl = document.getElementById('quotesNoData');
+    const tableEl = document.getElementById('quotesTable');
+    const recEl = document.getElementById('quoteRecommendation');
+    const tbody = document.getElementById('quotesTableBody');
+
+    const quotes = data.quotes || [];
+
+    if (quotes.length === 0) {
+        noDataEl.style.display = '';
+        tableEl.style.display = 'none';
+        recEl.style.display = 'none';
+        return;
+    }
+
+    noDataEl.style.display = 'none';
+
+    // AI 추천 카드
+    if (data.recommendation) {
+        const rec = data.recommendation;
+        recEl.style.display = '';
+        recEl.innerHTML = `
+            <div class="quote-recommend-card">
+                <div class="quote-recommend-icon">&#127942;</div>
+                <div class="quote-recommend-text">
+                    <strong>추천: ${escapeHtml(rec.supplier || '-')}</strong> (점수 ${rec.score || '-'})
+                    ${rec.reason ? ' — ' + escapeHtml(rec.reason) : ''}
+                </div>
+            </div>`;
+    } else {
+        recEl.style.display = 'none';
+    }
+
+    // 정렬: 점수 높은 순
+    quotes.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+    tbody.innerHTML = '';
+    quotes.forEach((q, i) => {
+        const scoreClass = (q.score || 0) >= 80 ? 'quote-score-high'
+                         : (q.score || 0) >= 60 ? 'quote-score-mid'
+                         : 'quote-score-low';
+        const selectedBadge = q.selected
+            ? '<span class="quote-selected-badge">&#10003; 선정됨</span>'
+            : '';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td><strong>${escapeHtml(q.supplier || '-')}</strong> ${selectedBadge}</td>
+            <td>$${q.unit_price != null ? Number(q.unit_price).toFixed(2) : '-'}</td>
+            <td>${q.moq != null ? Number(q.moq).toLocaleString() : '-'}</td>
+            <td>${q.lead_time != null ? q.lead_time + '일' : '-'}</td>
+            <td>${q.sample_cost != null ? '$' + Number(q.sample_cost).toFixed(2) : '-'}</td>
+            <td>${escapeHtml(q.certifications || '-')}</td>
+            <td><span class="quote-score ${scoreClass}">${q.score != null ? q.score : '-'}</span></td>
+            <td>
+                ${q.selected ? '' : `<button class="btn btn-sm btn-success" onclick="selectQuotation(${q.id})" style="font-size:11px; padding:4px 8px;">선정</button>`}
+                <button class="btn btn-sm btn-secondary" onclick="deleteQuotation(${q.id})" style="font-size:11px; padding:4px 8px; color:var(--danger);">삭제</button>
+            </td>`;
+        tbody.appendChild(tr);
+    });
+
+    tableEl.style.display = '';
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function openAddQuoteModal() {
+    const rfqId = document.getElementById('quoteRfqSelect').value;
+    if (!rfqId) { alert('RFQ를 먼저 선택하세요'); return; }
+    _parsedQuote = null;
+    document.getElementById('quoteRawText').value = '';
+    document.getElementById('quoteParsedResult').style.display = 'none';
+    document.getElementById('btnSaveQuote').style.display = 'none';
+    document.getElementById('qpWarnings').style.display = 'none';
+    ['qpSupplier','qpUnitPrice','qpMoq','qpLeadTime','qpSampleCost','qpCerts'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+    document.getElementById('quoteModalOverlay').style.display = 'flex';
+}
+
+function closeQuoteModal() {
+    document.getElementById('quoteModalOverlay').style.display = 'none';
+}
+
+async function parseQuoteText() {
+    const text = document.getElementById('quoteRawText').value.trim();
+    if (!text) { alert('텍스트를 붙여넣으세요'); return; }
+
+    const rfqId = document.getElementById('quoteRfqSelect').value;
+    const btn = document.getElementById('btnParseQuote');
+    btn.disabled = true;
+    btn.textContent = '분석 중...';
+
+    try {
+        const res = await fetch('/api/quotation/parse', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, rfq_id: rfqId })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            const p = data.parsed || {};
+            _parsedQuote = p;
+            document.getElementById('qpSupplier').value = p.supplier || '';
+            document.getElementById('qpUnitPrice').value = p.unit_price || '';
+            document.getElementById('qpMoq').value = p.moq || '';
+            document.getElementById('qpLeadTime').value = p.lead_time || '';
+            document.getElementById('qpSampleCost').value = p.sample_cost || '';
+            document.getElementById('qpCerts').value = p.certifications || '';
+
+            // 경고 표시
+            const warnings = data.warnings || [];
+            const warnEl = document.getElementById('qpWarnings');
+            if (warnings.length > 0) {
+                warnEl.style.display = '';
+                warnEl.innerHTML = warnings.map(w =>
+                    `<div class="quote-warning">&#9888; ${escapeHtml(w)}</div>`
+                ).join('');
+            } else {
+                warnEl.style.display = 'none';
+            }
+
+            document.getElementById('quoteParsedResult').style.display = '';
+            document.getElementById('btnSaveQuote').style.display = '';
+        } else {
+            alert(data.error || '파싱 실패');
+        }
+    } catch(e) {
+        console.error('parseQuoteText error:', e);
+        alert('서버 연결 실패');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'AI 분석';
+}
+
+async function saveQuotation() {
+    const rfqId = document.getElementById('quoteRfqSelect').value;
+    if (!rfqId) return;
+
+    const payload = {
+        rfq_id: parseInt(rfqId),
+        supplier: document.getElementById('qpSupplier').value.trim(),
+        unit_price: parseFloat(document.getElementById('qpUnitPrice').value) || null,
+        moq: parseInt(document.getElementById('qpMoq').value) || null,
+        lead_time: parseInt(document.getElementById('qpLeadTime').value) || null,
+        sample_cost: parseFloat(document.getElementById('qpSampleCost').value) || null,
+        certifications: document.getElementById('qpCerts').value.trim(),
+        raw_text: document.getElementById('quoteRawText').value.trim()
+    };
+
+    if (!payload.supplier) { alert('업체명을 입력하세요'); return; }
+
+    const btn = document.getElementById('btnSaveQuote');
+    btn.disabled = true;
+    btn.textContent = '저장 중...';
+
+    try {
+        const res = await fetch('/api/quotation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            closeQuoteModal();
+            loadQuoteComparison(rfqId);
+        } else {
+            alert(data.error || '저장 실패');
+        }
+    } catch(e) {
+        console.error('saveQuotation error:', e);
+        alert('서버 연결 실패');
+    }
+
+    btn.disabled = false;
+    btn.textContent = '저장';
+}
+
+async function selectQuotation(quoteId) {
+    try {
+        await fetch(`/api/quotation/${quoteId}/select`, { method: 'PUT' });
+        const rfqId = document.getElementById('quoteRfqSelect').value;
+        if (rfqId) loadQuoteComparison(rfqId);
+    } catch(e) { console.error('selectQuotation error:', e); }
+}
+
+async function deleteQuotation(quoteId) {
+    if (!confirm('이 견적을 삭제하시겠습니까?')) return;
+    try {
+        await fetch(`/api/quotation/${quoteId}`, { method: 'DELETE' });
+        const rfqId = document.getElementById('quoteRfqSelect').value;
+        if (rfqId) loadQuoteComparison(rfqId);
+    } catch(e) { console.error('deleteQuotation error:', e); }
+}
 
 // URL 파라미터로 탭 이동
 const urlParams = new URLSearchParams(window.location.search);
