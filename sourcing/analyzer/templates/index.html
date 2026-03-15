@@ -3419,7 +3419,7 @@ async function publishRFQ(rfqId) {
                     <div style="display:flex;gap:8px;">
                         <button onclick="autoPublishRFQ(${rfqId})" style="background:linear-gradient(135deg,#ff6b2b,#ff9500);color:#fff;border:none;padding:6px 16px;border-radius:3px;font-size:12px;font-weight:700;cursor:pointer;">자동 발행</button>
                         <button onclick="navigator.clipboard.writeText(window._lastRfqText);this.textContent='복사됨!';setTimeout(()=>this.textContent='복사',1500)" style="background:var(--cyan);color:#000;border:none;padding:6px 16px;border-radius:3px;font-size:12px;font-weight:700;cursor:pointer;">복사</button>
-                        <button onclick="window.open('https://message.alibaba.com/message/buyingLeads.htm?activeTab=rfq#/','_blank')" style="background:var(--bg-secondary);color:var(--text-secondary);border:1px solid var(--border);padding:6px 16px;border-radius:3px;font-size:12px;cursor:pointer;">수동 열기</button>
+                        <button onclick="window.open('https://rfq.alibaba.com/rfq/rfqForm.htm?newAiForm=true','_blank')" style="background:var(--bg-secondary);color:var(--text-secondary);border:1px solid var(--border);padding:6px 16px;border-radius:3px;font-size:12px;cursor:pointer;">수동 열기</button>
                     </div>
                 </div>
                 <div id="rfqPreviewText" style="font-size:13px;color:var(--text-secondary);line-height:1.8;white-space:pre-wrap;">${rfqText}</div>
@@ -3438,7 +3438,7 @@ async function publishRFQ(rfqId) {
 async function autoPublishRFQ(rfqId) {
     // 확장프로그램이 알리바바 폼을 자동 채움
     const qty = document.getElementById('rfqDetailQty')?.value || '1000';
-    window.open(`https://message.alibaba.com/message/buyingLeads.htm?activeTab=rfq&mf_rfq_id=${rfqId}&mf_qty=${qty}#/`, '_blank');
+    window.open(`https://rfq.alibaba.com/rfq/rfqForm.htm?newAiForm=true&mf_rfq_id=${rfqId}&mf_qty=${qty}`, '_blank');
 
     const btn = event.target;
     btn.textContent = '알리바바에서 확인하세요!';
