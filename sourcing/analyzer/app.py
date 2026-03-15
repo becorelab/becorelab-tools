@@ -1726,14 +1726,32 @@ def api_reviews_import():
     scan_id = data.get('scan_id')
     reviews = data.get('reviews', [])
 
-    if not scan_id or not reviews:
-        return jsonify({'success': False, 'error': 'scan_id와 reviews 필요'})
+    partial = data.get('partial', False)
+
+    if not scan_id:
+        return jsonify({'success': False, 'error': 'scan_id 필요'})
+    if not reviews and not partial:
+        return jsonify({'success': False, 'error': 'reviews 필요'})
 
     # scan_id를 int로 변환
     try:
         scan_id = int(scan_id)
     except (ValueError, TypeError):
         return jsonify({'success': False, 'error': 'scan_id는 정수여야 합니다'})
+
+    # partial 모드: 이전 리뷰에 추가
+    if partial and scan_id in _review_state and _review_state[scan_id].get('reviews'):
+        _review_state[scan_id]['reviews'].extend(reviews)
+        _review_state[scan_id]['status'] = 'collecting'
+        product_index = data.get('product_index', 0)
+        total_products = data.get('total_products', 1)
+        print(f'[REVIEW-IMPORT] 부분 수신: {len(reviews)}개 (상품 {product_index+1}/{total_products}, 누적 {len(_review_state[scan_id]["reviews"])}개)')
+
+        # 마지막 상품이면 분석 시작
+        if product_index >= total_products - 1:
+            reviews = _review_state[scan_id]['reviews']
+        else:
+            return jsonify({'success': True, 'message': f'부분 수신 ({product_index+1}/{total_products})', 'review_count': len(_review_state[scan_id]["reviews"])})
 
     # 리뷰 저장 + 분석 시작
     _review_state[scan_id] = {

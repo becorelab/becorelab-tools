@@ -2742,64 +2742,59 @@ async function _startInsightReview(scanId) {
     btn.disabled = true;
     btn.style.opacity = '0.5';
     btn.textContent = '수집 중...';
-    document.getElementById('insightReviewContent').innerHTML = '<div style="text-align:center;padding:30px;"><span class="loading-spinner"></span> 확장프로그램 확인 중...</div>';
+
+    // 리뷰 상태 초기화
+    _review_state_local[scanId] = 'collecting';
 
     try {
-        // 스캔 데이터에서 상품 URL 가져오기
         const scanRes = await fetch(`/api/scan/${scanId}`);
         const scanData = await scanRes.json();
         if (!scanData.success || !scanData.products || scanData.products.length === 0) {
-            document.getElementById('insightReviewContent').innerHTML = '<div style="padding:20px;color:var(--danger);">상품 데이터가 없습니다.</div>';
+            document.getElementById('insightReviewContent').innerHTML = '<div style="padding:20px;color:var(--danger);">상품 데이터가 없습니다. 윙 스캔을 먼저 해주세요.</div>';
             btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
             return;
         }
 
-        const products = scanData.products.slice(0, 10).map(p => ({
-            url: p.product_url,
-            name: p.product_name
-        }));
-
-        // 확장프로그램에 수집 요청 (content script가 window.postMessage를 수신)
-        window.postMessage({
-            type: 'MARKET_FINDER_COLLECT_REVIEWS',
-            scanId: scanId,
-            products: products
-        }, '*');
+        // 매출순 상위 10개 선택
+        const products = [...scanData.products]
+            .sort((a,b) => (b.revenue_monthly||0) - (a.revenue_monthly||0))
+            .slice(0, 10)
+            .filter(p => p.product_url);
+        const total = products.length;
 
         document.getElementById('insightReviewContent').innerHTML = `
             <div style="text-align:center;padding:30px;">
                 <span class="loading-spinner"></span>
-                <div style="margin-top:12px;color:var(--text-secondary);">확장프로그램이 리뷰를 수집하고 있습니다...</div>
-                <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">상품 ${products.length}개 대상 | 완료 시 자동 분석됩니다</div>
+                <div style="margin-top:12px;color:var(--text-secondary);">리뷰 수집 중... (0/${total} 상품)</div>
+                <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">쿠팡 탭이 순차적으로 열리고 닫힙니다</div>
+                <div id="insightReviewProgress" style="margin-top:12px;"></div>
             </div>`;
 
-        // 결과 폴링 시작
-        _pollInsightReview(scanId, btn);
+        // 상품별 순차적으로 탭 열기 (확장 content.js가 자동 수집)
+        for (let i = 0; i < total; i++) {
+            const url = products[i].product_url;
+            const sep = url.includes('?') ? '&' : '?';
+            const collectUrl = `${url}${sep}mf_collect=1&mf_scan=${scanId}&mf_idx=${i}&mf_total=${total}`;
 
-        // 확장프로그램 미설치 감지를 위한 타임아웃
-        setTimeout(() => {
-            const state = _review_state_local[scanId];
-            if (!state || state === 'waiting') {
-                // 10초 후에도 확장프로그램으로부터 응답 없으면 안내
-                const content = document.getElementById('insightReviewContent');
-                if (content && content.innerHTML.includes('확장프로그램이 리뷰를')) {
-                    content.innerHTML = `
-                        <div style="padding:24px;">
-                            <div style="color:var(--warning);font-weight:700;font-size:15px;margin-bottom:12px;">확장프로그램이 감지되지 않습니다</div>
-                            <div style="color:var(--text-secondary);font-size:13px;line-height:1.8;">
-                                리뷰 수집을 위해 크롬 확장프로그램이 필요합니다.<br><br>
-                                <strong style="color:var(--text-primary);">설치 방법:</strong><br>
-                                1. Chrome → <code style="background:var(--bg-secondary);padding:2px 6px;border-radius:3px;">chrome://extensions</code> 접속<br>
-                                2. 우측 상단 "개발자 모드" 활성화<br>
-                                3. "압축해제된 확장 프로그램을 로드합니다" 클릭<br>
-                                4. <code style="background:var(--bg-secondary);padding:2px 6px;border-radius:3px;">chrome_extension</code> 폴더 선택<br>
-                                5. 이 페이지 새로고침 후 다시 시도
-                            </div>
-                        </div>`;
-                    btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
-                }
-            }
-        }, 10000);
+            window.open(collectUrl, '_blank');
+
+            // 진행 상황 업데이트
+            const progress = document.getElementById('insightReviewProgress');
+            if (progress) progress.textContent = `${i+1}/${total} 상품 탭 열림`;
+
+            // 다음 상품까지 대기 (수집 + 전송 시간)
+            await new Promise(r => setTimeout(r, 8000));
+        }
+
+        // 모든 탭 열기 완료 → 분석 대기
+        document.getElementById('insightReviewContent').innerHTML = `
+            <div style="text-align:center;padding:30px;">
+                <span class="loading-spinner"></span>
+                <div style="margin-top:12px;color:var(--text-secondary);">리뷰 수집 완료! AI 분석 중...</div>
+            </div>`;
+
+        // 결과 폴링
+        _pollInsightReview(scanId, btn);
 
     } catch (e) {
         console.error('[REVIEW]', e);

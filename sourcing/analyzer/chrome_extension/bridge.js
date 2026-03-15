@@ -30,4 +30,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 });
 
+// 페이지에 확장 설치 플래그 설정
+window.__MARKET_FINDER_EXT_INSTALLED__ = true;
 console.log('[마켓 파인더 리뷰 수집기] Bridge 로드 완료');
