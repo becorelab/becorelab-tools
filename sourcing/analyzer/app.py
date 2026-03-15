@@ -2538,18 +2538,29 @@ def publish_rfq(rfq_id):
     if api_key:
         try:
             import requests as _req
-            prompt = f"""다음 제품 소싱 요청서를 영어로 번역해주세요. 알리바바 공급자에게 보내는 전문적인 RFQ(Request for Quotation) 형식으로 작성해주세요.
+            prompt = f"""Write a detailed professional RFQ (Request for Quotation) email in English for an Alibaba supplier.
 
-제품명: {product_name_kr}
-스펙:
+Product (Korean): {product_name_kr}
+Specifications:
 {specs_text}
-인증: {', '.join(certs) if certs else '없음'}
-목표단가: ${rfq.get('target_price', 0)} USD
-수량: {rfq.get('order_quantity', 1000)}개
-배송조건: {rfq.get('shipping_terms', 'FOB')}
+Certifications: {', '.join(certs) if certs else 'None specified'}
+Target Price: ${rfq.get('target_price', 0)} USD per unit
+Quantity: {rfq.get('order_quantity', 1000)} pieces
+Shipping: {rfq.get('shipping_terms', 'FOB')}
 
-JSON 형식으로 답변:
-{{"product_name_en": "...", "subject": "RFQ: ...", "message": "Dear Supplier,\\n\\n...", "specs_en": "..."}}"""
+Buyer: Becore Lab Co., Ltd. (South Korea)
+Email: becorelab@gmail.com
+
+Write a DETAILED message including ALL specs, and request:
+1. Best unit price for the quantity
+2. MOQ and price breaks
+3. Sample availability and cost
+4. Production lead time
+5. Required certifications
+6. Payment terms
+
+Reply in JSON only:
+{{"product_name_en": "...", "subject": "RFQ: ...", "message": "Dear Supplier,\\n\\n...(detailed 300+ words)...", "specs_en": "..."}}"""
 
             resp = _req.post(
                 'https://api.anthropic.com/v1/messages',
