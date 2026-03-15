@@ -3436,15 +3436,32 @@ async function publishRFQ(rfqId) {
 }
 
 async function autoPublishRFQ(rfqId) {
-    // 확장프로그램이 알리바바 폼을 자동 채움
-    const qty = document.getElementById('rfqDetailQty')?.value || '1000';
-    window.open(`https://rfq.alibaba.com/rfq/rfqForm.htm?newAiForm=true&mf_rfq_id=${rfqId}&mf_qty=${qty}`, '_blank');
+    const rfqText = window._lastRfqText || '';
+    if (!rfqText) { alert('먼저 [알리바바 발행] 버튼으로 번역해주세요.'); return; }
 
     const btn = event.target;
-    btn.textContent = '알리바바에서 확인하세요!';
-    btn.style.background = 'var(--success)';
-    btn.style.color = '#000';
-    setTimeout(() => { btn.textContent = '자동 발행'; btn.style.background = 'linear-gradient(135deg,#ff6b2b,#ff9500)'; btn.style.color = '#fff'; }, 5000);
+    btn.disabled = true;
+    btn.textContent = '알리바바 열고 작성 중...';
+
+    const qty = document.getElementById('rfqDetailQty')?.value || '1000';
+    const name = document.getElementById('rfqDetailNameKr')?.value || '';
+
+    const res = await fetch('/api/rfq/' + rfqId + '/auto-publish', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message: rfqText, product_name: name, quantity: parseInt(qty) })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+        btn.textContent = '알리바바에서 확인하세요!';
+        btn.style.background = 'var(--success)';
+        btn.style.color = '#000';
+    } else {
+        alert(data.error || '실패');
+        btn.disabled = false;
+        btn.textContent = '자동 발행';
+    }
 }
 
 async function loadHistory() {
