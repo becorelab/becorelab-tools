@@ -3128,7 +3128,7 @@ async function loadRfqList() {
 
             empty.style.display = 'none';
             tbody.innerHTML = data.rfqs.map(r => `
-                <tr>
+                <tr onclick="viewRFQDetail(${r.id})" style="cursor:pointer;">
                     <td><strong>${r.product_name_kr || r.product_name_en || '-'}</strong></td>
                     <td>${r.category || '-'}</td>
                     <td>${r.target_price ? '$' + r.target_price : '-'}</td>
@@ -3141,6 +3141,138 @@ async function loadRfqList() {
         }
     } catch (err) {
         console.error('RFQ 로딩 에러:', err);
+    }
+}
+
+async function viewRFQDetail(rfqId) {
+    const res = await fetch(`/api/rfq/${rfqId}`);
+    const data = await res.json();
+    if (!data.success) { alert('RFQ 조회 실패'); return; }
+    const rfq = data.rfq;
+    let specs = rfq.specifications || '{}';
+    try { const parsed = JSON.parse(specs); specs = typeof parsed === 'string' ? parsed : JSON.stringify(parsed, null, 2); } catch(e) {}
+
+    let certs = '';
+    try { const c = JSON.parse(rfq.certifications || '[]'); certs = Array.isArray(c) ? c.join(', ') : String(c); } catch(e) { certs = rfq.certifications || ''; }
+
+    let modal = document.getElementById('rfqDetailModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'rfqDetailModal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;';
+        modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+        document.body.appendChild(modal);
+    }
+    modal.style.display = 'flex';
+
+    modal.innerHTML = `
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;width:90%;max-width:800px;max-height:85vh;overflow-y:auto;padding:28px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <span style="font-size:18px;font-weight:800;">RFQ 상세</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <span style="padding:4px 12px;border-radius:3px;font-size:12px;font-weight:700;background:${rfq.status==='draft'?'rgba(255,171,0,0.15);color:#ffab00':'rgba(0,230,118,0.15);color:#00e676'};">${rfq.status==='draft'?'초안':'발행됨'}</span>
+                <button onclick="document.getElementById('rfqDetailModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">&times;</button>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">제품명 (한글)</label>
+                <input id="rfqDetailNameKr" type="text" value="${(rfq.product_name_kr||'').replace(/"/g,'&quot;')}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:14px;outline:none;box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">제품명 (영문)</label>
+                <input id="rfqDetailNameEn" type="text" value="${(rfq.product_name_en||'').replace(/"/g,'&quot;')}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:14px;outline:none;box-sizing:border-box;">
+            </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+            <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">카테고리</label>
+            <input id="rfqDetailCat" type="text" value="${(rfq.category||'').replace(/"/g,'&quot;')}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:14px;outline:none;box-sizing:border-box;">
+        </div>
+
+        <div style="margin-bottom:16px;">
+            <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">스펙 / 상세 요구사항</label>
+            <textarea id="rfqDetailSpecs" rows="5" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box;">${specs.replace(/</g,'&lt;')}</textarea>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">목표단가 (USD)</label>
+                <input id="rfqDetailPrice" type="number" step="0.01" value="${rfq.target_price||''}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--accent);padding:10px;font-size:16px;font-weight:700;outline:none;box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">주문수량</label>
+                <input id="rfqDetailQty" type="number" value="${rfq.order_quantity||''}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:14px;outline:none;box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">MOQ</label>
+                <input id="rfqDetailMoq" type="number" value="${rfq.moq||''}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:14px;outline:none;box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">배송 조건</label>
+                <input id="rfqDetailShipping" type="text" value="${(rfq.shipping_terms||'FOB').replace(/"/g,'&quot;')}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:14px;outline:none;box-sizing:border-box;">
+            </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+            <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">필수 인증</label>
+            <input id="rfqDetailCerts" type="text" value="${certs.replace(/"/g,'&quot;')}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:14px;outline:none;box-sizing:border-box;">
+        </div>
+
+        ${data.quotations && data.quotations.length > 0 ? `
+        <div style="margin-bottom:16px;">
+            <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:8px;">받은 견적 (${data.quotations.length}건)</label>
+            <table style="width:100%;font-size:13px;border-collapse:collapse;">
+                <thead><tr style="border-bottom:1px solid var(--border);color:var(--text-muted);font-size:11px;">
+                    <th style="padding:6px;text-align:left;">업체명</th>
+                    <th style="padding:6px;text-align:right;">단가</th>
+                    <th style="padding:6px;text-align:right;">MOQ</th>
+                    <th style="padding:6px;text-align:right;">리드타임</th>
+                </tr></thead>
+                <tbody>${data.quotations.map(q => `
+                    <tr style="border-bottom:1px solid rgba(42,47,64,0.3);">
+                        <td style="padding:6px;">${q.supplier_name||'-'}</td>
+                        <td style="padding:6px;text-align:right;color:var(--accent);font-weight:700;">$${q.unit_price||'-'}</td>
+                        <td style="padding:6px;text-align:right;">${q.moq||'-'}</td>
+                        <td style="padding:6px;text-align:right;">${q.lead_time_days ? q.lead_time_days+'일' : '-'}</td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>
+        </div>` : ''}
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--border);padding-top:16px;">
+            <button onclick="updateRFQ(${rfqId})" style="background:var(--accent);color:#fff;border:none;padding:12px 24px;border-radius:var(--radius);font-weight:700;font-size:14px;cursor:pointer;">저장</button>
+            <button onclick="document.getElementById('rfqDetailModal').style.display='none'" style="background:var(--bg-secondary);color:var(--text-secondary);border:1px solid var(--border);padding:12px 24px;border-radius:var(--radius);font-size:14px;cursor:pointer;">닫기</button>
+        </div>
+    </div>`;
+}
+
+async function updateRFQ(rfqId) {
+    const data = {
+        product_name_kr: document.getElementById('rfqDetailNameKr').value,
+        product_name_en: document.getElementById('rfqDetailNameEn').value,
+        category: document.getElementById('rfqDetailCat').value,
+        specifications: document.getElementById('rfqDetailSpecs').value,
+        target_price: parseFloat(document.getElementById('rfqDetailPrice').value) || null,
+        order_quantity: parseInt(document.getElementById('rfqDetailQty').value) || null,
+        moq: parseInt(document.getElementById('rfqDetailMoq').value) || null,
+        shipping_terms: document.getElementById('rfqDetailShipping').value,
+        certifications: document.getElementById('rfqDetailCerts').value
+    };
+
+    const res = await fetch(`/api/rfq/${rfqId}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (result.success) {
+        alert('RFQ 업데이트 완료!');
+        document.getElementById('rfqDetailModal').style.display = 'none';
+        loadRfqList();
+    } else {
+        alert('업데이트 실패: ' + (result.error || '알 수 없는 오류'));
     }
 }
 

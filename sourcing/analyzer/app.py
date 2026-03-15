@@ -2434,6 +2434,42 @@ def get_rfqs():
     return jsonify({'success': True, 'rfqs': [dict(r) for r in rfqs]})
 
 
+@app.route('/api/rfq/<int:rfq_id>', methods=['PUT'])
+def update_rfq(rfq_id):
+    """RFQ 수정"""
+    data = request.get_json(silent=True) or {}
+    db = get_db()
+
+    # 존재 확인
+    rfq = db.execute('SELECT id FROM rfqs WHERE id = ?', (rfq_id,)).fetchone()
+    if not rfq:
+        return jsonify({'success': False, 'error': 'RFQ 없음'})
+
+    # certifications: 쉼표 구분 문자열 → JSON 배열로 변환
+    certs_raw = data.get('certifications', '')
+    if isinstance(certs_raw, str):
+        certs = json.dumps([c.strip() for c in certs_raw.split(',') if c.strip()], ensure_ascii=False)
+    else:
+        certs = json.dumps(certs_raw, ensure_ascii=False)
+
+    db.execute('''
+        UPDATE rfqs SET
+            product_name_kr = ?, product_name_en = ?, category = ?,
+            specifications = ?, target_price = ?, order_quantity = ?,
+            moq = ?, shipping_terms = ?, certifications = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+    ''', (
+        data.get('product_name_kr'), data.get('product_name_en'),
+        data.get('category'), data.get('specifications'),
+        data.get('target_price'), data.get('order_quantity'),
+        data.get('moq'), data.get('shipping_terms'),
+        certs, rfq_id
+    ))
+    db.commit()
+    return jsonify({'success': True})
+
+
 @app.route('/api/rfq/<int:rfq_id>')
 def get_rfq_detail(rfq_id):
     """RFQ 상세 + 견적 목록"""
