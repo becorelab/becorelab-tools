@@ -75,6 +75,10 @@
             }
             console.log(`[마켓파인더] 최종 리뷰: ${reviews.length}개`);
 
+            // 상품명 추출 (페이지 타이틀에서)
+            const productName = document.title.replace(' - 쿠팡!', '').replace(' | 쿠팡', '').trim();
+            reviews.forEach(r => r.productName = productName);
+
             // 서버로 전송
             try {
                 await fetch('http://localhost:8090/api/reviews/import', {
@@ -83,6 +87,7 @@
                     body: JSON.stringify({
                         scan_id: parseInt(scanId),
                         reviews: reviews,
+                        product_name: productName,
                         product_index: parseInt(productIndex || '0'),
                         total_products: parseInt(totalProducts || '1'),
                         partial: true

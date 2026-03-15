@@ -183,10 +183,12 @@ def analyze_reviews_claude(reviews: list, keyword: str, api_key: str) -> dict:
     if not api_key:
         return analyze_reviews_basic(reviews, keyword)
 
-    # 리뷰 텍스트 준비 (최대 300개)
+    # 리뷰 텍스트 준비 (최대 300개) — 상품명 포함
     review_texts = []
     for r in reviews[:300]:
-        text = f"[{'★' * r.get('rating', 0)}] {r.get('headline', '')} {r.get('content', '')}"
+        pname = r.get('productName', '')
+        stars = '★' * r.get('rating', 0)
+        text = f"[{stars}] [{pname}] {r.get('headline', '')} {r.get('content', '')}"
         review_texts.append(text.strip())
 
     review_block = '\n---\n'.join(review_texts)
@@ -204,6 +206,7 @@ def analyze_reviews_claude(reviews: list, keyword: str, api_key: str) -> dict:
 5. "key_features": 소비자가 중요하게 생각하는 기능/특성 5가지 (배열)
 6. "sourcing_tips": 이 제품을 소싱할 때 포커스해야 할 포인트 3가지 (배열)
 7. "differentiation": 기존 제품 대비 차별화할 수 있는 아이디어 3가지 (배열)
+8. "top_products": 리뷰에서 가장 많이 언급된 상품 3개와 소비자 평가 요약 (배열, 각 항목은 {{"name": "상품명", "summary": "한줄평"}})
 
 JSON만 답해주세요."""
 

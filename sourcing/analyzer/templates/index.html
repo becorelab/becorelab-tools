@@ -2760,6 +2760,9 @@ async function _startInsightReview(scanId) {
             .sort((a,b) => (b.revenue_monthly||0) - (a.revenue_monthly||0))
             .slice(0, 10)
             .filter(p => p.product_url);
+
+        // 수집 대상 상품 로그
+        console.log('[리뷰 수집 대상]', products.map((p,i) => `${i+1}. ${p.product_name?.substring(0,20)} (매출:${(p.revenue_monthly||0).toLocaleString()}원)`));
         const total = products.length;
 
         document.getElementById('insightReviewContent').innerHTML = `
@@ -2891,6 +2894,11 @@ function _displayInsightReview(data) {
                     <div class="ins-section-title"><span class="dot" style="background:var(--purple);"></span>차별화 아이디어</div>
                     ${(a.differentiation||[]).map((d,i)=>'<div style="font-size:13px;padding:4px 0;color:var(--text-secondary);">'+(i+1)+'. '+d+'</div>').join('')}
                 </div>
+                ${a.top_products && a.top_products.length > 0 ? `
+                <div class="ins-chart-wrap" style="margin-top:16px;">
+                    <div class="ins-section-title"><span class="dot" style="background:var(--accent);"></span>리뷰 출처 상품</div>
+                    ${a.top_products.map(p => '<div style="font-size:13px;padding:6px 0;border-bottom:1px solid rgba(42,47,64,0.3);"><strong style="color:var(--cyan);">'+p.name+'</strong><br><span style="color:var(--text-secondary);">'+p.summary+'</span></div>').join('')}
+                </div>` : ''}
             </div>
         `;
     } else if (a.total_reviews > 0) {
@@ -2910,7 +2918,57 @@ function _displayInsightReview(data) {
     } else {
         html = '<div style="font-size:14px;color:var(--danger);padding:20px;">리뷰를 수집하지 못했습니다.</div>';
     }
+    // 채팅 UI 추가 (분석 결과가 있을 때만)
+    if (data.analysis && !data.analysis.error) {
+        html += `
+        <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:16px;">
+            <div style="font-size:15px; font-weight:700; margin-bottom:10px;">리뷰 Q&A</div>
+            <div id="reviewChatHistory" style="max-height:300px; overflow-y:auto; margin-bottom:10px;"></div>
+            <div style="display:flex; gap:8px;">
+                <input type="text" id="reviewChatInput" placeholder="리뷰에 대해 물어보세요..." style="flex:1; background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius); color:var(--text-primary); font-size:14px; padding:10px 14px; outline:none;">
+                <button onclick="askReviewQuestion()" style="background:var(--accent); color:#fff; border:none; padding:10px 20px; border-radius:var(--radius); font-weight:700; cursor:pointer;">질문</button>
+            </div>
+        </div>`;
+    }
+
     document.getElementById('insightReviewContent').innerHTML = html;
+
+    // Enter 키 바인딩
+    const chatInput = document.getElementById('reviewChatInput');
+    if (chatInput) {
+        chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') askReviewQuestion(); });
+    }
+}
+
+async function askReviewQuestion() {
+    const input = document.getElementById('reviewChatInput');
+    const question = input.value.trim();
+    if (!question || !_currentScanId) return;
+
+    const history = document.getElementById('reviewChatHistory');
+    history.innerHTML += `<div style="margin-bottom:8px;"><strong style="color:var(--accent);">Q:</strong> ${question}</div>`;
+    history.innerHTML += `<div style="margin-bottom:12px; color:var(--text-muted);"><span class="loading-spinner" style="display:inline-block;width:12px;height:12px;"></span> 답변 생성 중...</div>`;
+    input.value = '';
+
+    try {
+        const res = await fetch(`/api/scan/${_currentScanId}/reviews/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question })
+        });
+        const data = await res.json();
+
+        // 로딩 제거 + 답변 추가
+        const loadingDivs = history.querySelectorAll('.loading-spinner');
+        if (loadingDivs.length > 0) loadingDivs[loadingDivs.length-1].parentElement.remove();
+
+        history.innerHTML += `<div style="margin-bottom:16px; padding:10px; background:var(--bg-secondary); border-radius:var(--radius); font-size:14px; color:var(--text-secondary); line-height:1.8;"><strong style="color:var(--cyan);">A:</strong> ${data.answer || data.error || '답변 실패'}</div>`;
+        history.scrollTop = history.scrollHeight;
+    } catch (e) {
+        const loadingDivs = history.querySelectorAll('.loading-spinner');
+        if (loadingDivs.length > 0) loadingDivs[loadingDivs.length-1].parentElement.remove();
+        history.innerHTML += `<div style="margin-bottom:16px; padding:10px; color:var(--danger); font-size:14px;">오류: ${e.message}</div>`;
+    }
 }
 
 async function loadRfqList() {

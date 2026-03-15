@@ -216,6 +216,34 @@ def init_db():
 
         CREATE INDEX IF NOT EXISTS idx_goldbox_date ON goldbox_daily(crawled_date);
 
+        -- 수집 리뷰
+        CREATE TABLE IF NOT EXISTS collected_reviews (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            scan_id INTEGER NOT NULL,
+            product_name TEXT,
+            rating INTEGER,
+            headline TEXT,
+            content TEXT,
+            date TEXT,
+            option TEXT,
+            collected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (scan_id) REFERENCES market_scans(id) ON DELETE CASCADE
+        );
+
+        -- 리뷰 분석 결과
+        CREATE TABLE IF NOT EXISTS review_analyses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            scan_id INTEGER NOT NULL,
+            keyword TEXT,
+            review_count INTEGER,
+            analysis_json TEXT,
+            analyzed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (scan_id) REFERENCES market_scans(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_collected_reviews_scan ON collected_reviews(scan_id);
+        CREATE INDEX IF NOT EXISTS idx_review_analyses_scan ON review_analyses(scan_id);
+
         -- 인덱스
         CREATE INDEX IF NOT EXISTS idx_scans_keyword ON market_scans(keyword);
         CREATE INDEX IF NOT EXISTS idx_scans_score ON market_scans(opportunity_score DESC);
@@ -1706,8 +1734,15 @@ def api_scan_reviews(scan_id):
 
 @app.route('/api/scan/<int:scan_id>/reviews')
 def api_get_reviews(scan_id):
-    """리뷰 분석 결과 조회"""
-    state = _review_state.get(scan_id, {})
+    """리뷰 분석 결과 조회 — 메모리 우선, 없으면 DB에서 로드"""
+    state = _review_state.get(scan_id)
+    if not state or state.get('status') == 'none':
+        db_state = _load_reviews_from_db(scan_id)
+        if db_state:
+            _review_state[scan_id] = db_state
+            state = db_state
+    if not state:
+        state = {}
     return jsonify({
         'success': True,
         'status': state.get('status', 'none'),
@@ -1770,6 +1805,9 @@ def api_reviews_import():
             keyword = scan['keyword']
         db_conn.close()
 
+    # DB에 리뷰 저장
+    _save_reviews_to_db(scan_id, reviews)
+
     from analyzer.reviews import ANTHROPIC_API_KEY
     api_key = ANTHROPIC_API_KEY
 
@@ -1781,6 +1819,8 @@ def api_reviews_import():
                 analysis = analyze_reviews_basic(reviews, keyword)
             _review_state[scan_id]['analysis'] = analysis
             _review_state[scan_id]['status'] = 'done'
+            # 분석 결과도 DB에 저장
+            _save_analysis_to_db(scan_id, keyword, len(reviews), analysis)
             print(f'[REVIEW-IMPORT] 분석 완료: {keyword} ({len(reviews)}개 리뷰)')
         except Exception as e:
             import traceback
@@ -1851,6 +1891,9 @@ def _run_review_analysis(scan_id: int, api_key: str = ''):
 
             _review_state[scan_id]['analysis'] = analysis
             _review_state[scan_id]['status'] = 'done'
+            # DB에 리뷰 + 분석 저장
+            _save_reviews_to_db(scan_id, all_reviews)
+            _save_analysis_to_db(scan_id, keyword, len(all_reviews), analysis)
             print(f'[REVIEW] 분석 완료: {keyword}')
 
         except Exception as e:
@@ -1937,6 +1980,168 @@ def _collect_reviews_direct(products) -> list:
 
     print(f'[REVIEW] 총 {len(all_reviews)}개 수집 완료')
     return all_reviews
+
+
+def _save_reviews_to_db(scan_id: int, reviews: list):
+    """리뷰를 DB에 저장 (기존 데이터 교체)"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.execute('DELETE FROM collected_reviews WHERE scan_id = ?', (scan_id,))
+        for r in reviews:
+            conn.execute(
+                'INSERT INTO collected_reviews (scan_id, product_name, rating, headline, content, date, option) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                (scan_id, r.get('product_name', ''), r.get('rating'), r.get('headline', ''), r.get('content', ''), r.get('date', ''), r.get('option', ''))
+            )
+        conn.commit()
+        conn.close()
+        print(f'[REVIEW-DB] {len(reviews)}개 리뷰 DB 저장 완료 (scan_id={scan_id})')
+    except Exception as e:
+        print(f'[REVIEW-DB] 저장 실패: {e}')
+
+
+def _save_analysis_to_db(scan_id: int, keyword: str, review_count: int, analysis: dict):
+    """분석 결과를 DB에 저장 (기존 데이터 교체)"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.execute('DELETE FROM review_analyses WHERE scan_id = ?', (scan_id,))
+        conn.execute(
+            'INSERT INTO review_analyses (scan_id, keyword, review_count, analysis_json) VALUES (?, ?, ?, ?)',
+            (scan_id, keyword, review_count, json.dumps(analysis, ensure_ascii=False))
+        )
+        conn.commit()
+        conn.close()
+        print(f'[REVIEW-DB] 분석 결과 DB 저장 완료 (scan_id={scan_id})')
+    except Exception as e:
+        print(f'[REVIEW-DB] 분석 저장 실패: {e}')
+
+
+def _load_reviews_from_db(scan_id: int) -> dict:
+    """DB에서 리뷰 + 분석 결과 로드하여 _review_state 형태로 반환"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        reviews = conn.execute('SELECT * FROM collected_reviews WHERE scan_id = ?', (scan_id,)).fetchall()
+        analysis_row = conn.execute('SELECT * FROM review_analyses WHERE scan_id = ? ORDER BY analyzed_at DESC LIMIT 1', (scan_id,)).fetchone()
+        conn.close()
+
+        if not reviews and not analysis_row:
+            return None
+
+        review_list = [
+            {'product_name': r['product_name'], 'rating': r['rating'], 'headline': r['headline'], 'content': r['content'], 'date': r['date'], 'option': r['option']}
+            for r in reviews
+        ]
+        analysis = json.loads(analysis_row['analysis_json']) if analysis_row else None
+        return {
+            'status': 'done' if analysis else 'collecting',
+            'reviews': review_list,
+            'analysis': analysis
+        }
+    except Exception as e:
+        print(f'[REVIEW-DB] 로드 실패: {e}')
+        return None
+
+
+def _load_all_reviews_from_db():
+    """서버 시작 시 DB에서 모든 리뷰 상태 로드"""
+    global _review_state
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        scan_ids = conn.execute('SELECT DISTINCT scan_id FROM collected_reviews').fetchall()
+        for row in scan_ids:
+            sid = row['scan_id']
+            state = _load_reviews_from_db(sid)
+            if state:
+                _review_state[sid] = state
+        conn.close()
+        if _review_state:
+            print(f'[REVIEW-DB] {len(_review_state)}개 스캔의 리뷰 데이터 DB에서 로드 완료')
+    except Exception as e:
+        print(f'[REVIEW-DB] 초기 로드 실패: {e}')
+
+
+@app.route('/api/scan/<int:scan_id>/reviews/chat', methods=['POST'])
+def api_review_chat(scan_id):
+    """리뷰 Q&A 채팅 — Claude Haiku로 질문 답변"""
+    data = request.get_json(silent=True) or {}
+    question = data.get('question', '').strip()
+    if not question:
+        return jsonify({'error': '질문을 입력해주세요.'})
+
+    # DB에서 리뷰 로드 (메모리에 없으면)
+    state = _review_state.get(scan_id)
+    if not state or not state.get('reviews'):
+        state = _load_reviews_from_db(scan_id)
+    if not state or not state.get('reviews'):
+        return jsonify({'error': '리뷰 데이터가 없습니다. 먼저 리뷰 분석을 실행해주세요.'})
+
+    reviews = state['reviews']
+
+    # 키워드 조회
+    keyword = ''
+    db = get_db()
+    scan = db.execute('SELECT keyword FROM market_scans WHERE id = ?', (scan_id,)).fetchone()
+    if scan:
+        keyword = scan['keyword']
+
+    # 리뷰 텍스트 조합
+    review_texts = []
+    for i, r in enumerate(reviews[:200], 1):  # 최대 200개
+        parts = []
+        if r.get('rating'):
+            parts.append(f"평점:{r['rating']}")
+        if r.get('headline'):
+            parts.append(r['headline'])
+        if r.get('content'):
+            parts.append(r['content'])
+        if parts:
+            review_texts.append(f"{i}. {' | '.join(parts)}")
+
+    review_block = '\n'.join(review_texts)
+
+    prompt = f"""다음은 쿠팡에서 "{keyword}" 키워드 상위 상품들의 소비자 리뷰 {len(reviews)}개입니다.
+
+{review_block}
+
+위 리뷰를 기반으로 다음 질문에 답해주세요:
+{question}
+
+한국어로 간결하게 답해주세요."""
+
+    # Claude API 호출
+    api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+    if not api_key:
+        from analyzer.reviews import ANTHROPIC_API_KEY
+        api_key = ANTHROPIC_API_KEY
+    if not api_key:
+        return jsonify({'error': 'ANTHROPIC_API_KEY가 설정되지 않았습니다.'})
+
+    try:
+        import requests as req
+        resp = req.post(
+            'https://api.anthropic.com/v1/messages',
+            headers={
+                'x-api-key': api_key,
+                'anthropic-version': '2023-06-01',
+                'content-type': 'application/json'
+            },
+            json={
+                'model': 'claude-haiku-4-20250414',
+                'max_tokens': 1024,
+                'messages': [{'role': 'user', 'content': prompt}]
+            },
+            timeout=30
+        )
+        result = resp.json()
+        if 'content' in result and len(result['content']) > 0:
+            answer = result['content'][0].get('text', '')
+            return jsonify({'answer': answer})
+        else:
+            error_msg = result.get('error', {}).get('message', str(result))
+            return jsonify({'error': f'API 오류: {error_msg}'})
+    except Exception as e:
+        return jsonify({'error': f'API 호출 실패: {str(e)}'})
 
 
 @app.route('/api/scan/<int:scan_id>/status', methods=['PUT'])
@@ -2109,6 +2314,7 @@ if __name__ == '__main__':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
     init_db()
+    _load_all_reviews_from_db()
     print("\n[BECORELAB] Market Finder v0.1")
     print("[BECORELAB] http://localhost:8090\n")
     app.run(host='0.0.0.0', port=8090, debug=True, use_reloader=False)
