@@ -2785,8 +2785,8 @@ async function _startInsightReview(scanId) {
             const progress = document.getElementById('insightReviewProgress');
             if (progress) progress.textContent = `${i+1}/${total} 상품 탭 열림`;
 
-            // 다음 상품까지 대기 (수집 + 전송 시간)
-            await new Promise(r => setTimeout(r, 8000));
+            // 다음 상품까지 대기 (쿠팡 차단 방지 — 15초 간격)
+            await new Promise(r => setTimeout(r, 15000));
         }
 
         // 모든 탭 열기 완료 → 분석 대기
@@ -2918,8 +2918,8 @@ function _displayInsightReview(data) {
     } else {
         html = '<div style="font-size:14px;color:var(--danger);padding:20px;">리뷰를 수집하지 못했습니다.</div>';
     }
-    // 채팅 UI 추가 (분석 결과가 있을 때만)
-    if (data.analysis && !data.analysis.error) {
+    // 채팅 UI 추가 (분석 결과가 있을 때)
+    if (a && !a.error) {
         html += `
         <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:16px;">
             <div style="font-size:15px; font-weight:700; margin-bottom:10px;">리뷰 Q&A</div>

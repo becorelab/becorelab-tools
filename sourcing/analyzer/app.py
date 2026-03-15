@@ -1775,12 +1775,17 @@ def api_reviews_import():
         return jsonify({'success': False, 'error': 'scan_id는 정수여야 합니다'})
 
     # partial 모드: 이전 리뷰에 추가
+    product_name = data.get('product_name', '')
     if partial and scan_id in _review_state and _review_state[scan_id].get('reviews'):
         _review_state[scan_id]['reviews'].extend(reviews)
         _review_state[scan_id]['status'] = 'collecting'
+        if 'by_product' not in _review_state[scan_id]:
+            _review_state[scan_id]['by_product'] = {}
+        if product_name and reviews:
+            _review_state[scan_id]['by_product'][product_name] = len(reviews)
         product_index = data.get('product_index', 0)
         total_products = data.get('total_products', 1)
-        print(f'[REVIEW-IMPORT] 부분 수신: {len(reviews)}개 (상품 {product_index+1}/{total_products}, 누적 {len(_review_state[scan_id]["reviews"])}개)')
+        print(f'[REVIEW-IMPORT] {product_name[:20]} → {len(reviews)}개 (상품 {product_index+1}/{total_products}, 누적 {len(_review_state[scan_id]["reviews"])}개)')
 
         # 마지막 상품이면 분석 시작
         if product_index >= total_products - 1:
@@ -2127,7 +2132,7 @@ def api_review_chat(scan_id):
                 'content-type': 'application/json'
             },
             json={
-                'model': 'claude-haiku-4-20250414',
+                'model': 'claude-haiku-4-5-20251001',
                 'max_tokens': 1024,
                 'messages': [{'role': 'user', 'content': prompt}]
             },
