@@ -2538,29 +2538,19 @@ def publish_rfq(rfq_id):
     if api_key:
         try:
             import requests as _req
-            prompt = f"""Write a detailed professional RFQ (Request for Quotation) email in English for an Alibaba supplier.
+            prompt = f"""Write a concise RFQ email in English for Alibaba. Be polite but get to the point.
 
-Product (Korean): {product_name_kr}
-Specifications:
-{specs_text}
-Certifications: {', '.join(certs) if certs else 'None specified'}
-Target Price: ${rfq.get('target_price', 0)} USD per unit
-Quantity: {rfq.get('order_quantity', 1000)} pieces
-Shipping: {rfq.get('shipping_terms', 'FOB')}
+Product: {product_name_kr}
+Specs: {specs_text}
+Certs: {', '.join(certs) if certs else 'N/A'}
+Target: ${rfq.get('target_price', 0)}/unit, Qty: {rfq.get('order_quantity', 1000)}pcs, {rfq.get('shipping_terms', 'FOB')}
 
-Buyer: Becore Lab Co., Ltd. (South Korea)
-Email: becorelab@gmail.com
+Keep message under 150 words. Include specs, price, qty, and ask for: unit price, MOQ, sample, lead time.
 
-Write a DETAILED message including ALL specs, and request:
-1. Best unit price for the quantity
-2. MOQ and price breaks
-3. Sample availability and cost
-4. Production lead time
-5. Required certifications
-6. Payment terms
+Sign as: Becore Lab Co., Ltd. / kychung@becorelab.kr
 
-Reply in JSON only:
-{{"product_name_en": "...", "subject": "RFQ: ...", "message": "Dear Supplier,\\n\\n...(detailed 300+ words)...", "specs_en": "..."}}"""
+JSON only:
+{{"product_name_en": "...", "subject": "RFQ: ...", "message": "Dear Supplier,\\n\\n...\\n\\nBest regards,\\nBecore Lab Co., Ltd.\\nkychung@becorelab.kr", "specs_en": "..."}}"""
 
             resp = _req.post(
                 'https://api.anthropic.com/v1/messages',

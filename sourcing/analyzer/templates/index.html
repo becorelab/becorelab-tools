@@ -3436,36 +3436,18 @@ async function publishRFQ(rfqId) {
 }
 
 async function autoPublishRFQ(rfqId) {
-    const btn = event.target;
-    btn.disabled = true;
-    btn.textContent = '브라우저 여는 중...';
-
     const rfqText = window._lastRfqText || '';
-    const res = await fetch(`/api/rfq/${rfqId}/auto-publish`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            message: rfqText,
-            product_name: document.getElementById('rfqDetailNameKr')?.value || '',
-            quantity: parseInt(document.getElementById('rfqDetailQty')?.value || '1000')
-        })
-    });
-    const data = await res.json();
+    if (!rfqText) { alert('먼저 [알리바바 발행] 버튼으로 번역해주세요.'); return; }
 
-    if (data.success) {
-        btn.textContent = '브라우저에서 확인하세요!';
-        btn.style.background = 'var(--success)';
-        btn.style.color = '#000';
-    } else {
-        btn.textContent = data.error || '실패';
-        btn.style.background = 'var(--danger)';
-        setTimeout(() => {
-            btn.textContent = '자동 발행';
-            btn.style.background = 'linear-gradient(135deg,#ff6b2b,#ff9500)';
-            btn.style.color = '#fff';
-            btn.disabled = false;
-        }, 2000);
-    }
+    // 클립보드 복사 + 새 탭으로 알리바바 열기 (기존 Chrome 세션 활용)
+    await navigator.clipboard.writeText(rfqText);
+    window.open('https://sourcing.alibaba.com/rfq/post_request.htm', '_blank');
+
+    const btn = event.target;
+    btn.textContent = '복사 완료! 알리바바에서 붙여넣기';
+    btn.style.background = 'var(--success)';
+    btn.style.color = '#000';
+    setTimeout(() => { btn.textContent = '자동 발행'; btn.style.background = 'linear-gradient(135deg,#ff6b2b,#ff9500)'; btn.style.color = '#fff'; }, 5000);
 }
 
 async function loadHistory() {
