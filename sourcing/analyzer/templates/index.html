@@ -2031,6 +2031,7 @@ async function generateRFQ(scanId) {
     }
 
     const rfq = data.rfq;
+    _lastRfqData = rfq;
 
     // Build composition rows
     let compRows = '';
@@ -2121,14 +2122,23 @@ async function generateRFQ(scanId) {
 }
 
 async function saveRFQ(scanId) {
+    const specsJson = {
+        specs: document.getElementById('rfqSpecs').value.split('\n').filter(s => s.trim()),
+        composition_analysis: _lastRfqData?.composition_analysis || [],
+        recommended_composition: _lastRfqData?.recommended_composition || '',
+        recommendation_reason: _lastRfqData?.recommendation_reason || '',
+        certifications: document.getElementById('rfqCerts').value.split(',').map(s=>s.trim()).filter(Boolean),
+        calculation: _lastRfqData?.calculation || null
+    };
+
     const data = {
         scan_id: scanId,
         product_name_kr: document.getElementById('rfqName').value,
         category: document.getElementById('rfqCategory').value,
-        specifications: document.getElementById('rfqSpecs').value,
+        specifications: specsJson,
         target_price: parseFloat(document.getElementById('rfqPrice').value),
         order_quantity: parseInt(document.getElementById('rfqQty').value),
-        certifications: document.getElementById('rfqCerts').value.split(',').map(s=>s.trim())
+        certifications: document.getElementById('rfqCerts').value.split(',').map(s=>s.trim()).filter(Boolean)
     };
 
     const res = await fetch('/api/rfq', {
@@ -2140,6 +2150,8 @@ async function saveRFQ(scanId) {
     if (result.success) {
         alert('RFQ 저장 완료!');
         document.getElementById('rfqModal').style.display = 'none';
+        _lastRfqData = null;
+        loadRfqList();
     }
 }
 
@@ -3149,11 +3161,88 @@ async function viewRFQDetail(rfqId) {
     const data = await res.json();
     if (!data.success) { alert('RFQ 조회 실패'); return; }
     const rfq = data.rfq;
-    let specs = rfq.specifications || '{}';
-    try { const parsed = JSON.parse(specs); specs = typeof parsed === 'string' ? parsed : JSON.stringify(parsed, null, 2); } catch(e) {}
+
+    // specifications JSON 파싱
+    let specsObj = {};
+    let specsText = '';
+    try {
+        const raw = rfq.specifications || '{}';
+        const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+            specsObj = parsed;
+            specsText = (parsed.specs || []).join('\n');
+        } else if (Array.isArray(parsed)) {
+            specsText = parsed.join('\n');
+        } else {
+            specsText = String(parsed);
+        }
+    } catch(e) {
+        specsText = rfq.specifications || '';
+    }
 
     let certs = '';
-    try { const c = JSON.parse(rfq.certifications || '[]'); certs = Array.isArray(c) ? c.join(', ') : String(c); } catch(e) { certs = rfq.certifications || ''; }
+    try {
+        // certifications: specsObj 내부 또는 rfq.certifications
+        const certsSource = specsObj.certifications || rfq.certifications;
+        if (certsSource) {
+            const c = typeof certsSource === 'string' ? JSON.parse(certsSource) : certsSource;
+            certs = Array.isArray(c) ? c.join(', ') : String(c);
+        }
+    } catch(e) { certs = rfq.certifications || ''; }
+
+    // 구성 분석 테이블 HTML
+    let compAnalysisHtml = '';
+    if (specsObj.composition_analysis && specsObj.composition_analysis.length > 0) {
+        let compRows = '';
+        specsObj.composition_analysis.forEach(c => {
+            const isRec = c.composition === specsObj.recommended_composition;
+            compRows += `<tr style="border-bottom:1px solid rgba(42,47,64,0.3);${isRec ? 'background:rgba(0,229,255,0.08);' : ''}">
+                <td style="padding:8px;font-weight:${isRec ? '700;color:var(--cyan)' : '400;color:var(--text-primary)'};">${c.composition} ${isRec ? '&#8592; AI 추천' : ''}</td>
+                <td style="padding:8px;text-align:center;color:var(--text-secondary);">${c.count}개</td>
+                <td style="padding:8px;text-align:right;color:var(--text-secondary);">${Math.round((c.avg_revenue||0)/10000).toLocaleString()}만원</td>
+                <td style="padding:8px;text-align:right;color:var(--text-secondary);">${Math.round(c.avg_reviews||0).toLocaleString()}</td>
+            </tr>`;
+        });
+
+        let recHtml = '';
+        if (specsObj.recommendation_reason) {
+            recHtml = `<div style="margin-top:10px;padding:10px;background:rgba(0,229,255,0.05);border-left:3px solid var(--cyan);font-size:13px;color:var(--text-secondary);">AI 추천: <strong style="color:var(--cyan);">${specsObj.recommended_composition || ''}</strong> &mdash; ${specsObj.recommendation_reason}</div>`;
+        }
+
+        compAnalysisHtml = `
+        <div style="background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:16px;">
+            <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--cyan);">구성 분석 (AI)</div>
+            <table style="width:100%;font-size:13px;border-collapse:collapse;">
+                <thead>
+                    <tr style="color:var(--text-muted);border-bottom:1px solid var(--border);">
+                        <th style="padding:8px;text-align:left;">구성</th>
+                        <th style="padding:8px;text-align:center;">상품수</th>
+                        <th style="padding:8px;text-align:right;">평균매출</th>
+                        <th style="padding:8px;text-align:right;">평균리뷰</th>
+                    </tr>
+                </thead>
+                <tbody>${compRows}</tbody>
+            </table>
+            ${recHtml}
+        </div>`;
+    }
+
+    // 단가 산출 근거 HTML
+    let calcHtml = '';
+    if (specsObj.calculation) {
+        const calc = specsObj.calculation;
+        calcHtml = `
+        <div style="background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:16px;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:8px;">단가 산출 근거</div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:2;">
+                시장 평균 판매가: ${(calc.selling_price||0).toLocaleString()}원<br>
+                쿠팡 수수료 (10.8%): -${(calc.commission||0).toLocaleString()}원<br>
+                목표 마진 (40%): -${(calc.margin||0).toLocaleString()}원<br>
+                물류비: -${(calc.logistics||0).toLocaleString()}원<br>
+                <strong style="color:var(--accent);">목표 원가: ${(calc.target_cost||0).toLocaleString()}원 &rarr; $${rfq.target_price||'?'}</strong>
+            </div>
+        </div>`;
+    }
 
     let modal = document.getElementById('rfqDetailModal');
     if (!modal) {
@@ -3175,6 +3264,8 @@ async function viewRFQDetail(rfqId) {
             </div>
         </div>
 
+        ${compAnalysisHtml}
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
             <div>
                 <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">제품명 (한글)</label>
@@ -3193,7 +3284,7 @@ async function viewRFQDetail(rfqId) {
 
         <div style="margin-bottom:16px;">
             <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">스펙 / 상세 요구사항</label>
-            <textarea id="rfqDetailSpecs" rows="5" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box;">${specs.replace(/</g,'&lt;')}</textarea>
+            <textarea id="rfqDetailSpecs" rows="4" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:13px;outline:none;resize:vertical;box-sizing:border-box;">${specsText.replace(/</g,'&lt;')}</textarea>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
@@ -3219,6 +3310,8 @@ async function viewRFQDetail(rfqId) {
             <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">필수 인증</label>
             <input id="rfqDetailCerts" type="text" value="${certs.replace(/"/g,'&quot;')}" style="width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);padding:10px;font-size:14px;outline:none;box-sizing:border-box;">
         </div>
+
+        ${calcHtml}
 
         ${data.quotations && data.quotations.length > 0 ? `
         <div style="margin-bottom:16px;">
@@ -3249,11 +3342,29 @@ async function viewRFQDetail(rfqId) {
 }
 
 async function updateRFQ(rfqId) {
+    // 기존 specifications JSON 구조를 유지하면서 스펙 텍스트만 업데이트
+    let existingSpecsObj = {};
+    try {
+        const rfqRes = await fetch(`/api/rfq/${rfqId}`);
+        const rfqData = await rfqRes.json();
+        if (rfqData.success) {
+            const raw = rfqData.rfq.specifications || '{}';
+            const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+                existingSpecsObj = parsed;
+            }
+        }
+    } catch(e) {}
+
+    // specs 필드만 업데이트, 나머지 AI 데이터는 보존
+    existingSpecsObj.specs = document.getElementById('rfqDetailSpecs').value.split('\n').filter(s => s.trim());
+    existingSpecsObj.certifications = document.getElementById('rfqDetailCerts').value.split(',').map(s=>s.trim()).filter(Boolean);
+
     const data = {
         product_name_kr: document.getElementById('rfqDetailNameKr').value,
         product_name_en: document.getElementById('rfqDetailNameEn').value,
         category: document.getElementById('rfqDetailCat').value,
-        specifications: document.getElementById('rfqDetailSpecs').value,
+        specifications: JSON.stringify(existingSpecsObj),
         target_price: parseFloat(document.getElementById('rfqDetailPrice').value) || null,
         order_quantity: parseInt(document.getElementById('rfqDetailQty').value) || null,
         moq: parseInt(document.getElementById('rfqDetailMoq').value) || null,
@@ -3673,6 +3784,7 @@ function getStatusText(status) {
 
 let _currentScanId = null;
 let _lastScanHtml = null; // 탭 전환 시 결과 보존용
+let _lastRfqData = null; // RFQ 생성 시 AI 분석 데이터 보존용
 
 async function startReviewAnalysis() {
     if (!_currentScanId) return;
