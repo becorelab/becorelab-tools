@@ -24,6 +24,16 @@ from analyzer.reviews import analyze_reviews_basic, analyze_reviews_claude
 
 app = Flask(__name__)
 
+
+@app.after_request
+def add_cors_headers(response):
+    """크롬 확장프로그램에서의 요청 허용"""
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+    return response
+
+
 # 전역 헬프스토어 API 인스턴스
 helpstore_api = None
 
@@ -1706,6 +1716,69 @@ def api_get_reviews(scan_id):
     })
 
 
+@app.route('/api/reviews/import', methods=['POST', 'OPTIONS'])
+def api_reviews_import():
+    """크롬 확장프로그램에서 수집된 리뷰 데이터 수신"""
+    if request.method == 'OPTIONS':
+        return jsonify({'success': True})
+
+    data = request.get_json(silent=True) or {}
+    scan_id = data.get('scan_id')
+    reviews = data.get('reviews', [])
+
+    if not scan_id or not reviews:
+        return jsonify({'success': False, 'error': 'scan_id와 reviews 필요'})
+
+    # scan_id를 int로 변환
+    try:
+        scan_id = int(scan_id)
+    except (ValueError, TypeError):
+        return jsonify({'success': False, 'error': 'scan_id는 정수여야 합니다'})
+
+    # 리뷰 저장 + 분석 시작
+    _review_state[scan_id] = {
+        'status': 'analyzing',
+        'reviews': reviews,
+        'analysis': None
+    }
+
+    # 키워드 조회
+    keyword = ''
+    with app.app_context():
+        db_conn = sqlite3.connect(DB_PATH)
+        db_conn.row_factory = sqlite3.Row
+        scan = db_conn.execute('SELECT keyword FROM market_scans WHERE id = ?', (scan_id,)).fetchone()
+        if scan:
+            keyword = scan['keyword']
+        db_conn.close()
+
+    from analyzer.reviews import ANTHROPIC_API_KEY
+    api_key = ANTHROPIC_API_KEY
+
+    def _analyze():
+        try:
+            if api_key:
+                analysis = analyze_reviews_claude(reviews, keyword, api_key)
+            else:
+                analysis = analyze_reviews_basic(reviews, keyword)
+            _review_state[scan_id]['analysis'] = analysis
+            _review_state[scan_id]['status'] = 'done'
+            print(f'[REVIEW-IMPORT] 분석 완료: {keyword} ({len(reviews)}개 리뷰)')
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            _review_state[scan_id]['status'] = 'error'
+            _review_state[scan_id]['analysis'] = {'error': str(e)}
+
+    threading.Thread(target=_analyze, daemon=True).start()
+
+    return jsonify({
+        'success': True,
+        'message': f'{len(reviews)}개 리뷰 수신, AI 분석 시작',
+        'review_count': len(reviews)
+    })
+
+
 def _run_review_analysis(scan_id: int, api_key: str = ''):
     """리뷰 수집 → 분석 백그라운드"""
     with app.app_context():
@@ -1726,9 +1799,27 @@ def _run_review_analysis(scan_id: int, api_key: str = ''):
                 _review_state[scan_id] = {'status': 'error', 'reviews': [], 'analysis': {'error': '상품 데이터 없음'}}
                 return
 
-            # 리뷰 수집 — 별도 Playwright (Wing 워커와 독립)
+            # 리뷰 수집 — Wing 워커 큐로 (스캔 완료 후라 워커 비어있음)
             _review_state[scan_id]['status'] = 'collecting'
-            all_reviews = _collect_reviews_direct(products)
+            from analyzer.wing import _send
+            import time as _time
+
+            all_reviews = []
+            for p in products[:10]:
+                url = p['product_url']
+                if not url:
+                    continue
+                try:
+                    reviews = _send('collect_reviews', {
+                        'product_url': url,
+                        'max_reviews': 100
+                    }, timeout=60)
+                    if reviews:
+                        all_reviews.extend(reviews)
+                        print(f'[REVIEW] {p["product_name"][:20]} → {len(all_reviews)}개 누적')
+                except Exception as e:
+                    print(f'[REVIEW] 실패: {p["product_name"][:20]} — {e}')
+                _time.sleep(0.5)
 
             _review_state[scan_id]['reviews'] = all_reviews
             print(f'[REVIEW] 총 {len(all_reviews)}개 리뷰 수집 완료')

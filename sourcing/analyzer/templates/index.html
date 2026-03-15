@@ -2157,6 +2157,22 @@ function _renderStructureTab(el, products, scan) {
             <div class="ins-section-title"><span class="dot" style="background:var(--accent);"></span>상위 ${Math.min(40,sorted.length)}개 상품 매출</div>
             <div style="height:350px;position:relative;"><canvas id="chartStructure"></canvas></div>
         </div>
+        <div style="margin:16px 0;">
+            <div class="ins-section-title"><span class="dot" style="background:#ff5252;"></span>매출 TOP 3</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                ${sorted.slice(0,3).map((p,i) => `
+                    <a href="${p.product_url||'#'}" target="_blank" style="flex:1;min-width:200px;background:var(--bg-primary);border:1px solid ${i===0?'var(--danger)':'var(--border)'};border-radius:6px;padding:14px;text-decoration:none;color:var(--text-primary);transition:border-color 0.15s;">
+                        <div style="font-size:11px;color:var(--danger);font-weight:700;margin-bottom:4px;">${i+1}위 — ${totalRev>0?((p.revenue_monthly||0)/totalRev*100).toFixed(1):'0'}%</div>
+                        <div style="font-size:14px;font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.product_name||'-'}</div>
+                        <div style="display:flex;gap:12px;font-size:12px;color:var(--text-secondary);">
+                            <span>매출 <strong style="color:var(--accent);">${(p.revenue_monthly||0)>=10000?((p.revenue_monthly||0)/10000).toFixed(0)+'만':formatNumber(p.revenue_monthly||0)}원</strong></span>
+                            <span>판매 <strong>${formatNumber(p.sales_monthly||0)}개</strong></span>
+                            <span>${formatNumber(p.price||0)}원</span>
+                        </div>
+                    </a>
+                `).join('')}
+            </div>
+        </div>
         <div class="ins-verdict ${verdictClass}">${verdictText}</div>
     `;
     const labels = sorted.slice(0,40).map((_,i) => (i+1)+'위');
@@ -2721,15 +2737,107 @@ function _renderReviewTab(el, scan) {
     }).catch(()=>{});
 }
 
-function _startInsightReview(scanId) {
+async function _startInsightReview(scanId) {
     const btn = document.getElementById('btnInsightReview');
     btn.disabled = true;
     btn.style.opacity = '0.5';
     btn.textContent = '수집 중...';
-    document.getElementById('insightReviewContent').innerHTML = '<div style="text-align:center;padding:30px;"><span class="loading-spinner"></span> 리뷰 수집 중...</div>';
+    document.getElementById('insightReviewContent').innerHTML = '<div style="text-align:center;padding:30px;"><span class="loading-spinner"></span> 확장프로그램 확인 중...</div>';
 
-    fetch(`/api/scan/${scanId}/reviews`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' }).then(()=>{
-        const poll = async () => {
+    try {
+        // 스캔 데이터에서 상품 URL 가져오기
+        const scanRes = await fetch(`/api/scan/${scanId}`);
+        const scanData = await scanRes.json();
+        if (!scanData.success || !scanData.products || scanData.products.length === 0) {
+            document.getElementById('insightReviewContent').innerHTML = '<div style="padding:20px;color:var(--danger);">상품 데이터가 없습니다.</div>';
+            btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
+            return;
+        }
+
+        const products = scanData.products.slice(0, 10).map(p => ({
+            url: p.product_url,
+            name: p.product_name
+        }));
+
+        // 확장프로그램에 수집 요청 (content script가 window.postMessage를 수신)
+        window.postMessage({
+            type: 'MARKET_FINDER_COLLECT_REVIEWS',
+            scanId: scanId,
+            products: products
+        }, '*');
+
+        document.getElementById('insightReviewContent').innerHTML = `
+            <div style="text-align:center;padding:30px;">
+                <span class="loading-spinner"></span>
+                <div style="margin-top:12px;color:var(--text-secondary);">확장프로그램이 리뷰를 수집하고 있습니다...</div>
+                <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">상품 ${products.length}개 대상 | 완료 시 자동 분석됩니다</div>
+            </div>`;
+
+        // 결과 폴링 시작
+        _pollInsightReview(scanId, btn);
+
+        // 확장프로그램 미설치 감지를 위한 타임아웃
+        setTimeout(() => {
+            const state = _review_state_local[scanId];
+            if (!state || state === 'waiting') {
+                // 10초 후에도 확장프로그램으로부터 응답 없으면 안내
+                const content = document.getElementById('insightReviewContent');
+                if (content && content.innerHTML.includes('확장프로그램이 리뷰를')) {
+                    content.innerHTML = `
+                        <div style="padding:24px;">
+                            <div style="color:var(--warning);font-weight:700;font-size:15px;margin-bottom:12px;">확장프로그램이 감지되지 않습니다</div>
+                            <div style="color:var(--text-secondary);font-size:13px;line-height:1.8;">
+                                리뷰 수집을 위해 크롬 확장프로그램이 필요합니다.<br><br>
+                                <strong style="color:var(--text-primary);">설치 방법:</strong><br>
+                                1. Chrome → <code style="background:var(--bg-secondary);padding:2px 6px;border-radius:3px;">chrome://extensions</code> 접속<br>
+                                2. 우측 상단 "개발자 모드" 활성화<br>
+                                3. "압축해제된 확장 프로그램을 로드합니다" 클릭<br>
+                                4. <code style="background:var(--bg-secondary);padding:2px 6px;border-radius:3px;">chrome_extension</code> 폴더 선택<br>
+                                5. 이 페이지 새로고침 후 다시 시도
+                            </div>
+                        </div>`;
+                    btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
+                }
+            }
+        }, 10000);
+
+    } catch (e) {
+        console.error('[REVIEW]', e);
+        document.getElementById('insightReviewContent').innerHTML = '<div style="padding:20px;color:var(--danger);">오류 발생: ' + e.message + '</div>';
+        btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
+    }
+}
+
+// 확장프로그램 ACK 추적용
+const _review_state_local = {};
+
+// 확장프로그램으로부터의 메시지 수신
+window.addEventListener('message', (event) => {
+    if (event.source !== window) return;
+    if (event.data && event.data.type === 'MARKET_FINDER_REVIEW_ACK') {
+        // 확장프로그램이 요청을 수신했음을 확인
+        const scanId = event.data.scanId;
+        _review_state_local[scanId] = 'collecting';
+        console.log('[REVIEW] 확장프로그램이 수집 시작:', scanId);
+    }
+    if (event.data && event.data.type === 'MARKET_FINDER_REVIEW_PROGRESS') {
+        // 수집 진행 상황 업데이트
+        const { scanId, collected, total } = event.data;
+        const content = document.getElementById('insightReviewContent');
+        if (content) {
+            content.innerHTML = `
+                <div style="text-align:center;padding:30px;">
+                    <span class="loading-spinner"></span>
+                    <div style="margin-top:12px;color:var(--text-secondary);">리뷰 수집 중... (${collected}개 수집됨)</div>
+                    <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">${total}개 상품 중 진행 중</div>
+                </div>`;
+        }
+    }
+});
+
+function _pollInsightReview(scanId, btn) {
+    const poll = async () => {
+        try {
             const res = await fetch(`/api/scan/${scanId}/reviews`);
             const data = await res.json();
             if (data.status === 'collecting') {
@@ -2741,13 +2849,19 @@ function _startInsightReview(scanId) {
             } else if (data.status === 'done' && data.analysis) {
                 _displayInsightReview(data);
                 btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 분석';
-            } else {
-                document.getElementById('insightReviewContent').innerHTML = '<div style="padding:20px;color:var(--danger);">분석 실패</div>';
+                _review_state_local[scanId] = 'done';
+            } else if (data.status === 'error') {
+                document.getElementById('insightReviewContent').innerHTML = `<div style="padding:20px;color:var(--danger);">분석 실패: ${data.analysis?.error || ''}</div>`;
                 btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
+            } else {
+                // 아직 확장프로그램에서 리뷰가 안 왔을 수 있음 → 계속 폴링
+                setTimeout(poll, 3000);
             }
-        };
-        poll();
-    });
+        } catch (e) {
+            setTimeout(poll, 3000);
+        }
+    };
+    setTimeout(poll, 3000);
 }
 
 function _displayInsightReview(data) {
@@ -3172,10 +3286,12 @@ function loadTabData(tab) {
     switch (tab) {
         case 'scan':
             loadScanHistory();
-            // 마지막 본 스캔 결과 복원
+            // 마지막 스캔 결과 복원 — 다시 로드
             if (_currentScanId) {
+                document.getElementById('manualScanPanel').style.display = 'block';
                 document.getElementById('scanEmpty').style.display = 'none';
                 document.getElementById('scanResult').style.display = 'block';
+                showScanResult(_currentScanId, {});
             }
             break;
         case 'insight': loadOpportunities(); break;
@@ -3230,6 +3346,7 @@ function getStatusText(status) {
 }
 
 let _currentScanId = null;
+let _lastScanHtml = null; // 탭 전환 시 결과 보존용
 
 async function startReviewAnalysis() {
     if (!_currentScanId) return;
@@ -3238,20 +3355,60 @@ async function startReviewAnalysis() {
     btn.textContent = '수집중...';
     document.getElementById('reviewEmpty').style.display = 'none';
     document.getElementById('reviewResult').style.display = 'block';
-    document.getElementById('reviewResult').innerHTML = '<div style="padding:20px;text-align:center;"><span class="loading-spinner"></span> 리뷰 수집 중... (상위 10개 상품)</div>';
-
-    // API 키 입력 (옵션)
-    const apiKey = localStorage.getItem('anthropic_api_key') || '';
+    document.getElementById('reviewResult').innerHTML = '<div style="padding:20px;text-align:center;"><span class="loading-spinner"></span> 확장프로그램 확인 중...</div>';
 
     try {
-        await fetch(`/api/scan/${_currentScanId}/reviews`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ api_key: apiKey })
-        });
+        // 스캔 데이터에서 상품 URL 가져오기
+        const scanRes = await fetch(`/api/scan/${_currentScanId}`);
+        const scanData = await scanRes.json();
+        if (!scanData.success || !scanData.products || scanData.products.length === 0) {
+            document.getElementById('reviewResult').innerHTML = '<div style="padding:20px;color:var(--danger);">상품 데이터가 없습니다.</div>';
+            btn.disabled = false; btn.textContent = '리뷰 분석';
+            return;
+        }
+
+        const products = scanData.products.slice(0, 10).map(p => ({
+            url: p.product_url,
+            name: p.product_name
+        }));
+
+        // 확장프로그램에 수집 요청
+        window.postMessage({
+            type: 'MARKET_FINDER_COLLECT_REVIEWS',
+            scanId: _currentScanId,
+            products: products
+        }, '*');
+
+        document.getElementById('reviewResult').innerHTML = `
+            <div style="padding:20px;text-align:center;">
+                <span class="loading-spinner"></span>
+                <div style="margin-top:12px;">확장프로그램이 리뷰를 수집하고 있습니다...</div>
+                <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">상품 ${products.length}개 대상</div>
+            </div>`;
+
+        // 폴링 시작
         pollReviewResult(_currentScanId);
+
+        // 확장프로그램 미설치 감지
+        setTimeout(() => {
+            if (!_review_state_local[_currentScanId] || _review_state_local[_currentScanId] === 'waiting') {
+                const result = document.getElementById('reviewResult');
+                if (result && result.innerHTML.includes('확장프로그램이 리뷰를')) {
+                    result.innerHTML = `
+                        <div style="padding:20px;">
+                            <div style="color:var(--warning);font-weight:700;margin-bottom:10px;">확장프로그램이 감지되지 않습니다</div>
+                            <div style="color:var(--text-secondary);font-size:13px;line-height:1.8;">
+                                chrome_extension 폴더를 Chrome에 로드해주세요.<br>
+                                chrome://extensions → 개발자 모드 → 압축해제된 확장 프로그램 로드
+                            </div>
+                        </div>`;
+                    btn.disabled = false; btn.textContent = '리뷰 분석';
+                }
+            }
+        }, 10000);
+
     } catch(e) {
-        document.getElementById('reviewResult').innerHTML = '<div style="padding:20px;color:var(--danger);">연결 실패</div>';
+        document.getElementById('reviewResult').innerHTML = '<div style="padding:20px;color:var(--danger);">연결 실패: ' + e.message + '</div>';
         btn.disabled = false;
         btn.textContent = '리뷰 분석';
     }
