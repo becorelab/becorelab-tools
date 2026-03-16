@@ -139,20 +139,19 @@ def list_scans(limit: int = 100) -> list:
 def get_opportunities(status_filter: str = '') -> list:
     """기회점수 랭킹"""
     ref = db().collection('market_scans')
-    if status_filter == 'go':
-        query = ref.where('status', '==', 'go').order_by('opportunity_score', direction=firestore.Query.DESCENDING)
-    elif status_filter == 'scanned':
-        query = (ref.where('status', '==', 'scanned')
-                 .order_by('opportunity_score', direction=firestore.Query.DESCENDING)
-                 .limit(50))
+    if status_filter in ('go', 'scanned'):
+        query = ref.where('status', '==', status_filter)
     else:
-        query = (ref.order_by('opportunity_score', direction=firestore.Query.DESCENDING)
-                 .limit(50))
+        query = ref
     results = []
     for d in query.stream():
         data = d.to_dict()
         if data.get('opportunity_score') is not None:
             results.append(data)
+    # Python에서 정렬 (Firestore 복합 인덱스 불필요)
+    results.sort(key=lambda x: x.get('opportunity_score', 0), reverse=True)
+    if status_filter != 'go':
+        results = results[:50]
     return results
 
 
@@ -180,9 +179,10 @@ def get_products(scan_id: int) -> list:
     """스캔의 상품 목록"""
     docs = (db().collection('products')
             .where('scan_id', '==', scan_id)
-            .order_by('ranking')
             .stream())
-    return [d.to_dict() for d in docs]
+    results = [d.to_dict() for d in docs]
+    results.sort(key=lambda x: x.get('ranking', 9999))
+    return results
 
 
 # ══════════════════════════════════════════════
@@ -209,9 +209,10 @@ def get_inflow_keywords(scan_id: int) -> list:
     """스캔의 유입 키워드 목록"""
     docs = (db().collection('inflow_keywords')
             .where('scan_id', '==', scan_id)
-            .order_by('search_volume', direction=firestore.Query.DESCENDING)
             .stream())
-    return [d.to_dict() for d in docs]
+    results = [d.to_dict() for d in docs]
+    results.sort(key=lambda x: x.get('search_volume', 0), reverse=True)
+    return results
 
 
 # ══════════════════════════════════════════════
@@ -339,9 +340,10 @@ def get_quotations(rfq_id: int) -> list:
     """RFQ의 견적 목록"""
     docs = (db().collection('quotations')
             .where('rfq_id', '==', rfq_id)
-            .order_by('unit_price')
             .stream())
-    return [d.to_dict() for d in docs]
+    results = [d.to_dict() for d in docs]
+    results.sort(key=lambda x: x.get('unit_price', 9999999))
+    return results
 
 
 def get_quotation(quote_id: int) -> dict:
@@ -459,12 +461,13 @@ def get_review_analysis(scan_id: int) -> dict:
     """스캔의 최신 분석 결과"""
     docs = list(db().collection('review_analyses')
                 .where('scan_id', '==', scan_id)
-                .order_by('analyzed_at', direction=firestore.Query.DESCENDING)
-                .limit(1)
                 .stream())
     if not docs:
         return None
-    return docs[0].to_dict()
+    # 인덱스 없이도 작동하도록 Python에서 정렬
+    results = [d.to_dict() for d in docs]
+    results.sort(key=lambda x: x.get('analyzed_at', ''), reverse=True)
+    return results[0]
 
 
 def get_scan_ids_with_reviews() -> list:

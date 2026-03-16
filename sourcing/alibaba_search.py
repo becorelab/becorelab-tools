@@ -48,7 +48,7 @@ SEARCH_CONFIG = {
     'weight_g_per_pc':  10,      # 개당 예상 무게 (g)
 
     'max_results':      48,
-    'output_dir':       '/Users/kymac/claude/sourcing/output/',
+    'output_dir':       os.path.join(os.path.dirname(os.path.abspath(__file__)), 'output') + os.sep,
 }
 
 # ============================================================
@@ -62,10 +62,12 @@ EMAIL_CONFIG = {
     'smtp_port': 465,           # SSL
 }
 
-CHROME_PATH   = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+CHROME_PATH   = (r'C:\Program Files\Google\Chrome\Application\chrome.exe'
+                 if os.name == 'nt' else
+                 '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
 CHROME_PORT   = 9222
-CHROME_TMPDIR = '/tmp/chrome_ali'
-IMAGE_PATH    = '/Users/kymac/claude/sourcing/output/search_image.jpg'
+CHROME_TMPDIR = os.path.join(os.environ.get('TEMP', '/tmp'), 'chrome_ali')
+IMAGE_PATH    = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'output', 'search_image.jpg')
 
 
 # ============================================================

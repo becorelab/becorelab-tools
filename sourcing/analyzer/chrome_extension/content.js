@@ -50,18 +50,96 @@
             window.scrollTo(0, document.body.scrollHeight * 0.3);
             await sleep(2000);
 
-            // 3) article 태그에서 직접 수집
+            // 3) 모든 페이지를 넘기면서 리뷰 전부 수집
             let reviews = [];
-            const articles = document.querySelectorAll('article');
-            console.log(`[마켓파인더] article 요소: ${articles.length}개`);
-            articles.forEach(el => {
-                const text = el.innerText.trim();
-                if (text.length > 30) {
-                    reviews.push({ rating: 5, headline: '', content: text.substring(0, 800), date: '', option: '' });
-                }
-            });
+            const seenTexts = new Set(); // 중복 방지
 
-            // 폴백: 텍스트 기반
+            function collectCurrentPage() {
+                let count = 0;
+                const articles = document.querySelectorAll('article');
+                articles.forEach(el => {
+                    const text = el.innerText.trim();
+                    const key = text.substring(0, 100);
+                    if (text.length > 30 && !seenTexts.has(key)) {
+                        seenTexts.add(key);
+                        // 별점 추출
+                        let rating = 5;
+                        const starEl = el.querySelector('[class*="star-orange"], [data-rating], [class*="StarRating"]');
+                        if (starEl) {
+                            const w = starEl.style.width;
+                            if (w && w.includes('%')) rating = Math.round(parseInt(w, 10) / 20);
+                            const dr = starEl.getAttribute('data-rating');
+                            if (dr) rating = parseInt(dr, 10) || 5;
+                        }
+                        // 날짜 추출
+                        let date = '';
+                        const dateMatch = text.match(/\d{4}\.\d{2}\.\d{2}/);
+                        if (dateMatch) date = dateMatch[0];
+                        reviews.push({ rating, headline: '', content: text.substring(0, 800), date, option: '' });
+                        count++;
+                    }
+                });
+                return count;
+            }
+
+            // 첫 페이지 수집
+            collectCurrentPage();
+            console.log(`[마켓파인더] 1페이지: ${reviews.length}개`);
+
+            // 페이지네이션으로 모든 페이지 순회 (최대 50페이지)
+            for (let page = 2; page <= 50; page++) {
+                // 페이지 버튼 찾기
+                const pageBtns = document.querySelectorAll(
+                    '.sdp-review__article__page button, [class*="pagination"] button, .sdp-review__article__page a, [class*="page"] button, [class*="page"] a'
+                );
+                let clicked = false;
+
+                // 페이지 번호 버튼 클릭
+                for (const btn of pageBtns) {
+                    const txt = btn.textContent.trim();
+                    if (txt === String(page)) {
+                        btn.click();
+                        clicked = true;
+                        break;
+                    }
+                }
+
+                // "다음" 버튼 (10페이지 단위 넘김)
+                if (!clicked) {
+                    for (const btn of pageBtns) {
+                        const txt = btn.textContent.trim();
+                        if (txt === '다음' || txt === 'Next' || btn.getAttribute('aria-label') === 'next' || btn.classList.contains('next')) {
+                            btn.click();
+                            clicked = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!clicked) {
+                    console.log(`[마켓파인더] ${page}페이지 버튼 없음 — 수집 종료`);
+                    break;
+                }
+
+                await sleep(2000);
+                // 리뷰 영역으로 스크롤
+                const reviewSection = document.querySelector('.sdp-review, [class*="review-section"], #btfTab');
+                if (reviewSection) reviewSection.scrollIntoView({ behavior: 'instant', block: 'start' });
+                await sleep(1500);
+
+                const before = reviews.length;
+                collectCurrentPage();
+                const added = reviews.length - before;
+                console.log(`[마켓파인더] ${page}페이지: +${added}개 (누적 ${reviews.length}개)`);
+
+                // 새 리뷰가 없으면 종료
+                if (added === 0) {
+                    console.log(`[마켓파인더] 새 리뷰 없음 — 수집 종료`);
+                    break;
+                }
+            }
+
+            // 폴백: article 못 찾으면 텍스트 기반
             if (reviews.length === 0) {
                 const bodyText = document.body.innerText;
                 const si = bodyText.indexOf('상품 리뷰');
@@ -166,8 +244,8 @@
     // Click "more reviews" / pagination to load extra pages
     // ----------------------------------------------------------
     async function loadMoreReviews() {
-        // 1) Click "more reviews" button up to 5 times
-        for (let i = 0; i < 5; i++) {
+        // 1) Click "more reviews" button until exhausted
+        for (let i = 0; i < 20; i++) {
             const moreBtn = findVisible([
                 '.sdp-review__article__list__more',
                 '[class*="more-review"]',
@@ -182,16 +260,34 @@
             }
         }
 
-        // 2) Click through pagination (up to 5 pages)
-        const pageBtns = document.querySelectorAll(
-            '.sdp-review__article__page button, [class*="pagination"] button, .sdp-review__article__page a'
-        );
+        // 2) Click through all pagination pages (최대 50페이지)
+        for (let page = 2; page <= 50; page++) {
+            const pageBtns = document.querySelectorAll(
+                '.sdp-review__article__page button, [class*="pagination"] button, .sdp-review__article__page a, [class*="page"] button, [class*="page"] a'
+            );
+            let clicked = false;
 
-        for (let i = 1; i < Math.min(pageBtns.length, 5); i++) {
-            try {
-                pageBtns[i].click();
-                await sleep(1500);
-            } catch (_) {}
+            for (const btn of pageBtns) {
+                if (btn.textContent.trim() === String(page)) {
+                    btn.click();
+                    clicked = true;
+                    break;
+                }
+            }
+
+            if (!clicked) {
+                for (const btn of pageBtns) {
+                    const txt = btn.textContent.trim();
+                    if (txt === '다음' || txt === 'Next' || btn.getAttribute('aria-label') === 'next' || btn.classList.contains('next')) {
+                        btn.click();
+                        clicked = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!clicked) break;
+            await sleep(2000);
         }
     }
 

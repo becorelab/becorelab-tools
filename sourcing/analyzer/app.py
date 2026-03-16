@@ -5,6 +5,10 @@
 
 import os
 import sys
+
+# 프로젝트 루트를 path에 추가 (다른 import보다 먼저 실행)
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import json
 import re
 import threading
@@ -12,9 +16,6 @@ from datetime import datetime
 from collections import Counter
 from flask import Flask, render_template, request, jsonify
 import analyzer.firestore_db as fdb
-
-# 프로젝트 루트를 path에 추가
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from analyzer.helpstore import (
     HelpstoreAPI, scan_keyword_api_only,
@@ -1604,7 +1605,11 @@ def _collect_reviews_direct(products) -> list:
 def _load_all_reviews_from_db():
     """서버 시작 시 DB에서 모든 리뷰 상태 로드"""
     global _review_state
-    _review_state = fdb.load_all_reviews()
+    try:
+        _review_state = fdb.load_all_reviews()
+    except Exception as e:
+        print(f'[REVIEW-DB] 리뷰 로드 실패 (앱은 정상 시작): {e}')
+        _review_state = {}
 
 
 @app.route('/api/scan/<int:scan_id>/reviews/chat', methods=['POST'])
