@@ -7,11 +7,11 @@ import os
 import sys
 import json
 import re
-import sqlite3
 import threading
 from datetime import datetime
 from collections import Counter
-from flask import Flask, render_template, request, jsonify, g
+from flask import Flask, render_template, request, jsonify
+import analyzer.firestore_db as fdb
 
 # 프로젝트 루트를 path에 추가
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -46,218 +46,6 @@ def get_helpstore():
     return helpstore_api
 app.config['SECRET_KEY'] = 'becorelab-sourcing-analyzer-2026'
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'analyzer.db')
-
-
-# ─────────────────────────────────────────────
-# DB 연결
-# ─────────────────────────────────────────────
-def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(DB_PATH)
-        g.db.row_factory = sqlite3.Row
-        g.db.execute("PRAGMA journal_mode=WAL")
-        g.db.execute("PRAGMA foreign_keys=ON")
-    return g.db
-
-
-@app.teardown_appcontext
-def close_db(exception):
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
-
-
-def init_db():
-    """DB 테이블 초기화"""
-    conn = sqlite3.connect(DB_PATH)
-    conn.executescript('''
-        -- 시장조사 기록 (키워드 단위)
-        CREATE TABLE IF NOT EXISTS market_scans (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            keyword TEXT NOT NULL,
-            scan_type TEXT DEFAULT 'auto',  -- auto / manual
-            category TEXT,
-            opportunity_score REAL,
-            top10_avg_revenue INTEGER,
-            top10_avg_sales INTEGER,
-            top10_avg_price INTEGER,
-            revenue_concentration REAL,      -- 1위 점유율
-            revenue_equality REAL,           -- 매출균등도 (10위/1위)
-            new_product_rate REAL,            -- 신상품 진입률
-            ad_dependency REAL,              -- 광고 의존도
-            recommended_keyword TEXT,         -- 추천 진입 키워드
-            status TEXT DEFAULT 'scanned',   -- scanned / analyzed / go / pass
-            scanned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-
-        -- 상품 상세 (상위 40개)
-        CREATE TABLE IF NOT EXISTS products (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            scan_id INTEGER NOT NULL,
-            ranking INTEGER,
-            product_name TEXT,
-            brand TEXT,
-            manufacturer TEXT,
-            price INTEGER,
-            sales_monthly INTEGER,            -- 월 판매량
-            revenue_monthly INTEGER,           -- 월 매출
-            review_count INTEGER,
-            click_count INTEGER,
-            conversion_rate REAL,              -- 전환율
-            page_views INTEGER,                -- PV
-            new_product_weight REAL,           -- 신상품 가중치
-            category TEXT,
-            category_code TEXT,
-            product_url TEXT,
-            FOREIGN KEY (scan_id) REFERENCES market_scans(id) ON DELETE CASCADE
-        );
-
-        -- 유입 키워드
-        CREATE TABLE IF NOT EXISTS inflow_keywords (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            scan_id INTEGER NOT NULL,
-            product_id INTEGER,
-            keyword TEXT NOT NULL,
-            search_volume INTEGER,            -- 조회수
-            click_count INTEGER,              -- 클릭수
-            click_rate REAL,                  -- 클릭율
-            impression_increase REAL,         -- 노출증가
-            ad_weight REAL,                   -- 광고비중
-            FOREIGN KEY (scan_id) REFERENCES market_scans(id) ON DELETE CASCADE,
-            FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-        );
-
-        -- 키워드 변형 (띄어쓰기 등)
-        CREATE TABLE IF NOT EXISTS keyword_variants (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            scan_id INTEGER NOT NULL,
-            original_keyword TEXT NOT NULL,
-            variant_keyword TEXT NOT NULL,
-            search_volume INTEGER,
-            competition_level TEXT,
-            opportunity_note TEXT,
-            FOREIGN KEY (scan_id) REFERENCES market_scans(id) ON DELETE CASCADE
-        );
-
-        -- RFQ (견적 요청)
-        CREATE TABLE IF NOT EXISTS rfqs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            scan_id INTEGER,
-            product_name_en TEXT,
-            product_name_kr TEXT,
-            category TEXT,
-            specifications TEXT,              -- JSON: 소재, 사이즈, 색상 등
-            target_price REAL,
-            target_price_currency TEXT DEFAULT 'USD',
-            order_quantity INTEGER,
-            moq INTEGER,
-            shipping_terms TEXT DEFAULT 'FOB',
-            certifications TEXT,              -- JSON: KC, CE 등
-            reference_images TEXT,            -- JSON: 이미지 URL 리스트
-            alibaba_rfq_id TEXT,
-            status TEXT DEFAULT 'draft',      -- draft / posted / receiving / closed
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-
-        -- 견적 (업체 응답)
-        CREATE TABLE IF NOT EXISTS quotations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            rfq_id INTEGER NOT NULL,
-            supplier_name TEXT,
-            supplier_url TEXT,
-            supplier_rating REAL,
-            supplier_years INTEGER,           -- 업력
-            unit_price REAL,
-            unit_price_currency TEXT DEFAULT 'USD',
-            moq INTEGER,
-            lead_time_days INTEGER,
-            sample_cost REAL,
-            certifications TEXT,              -- JSON
-            notes TEXT,
-            is_selected INTEGER DEFAULT 0,
-            received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (rfq_id) REFERENCES rfqs(id) ON DELETE CASCADE
-        );
-
-        -- 소싱 히스토리 (종합)
-        CREATE TABLE IF NOT EXISTS sourcing_history (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            scan_id INTEGER,
-            rfq_id INTEGER,
-            product_name TEXT,
-            status TEXT DEFAULT 'discovered',
-            -- discovered → analyzed → rfq_posted → quoting →
-            -- supplier_selected → sampling → sample_received → ordered → completed / dropped
-            opportunity_score REAL,
-            selected_keyword TEXT,
-            selected_supplier TEXT,
-            target_price REAL,
-            final_price REAL,
-            margin_rate REAL,
-            notes TEXT,
-            discovered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (scan_id) REFERENCES market_scans(id),
-            FOREIGN KEY (rfq_id) REFERENCES rfqs(id)
-        );
-
-        -- 골드박스 일별 기록
-        CREATE TABLE IF NOT EXISTS goldbox_daily (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            crawled_date TEXT NOT NULL,          -- YYYY-MM-DD
-            product_name TEXT,
-            price INTEGER,
-            discount TEXT,
-            product_url TEXT,
-            extracted_keyword TEXT,
-            crawled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-
-        CREATE INDEX IF NOT EXISTS idx_goldbox_date ON goldbox_daily(crawled_date);
-
-        -- 수집 리뷰
-        CREATE TABLE IF NOT EXISTS collected_reviews (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            scan_id INTEGER NOT NULL,
-            product_name TEXT,
-            rating INTEGER,
-            headline TEXT,
-            content TEXT,
-            date TEXT,
-            option TEXT,
-            collected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (scan_id) REFERENCES market_scans(id) ON DELETE CASCADE
-        );
-
-        -- 리뷰 분석 결과
-        CREATE TABLE IF NOT EXISTS review_analyses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            scan_id INTEGER NOT NULL,
-            keyword TEXT,
-            review_count INTEGER,
-            analysis_json TEXT,
-            analyzed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (scan_id) REFERENCES market_scans(id) ON DELETE CASCADE
-        );
-
-        CREATE INDEX IF NOT EXISTS idx_collected_reviews_scan ON collected_reviews(scan_id);
-        CREATE INDEX IF NOT EXISTS idx_review_analyses_scan ON review_analyses(scan_id);
-
-        -- 인덱스
-        CREATE INDEX IF NOT EXISTS idx_scans_keyword ON market_scans(keyword);
-        CREATE INDEX IF NOT EXISTS idx_scans_score ON market_scans(opportunity_score DESC);
-        CREATE INDEX IF NOT EXISTS idx_scans_status ON market_scans(status);
-        CREATE INDEX IF NOT EXISTS idx_products_scan ON products(scan_id);
-        CREATE INDEX IF NOT EXISTS idx_inflow_scan ON inflow_keywords(scan_id);
-        CREATE INDEX IF NOT EXISTS idx_rfqs_status ON rfqs(status);
-        CREATE INDEX IF NOT EXISTS idx_history_status ON sourcing_history(status);
-    ''')
-    conn.commit()
-    conn.close()
-
 
 # ─────────────────────────────────────────────
 # 라우트
@@ -278,13 +66,7 @@ def manual_scan():
         return jsonify({'success': False, 'error': '키워드를 입력해주세요'})
 
     # 스캔 기록 생성
-    db = get_db()
-    cursor = db.execute('''
-        INSERT INTO market_scans (keyword, scan_type, status)
-        VALUES (?, 'manual', 'scanning')
-    ''', (keyword,))
-    db.commit()
-    scan_id = cursor.lastrowid
+    scan_id = fdb.create_scan(keyword, 'manual', 'scanning')
 
     # 백그라운드 스레드에서 수집 수행
     thread = threading.Thread(
@@ -305,29 +87,24 @@ def manual_scan():
 def _run_scan_background(scan_id: int, keyword: str, use_cdp: bool = False):
     """백그라운드에서 헬프스토어 데이터 수집 + 분석"""
     with app.app_context():
-        db = get_db()
         try:
             if use_cdp:
                 try:
-                    _run_scan_cdp(db, scan_id, keyword)
+                    _run_scan_cdp(scan_id, keyword)
                 except Exception as cdp_err:
                     # CDP 실패 시 API 모드로 자동 폴백
                     print(f'[SCAN-CDP] 실패 → API 모드로 전환: {cdp_err}')
-                    _run_scan_api(db, scan_id, keyword)
+                    _run_scan_api(scan_id, keyword)
             else:
-                _run_scan_api(db, scan_id, keyword)
+                _run_scan_api(scan_id, keyword)
         except Exception as e:
             import traceback
             print(f'[SCAN] 에러: {keyword} — {e}')
             traceback.print_exc()
-            db.execute('''
-                UPDATE market_scans SET status = 'failed', updated_at = CURRENT_TIMESTAMP
-                WHERE id = ?
-            ''', (scan_id,))
-            db.commit()
+            fdb.update_scan(scan_id, status='failed')
 
 
-def _run_scan_api(db, scan_id: int, keyword: str):
+def _run_scan_api(scan_id: int, keyword: str):
     """서버 API 전용 스캔 (기존 로직)"""
     # 1. 헬프스토어 서버 API로 키워드 데이터 수집
     api = get_helpstore()
@@ -335,19 +112,16 @@ def _run_scan_api(db, scan_id: int, keyword: str):
 
     # 2. 연관 키워드를 inflow_keywords 테이블에 저장
     for kw in result.related_keywords:
-        db.execute('''
-            INSERT INTO inflow_keywords (scan_id, keyword, search_volume,
-                click_count, click_rate, ad_weight)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (
-            scan_id, kw.keyword, kw.total_search,
-            kw.pc_search + kw.mobile_search,
-            (kw.pc_click_rate + kw.mobile_click_rate) / 2,
-            0  # 서버 API에서는 광고비중 데이터 없음
-        ))
+        fdb.add_inflow_keyword(scan_id, {
+            'keyword': kw.keyword,
+            'search_volume': kw.total_search,
+            'click_count': kw.pc_search + kw.mobile_search,
+            'click_rate': (kw.pc_click_rate + kw.mobile_click_rate) / 2,
+            'ad_weight': 0,
+        })
 
     # 3. 띄어쓰기 변형 키워드 생성 및 저장
-    _save_keyword_variants(db, scan_id, keyword, result.related_keywords)
+    _save_keyword_variants(scan_id, keyword, result.related_keywords)
 
     # 4. 기회점수 산출 (서버 API 데이터 기반)
     keyword_nospace = keyword.replace(' ', '')
@@ -395,31 +169,22 @@ def _run_scan_api(db, scan_id: int, keyword: str):
                 recommended = kw.keyword
 
     # 5. 스캔 결과 업데이트
-    db.execute('''
-        UPDATE market_scans SET
-            status = 'scanned',
-            category = ?,
-            opportunity_score = ?,
-            top10_avg_revenue = 0,
-            top10_avg_sales = 0,
-            top10_avg_price = 0,
-            revenue_equality = 0,
-            new_product_rate = 0,
-            ad_dependency = 0,
-            recommended_keyword = ?,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-    ''', (
-        result.main_category,
-        round(simple_score, 1),
-        recommended,
-        scan_id
-    ))
-    db.commit()
+    fdb.update_scan(scan_id,
+        status='scanned',
+        category=result.main_category,
+        opportunity_score=round(simple_score, 1),
+        top10_avg_revenue=0,
+        top10_avg_sales=0,
+        top10_avg_price=0,
+        revenue_equality=0,
+        new_product_rate=0,
+        ad_dependency=0,
+        recommended_keyword=recommended,
+    )
     print(f'[SCAN-API] 완료: {keyword} (점수: {simple_score:.1f}, 연관키워드: {len(result.related_keywords)}개)')
 
 
-def _run_scan_cdp(db, scan_id: int, keyword: str):
+def _run_scan_cdp(scan_id: int, keyword: str):
     """
     CDP 전체 스캔 — 실제 쿠팡 데이터 (매출/판매량/클릭수/전환율)
     서버 API 데이터 + 브라우저 자동화 데이터 결합
@@ -431,45 +196,35 @@ def _run_scan_cdp(db, scan_id: int, keyword: str):
 
     # ─── 상품 데이터 저장 ───
     for product in result.products:
-        db.execute('''
-            INSERT INTO products (scan_id, ranking, product_name, brand, manufacturer,
-                price, sales_monthly, revenue_monthly, review_count, click_count,
-                conversion_rate, page_views, category, category_code, product_url)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            scan_id, product.ranking, product.product_name, product.brand,
-            product.manufacturer, product.price, product.sales_monthly,
-            product.revenue_monthly, product.review_count, product.click_count,
-            product.conversion_rate, product.page_views, product.category,
-            product.category_code, product.product_url
-        ))
+        fdb.add_product(scan_id, {
+            'ranking': product.ranking, 'product_name': product.product_name,
+            'brand': product.brand, 'manufacturer': product.manufacturer,
+            'price': product.price, 'sales_monthly': product.sales_monthly,
+            'revenue_monthly': product.revenue_monthly, 'review_count': product.review_count,
+            'click_count': product.click_count, 'conversion_rate': product.conversion_rate,
+            'page_views': product.page_views, 'category': product.category,
+            'category_code': product.category_code, 'product_url': product.product_url,
+        })
 
     # ─── 유입 키워드 저장 ───
     for kw in result.inflow_keywords:
-        db.execute('''
-            INSERT INTO inflow_keywords (scan_id, keyword, search_volume,
-                click_count, click_rate, impression_increase, ad_weight)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            scan_id, kw.keyword, kw.search_volume,
-            kw.click_count, kw.click_rate,
-            kw.impression_increase, kw.ad_weight
-        ))
+        fdb.add_inflow_keyword(scan_id, {
+            'keyword': kw.keyword, 'search_volume': kw.search_volume,
+            'click_count': kw.click_count, 'click_rate': kw.click_rate,
+            'impression_increase': kw.impression_increase, 'ad_weight': kw.ad_weight,
+        })
 
     # ─── 연관 키워드 저장 (API에서 가져온 것) ───
     for kw in result.related_keywords:
-        db.execute('''
-            INSERT INTO inflow_keywords (scan_id, keyword, search_volume,
-                click_count, click_rate, ad_weight)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (
-            scan_id, kw.keyword, kw.total_search,
-            kw.pc_search + kw.mobile_search,
-            (kw.pc_click_rate + kw.mobile_click_rate) / 2, 0
-        ))
+        fdb.add_inflow_keyword(scan_id, {
+            'keyword': kw.keyword, 'search_volume': kw.total_search,
+            'click_count': kw.pc_search + kw.mobile_search,
+            'click_rate': (kw.pc_click_rate + kw.mobile_click_rate) / 2,
+            'ad_weight': 0,
+        })
 
     # ─── 띄어쓰기 변형 키워드 ───
-    _save_keyword_variants(db, scan_id, keyword, result.related_keywords)
+    _save_keyword_variants(scan_id, keyword, result.related_keywords)
 
     # ─── 기회점수 산출 (실제 쿠팡 데이터 기반!) ───
     opp_score = calculate_opportunity(
@@ -480,35 +235,19 @@ def _run_scan_cdp(db, scan_id: int, keyword: str):
     )
 
     # ─── 스캔 결과 업데이트 ───
-    db.execute('''
-        UPDATE market_scans SET
-            status = 'scanned',
-            category = ?,
-            opportunity_score = ?,
-            top10_avg_revenue = ?,
-            top10_avg_sales = ?,
-            top10_avg_price = ?,
-            revenue_concentration = ?,
-            revenue_equality = ?,
-            new_product_rate = ?,
-            ad_dependency = ?,
-            recommended_keyword = ?,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-    ''', (
-        result.main_category,
-        round(opp_score.total_score, 1),
-        opp_score.top10_avg_revenue,
-        opp_score.top10_avg_sales,
-        opp_score.top10_avg_price,
-        round(opp_score.top1_share * 100, 1),
-        round(opp_score.revenue_equality * 100, 1),
-        round(opp_score.new_product_rate * 100, 1),
-        round(opp_score.ad_dependency, 1),
-        opp_score.recommended_keyword,
-        scan_id
-    ))
-    db.commit()
+    fdb.update_scan(scan_id,
+        status='scanned',
+        category=result.main_category,
+        opportunity_score=round(opp_score.total_score, 1),
+        top10_avg_revenue=opp_score.top10_avg_revenue,
+        top10_avg_sales=opp_score.top10_avg_sales,
+        top10_avg_price=opp_score.top10_avg_price,
+        revenue_concentration=round(opp_score.top1_share * 100, 1),
+        revenue_equality=round(opp_score.revenue_equality * 100, 1),
+        new_product_rate=round(opp_score.new_product_rate * 100, 1),
+        ad_dependency=round(opp_score.ad_dependency, 1),
+        recommended_keyword=opp_score.recommended_keyword,
+    )
 
     print(
         f'[SCAN-CDP] 완료: {keyword}\n'
@@ -521,7 +260,7 @@ def _run_scan_cdp(db, scan_id: int, keyword: str):
     )
 
 
-def _save_keyword_variants(db, scan_id: int, keyword: str, related_keywords: list):
+def _save_keyword_variants(scan_id: int, keyword: str, related_keywords: list):
     """띄어쓰기 변형 키워드 생성 및 저장"""
     variants = generate_keyword_variants(keyword)
     for variant in variants:
@@ -532,11 +271,12 @@ def _save_keyword_variants(db, scan_id: int, keyword: str, related_keywords: lis
                 variant_search = kw.total_search
                 variant_comp = kw.competition
                 break
-        db.execute('''
-            INSERT INTO keyword_variants (scan_id, original_keyword,
-                variant_keyword, search_volume, competition_level)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (scan_id, keyword, variant, variant_search, variant_comp))
+        fdb.add_keyword_variant(scan_id, {
+            'original_keyword': keyword,
+            'variant_keyword': variant,
+            'search_volume': variant_search,
+            'competition_level': variant_comp,
+        })
 
 
 # === 쿠팡윙 직접 스캔 ===
@@ -592,13 +332,7 @@ def wing_scan():
         return jsonify({'success': False, 'error': '키워드를 입력해주세요'})
 
     # 스캔 기록 생성
-    db = get_db()
-    cursor = db.execute('''
-        INSERT INTO market_scans (keyword, scan_type, status)
-        VALUES (?, 'wing', 'scanning')
-    ''', (keyword,))
-    db.commit()
-    scan_id = cursor.lastrowid
+    scan_id = fdb.create_scan(keyword, 'wing', 'scanning')
 
     # 백그라운드 스레드에서 수집
     thread = threading.Thread(
@@ -618,43 +352,35 @@ def wing_scan():
 def _run_scan_wing(scan_id: int, keyword: str):
     """쿠팡윙 API로 상품 데이터 수집 + 헬프스토어 키워드 데이터 결합"""
     with app.app_context():
-        db = get_db()
         try:
             # 1. 쿠팡윙 상품 데이터
             products = wing_search(keyword)
 
             for p in products:
-                db.execute('''
-                    INSERT INTO products (scan_id, ranking, product_name, brand,
-                        manufacturer, price, sales_monthly, revenue_monthly,
-                        review_count, click_count, conversion_rate, page_views,
-                        category, category_code, product_url)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    scan_id, p.ranking, p.product_name, p.brand,
-                    p.manufacturer, p.price, p.sales_monthly,
-                    p.revenue_monthly, p.review_count, p.click_count,
-                    p.conversion_rate, p.page_views, p.category,
-                    p.category_code, p.product_url
-                ))
+                fdb.add_product(scan_id, {
+                    'ranking': p.ranking, 'product_name': p.product_name,
+                    'brand': p.brand, 'manufacturer': p.manufacturer,
+                    'price': p.price, 'sales_monthly': p.sales_monthly,
+                    'revenue_monthly': p.revenue_monthly, 'review_count': p.review_count,
+                    'click_count': p.click_count, 'conversion_rate': p.conversion_rate,
+                    'page_views': p.page_views, 'category': p.category,
+                    'category_code': p.category_code, 'product_url': p.product_url,
+                })
 
             # 2. 헬프스토어 키워드 데이터 (연관키워드/검색량)
             api = get_helpstore()
             api_result = api.search_keyword(keyword)
 
             for kw in api_result.related_keywords:
-                db.execute('''
-                    INSERT INTO inflow_keywords (scan_id, keyword, search_volume,
-                        click_count, click_rate, ad_weight)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', (
-                    scan_id, kw.keyword, kw.total_search,
-                    kw.pc_search + kw.mobile_search,
-                    (kw.pc_click_rate + kw.mobile_click_rate) / 2, 0
-                ))
+                fdb.add_inflow_keyword(scan_id, {
+                    'keyword': kw.keyword, 'search_volume': kw.total_search,
+                    'click_count': kw.pc_search + kw.mobile_search,
+                    'click_rate': (kw.pc_click_rate + kw.mobile_click_rate) / 2,
+                    'ad_weight': 0,
+                })
 
             # 3. 키워드 변형
-            _save_keyword_variants(db, scan_id, keyword, api_result.related_keywords)
+            _save_keyword_variants(scan_id, keyword, api_result.related_keywords)
 
             # 4. 기회점수 산출
             opp_score = calculate_opportunity(
@@ -665,35 +391,19 @@ def _run_scan_wing(scan_id: int, keyword: str):
             )
 
             # 5. DB 업데이트
-            db.execute('''
-                UPDATE market_scans SET
-                    status = 'scanned',
-                    category = ?,
-                    opportunity_score = ?,
-                    top10_avg_revenue = ?,
-                    top10_avg_sales = ?,
-                    top10_avg_price = ?,
-                    revenue_concentration = ?,
-                    revenue_equality = ?,
-                    new_product_rate = ?,
-                    ad_dependency = ?,
-                    recommended_keyword = ?,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id = ?
-            ''', (
-                api_result.main_category,
-                round(opp_score.total_score, 1),
-                opp_score.top4_10_avg_revenue,  # 4~10등 평균매출 (진입 기대)
-                opp_score.top4_10_avg_sales,
-                opp_score.top4_10_avg_price,
-                round(opp_score.top3_share * 100, 1),  # 상위3 점유율
-                round(opp_score.sellers_over_3m_rate * 100, 1),  # 300만+ 비율
-                round(opp_score.new_product_rate * 100, 1),
-                round(opp_score.avg_new_product_weight, 1),  # 신상품 가중치
-                opp_score.recommended_keyword,
-                scan_id
-            ))
-            db.commit()
+            fdb.update_scan(scan_id,
+                status='scanned',
+                category=api_result.main_category,
+                opportunity_score=round(opp_score.total_score, 1),
+                top10_avg_revenue=opp_score.top4_10_avg_revenue,
+                top10_avg_sales=opp_score.top4_10_avg_sales,
+                top10_avg_price=opp_score.top4_10_avg_price,
+                revenue_concentration=round(opp_score.top3_share * 100, 1),
+                revenue_equality=round(opp_score.sellers_over_3m_rate * 100, 1),
+                new_product_rate=round(opp_score.new_product_rate * 100, 1),
+                ad_dependency=round(opp_score.avg_new_product_weight, 1),
+                recommended_keyword=opp_score.recommended_keyword,
+            )
 
             print(
                 f'[SCAN-WING] 완료: {keyword}\n'
@@ -712,11 +422,7 @@ def _run_scan_wing(scan_id: int, keyword: str):
             traceback.print_exc()
 
             status = 'login_required' if 'LOGIN_REQUIRED' in error_msg else 'failed'
-            db.execute('''
-                UPDATE market_scans SET status = ?, updated_at = CURRENT_TIMESTAMP
-                WHERE id = ?
-            ''', (status, scan_id))
-            db.commit()
+            fdb.update_scan(scan_id, status=status)
 
 
 # === 카테고리 탐색 ===
@@ -839,28 +545,15 @@ def api_goldbox_products():
 @app.route('/api/goldbox/history')
 def api_goldbox_history():
     """골드박스 일별 기록"""
-    db = get_db()
-    # 날짜별 상품 수
-    dates = db.execute('''
-        SELECT crawled_date, COUNT(*) as count
-        FROM goldbox_daily
-        GROUP BY crawled_date
-        ORDER BY crawled_date DESC
-        LIMIT 30
-    ''').fetchall()
-    return jsonify({'success': True, 'dates': [dict(d) for d in dates]})
+    dates = fdb.get_goldbox_dates()
+    return jsonify({'success': True, 'dates': dates})
 
 
 @app.route('/api/goldbox/history/<date>')
 def api_goldbox_history_date(date):
     """특정 날짜의 골드박스 상품"""
-    db = get_db()
-    products = db.execute('''
-        SELECT * FROM goldbox_daily
-        WHERE crawled_date = ?
-        ORDER BY id
-    ''', (date,)).fetchall()
-    return jsonify({'success': True, 'date': date, 'products': [dict(p) for p in products]})
+    products = fdb.get_goldbox_by_date(date)
+    return jsonify({'success': True, 'date': date, 'products': products})
 
 
 @app.route('/api/goldbox/results')
@@ -885,15 +578,18 @@ def _run_goldbox(max_scan: int):
             # DB에 일별 저장
             import re
             today = datetime.now().strftime('%Y-%m-%d')
-            db = get_db()
+            goldbox_products = []
             for p in products:
                 words = re.findall(r'[가-힣]{2,6}', p.get('name', ''))
                 extracted = ' '.join(words[:3]) if words else ''
-                db.execute('''
-                    INSERT INTO goldbox_daily (crawled_date, product_name, price, discount, product_url, extracted_keyword)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', (today, p.get('name', ''), p.get('price', 0), p.get('discount', ''), p.get('url', ''), extracted))
-            db.commit()
+                goldbox_products.append({
+                    'product_name': p.get('name', ''),
+                    'price': p.get('price', 0),
+                    'discount': p.get('discount', ''),
+                    'product_url': p.get('url', ''),
+                    'extracted_keyword': extracted,
+                })
+            fdb.add_goldbox_products(today, goldbox_products)
             print(f'[GOLDBOX] {today} — {len(products)}개 상품 DB 저장')
 
             if not products:
@@ -910,7 +606,6 @@ def _run_goldbox(max_scan: int):
             # Phase 3: 윙 스캔
             _goldbox_state['phase'] = 'scanning'
             api = get_helpstore()
-            db = get_db()
 
             for i, kw in enumerate(keywords[:max_scan]):
                 if not _goldbox_state['running']:
@@ -921,43 +616,37 @@ def _run_goldbox(max_scan: int):
 
                 try:
                     # 윙 스캔
-                    cursor = db.execute(
-                        "INSERT INTO market_scans (keyword, scan_type, status) VALUES (?, 'goldbox', 'scanning')",
-                        (kw,))
-                    db.commit()
-                    scan_id = cursor.lastrowid
+                    scan_id = fdb.create_scan(kw, 'goldbox', 'scanning')
 
                     scan_products = wing_search(kw)
 
                     for p in scan_products:
-                        db.execute('''
-                            INSERT INTO products (scan_id, ranking, product_name, brand,
-                                manufacturer, price, sales_monthly, revenue_monthly,
-                                review_count, click_count, conversion_rate, page_views,
-                                category, category_code, product_url)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        ''', (scan_id, p.ranking, p.product_name, p.brand,
-                              p.manufacturer, p.price, p.sales_monthly,
-                              p.revenue_monthly, p.review_count, p.click_count,
-                              p.conversion_rate, p.page_views, p.category,
-                              p.category_code, p.product_url))
+                        fdb.add_product(scan_id, {
+                            'ranking': p.ranking, 'product_name': p.product_name,
+                            'brand': p.brand, 'manufacturer': p.manufacturer,
+                            'price': p.price, 'sales_monthly': p.sales_monthly,
+                            'revenue_monthly': p.revenue_monthly, 'review_count': p.review_count,
+                            'click_count': p.click_count, 'conversion_rate': p.conversion_rate,
+                            'page_views': p.page_views, 'category': p.category,
+                            'category_code': p.category_code, 'product_url': p.product_url,
+                        })
 
                     related = api.get_related_keywords(kw)
                     opp = calculate_opportunity(products=scan_products, related_keywords=related, keyword=kw)
 
-                    db.execute('''
-                        UPDATE market_scans SET status='scanned', category=?, opportunity_score=?,
-                            top10_avg_revenue=?, top10_avg_sales=?, top10_avg_price=?,
-                            revenue_concentration=?, revenue_equality=?,
-                            new_product_rate=?, ad_dependency=?,
-                            recommended_keyword=?, updated_at=CURRENT_TIMESTAMP
-                        WHERE id=?
-                    ''', (scan_products[0].category if scan_products else '', round(opp.total_score, 1),
-                          opp.top4_10_avg_revenue, opp.top4_10_avg_sales, opp.top4_10_avg_price,
-                          round(opp.top3_share*100, 1), round(opp.sellers_over_3m_rate*100, 1),
-                          round(opp.new_product_rate*100, 1), round(opp.avg_new_product_weight, 1),
-                          opp.recommended_keyword, scan_id))
-                    db.commit()
+                    fdb.update_scan(scan_id,
+                        status='scanned',
+                        category=scan_products[0].category if scan_products else '',
+                        opportunity_score=round(opp.total_score, 1),
+                        top10_avg_revenue=opp.top4_10_avg_revenue,
+                        top10_avg_sales=opp.top4_10_avg_sales,
+                        top10_avg_price=opp.top4_10_avg_price,
+                        revenue_concentration=round(opp.top3_share*100, 1),
+                        revenue_equality=round(opp.sellers_over_3m_rate*100, 1),
+                        new_product_rate=round(opp.new_product_rate*100, 1),
+                        ad_dependency=round(opp.avg_new_product_weight, 1),
+                        recommended_keyword=opp.recommended_keyword,
+                    )
 
                     _goldbox_state['results'].append({
                         'scan_id': scan_id, 'keyword': kw,
@@ -1348,31 +1037,21 @@ def _run_autoscan(seeds: list, min_search: int, max_scan: int):
 
                 try:
                     # 윙 스캔 실행
-                    db = get_db()
-                    cursor = db.execute('''
-                        INSERT INTO market_scans (keyword, scan_type, status)
-                        VALUES (?, 'auto', 'scanning')
-                    ''', (keyword,))
-                    db.commit()
-                    scan_id = cursor.lastrowid
+                    scan_id = fdb.create_scan(keyword, 'auto', 'scanning')
 
                     products = wing_search(keyword)
 
                     # 상품 저장
                     for p in products:
-                        db.execute('''
-                            INSERT INTO products (scan_id, ranking, product_name, brand,
-                                manufacturer, price, sales_monthly, revenue_monthly,
-                                review_count, click_count, conversion_rate, page_views,
-                                category, category_code, product_url)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        ''', (
-                            scan_id, p.ranking, p.product_name, p.brand,
-                            p.manufacturer, p.price, p.sales_monthly,
-                            p.revenue_monthly, p.review_count, p.click_count,
-                            p.conversion_rate, p.page_views, p.category,
-                            p.category_code, p.product_url
-                        ))
+                        fdb.add_product(scan_id, {
+                            'ranking': p.ranking, 'product_name': p.product_name,
+                            'brand': p.brand, 'manufacturer': p.manufacturer,
+                            'price': p.price, 'sales_monthly': p.sales_monthly,
+                            'revenue_monthly': p.revenue_monthly, 'review_count': p.review_count,
+                            'click_count': p.click_count, 'conversion_rate': p.conversion_rate,
+                            'page_views': p.page_views, 'category': p.category,
+                            'category_code': p.category_code, 'product_url': p.product_url,
+                        })
 
                     # 기회점수
                     opp = calculate_opportunity(
@@ -1382,25 +1061,19 @@ def _run_autoscan(seeds: list, min_search: int, max_scan: int):
                     )
 
                     # DB 업데이트
-                    db.execute('''
-                        UPDATE market_scans SET
-                            status = 'scanned', category = ?, opportunity_score = ?,
-                            top10_avg_revenue = ?, top10_avg_sales = ?, top10_avg_price = ?,
-                            revenue_concentration = ?, revenue_equality = ?,
-                            new_product_rate = ?, ad_dependency = ?,
-                            recommended_keyword = ?, updated_at = CURRENT_TIMESTAMP
-                        WHERE id = ?
-                    ''', (
-                        products[0].category if products else '',
-                        round(opp.total_score, 1),
-                        opp.top4_10_avg_revenue, opp.top4_10_avg_sales, opp.top4_10_avg_price,
-                        round(opp.top3_share * 100, 1),
-                        round(opp.sellers_over_3m_rate * 100, 1),
-                        round(opp.new_product_rate * 100, 1),
-                        round(opp.avg_new_product_weight, 1),
-                        opp.recommended_keyword, scan_id
-                    ))
-                    db.commit()
+                    fdb.update_scan(scan_id,
+                        status='scanned',
+                        category=products[0].category if products else '',
+                        opportunity_score=round(opp.total_score, 1),
+                        top10_avg_revenue=opp.top4_10_avg_revenue,
+                        top10_avg_sales=opp.top4_10_avg_sales,
+                        top10_avg_price=opp.top4_10_avg_price,
+                        revenue_concentration=round(opp.top3_share * 100, 1),
+                        revenue_equality=round(opp.sellers_over_3m_rate * 100, 1),
+                        new_product_rate=round(opp.new_product_rate * 100, 1),
+                        ad_dependency=round(opp.avg_new_product_weight, 1),
+                        recommended_keyword=opp.recommended_keyword,
+                    )
 
                     _auto_scan_state['results'].append({
                         'scan_id': scan_id,
@@ -1461,15 +1134,8 @@ def api_scan_import():
     if not raw_products:
         return jsonify({'success': False, 'error': '상품 데이터가 없습니다'})
 
-    db = get_db()
-
     # 스캔 레코드 생성
-    cursor = db.execute('''
-        INSERT INTO market_scans (keyword, scan_type, status)
-        VALUES (?, 'capture', 'scanning')
-    ''', (keyword,))
-    db.commit()
-    scan_id = cursor.lastrowid
+    scan_id = fdb.create_scan(keyword, 'capture', 'scanning')
 
     # 백그라운드에서 처리 (API 키워드 데이터 수집 + 기회점수)
     thread = threading.Thread(
@@ -1490,7 +1156,6 @@ def api_scan_import():
 def _run_scan_import(scan_id: int, keyword: str, raw_products: list):
     """북마클릿에서 받은 상품 데이터 + 서버 API 키워드 데이터 → 기회점수 산출"""
     with app.app_context():
-        db = get_db()
         try:
             # 1. 상품 데이터를 CoupangProduct로 변환 + DB 저장
             products = []
@@ -1516,37 +1181,30 @@ def _run_scan_import(scan_id: int, keyword: str, raw_products: list):
                     p.revenue_monthly = p.sales_monthly * p.price
                 products.append(p)
 
-                db.execute('''
-                    INSERT INTO products (scan_id, ranking, product_name, brand,
-                        manufacturer, price, sales_monthly, revenue_monthly,
-                        review_count, click_count, conversion_rate, page_views,
-                        category, category_code, product_url)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    scan_id, p.ranking, p.product_name, p.brand,
-                    p.manufacturer, p.price, p.sales_monthly,
-                    p.revenue_monthly, p.review_count, p.click_count,
-                    p.conversion_rate, p.page_views, p.category,
-                    p.category_code, p.product_url
-                ))
+                fdb.add_product(scan_id, {
+                    'ranking': p.ranking, 'product_name': p.product_name,
+                    'brand': p.brand, 'manufacturer': p.manufacturer,
+                    'price': p.price, 'sales_monthly': p.sales_monthly,
+                    'revenue_monthly': p.revenue_monthly, 'review_count': p.review_count,
+                    'click_count': p.click_count, 'conversion_rate': p.conversion_rate,
+                    'page_views': p.page_views, 'category': p.category,
+                    'category_code': p.category_code, 'product_url': p.product_url,
+                })
 
             # 2. 서버 API로 키워드 데이터 수집 (연관키워드/검색량)
             api = get_helpstore()
             api_result = api.search_keyword(keyword)
 
             for kw in api_result.related_keywords:
-                db.execute('''
-                    INSERT INTO inflow_keywords (scan_id, keyword, search_volume,
-                        click_count, click_rate, ad_weight)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', (
-                    scan_id, kw.keyword, kw.total_search,
-                    kw.pc_search + kw.mobile_search,
-                    (kw.pc_click_rate + kw.mobile_click_rate) / 2, 0
-                ))
+                fdb.add_inflow_keyword(scan_id, {
+                    'keyword': kw.keyword, 'search_volume': kw.total_search,
+                    'click_count': kw.pc_search + kw.mobile_search,
+                    'click_rate': (kw.pc_click_rate + kw.mobile_click_rate) / 2,
+                    'ad_weight': 0,
+                })
 
             # 3. 띄어쓰기 변형 키워드
-            _save_keyword_variants(db, scan_id, keyword, api_result.related_keywords)
+            _save_keyword_variants(scan_id, keyword, api_result.related_keywords)
 
             # 4. 기회점수 산출 (실제 쿠팡 데이터 기반!)
             opp_score = calculate_opportunity(
@@ -1557,35 +1215,19 @@ def _run_scan_import(scan_id: int, keyword: str, raw_products: list):
             )
 
             # 5. 스캔 결과 업데이트
-            db.execute('''
-                UPDATE market_scans SET
-                    status = 'scanned',
-                    category = ?,
-                    opportunity_score = ?,
-                    top10_avg_revenue = ?,
-                    top10_avg_sales = ?,
-                    top10_avg_price = ?,
-                    revenue_concentration = ?,
-                    revenue_equality = ?,
-                    new_product_rate = ?,
-                    ad_dependency = ?,
-                    recommended_keyword = ?,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id = ?
-            ''', (
-                api_result.main_category,
-                round(opp_score.total_score, 1),
-                opp_score.top10_avg_revenue,
-                opp_score.top10_avg_sales,
-                opp_score.top10_avg_price,
-                round(opp_score.top1_share * 100, 1),
-                round(opp_score.revenue_equality * 100, 1),
-                round(opp_score.new_product_rate * 100, 1),
-                round(opp_score.ad_dependency, 1),
-                opp_score.recommended_keyword,
-                scan_id
-            ))
-            db.commit()
+            fdb.update_scan(scan_id,
+                status='scanned',
+                category=api_result.main_category,
+                opportunity_score=round(opp_score.total_score, 1),
+                top10_avg_revenue=opp_score.top10_avg_revenue,
+                top10_avg_sales=opp_score.top10_avg_sales,
+                top10_avg_price=opp_score.top10_avg_price,
+                revenue_concentration=round(opp_score.top1_share * 100, 1),
+                revenue_equality=round(opp_score.revenue_equality * 100, 1),
+                new_product_rate=round(opp_score.new_product_rate * 100, 1),
+                ad_dependency=round(opp_score.ad_dependency, 1),
+                recommended_keyword=opp_score.recommended_keyword,
+            )
 
             print(
                 f'[SCAN-CAPTURE] 완료: {keyword}\n'
@@ -1599,61 +1241,42 @@ def _run_scan_import(scan_id: int, keyword: str, raw_products: list):
             import traceback
             print(f'[SCAN-CAPTURE] 에러: {keyword} — {e}')
             traceback.print_exc()
-            db.execute('''
-                UPDATE market_scans SET status = 'failed', updated_at = CURRENT_TIMESTAMP
-                WHERE id = ?
-            ''', (scan_id,))
-            db.commit()
+            fdb.update_scan(scan_id, status='failed')
 
 
 @app.route('/api/scan/<int:scan_id>/poll')
 def poll_scan(scan_id):
     """스캔 진행 상태 폴링"""
-    db = get_db()
-    scan = db.execute('SELECT id, status, opportunity_score, keyword, recommended_keyword, category FROM market_scans WHERE id = ?', (scan_id,)).fetchone()
+    scan = fdb.get_scan(scan_id)
     if not scan:
         return jsonify({'success': False})
-    return jsonify({'success': True, 'scan': dict(scan)})
+    return jsonify({'success': True, 'scan': scan})
 
 
 @app.route('/api/scans')
 def get_scans():
     """시장조사 목록 조회"""
-    db = get_db()
-    scans = db.execute('''
-        SELECT * FROM market_scans
-        ORDER BY scanned_at DESC
-        LIMIT 100
-    ''').fetchall()
-    return jsonify({'success': True, 'scans': [dict(s) for s in scans]})
+    scans = fdb.list_scans()
+    return jsonify({'success': True, 'scans': scans})
 
 
 @app.route('/api/scan/<int:scan_id>')
 def get_scan_detail(scan_id):
     """시장조사 상세 (상품 + 키워드 포함)"""
-    db = get_db()
-    scan = db.execute('SELECT * FROM market_scans WHERE id = ?', (scan_id,)).fetchone()
+    scan = fdb.get_scan(scan_id)
     if not scan:
         return jsonify({'success': False, 'error': '조사 기록 없음'})
 
-    products = db.execute('''
-        SELECT * FROM products WHERE scan_id = ? ORDER BY ranking
-    ''', (scan_id,)).fetchall()
-
-    keywords = db.execute('''
-        SELECT * FROM inflow_keywords WHERE scan_id = ? ORDER BY search_volume DESC
-    ''', (scan_id,)).fetchall()
-
-    variants = db.execute('''
-        SELECT * FROM keyword_variants WHERE scan_id = ?
-    ''', (scan_id,)).fetchall()
+    products = fdb.get_products(scan_id)
+    keywords = fdb.get_inflow_keywords(scan_id)
+    variants = fdb.get_keyword_variants(scan_id)
 
     return jsonify({
         'success': True,
-        'scan': dict(scan),
-        'products': [dict(p) for p in products],
-        'keywords': [dict(k) for k in keywords],
-        'variants': [dict(v) for v in variants]
+        'scan': scan,
+        'products': products,
+        'keywords': keywords,
+        'variants': variants,
     })
 
 
@@ -1663,17 +1286,14 @@ _coupang_kw_cache = {}  # keyword → {autocomplete, related, ts}
 @app.route('/api/scan/<int:scan_id>/keywords')
 def api_scan_keywords(scan_id):
     """스캔 키워드 데이터 통합 반환 (변형 + 쿠팡 자동완성 + 연관)"""
-    db = get_db()
-    scan = db.execute('SELECT keyword FROM market_scans WHERE id = ?', (scan_id,)).fetchone()
+    scan = fdb.get_scan(scan_id)
     if not scan:
         return jsonify({'success': False, 'error': '조사 기록 없음'})
 
     keyword = scan['keyword']
 
     # DB에서 키워드 변형 조회
-    variants = db.execute('''
-        SELECT * FROM keyword_variants WHERE scan_id = ?
-    ''', (scan_id,)).fetchall()
+    variants = fdb.get_keyword_variants(scan_id)
 
     # 쿠팡 자동완성/연관 — 캐시 확인
     import time
@@ -1702,7 +1322,7 @@ def api_scan_keywords(scan_id):
 
     return jsonify({
         'success': True,
-        'variants': [dict(v) for v in variants],
+        'variants': variants,
         'autocomplete': autocomplete,
         'related': related
     })
@@ -1739,7 +1359,7 @@ def api_get_reviews(scan_id):
     """리뷰 분석 결과 조회 — 메모리 우선, 없으면 DB에서 로드"""
     state = _review_state.get(scan_id)
     if not state or state.get('status') == 'none':
-        db_state = _load_reviews_from_db(scan_id)
+        db_state = fdb.load_reviews_from_db(scan_id)
         if db_state:
             _review_state[scan_id] = db_state
             state = db_state
@@ -1804,16 +1424,12 @@ def api_reviews_import():
 
     # 키워드 조회
     keyword = ''
-    with app.app_context():
-        db_conn = sqlite3.connect(DB_PATH)
-        db_conn.row_factory = sqlite3.Row
-        scan = db_conn.execute('SELECT keyword FROM market_scans WHERE id = ?', (scan_id,)).fetchone()
-        if scan:
-            keyword = scan['keyword']
-        db_conn.close()
+    scan = fdb.get_scan(scan_id)
+    if scan:
+        keyword = scan['keyword']
 
     # DB에 리뷰 저장
-    _save_reviews_to_db(scan_id, reviews)
+    fdb.save_reviews(scan_id, reviews)
 
     from analyzer.reviews import ANTHROPIC_API_KEY
     api_key = ANTHROPIC_API_KEY
@@ -1827,7 +1443,7 @@ def api_reviews_import():
             _review_state[scan_id]['analysis'] = analysis
             _review_state[scan_id]['status'] = 'done'
             # 분석 결과도 DB에 저장
-            _save_analysis_to_db(scan_id, keyword, len(reviews), analysis)
+            fdb.save_review_analysis(scan_id, keyword, len(reviews), analysis)
             print(f'[REVIEW-IMPORT] 분석 완료: {keyword} ({len(reviews)}개 리뷰)')
         except Exception as e:
             import traceback
@@ -1848,17 +1464,13 @@ def _run_review_analysis(scan_id: int, api_key: str = ''):
     """리뷰 수집 → 분석 백그라운드"""
     with app.app_context():
         try:
-            db = get_db()
-            scan = db.execute('SELECT keyword FROM market_scans WHERE id = ?', (scan_id,)).fetchone()
+            scan = fdb.get_scan(scan_id)
             if not scan:
                 _review_state[scan_id] = {'status': 'error', 'reviews': [], 'analysis': None}
                 return
 
             keyword = scan['keyword']
-            products = db.execute(
-                'SELECT * FROM products WHERE scan_id = ? ORDER BY ranking LIMIT 10',
-                (scan_id,)
-            ).fetchall()
+            products = fdb.get_products(scan_id)[:10]
 
             if not products:
                 _review_state[scan_id] = {'status': 'error', 'reviews': [], 'analysis': {'error': '상품 데이터 없음'}}
@@ -1899,8 +1511,8 @@ def _run_review_analysis(scan_id: int, api_key: str = ''):
             _review_state[scan_id]['analysis'] = analysis
             _review_state[scan_id]['status'] = 'done'
             # DB에 리뷰 + 분석 저장
-            _save_reviews_to_db(scan_id, all_reviews)
-            _save_analysis_to_db(scan_id, keyword, len(all_reviews), analysis)
+            fdb.save_reviews(scan_id, all_reviews)
+            fdb.save_review_analysis(scan_id, keyword, len(all_reviews), analysis)
             print(f'[REVIEW] 분석 완료: {keyword}')
 
         except Exception as e:
@@ -1989,83 +1601,10 @@ def _collect_reviews_direct(products) -> list:
     return all_reviews
 
 
-def _save_reviews_to_db(scan_id: int, reviews: list):
-    """리뷰를 DB에 저장 (기존 데이터 교체)"""
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.execute('DELETE FROM collected_reviews WHERE scan_id = ?', (scan_id,))
-        for r in reviews:
-            conn.execute(
-                'INSERT INTO collected_reviews (scan_id, product_name, rating, headline, content, date, option) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                (scan_id, r.get('product_name', ''), r.get('rating'), r.get('headline', ''), r.get('content', ''), r.get('date', ''), r.get('option', ''))
-            )
-        conn.commit()
-        conn.close()
-        print(f'[REVIEW-DB] {len(reviews)}개 리뷰 DB 저장 완료 (scan_id={scan_id})')
-    except Exception as e:
-        print(f'[REVIEW-DB] 저장 실패: {e}')
-
-
-def _save_analysis_to_db(scan_id: int, keyword: str, review_count: int, analysis: dict):
-    """분석 결과를 DB에 저장 (기존 데이터 교체)"""
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.execute('DELETE FROM review_analyses WHERE scan_id = ?', (scan_id,))
-        conn.execute(
-            'INSERT INTO review_analyses (scan_id, keyword, review_count, analysis_json) VALUES (?, ?, ?, ?)',
-            (scan_id, keyword, review_count, json.dumps(analysis, ensure_ascii=False))
-        )
-        conn.commit()
-        conn.close()
-        print(f'[REVIEW-DB] 분석 결과 DB 저장 완료 (scan_id={scan_id})')
-    except Exception as e:
-        print(f'[REVIEW-DB] 분석 저장 실패: {e}')
-
-
-def _load_reviews_from_db(scan_id: int) -> dict:
-    """DB에서 리뷰 + 분석 결과 로드하여 _review_state 형태로 반환"""
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row
-        reviews = conn.execute('SELECT * FROM collected_reviews WHERE scan_id = ?', (scan_id,)).fetchall()
-        analysis_row = conn.execute('SELECT * FROM review_analyses WHERE scan_id = ? ORDER BY analyzed_at DESC LIMIT 1', (scan_id,)).fetchone()
-        conn.close()
-
-        if not reviews and not analysis_row:
-            return None
-
-        review_list = [
-            {'product_name': r['product_name'], 'rating': r['rating'], 'headline': r['headline'], 'content': r['content'], 'date': r['date'], 'option': r['option']}
-            for r in reviews
-        ]
-        analysis = json.loads(analysis_row['analysis_json']) if analysis_row else None
-        return {
-            'status': 'done' if analysis else 'collecting',
-            'reviews': review_list,
-            'analysis': analysis
-        }
-    except Exception as e:
-        print(f'[REVIEW-DB] 로드 실패: {e}')
-        return None
-
-
 def _load_all_reviews_from_db():
     """서버 시작 시 DB에서 모든 리뷰 상태 로드"""
     global _review_state
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row
-        scan_ids = conn.execute('SELECT DISTINCT scan_id FROM collected_reviews').fetchall()
-        for row in scan_ids:
-            sid = row['scan_id']
-            state = _load_reviews_from_db(sid)
-            if state:
-                _review_state[sid] = state
-        conn.close()
-        if _review_state:
-            print(f'[REVIEW-DB] {len(_review_state)}개 스캔의 리뷰 데이터 DB에서 로드 완료')
-    except Exception as e:
-        print(f'[REVIEW-DB] 초기 로드 실패: {e}')
+    _review_state = fdb.load_all_reviews()
 
 
 @app.route('/api/scan/<int:scan_id>/reviews/chat', methods=['POST'])
@@ -2079,7 +1618,7 @@ def api_review_chat(scan_id):
     # DB에서 리뷰 로드 (메모리에 없으면)
     state = _review_state.get(scan_id)
     if not state or not state.get('reviews'):
-        state = _load_reviews_from_db(scan_id)
+        state = fdb.load_reviews_from_db(scan_id)
     if not state or not state.get('reviews'):
         return jsonify({'error': '리뷰 데이터가 없습니다. 먼저 리뷰 분석을 실행해주세요.'})
 
@@ -2087,8 +1626,7 @@ def api_review_chat(scan_id):
 
     # 키워드 조회
     keyword = ''
-    db = get_db()
-    scan = db.execute('SELECT keyword FROM market_scans WHERE id = ?', (scan_id,)).fetchone()
+    scan = fdb.get_scan(scan_id)
     if scan:
         keyword = scan['keyword']
 
@@ -2162,12 +1700,7 @@ def update_scan_status(scan_id):
     """스캔 상태 변경 (go / pass)"""
     data = request.get_json(silent=True) or {}
     status = data.get('status')
-    db = get_db()
-    db.execute('''
-        UPDATE market_scans SET status = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-    ''', (status, scan_id))
-    db.commit()
+    fdb.update_scan(scan_id, status=status)
     return jsonify({'success': True})
 
 
@@ -2175,26 +1708,9 @@ def update_scan_status(scan_id):
 @app.route('/api/opportunities')
 def get_opportunities():
     """기회점수 랭킹 조회"""
-    db = get_db()
     status_filter = request.args.get('status', '')
-
-    if status_filter == 'go':
-        scans = db.execute('''
-            SELECT * FROM market_scans WHERE status = 'go'
-            ORDER BY opportunity_score DESC
-        ''').fetchall()
-    elif status_filter == 'scanned':
-        scans = db.execute('''
-            SELECT * FROM market_scans WHERE status = 'scanned' AND opportunity_score IS NOT NULL
-            ORDER BY opportunity_score DESC LIMIT 50
-        ''').fetchall()
-    else:
-        scans = db.execute('''
-            SELECT * FROM market_scans WHERE opportunity_score IS NOT NULL
-            ORDER BY opportunity_score DESC LIMIT 50
-        ''').fetchall()
-
-    return jsonify({'success': True, 'opportunities': [dict(s) for s in scans]})
+    scans = fdb.get_opportunities(status_filter)
+    return jsonify({'success': True, 'opportunities': scans})
 
 
 # === RFQ API ===
@@ -2202,52 +1718,37 @@ def get_opportunities():
 def create_rfq():
     """RFQ 생성"""
     data = request.json
-    db = get_db()
-    cursor = db.execute('''
-        INSERT INTO rfqs (scan_id, product_name_en, product_name_kr, category,
-                         specifications, target_price, order_quantity, moq,
-                         shipping_terms, certifications, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft')
-    ''', (
-        data.get('scan_id'),
-        data.get('product_name_en'),
-        data.get('product_name_kr'),
-        data.get('category'),
-        json.dumps(data.get('specifications', {})),
-        data.get('target_price'),
-        data.get('order_quantity'),
-        data.get('moq'),
-        data.get('shipping_terms', 'FOB'),
-        json.dumps(data.get('certifications', []))
-    ))
-    db.commit()
-    return jsonify({'success': True, 'rfq_id': cursor.lastrowid})
+    rfq_id = fdb.create_rfq(
+        scan_id=data.get('scan_id'),
+        product_name_en=data.get('product_name_en'),
+        product_name_kr=data.get('product_name_kr'),
+        category=data.get('category'),
+        specifications=json.dumps(data.get('specifications', {})),
+        target_price=data.get('target_price'),
+        order_quantity=data.get('order_quantity'),
+        moq=data.get('moq'),
+        shipping_terms=data.get('shipping_terms', 'FOB'),
+        certifications=json.dumps(data.get('certifications', [])),
+    )
+    return jsonify({'success': True, 'rfq_id': rfq_id})
 
 
 @app.route('/api/scan/<int:scan_id>/rfq/generate', methods=['POST'])
 def generate_rfq_from_scan(scan_id):
     """GO 판정된 스캔의 상품 데이터를 분석하여 RFQ 자동 생성"""
-    db = get_db()
-
     # 스캔 조회
-    scan = db.execute('SELECT * FROM market_scans WHERE id = ?', (scan_id,)).fetchone()
-    if not scan:
+    scan_dict = fdb.get_scan(scan_id)
+    if not scan_dict:
         return jsonify({'success': False, 'error': '스캔을 찾을 수 없습니다'})
 
-    scan_dict = dict(scan)
     if scan_dict.get('status') != 'go':
         return jsonify({'success': False, 'error': 'GO 판정된 스캔만 RFQ 생성이 가능합니다'})
 
     # 상위 40개 상품 조회
-    products = db.execute('''
-        SELECT * FROM products WHERE scan_id = ?
-        ORDER BY ranking ASC LIMIT 40
-    ''', (scan_id,)).fetchall()
+    products = fdb.get_products(scan_id)[:40]
 
     if not products:
         return jsonify({'success': False, 'error': '상품 데이터가 없습니다'})
-
-    products = [dict(p) for p in products]
 
     # ── 1. 구성 분석: 상품명에서 수량/구성 패턴 추출 ──
     comp_pattern = re.compile(r'(\d+)\s*(개입|매입|P|종|장|개|매|팩|세트|묶음)', re.IGNORECASE)
@@ -2415,50 +1916,41 @@ def generate_rfq_from_scan(scan_id):
 def save_rfq():
     """RFQ 폼 데이터를 rfqs 테이블에 저장"""
     data = request.get_json(silent=True) or {}
-    db = get_db()
 
     specs = data.get('specifications') or data.get('specs', [])
     certs = data.get('certifications', [])
 
-    cursor = db.execute('''
-        INSERT INTO rfqs (scan_id, product_name_en, product_name_kr, category,
-                         specifications, target_price, target_price_currency,
-                         order_quantity, moq, shipping_terms, certifications, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft')
-    ''', (
-        data.get('scan_id'),
-        data.get('product_name_en', ''),
-        data.get('product_name_kr', data.get('product_name', '')),
-        data.get('category', ''),
-        json.dumps(specs if isinstance(specs, (list, dict)) else specs, ensure_ascii=False),
-        data.get('target_price') or data.get('target_price_usd'),
-        data.get('target_price_currency', 'USD'),
-        data.get('order_quantity') or data.get('suggested_moq'),
-        data.get('moq') or data.get('suggested_moq'),
-        data.get('shipping_terms', 'FOB'),
-        json.dumps(certs if isinstance(certs, list) else [certs], ensure_ascii=False)
-    ))
-    db.commit()
+    rfq_id = fdb.create_rfq(
+        scan_id=data.get('scan_id'),
+        product_name_en=data.get('product_name_en', ''),
+        product_name_kr=data.get('product_name_kr', data.get('product_name', '')),
+        category=data.get('category', ''),
+        specifications=json.dumps(specs if isinstance(specs, (list, dict)) else specs, ensure_ascii=False),
+        target_price=data.get('target_price') or data.get('target_price_usd'),
+        target_price_currency=data.get('target_price_currency', 'USD'),
+        order_quantity=data.get('order_quantity') or data.get('suggested_moq'),
+        moq=data.get('moq') or data.get('suggested_moq'),
+        shipping_terms=data.get('shipping_terms', 'FOB'),
+        certifications=json.dumps(certs if isinstance(certs, list) else [certs], ensure_ascii=False),
+    )
 
-    return jsonify({'success': True, 'rfq_id': cursor.lastrowid})
+    return jsonify({'success': True, 'rfq_id': rfq_id})
 
 
 @app.route('/api/rfqs')
 def get_rfqs():
     """RFQ 목록 조회"""
-    db = get_db()
-    rfqs = db.execute('SELECT * FROM rfqs ORDER BY created_at DESC').fetchall()
-    return jsonify({'success': True, 'rfqs': [dict(r) for r in rfqs]})
+    rfqs = fdb.list_rfqs()
+    return jsonify({'success': True, 'rfqs': rfqs})
 
 
 @app.route('/api/rfq/<int:rfq_id>', methods=['PUT'])
 def update_rfq(rfq_id):
     """RFQ 수정"""
     data = request.get_json(silent=True) or {}
-    db = get_db()
 
     # 존재 확인
-    rfq = db.execute('SELECT id FROM rfqs WHERE id = ?', (rfq_id,)).fetchone()
+    rfq = fdb.get_rfq(rfq_id)
     if not rfq:
         return jsonify({'success': False, 'error': 'RFQ 없음'})
 
@@ -2469,43 +1961,33 @@ def update_rfq(rfq_id):
     else:
         certs = json.dumps(certs_raw, ensure_ascii=False)
 
-    db.execute('''
-        UPDATE rfqs SET
-            product_name_kr = ?, product_name_en = ?, category = ?,
-            specifications = ?, target_price = ?, order_quantity = ?,
-            moq = ?, shipping_terms = ?, certifications = ?,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-    ''', (
-        data.get('product_name_kr'), data.get('product_name_en'),
-        data.get('category'), data.get('specifications'),
-        data.get('target_price'), data.get('order_quantity'),
-        data.get('moq'), data.get('shipping_terms'),
-        certs, rfq_id
-    ))
-    db.commit()
+    fdb.update_rfq(rfq_id,
+        product_name_kr=data.get('product_name_kr'),
+        product_name_en=data.get('product_name_en'),
+        category=data.get('category'),
+        specifications=data.get('specifications'),
+        target_price=data.get('target_price'),
+        order_quantity=data.get('order_quantity'),
+        moq=data.get('moq'),
+        shipping_terms=data.get('shipping_terms'),
+        certifications=certs,
+    )
     return jsonify({'success': True})
 
 
 @app.route('/api/rfq/<int:rfq_id>', methods=['DELETE'])
 def delete_rfq(rfq_id):
     """RFQ 삭제"""
-    db = get_db()
-    db.execute('DELETE FROM quotations WHERE rfq_id = ?', (rfq_id,))
-    db.execute('DELETE FROM rfqs WHERE id = ?', (rfq_id,))
-    db.commit()
+    fdb.delete_rfq(rfq_id)
     return jsonify({'success': True})
 
 
 @app.route('/api/rfq/<int:rfq_id>/publish', methods=['POST'])
 def publish_rfq(rfq_id):
     """RFQ 영문 변환 + 알리바바 발행 준비"""
-    db = get_db()
-    rfq = db.execute('SELECT * FROM rfqs WHERE id = ?', (rfq_id,)).fetchone()
+    rfq = fdb.get_rfq(rfq_id)
     if not rfq:
         return jsonify({'success': False, 'error': 'RFQ not found'})
-
-    rfq = dict(rfq)
     specs = rfq.get('specifications', '{}')
     try:
         specs_data = json.loads(specs) if isinstance(specs, str) else specs
@@ -2568,9 +2050,10 @@ JSON only:
             print(f'[RFQ Publish] 번역 실패: {e}')
 
     # DB 업데이트: 영문명 저장 + 상태 변경
-    db.execute('UPDATE rfqs SET product_name_en = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-               (english_data.get('product_name_en', product_name_kr), 'ready', rfq_id))
-    db.commit()
+    fdb.update_rfq(rfq_id,
+        product_name_en=english_data.get('product_name_en', product_name_kr),
+        status='ready',
+    )
 
     return jsonify({
         'success': True,
@@ -2678,19 +2161,16 @@ def auto_publish_rfq(rfq_id):
 @app.route('/api/rfq/<int:rfq_id>')
 def get_rfq_detail(rfq_id):
     """RFQ 상세 + 견적 목록"""
-    db = get_db()
-    rfq = db.execute('SELECT * FROM rfqs WHERE id = ?', (rfq_id,)).fetchone()
+    rfq = fdb.get_rfq(rfq_id)
     if not rfq:
         return jsonify({'success': False, 'error': 'RFQ 없음'})
 
-    quotations = db.execute('''
-        SELECT * FROM quotations WHERE rfq_id = ? ORDER BY unit_price
-    ''', (rfq_id,)).fetchall()
+    quotations = fdb.get_quotations(rfq_id)
 
     return jsonify({
         'success': True,
-        'rfq': dict(rfq),
-        'quotations': [dict(q) for q in quotations]
+        'rfq': rfq,
+        'quotations': quotations,
     })
 
 
@@ -2699,27 +2179,20 @@ def get_rfq_detail(rfq_id):
 def add_quotation():
     """견적 추가"""
     data = request.json
-    db = get_db()
-    cursor = db.execute('''
-        INSERT INTO quotations (rfq_id, supplier_name, supplier_url, supplier_rating,
-                               supplier_years, unit_price, moq, lead_time_days,
-                               sample_cost, certifications, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (
-        data.get('rfq_id'),
-        data.get('supplier_name'),
-        data.get('supplier_url'),
-        data.get('supplier_rating'),
-        data.get('supplier_years'),
-        data.get('unit_price'),
-        data.get('moq'),
-        data.get('lead_time_days'),
-        data.get('sample_cost'),
-        json.dumps(data.get('certifications', [])),
-        data.get('notes')
-    ))
-    db.commit()
-    return jsonify({'success': True, 'quotation_id': cursor.lastrowid})
+    quote_id = fdb.add_quotation(
+        rfq_id=data.get('rfq_id'),
+        supplier_name=data.get('supplier_name'),
+        supplier_url=data.get('supplier_url'),
+        supplier_rating=data.get('supplier_rating'),
+        supplier_years=data.get('supplier_years'),
+        unit_price=data.get('unit_price'),
+        moq=data.get('moq'),
+        lead_time_days=data.get('lead_time_days'),
+        sample_cost=data.get('sample_cost'),
+        certifications=json.dumps(data.get('certifications', [])),
+        notes=data.get('notes'),
+    )
+    return jsonify({'success': True, 'quotation_id': quote_id})
 
 
 @app.route('/api/quotation/parse', methods=['POST'])
@@ -2790,11 +2263,8 @@ JSON only (no other text):
 @app.route('/api/rfq/<int:rfq_id>/compare')
 def compare_quotations(rfq_id):
     """견적 비교 데이터 (AI 점수 산출 포함)"""
-    db = get_db()
-    rfq = db.execute('SELECT * FROM rfqs WHERE id = ?', (rfq_id,)).fetchone()
-    quotes = db.execute('SELECT * FROM quotations WHERE rfq_id = ? ORDER BY unit_price', (rfq_id,)).fetchall()
-
-    quotes_list = [dict(q) for q in quotes]
+    rfq = fdb.get_rfq(rfq_id)
+    quotes_list = fdb.get_quotations(rfq_id)
 
     # AI 점수 산출: 가격(40%) + 신뢰도(25%) + 조건(20%) + 속도(15%)
     if quotes_list:
@@ -2831,7 +2301,7 @@ def compare_quotations(rfq_id):
 
     return jsonify({
         'success': True,
-        'rfq': dict(rfq) if rfq else {},
+        'rfq': rfq if rfq else {},
         'quotations': quotes_list,
         'recommendation': recommendation
     })
@@ -2840,23 +2310,14 @@ def compare_quotations(rfq_id):
 @app.route('/api/quotation/<int:quote_id>', methods=['DELETE'])
 def delete_quotation(quote_id):
     """견적 삭제"""
-    db = get_db()
-    db.execute('DELETE FROM quotations WHERE id = ?', (quote_id,))
-    db.commit()
+    fdb.delete_quotation(quote_id)
     return jsonify({'success': True})
 
 
 @app.route('/api/quotation/<int:quote_id>/select', methods=['PUT'])
 def select_quotation(quote_id):
     """업체 선정"""
-    db = get_db()
-    quote = db.execute('SELECT * FROM quotations WHERE id = ?', (quote_id,)).fetchone()
-    if quote:
-        rfq_id = quote['rfq_id']
-        db.execute('UPDATE quotations SET is_selected = 0 WHERE rfq_id = ?', (rfq_id,))
-        db.execute('UPDATE quotations SET is_selected = 1 WHERE id = ?', (quote_id,))
-        db.execute("UPDATE rfqs SET status = 'closed', updated_at = CURRENT_TIMESTAMP WHERE id = ?", (rfq_id,))
-        db.commit()
+    fdb.select_quotation(quote_id)
     return jsonify({'success': True})
 
 
@@ -2864,39 +2325,15 @@ def select_quotation(quote_id):
 @app.route('/api/history')
 def get_history():
     """소싱 히스토리 조회"""
-    db = get_db()
-    history = db.execute('''
-        SELECT h.*, m.keyword as scan_keyword, r.product_name_kr as rfq_product
-        FROM sourcing_history h
-        LEFT JOIN market_scans m ON h.scan_id = m.id
-        LEFT JOIN rfqs r ON h.rfq_id = r.id
-        ORDER BY h.updated_at DESC
-    ''').fetchall()
-    return jsonify({'success': True, 'history': [dict(h) for h in history]})
+    history = fdb.get_history()
+    return jsonify({'success': True, 'history': history})
 
 
 # === 대시보드 통계 ===
 @app.route('/api/stats')
 def get_stats():
     """대시보드 통계"""
-    db = get_db()
-    stats = {
-        'total_scans': db.execute('SELECT COUNT(*) FROM market_scans').fetchone()[0],
-        'auto_scans': db.execute("SELECT COUNT(*) FROM market_scans WHERE scan_type='auto'").fetchone()[0],
-        'manual_scans': db.execute("SELECT COUNT(*) FROM market_scans WHERE scan_type='manual'").fetchone()[0],
-        'go_products': db.execute("SELECT COUNT(*) FROM market_scans WHERE status='go'").fetchone()[0],
-        'active_rfqs': db.execute("SELECT COUNT(*) FROM rfqs WHERE status IN ('posted','receiving')").fetchone()[0],
-        'total_quotations': db.execute('SELECT COUNT(*) FROM quotations').fetchone()[0],
-        'top_opportunity': None
-    }
-    top = db.execute('''
-        SELECT keyword, opportunity_score FROM market_scans
-        WHERE opportunity_score IS NOT NULL
-        ORDER BY opportunity_score DESC LIMIT 1
-    ''').fetchone()
-    if top:
-        stats['top_opportunity'] = {'keyword': top[0], 'score': top[1]}
-
+    stats = fdb.get_stats()
     return jsonify({'success': True, 'stats': stats})
 
 
@@ -2907,7 +2344,7 @@ if __name__ == '__main__':
     import sys, io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
-    init_db()
+    fdb.init_firestore()
     _load_all_reviews_from_db()
     print("\n[BECORELAB] Market Finder v0.1")
     print("[BECORELAB] http://localhost:8090\n")

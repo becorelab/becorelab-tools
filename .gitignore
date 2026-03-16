@@ -36,6 +36,9 @@ instagram/api_session.json
 .env
 sourcing/analyzer/.env
 
+# Firebase 서비스 계정 키 (절대 커밋 금지)
+*-firebase-adminsdk-*.json
+
 # Python
 __pycache__/
 *.pyc
