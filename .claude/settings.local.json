@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/\")",
+      "Bash(mkdir -p \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/사무실→집/2026-03-16\")",
+      "Bash(mkdir -p \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/집→사무실/2026-03-16\")",
+      "Bash(mv \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/사무실PC_클로드코드_셋업가이드.txt\" \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/사무실→집/2026-03-16/\")",
+      "Bash(mv \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/마켓파인더_Firestore_전환_가이드.md\" \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/사무실→집/2026-03-16/\")",
+      "Bash(mv \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/claude-config\" \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/사무실→집/2026-03-16/\")",
+      "Bash(mv \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/db-backup\" \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/사무실→집/2026-03-16/\")",
+      "Bash(mv \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/인스타그램봇_설치\" \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/사무실→집/2026-03-16/\")",
+      "Bash(mv \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json\" \"C:/Users/pnp28/OneDrive/\\(주\\)비코어랩/Claude-Setup/사무실→집/2026-03-16/\")",
+      "Bash(powershell -Command \"Move-Item ''사무실PC_클로드코드_셋업가이드.txt'' ''사무실→집/2026-03-16/''; Move-Item ''마켓파인더_Firestore_전환_가이드.md'' ''사무실→집/2026-03-16/''; Move-Item ''claude-config'' ''사무실→집/2026-03-16/''; Move-Item ''db-backup'' ''사무실→집/2026-03-16/''; Move-Item ''인스타그램봇_설치'' ''사무실→집/2026-03-16/''; Move-Item ''becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json'' ''사무실→집/2026-03-16/''\")"
+    ]
+  }
+}
