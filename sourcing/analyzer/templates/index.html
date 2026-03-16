@@ -4635,9 +4635,11 @@ async function loadGoldboxHistory() {
         const data = await res.json();
         if (!data.success) return;
         document.getElementById('goldboxHistoryCount').textContent = data.dates.length;
-        document.getElementById('goldboxHistoryList').innerHTML = data.dates.map(d =>
-            `<button class="btn" style="margin:3px;" onclick="loadGoldboxByDate('${d}')">${d}</button>`
-        ).join('');
+        document.getElementById('goldboxHistoryList').innerHTML = data.dates.map(d => {
+            const date = d.crawled_date || d;
+            const count = d.count || '';
+            return `<button class="btn" style="margin:3px;" onclick="loadGoldboxByDate('${date}')">${date}${count ? ' (' + count + ')' : ''}</button>`;
+        }).join('');
     } catch(e) {}
 }
 
