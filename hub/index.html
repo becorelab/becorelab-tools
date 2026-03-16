@@ -301,10 +301,10 @@ body{
   <nav class="sidebar">
     <a class="sb-logo" href="./" title="홈">B</a>
     <a class="sb-item active" href="./" title="대시보드">🏠<span class="sb-tooltip">대시보드</span></a>
-    <a class="sb-item" href="./accounting/sales.html" title="매출 정산">💰<span class="sb-tooltip">매출 정산</span></a>
-    <a class="sb-item" href="./sales-dashboard.html" title="매출 대시보드">📊<span class="sb-tooltip">매출 대시보드</span></a>
-    <a class="sb-item" href="./logistics/orders.html" title="인벤토리 허브">📦<span class="sb-tooltip">인벤토리 허브</span></a>
-    <a class="sb-item" href="./rocket/rocket_preview.html" title="로켓 미리보기">🚀<span class="sb-tooltip">로켓 미리보기</span></a>
+    <a class="sb-item" href="./accounting/sales.html" target="_blank" title="매출 정산">💰<span class="sb-tooltip">매출 정산</span></a>
+    <a class="sb-item" href="./sales-dashboard.html" target="_blank" title="매출 대시보드">📊<span class="sb-tooltip">매출 대시보드</span></a>
+    <a class="sb-item" href="./logistics/orders.html" target="_blank" title="인벤토리 허브">📦<span class="sb-tooltip">인벤토리 허브</span></a>
+    <a class="sb-item" href="./rocket/rocket_preview.html" target="_blank" title="로켓 미리보기">🚀<span class="sb-tooltip">로켓 미리보기</span></a>
     <a class="sb-item" href="http://localhost:8090" target="_blank" title="소싱 분석기">🔍<span class="sb-tooltip">소싱 분석기</span></a>
     <div class="sb-spacer"></div>
     <a class="sb-item" title="설정">⚙️<span class="sb-tooltip">설정</span></a>
@@ -354,7 +354,7 @@ body{
       <div class="card">
         <div class="card-top">
           <div class="card-title">월별 매출 추이</div>
-          <a class="card-arrow" href="./sales-dashboard.html">↗</a>
+          <a class="card-arrow" href="./sales-dashboard.html" target="_blank">↗</a>
         </div>
         <div class="card-sub">전 채널 합산 · 실제 정산 데이터 기준</div>
         <div class="chart-wrap"><canvas id="chartLine"></canvas></div>
@@ -364,7 +364,7 @@ body{
       <div class="card" style="min-height:340px">
         <div class="card-top">
           <div class="card-title">채널 비중</div>
-          <a class="card-arrow" href="./accounting/sales.html">↗</a>
+          <a class="card-arrow" href="./accounting/sales.html" target="_blank">↗</a>
         </div>
         <div class="card-sub" id="donutSub">전월 매출 기준</div>
         <div class="chart-wrap" style="height:270px"><canvas id="chartDonut"></canvas></div>
@@ -374,7 +374,7 @@ body{
       <div class="card">
         <div class="card-top">
           <div class="card-title">재고 현황</div>
-          <a class="card-arrow" href="./logistics/orders.html">↗</a>
+          <a class="card-arrow" href="./logistics/orders.html" target="_blank">↗</a>
         </div>
         <div class="card-sub">주요 제품 재고 요약</div>
         <table class="inv-table">
@@ -473,22 +473,22 @@ body{
           <div class="rp-app-info"><div class="rp-app-name">소싱 분석기</div><div class="rp-app-desc">쿠팡 기회분석 · 골드박스</div></div>
           <div class="rp-app-arrow">→</div>
         </a>
-        <a class="rp-app" href="./rocket/rocket_preview.html">
+        <a class="rp-app" href="./rocket/rocket_preview.html" target="_blank">
           <div class="rp-app-icon">🚀</div>
           <div class="rp-app-info"><div class="rp-app-name">로켓 미리보기</div><div class="rp-app-desc">로켓그로스 상품 등록</div></div>
           <div class="rp-app-arrow">→</div>
         </a>
-        <a class="rp-app" href="./logistics/orders.html">
+        <a class="rp-app" href="./logistics/orders.html" target="_blank">
           <div class="rp-app-icon">📦</div>
           <div class="rp-app-info"><div class="rp-app-name">인벤토리 허브</div><div class="rp-app-desc">재고 관리 · 발주 현황</div></div>
           <div class="rp-app-arrow">→</div>
         </a>
-        <a class="rp-app" href="./accounting/sales.html">
+        <a class="rp-app" href="./accounting/sales.html" target="_blank">
           <div class="rp-app-icon">💰</div>
           <div class="rp-app-info"><div class="rp-app-name">매출 정산</div><div class="rp-app-desc">채널별 매출 리포트</div></div>
           <div class="rp-app-arrow">→</div>
         </a>
-        <a class="rp-app" href="./sales-dashboard.html">
+        <a class="rp-app" href="./sales-dashboard.html" target="_blank">
           <div class="rp-app-icon">📊</div>
           <div class="rp-app-info"><div class="rp-app-name">매출 대시보드</div><div class="rp-app-desc">매출 성과 분석</div></div>
           <div class="rp-app-arrow">→</div>
