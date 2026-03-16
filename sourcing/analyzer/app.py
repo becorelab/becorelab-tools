@@ -490,6 +490,204 @@ def api_explore_start():
     })
 
 
+# === 골드박스 ===
+GOLDBOX_URL = 'https://pages.coupang.com/p/121237?sourceType=gm_crm_goldbox&subSourceType=gm_crm_gwsrtcut'
+
+_goldbox_state = {
+    'running': False,
+    'phase': '',
+    'products': [],
+    'scanned': 0,
+    'total': 0,
+    'current': '',
+}
+
+
+@app.route('/api/goldbox/start', methods=['POST'])
+def api_goldbox_start():
+    """골드박스 수집 시작"""
+    if _goldbox_state['running']:
+        return jsonify({'success': False, 'error': '이미 진행 중'})
+
+    _goldbox_state.update({
+        'running': True, 'phase': 'crawling', 'products': [],
+        'scanned': 0, 'total': 0, 'current': '',
+    })
+
+    thread = threading.Thread(target=_run_goldbox, daemon=True)
+    thread.start()
+    return jsonify({'success': True, 'message': '골드박스 수집 시작!'})
+
+
+@app.route('/api/goldbox/status')
+def api_goldbox_status():
+    return jsonify({
+        'success': True,
+        'phase': _goldbox_state['phase'],
+        'products': len(_goldbox_state['products']),
+        'current': _goldbox_state['current'],
+        'running': _goldbox_state['running'],
+    })
+
+
+@app.route('/api/goldbox/products')
+def api_goldbox_products():
+    return jsonify({'success': True, 'products': _goldbox_state['products']})
+
+
+@app.route('/api/goldbox/history')
+def api_goldbox_history():
+    """골드박스 일별 기록"""
+    dates = fdb.get_goldbox_dates()
+    return jsonify({'success': True, 'dates': dates})
+
+
+@app.route('/api/goldbox/history/<date>')
+def api_goldbox_history_date(date):
+    """특정 날짜의 골드박스 상품"""
+    products = fdb.get_goldbox_by_date(date)
+    return jsonify({'success': True, 'date': date, 'products': products})
+
+
+def _run_goldbox():
+    """골드박스 크롤링 → 상품 수집 (키워드 추출/스캔 없음)"""
+    with app.app_context():
+        try:
+            _goldbox_state['phase'] = 'crawling'
+            _goldbox_state['current'] = '골드박스 페이지 로딩...'
+
+            products = _crawl_goldbox_direct(GOLDBOX_URL)
+            _goldbox_state['products'] = products
+            _goldbox_state['current'] = f'{len(products)}개 상품 수집 완료'
+
+            # DB에 일별 저장
+            import re
+            today = datetime.now().strftime('%Y-%m-%d')
+            goldbox_products = []
+            for p in products:
+                words = re.findall(r'[가-힣]{2,6}', p.get('name', ''))
+                extracted = ' '.join(words[:3]) if words else ''
+                goldbox_products.append({
+                    'product_name': p.get('name', ''),
+                    'price': p.get('price', 0),
+                    'discount': p.get('discount', ''),
+                    'product_url': p.get('url', ''),
+                    'extracted_keyword': extracted,
+                })
+            fdb.add_goldbox_products(today, goldbox_products)
+            print(f'[GOLDBOX] {today} — {len(products)}개 상품 저장')
+
+            if not products:
+                _goldbox_state['phase'] = 'error'
+                _goldbox_state['current'] = '상품을 찾을 수 없습니다'
+                return
+
+            _goldbox_state['phase'] = 'done'
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            _goldbox_state['phase'] = 'error'
+            _goldbox_state['current'] = str(e)
+        finally:
+            _goldbox_state['running'] = False
+
+
+def _crawl_goldbox_direct(url: str) -> list:
+    """골드박스 크롤링 — 별도 Playwright (Wing 워커와 독립)"""
+    from playwright.sync_api import sync_playwright
+    import re
+
+    print('[GOLDBOX] 크롤링 시작...')
+    pw = sync_playwright().start()
+    browser = pw.chromium.launch(
+        headless=False,
+        args=['--disable-blink-features=AutomationControlled']
+    )
+    page = browser.new_page()
+
+    try:
+        page.goto(url, wait_until='domcontentloaded', timeout=30000)
+        page.wait_for_timeout(5000)
+
+        page.evaluate(r'''() => {
+            window.__goldbox_items = {};
+            window.__goldbox_collect = () => {
+                document.querySelectorAll('a[href*="/vp/products/"], a[href*="/pb/products/"]').forEach(a => {
+                    const href = a.href || '';
+                    const pid = href.match(/products\/(\d+)/);
+                    if (!pid || window.__goldbox_items[pid[1]]) return;
+
+                    let name = '';
+                    const img = a.querySelector('img');
+                    if (img && img.alt && img.alt.length > 3) {
+                        name = img.alt.trim();
+                    } else {
+                        const parent = a.closest('[class*="product"], [class*="item"], [class*="deal"], li, div');
+                        if (parent) {
+                            const texts = [];
+                            parent.querySelectorAll('span, p, div, strong, em').forEach(el => {
+                                const t = el.innerText?.trim();
+                                if (t && t.length > 5 && t.length < 100 && /[가-힣]/.test(t)) texts.push(t);
+                            });
+                            if (texts.length > 0) name = texts.sort((a,b) => b.length - a.length)[0];
+                        }
+                        if (!name) name = a.innerText?.trim().substring(0, 80);
+                    }
+
+                    if (!name || name.length < 4 || !/[가-힣]/.test(name)) return;
+                    if (/전체|삭제|검색|필터|더보기|로그인|장바구니|카테고리/.test(name)) return;
+
+                    let price = 0, discount = '';
+                    const parent = a.closest('[class*="product"], [class*="item"], [class*="deal"], li, div');
+                    if (parent) {
+                        const m = parent.innerText.match(/[\d,]+원/g);
+                        if (m) price = parseInt(m[0].replace(/[^0-9]/g, '')) || 0;
+                        const d = parent.innerText.match(/(\d+)%/);
+                        if (d) discount = d[0];
+                    }
+
+                    window.__goldbox_items[pid[1]] = { name, price, discount, url: href };
+                });
+            };
+        }''')
+
+        no_change = 0
+        prev_total = 0
+        for i in range(300):
+            page.evaluate('window.scrollBy(0, 500)')
+            page.wait_for_timeout(300)
+
+            if i % 5 == 4:
+                page.evaluate('window.__goldbox_collect()')
+                total = page.evaluate('Object.keys(window.__goldbox_items).length')
+
+                if i % 15 == 14:
+                    print(f'[GOLDBOX] 스크롤 {i+1}회, 누적: {total}개')
+
+                if total == prev_total:
+                    no_change += 1
+                    if no_change >= 6:
+                        break
+                else:
+                    no_change = 0
+                prev_total = total
+
+        page.evaluate('window.__goldbox_collect()')
+        products = page.evaluate('Object.values(window.__goldbox_items)')
+        print(f'[GOLDBOX] 수집 완료: {len(products)}개')
+        return products
+
+    except Exception as e:
+        print(f'[GOLDBOX] 크롤링 에러: {e}')
+        import traceback
+        traceback.print_exc()
+        return []
+    finally:
+        browser.close()
+        pw.stop()
+
+
 # === 노이즈 키워드 필터 ===
 def _is_noise_keyword(keyword: str) -> bool:
     """브랜드명, 제품명, 정보성 키워드 필터링"""

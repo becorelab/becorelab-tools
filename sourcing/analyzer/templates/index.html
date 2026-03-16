@@ -1224,6 +1224,7 @@ body {
         <button class="scan-mode-btn active" data-mode="manual">스팟 분석</button>
         <button class="scan-mode-btn" data-mode="smart">스마트 스캔</button>
         <button class="scan-mode-btn" data-mode="discover">시장 발굴</button>
+        <button class="scan-mode-btn" data-mode="goldbox" style="color:var(--warning);">골드박스</button>
     </div>
 
     <!-- 직접 조사 -->
@@ -1392,6 +1393,65 @@ body {
                 </thead>
                 <tbody id="discoverResultsBody"></tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- 골드박스 -->
+    <div id="goldboxPanel" style="display:none;">
+        <div class="card" style="border-color:var(--warning);">
+            <div class="card-header">
+                <span class="card-title" style="color:var(--warning);">쿠팡 골드박스 수집</span>
+                <span class="card-subtitle">24시간 행사 인기 상품 수집</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <span style="font-size:13px; color:var(--text-secondary);">골드박스 상품을 수집해서 오늘의 행사 상품을 확인합니다</span>
+                <div style="flex:1;"></div>
+                <button class="btn btn-primary" id="btnGoldbox" style="background:var(--warning); color:#000; font-weight:700;">골드박스 수집</button>
+            </div>
+        </div>
+
+        <!-- 진행 상태 -->
+        <div id="goldboxProgress" class="card" style="display:none; border-color:var(--warning);">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span class="loading-spinner" style="border-top-color:var(--warning);"></span>
+                <div>
+                    <div style="font-size:14px; font-weight:600;" id="goldboxPhase">수집중...</div>
+                    <div style="font-size:12px; color:var(--text-secondary);" id="goldboxDetail"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 일별 기록 -->
+        <div class="history-dropdown" style="margin-top:12px;">
+            <button class="history-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+                <span>골드박스 일별 기록</span>
+                <span class="history-count" id="goldboxHistoryCount" style="background:var(--warning);">0</span>
+                <span class="history-arrow">&#9660;</span>
+            </button>
+            <div style="display:none;" id="goldboxHistoryPanel">
+                <div id="goldboxHistoryList" style="padding:8px;"></div>
+            </div>
+        </div>
+
+        <!-- 수집된 상품 목록 -->
+        <div class="card" id="goldboxProducts" style="display:none;">
+            <div class="card-header">
+                <span class="card-title">골드박스 수집 상품</span>
+                <span class="card-subtitle" id="goldboxProductCount"></span>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>상품명</th>
+                        <th>가격</th>
+                        <th>할인율</th>
+                        <th>링크</th>
+                    </tr>
+                </thead>
+                <tbody id="goldboxProductsBody"></tbody>
+            </table>
+            <div id="goldboxPagination"></div>
         </div>
     </div>
 
@@ -1893,6 +1953,7 @@ document.querySelectorAll('.scan-mode-btn').forEach(btn => {
         document.getElementById('manualScanPanel').style.display = mode === 'manual' ? 'block' : 'none';
         document.getElementById('smartScanPanel').style.display = mode === 'smart' ? 'block' : 'none';
         document.getElementById('discoverPanel').style.display = mode === 'discover' ? 'block' : 'none';
+        document.getElementById('goldboxPanel').style.display = mode === 'goldbox' ? 'block' : 'none';
     });
 });
 
@@ -4491,6 +4552,107 @@ function viewScanDetail(scanId) {
     document.getElementById('scanResult').style.display = 'block';
     showScanResult(scanId, {});
 }
+
+// ─────────────────────────────────────────────
+// 골드박스
+// ─────────────────────────────────────────────
+let _gbPage = 0;
+let _gbAllProducts = [];
+
+document.getElementById('btnGoldbox').addEventListener('click', async () => {
+    const btn = document.getElementById('btnGoldbox');
+    btn.disabled = true;
+    btn.textContent = '수집 중...';
+    document.getElementById('goldboxProgress').style.display = 'block';
+    document.getElementById('goldboxProducts').style.display = 'none';
+
+    try {
+        const res = await fetch('/api/goldbox/start', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' });
+        const data = await res.json();
+        if (!data.success) { alert(data.error); return; }
+
+        const poll = setInterval(async () => {
+            try {
+                const s = (await (await fetch('/api/goldbox/status')).json());
+                const phases = { crawling: '골드박스 페이지 수집 중...', done: '수집 완료!', error: '에러 발생' };
+                document.getElementById('goldboxPhase').textContent = phases[s.phase] || s.phase;
+                document.getElementById('goldboxDetail').textContent = s.current || '';
+
+                if (!s.running) {
+                    clearInterval(poll);
+                    btn.disabled = false;
+                    btn.textContent = '골드박스 수집';
+                    if (s.phase === 'done') {
+                        document.getElementById('goldboxProgress').style.borderColor = 'var(--success)';
+                        await loadGoldboxProducts();
+                        await loadGoldboxHistory();
+                    }
+                }
+            } catch(e) {}
+        }, 1500);
+    } catch(e) {
+        btn.disabled = false;
+        btn.textContent = '골드박스 수집';
+    }
+});
+
+async function loadGoldboxProducts() {
+    const res = await fetch('/api/goldbox/products');
+    const data = await res.json();
+    if (!data.success) return;
+    _gbAllProducts = data.products;
+    _gbPage = 0;
+    renderGoldboxPage();
+}
+
+function renderGoldboxPage() {
+    const pageSize = 50;
+    const total = _gbAllProducts.length;
+    const totalPages = Math.ceil(total / pageSize);
+    const pageProducts = _gbAllProducts.slice(_gbPage * pageSize, (_gbPage + 1) * pageSize);
+
+    document.getElementById('goldboxProducts').style.display = 'block';
+    document.getElementById('goldboxProductCount').textContent = `${total}개 상품`;
+    document.getElementById('goldboxProductsBody').innerHTML = pageProducts.map((p, i) => `
+        <tr>
+            <td>${_gbPage * pageSize + i + 1}</td>
+            <td style="max-width:300px; word-break:break-all;">${escapeHtml(p.name || p.product_name || '')}</td>
+            <td>${p.price ? p.price.toLocaleString() + '원' : '-'}</td>
+            <td>${p.discount || '-'}</td>
+            <td>${p.url || p.product_url ? `<a href="${p.url || p.product_url}" target="_blank" style="color:var(--accent);">링크</a>` : '-'}</td>
+        </tr>
+    `).join('');
+
+    const paginationHtml = Array.from({length: totalPages}, (_, i) =>
+        `<button class="btn ${i === _gbPage ? 'btn-primary' : ''}" style="margin:2px; min-width:32px;" onclick="_gbPage=${i};renderGoldboxPage()">${i+1}</button>`
+    ).join('');
+    document.getElementById('goldboxPagination').innerHTML = paginationHtml;
+}
+
+async function loadGoldboxHistory() {
+    try {
+        const res = await fetch('/api/goldbox/history');
+        const data = await res.json();
+        if (!data.success) return;
+        document.getElementById('goldboxHistoryCount').textContent = data.dates.length;
+        document.getElementById('goldboxHistoryList').innerHTML = data.dates.map(d =>
+            `<button class="btn" style="margin:3px;" onclick="loadGoldboxByDate('${d}')">${d}</button>`
+        ).join('');
+    } catch(e) {}
+}
+
+async function loadGoldboxByDate(date) {
+    const res = await fetch(`/api/goldbox/history/${date}`);
+    const data = await res.json();
+    if (!data.success) return;
+    _gbAllProducts = data.products;
+    _gbPage = 0;
+    renderGoldboxPage();
+    document.getElementById('goldboxProductCount').textContent = `${date} — ${data.products.length}개`;
+}
+
+// 골드박스 탭 열 때 기록 로드
+loadGoldboxHistory();
 
 function quickScan(keyword) {
     if (!keyword) return;
