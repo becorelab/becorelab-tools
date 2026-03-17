@@ -1521,37 +1521,17 @@ def api_review_chat(scan_id):
 - 이모지나 마크다운은 사용하지 마세요.
 - 한국어로 답해주세요."""
 
-    # Claude API 호출
-    api_key = os.environ.get('ANTHROPIC_API_KEY', '')
-    if not api_key:
-        from analyzer.reviews import ANTHROPIC_API_KEY
-        api_key = ANTHROPIC_API_KEY
-    if not api_key:
-        return jsonify({'error': 'ANTHROPIC_API_KEY가 설정되지 않았습니다.'})
+    # Gemini Flash API 호출 (무료)
+    from analyzer.reviews import GEMINI_API_KEY, _call_gemini
+    if not GEMINI_API_KEY:
+        return jsonify({'error': 'GEMINI_API_KEY가 설정되지 않았습니다.'})
 
     try:
-        import requests as req
-        resp = req.post(
-            'https://api.anthropic.com/v1/messages',
-            headers={
-                'x-api-key': api_key,
-                'anthropic-version': '2023-06-01',
-                'content-type': 'application/json'
-            },
-            json={
-                'model': 'claude-haiku-4-5-20251001',
-                'max_tokens': 1024,
-                'messages': [{'role': 'user', 'content': prompt}]
-            },
-            timeout=30
-        )
-        result = resp.json()
-        if 'content' in result and len(result['content']) > 0:
-            answer = result['content'][0].get('text', '')
+        answer = _call_gemini(prompt, max_tokens=1024)
+        if answer:
             return jsonify({'answer': answer})
         else:
-            error_msg = result.get('error', {}).get('message', str(result))
-            return jsonify({'error': f'API 오류: {error_msg}'})
+            return jsonify({'error': 'AI 응답이 비어있습니다.'})
     except Exception as e:
         return jsonify({'error': f'API 호출 실패: {str(e)}'})
 
@@ -1649,21 +1629,9 @@ def generate_rfq_from_scan(scan_id):
     recommendation_reason = '가장 많은 상품이 채택한 구성'
     certifications = []
 
-    # API 키 — 환경변수 → reviews.py 순서로 체크
-    anthropic_key = os.environ.get('ANTHROPIC_API_KEY', '')
-    if not anthropic_key:
-        try:
-            from analyzer.reviews import ANTHROPIC_API_KEY as _rfq_key
-            anthropic_key = _rfq_key
-        except:
-            pass
-    # 리뷰 분석의 chat 엔드포인트에서 쓰는 방식과 동일하게
-    if not anthropic_key:
-        for env_name in ['ANTHROPIC_API_KEY', 'CLAUDE_API_KEY']:
-            anthropic_key = os.environ.get(env_name, '')
-            if anthropic_key:
-                break
-    if anthropic_key and len(top10_names) > 0:
+    # Gemini Flash로 AI 스펙 생성 (무료)
+    from analyzer.reviews import GEMINI_API_KEY as _gemini_key, _call_gemini
+    if _gemini_key and len(top10_names) > 0:
         try:
             prompt_text = (
                 "다음은 쿠팡에서 잘 팔리는 상위 10개 상품명입니다:\n\n"
@@ -1676,25 +1644,9 @@ def generate_rfq_from_scan(scan_id):
                 '"reason": "경쟁 적고 매출 양호", '
                 '"certifications": ["KC인증"]}'
             )
-            import requests as _requests
-            resp = _requests.post(
-                'https://api.anthropic.com/v1/messages',
-                headers={
-                    'x-api-key': anthropic_key,
-                    'anthropic-version': '2023-06-01',
-                    'content-type': 'application/json'
-                },
-                json={
-                    'model': 'claude-haiku-4-5-20251001',
-                    'max_tokens': 1024,
-                    'messages': [{'role': 'user', 'content': prompt_text}]
-                },
-                timeout=30
-            )
-            if resp.ok:
-                ai_text = resp.json()['content'][0]['text'].strip()
+            ai_text = _call_gemini(prompt_text, max_tokens=1024)
+            if ai_text:
                 print(f'[RFQ] AI 스펙 생성 성공: {ai_text[:100]}')
-                # JSON 블록 추출 (```json ... ``` 감싸진 경우 대비)
                 json_match = re.search(r'\{[\s\S]*\}', ai_text)
                 if json_match:
                     ai_result = json.loads(json_match.group())

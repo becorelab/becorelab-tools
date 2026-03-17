@@ -15,15 +15,39 @@ logger = logging.getLogger(__name__)
 import os
 
 REVIEW_API = 'https://www.coupang.com/next-api/review'
+
+# API 키 로드 (.env 파일 지원)
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
-if not ANTHROPIC_API_KEY:
-    _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
-    if os.path.exists(_env_path):
-        with open(_env_path) as _f:
-            for _line in _f:
-                if _line.startswith('ANTHROPIC_API_KEY='):
-                    ANTHROPIC_API_KEY = _line.split('=', 1)[1].strip()
-                    break
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+_env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+if os.path.exists(_env_path):
+    with open(_env_path) as _f:
+        for _line in _f:
+            if _line.startswith('ANTHROPIC_API_KEY=') and not ANTHROPIC_API_KEY:
+                ANTHROPIC_API_KEY = _line.split('=', 1)[1].strip()
+            elif _line.startswith('GEMINI_API_KEY=') and not GEMINI_API_KEY:
+                GEMINI_API_KEY = _line.split('=', 1)[1].strip()
+
+
+def _call_gemini(prompt: str, max_tokens: int = 4000) -> str:
+    """Gemini 2.0 Flash API 호출 (무료 티어)"""
+    url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}'
+    res = requests.post(url, json={
+        'contents': [{'parts': [{'text': prompt}]}],
+        'generationConfig': {
+            'maxOutputTokens': max_tokens,
+            'thinkingConfig': {'thinkingBudget': 0},
+        },
+    }, timeout=60)
+    if res.ok:
+        data = res.json()
+        candidates = data.get('candidates', [])
+        if candidates:
+            parts = candidates[0].get('content', {}).get('parts', [])
+            if parts:
+                return parts[0].get('text', '')
+    logger.error(f'Gemini API 에러: {res.status_code} {res.text[:200]}')
+    return ''
 
 
 def collect_reviews_from_browser(page, product_url: str, max_reviews: int = 50) -> list:
@@ -184,11 +208,12 @@ def analyze_reviews_basic(reviews: list, keyword: str = '') -> dict:
     }
 
 
-def analyze_reviews_claude(reviews: list, keyword: str, api_key: str) -> dict:
+def analyze_reviews_claude(reviews: list, keyword: str, api_key: str = '') -> dict:
     """
-    Claude API로 리뷰 심층 분석
+    Gemini Flash로 리뷰 심층 분석 (무료, 기존 Claude 대체)
+    api_key 파라미터는 호환성 유지용 (사용하지 않음)
     """
-    if not api_key:
+    if not GEMINI_API_KEY:
         return analyze_reviews_basic(reviews, keyword)
 
     # 리뷰 텍스트 준비 (최대 300개) — 상품명 포함
@@ -219,34 +244,16 @@ def analyze_reviews_claude(reviews: list, keyword: str, api_key: str) -> dict:
 JSON만 답해주세요."""
 
     try:
-        res = requests.post(
-            'https://api.anthropic.com/v1/messages',
-            headers={
-                'x-api-key': api_key,
-                'anthropic-version': '2023-06-01',
-                'content-type': 'application/json',
-            },
-            json={
-                'model': 'claude-haiku-4-5-20251001',
-                'max_tokens': 4000,
-                'messages': [{'role': 'user', 'content': prompt}],
-            },
-            timeout=60,
-        )
-
-        if res.ok:
-            content = res.json()['content'][0]['text']
-            # JSON 추출
+        content = _call_gemini(prompt, max_tokens=4000)
+        if content:
             json_match = re.search(r'\{[\s\S]*\}', content)
             if json_match:
                 analysis = json.loads(json_match.group())
-                analysis['_source'] = 'claude'
+                analysis['_source'] = 'gemini'
                 return analysis
 
-        logger.error(f'Claude API 에러: {res.status_code} {res.text[:200]}')
-
     except Exception as e:
-        logger.error(f'Claude API 호출 실패: {e}')
+        logger.error(f'Gemini API 호출 실패: {e}')
 
     # 실패 시 기본 분석으로 폴백
     return analyze_reviews_basic(reviews, keyword)

@@ -303,9 +303,11 @@ body{
     <a class="sb-item active" href="./" title="대시보드">🏠<span class="sb-tooltip">대시보드</span></a>
     <a class="sb-item" href="./accounting/sales.html" target="_blank" title="매출 정산">💰<span class="sb-tooltip">매출 정산</span></a>
     <a class="sb-item" href="./sales-dashboard.html" target="_blank" title="매출 대시보드">📊<span class="sb-tooltip">매출 대시보드</span></a>
-    <a class="sb-item" href="./logistics/orders.html" target="_blank" title="인벤토리 허브">📦<span class="sb-tooltip">인벤토리 허브</span></a>
+    <a class="sb-item" href="./logistics/orders.html" target="_blank" title="물류 대시보드 (서버)">📦<span class="sb-tooltip">물류 대시보드 (서버)</span></a>
     <a class="sb-item" href="./rocket/rocket_preview.html" target="_blank" title="로켓 미리보기">🚀<span class="sb-tooltip">로켓 미리보기</span></a>
-    <a class="sb-item" href="http://72.62.198.120:8090" target="_blank" title="소싱 분석기">🔍<span class="sb-tooltip">소싱 분석기</span></a>
+    <a class="sb-item" href="http://72.62.198.120:8090" target="_blank" title="마켓파인더 (서버)">🔍<span class="sb-tooltip">마켓파인더 (서버)</span></a>
+    <a class="sb-item" href="http://localhost:8090" target="_blank" title="마켓파인더 (로컬)">🔬<span class="sb-tooltip">마켓파인더 (로컬)</span></a>
+    <a class="sb-item" href="http://localhost:8082" target="_blank" title="물류 대시보드 (로컬)">🚛<span class="sb-tooltip">물류 대시보드 (로컬)</span></a>
     <div class="sb-spacer"></div>
     <a class="sb-item" title="설정">⚙️<span class="sb-tooltip">설정</span></a>
   </nav>
@@ -470,7 +472,12 @@ body{
       <div style="display:flex;flex-direction:column;gap:6px">
         <a class="rp-app" href="http://72.62.198.120:8090" target="_blank">
           <div class="rp-app-icon">🔍</div>
-          <div class="rp-app-info"><div class="rp-app-name">소싱 분석기</div><div class="rp-app-desc">쿠팡 기회분석 · 골드박스</div></div>
+          <div class="rp-app-info"><div class="rp-app-name">마켓파인더 (서버)</div><div class="rp-app-desc">결과 조회 · 골드박스 · 리뷰</div></div>
+          <div class="rp-app-arrow">→</div>
+        </a>
+        <a class="rp-app" href="http://localhost:8090" target="_blank">
+          <div class="rp-app-icon">🔬</div>
+          <div class="rp-app-info"><div class="rp-app-name">마켓파인더 (로컬)</div><div class="rp-app-desc">스캔 · 판매량 · 시장발굴</div></div>
           <div class="rp-app-arrow">→</div>
         </a>
         <a class="rp-app" href="./rocket/rocket_preview.html" target="_blank">
@@ -480,7 +487,12 @@ body{
         </a>
         <a class="rp-app" href="./logistics/orders.html" target="_blank">
           <div class="rp-app-icon">📦</div>
-          <div class="rp-app-info"><div class="rp-app-name">인벤토리 허브</div><div class="rp-app-desc">재고 관리 · 발주 현황</div></div>
+          <div class="rp-app-info"><div class="rp-app-name">물류 대시보드 (서버)</div><div class="rp-app-desc">재고 현황 · 발주 조회</div></div>
+          <div class="rp-app-arrow">→</div>
+        </a>
+        <a class="rp-app" href="http://localhost:8082" target="_blank">
+          <div class="rp-app-icon">🚛</div>
+          <div class="rp-app-info"><div class="rp-app-name">물류 대시보드 (로컬)</div><div class="rp-app-desc">이지어드민 수집 · 발주관리</div></div>
           <div class="rp-app-arrow">→</div>
         </a>
         <a class="rp-app" href="./accounting/sales.html" target="_blank">
