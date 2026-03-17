@@ -124,10 +124,14 @@ def _start_browser():
             f'--disable-extensions-except={ext_path}',
         ])
 
+    # Docker/서버 환경에서는 headless 모드 사용
+    is_server = os.environ.get('DOCKER_ENV') == '1' or not os.environ.get('DISPLAY', os.name == 'nt' and 'yes' or '')
+    use_headless = is_server and not ext_path
+
     _pw = sync_playwright().start()
     _ctx = _pw.chromium.launch_persistent_context(
         user_data_dir=STATE_DIR,
-        headless=False,
+        headless=use_headless,
         viewport={'width': 1200, 'height': 800},
         args=launch_args,
     )

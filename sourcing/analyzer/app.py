@@ -354,19 +354,26 @@ def _run_scan_wing(scan_id: int, keyword: str):
     """쿠팡윙 API로 상품 데이터 수집 + 헬프스토어 키워드 데이터 결합"""
     with app.app_context():
         try:
-            # 1. 쿠팡윙 상품 데이터
-            products = wing_search(keyword)
-
-            for p in products:
-                fdb.add_product(scan_id, {
-                    'ranking': p.ranking, 'product_name': p.product_name,
-                    'brand': p.brand, 'manufacturer': p.manufacturer,
-                    'price': p.price, 'sales_monthly': p.sales_monthly,
-                    'revenue_monthly': p.revenue_monthly, 'review_count': p.review_count,
-                    'click_count': p.click_count, 'conversion_rate': p.conversion_rate,
-                    'page_views': p.page_views, 'category': p.category,
-                    'category_code': p.category_code, 'product_url': p.product_url,
-                })
+            # 1. 쿠팡윙 상품 데이터 (서버에서는 크롬 확장 없어서 스킵)
+            products = []
+            is_server = os.environ.get('DOCKER_ENV') == '1'
+            if is_server:
+                print(f'[SCAN-WING] 서버 환경 — 윙 브라우저 스킵 (키워드 데이터만 수집)')
+            else:
+                try:
+                    products = wing_search(keyword)
+                    for p in products:
+                        fdb.add_product(scan_id, {
+                            'ranking': p.ranking, 'product_name': p.product_name,
+                            'brand': p.brand, 'manufacturer': p.manufacturer,
+                            'price': p.price, 'sales_monthly': p.sales_monthly,
+                            'revenue_monthly': p.revenue_monthly, 'review_count': p.review_count,
+                            'click_count': p.click_count, 'conversion_rate': p.conversion_rate,
+                            'page_views': p.page_views, 'category': p.category,
+                            'category_code': p.category_code, 'product_url': p.product_url,
+                        })
+                except Exception as wing_err:
+                    print(f'[SCAN-WING] 윙 데이터 수집 실패 (키워드 데이터만 사용): {wing_err}')
 
             # 2. 헬프스토어 키워드 데이터 (연관키워드/검색량)
             api = get_helpstore()
@@ -599,9 +606,10 @@ def _crawl_goldbox_direct(url: str) -> list:
     import re
 
     print('[GOLDBOX] 크롤링 시작...')
+    is_server = os.environ.get('DOCKER_ENV') == '1'
     pw = sync_playwright().start()
     browser = pw.chromium.launch(
-        headless=False,
+        headless=is_server,
         args=['--disable-blink-features=AutomationControlled']
     )
     page = browser.new_page()
@@ -1379,9 +1387,10 @@ def _collect_reviews_direct(products) -> list:
     import re, time
 
     all_reviews = []
+    is_server = os.environ.get('DOCKER_ENV') == '1'
     pw = sync_playwright().start()
     browser = pw.chromium.launch(
-        headless=False,
+        headless=is_server,
         args=['--disable-blink-features=AutomationControlled', '--window-position=-2000,-2000']
     )
     context = browser.new_context(
@@ -1932,10 +1941,11 @@ def auto_publish_rfq(rfq_id):
             ali_profile = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.alibaba_profile')
             os.makedirs(ali_profile, exist_ok=True)
 
+            is_server = os.environ.get('DOCKER_ENV') == '1'
             pw = sync_playwright().start()
             ctx = pw.chromium.launch_persistent_context(
                 user_data_dir=ali_profile,
-                headless=False,
+                headless=is_server,
                 viewport={'width': 1200, 'height': 800},
                 args=['--disable-blink-features=AutomationControlled']
             )

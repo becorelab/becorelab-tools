@@ -196,7 +196,7 @@ if __name__ == "__main__":
     scheduler.start()
     log.info("APScheduler 시작 — 매일 10:00 자동 수집 예약됨")
 
-    port = 8090
+    port = int(os.environ.get('PORT', 8082))
     print(f"\n  iLBiA 물류 대시보드")
     print(f"  http://localhost:{port}")
     print(f"  매일 10:00 자동 수집 활성화")

@@ -1,0 +1,60 @@
+services:
+  # 마켓 파인더 (소싱 분석기) — :8090
+  market-finder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: becorelab-market-finder
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./sourcing/analyzer/.env:/app/sourcing/analyzer/.env:ro
+    environment:
+      - TZ=Asia/Seoul
+      - DOCKER_ENV=1
+      - DISPLAY=:99
+    command: bash -c "Xvfb :99 -screen 0 1280x1024x24 -nolisten tcp &  sleep 1 && python sourcing/analyzer/app.py"
+
+  # 소싱 매니저 (알리바바 문의) — :8080
+  sourcing-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: becorelab-sourcing
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - sourcing-db:/app/sourcing/data
+    environment:
+      - TZ=Asia/Seoul
+    command: python sourcing/sourcing_app.py
+
+  # 물류 대시보드 — :8082
+  logistics:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: becorelab-logistics
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      - TZ=Asia/Seoul
+    command: python logistics/logistics_app.py
+
+  # 비코어랩 허브 (정적 HTML) — :8000
+  hub:
+    image: nginx:alpine
+    container_name: becorelab-hub
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./hub:/usr/share/nginx/html:ro
+    environment:
+      - TZ=Asia/Seoul
+
+volumes:
+  sourcing-db:

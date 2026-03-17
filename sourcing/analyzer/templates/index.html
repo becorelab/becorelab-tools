@@ -870,6 +870,70 @@ body {
     .form-row { grid-template-columns: 1fr; }
 }
 
+@media (max-width: 768px) {
+    /* 헤더: 가로 스크롤 */
+    .header { padding: 0 10px; height: 44px; overflow-x: auto; }
+    .header-title .logo { font-size: 14px !important; }
+    .header-title { font-size: 12px !important; gap: 6px !important; white-space: nowrap; }
+    .header-stats { gap: 12px !important; font-size: 11px !important; white-space: nowrap; }
+
+    /* 탭: 가로 스크롤, 글씨 한 줄 유지 */
+    .tab-nav { padding: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+    .tab-btn { font-size: 11px !important; padding: 10px 12px !important; white-space: nowrap !important; flex-shrink: 0; }
+    .tab-btn .tab-icon { font-size: 13px !important; }
+    .tab-btn .badge { font-size: 8px !important; padding: 0px 4px !important; }
+
+    /* 메인 */
+    .main-content { padding: 10px !important; }
+
+    /* 스캔 모드 버튼 */
+    .scan-mode-toggle { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+    .scan-mode-btn { font-size: 12px !important; padding: 10px 8px !important; text-align: center; white-space: nowrap; }
+
+    /* 검색 박스 */
+    .search-box { flex-wrap: wrap; gap: 6px !important; }
+    .search-box input { width: 100% !important; flex: none !important; }
+    .btn-scan, .search-box .btn { flex: 1; }
+    .cdp-toggle { display: none; }
+    .btn-capture { font-size: 11px !important; padding: 0 8px !important; }
+
+    /* 카드 */
+    .card { padding: 12px !important; margin-bottom: 10px !important; }
+    .card-title { font-size: 13px !important; }
+
+    /* 통계 카드 */
+    .stat-card { padding: 10px !important; min-width: 0 !important; }
+    .stat-label { font-size: 10px !important; }
+    .stat-number { font-size: 15px !important; }
+    .stat-sub { font-size: 9px !important; }
+
+    /* 테이블 */
+    table { font-size: 11px !important; }
+    th, td { padding: 5px 6px !important; white-space: nowrap; }
+
+    /* 버튼 */
+    .btn { font-size: 11px !important; padding: 8px 10px !important; }
+
+    /* 모달 */
+    #insightBox { width: 98% !important; height: 95vh !important; }
+
+    /* 입력 확대 방지 */
+    input, select, textarea { font-size: 16px !important; }
+}
+
+/* 모바일 인라인 그리드 오버라이드 */
+@media (max-width: 768px) {
+    [style*="grid-template-columns: repeat(3"] { grid-template-columns: 1fr 1fr !important; }
+    [style*="grid-template-columns: 1fr 1fr;"] { grid-template-columns: 1fr !important; }
+    [style*="grid-template-columns: repeat(4"] { grid-template-columns: 1fr 1fr !important; }
+    [style*="grid-template-columns: repeat(7"] { grid-template-columns: repeat(3, 1fr) !important; }
+}
+
+/* 모바일 테이블 스크롤 */
+@media (max-width: 768px) {
+    .card:has(table), div:has(> table) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
 /* ── 견적비교 모달 ── */
 .quote-modal-overlay {
     position: fixed;
