@@ -355,6 +355,162 @@ def scrape_outbound(page, days=90, progress=None):
     return result
 
 
+def scrape_sales(page, target_date=None, progress=None):
+    """확장주문검색2 (DS00) — 판매처별 주문 + 매출 데이터 수집
+    컬럼 매핑 (검증 완료):
+      grid1_shop_id = 판매처
+      grid1_collect_date = 발주일
+      grid1_product_id = 상품코드
+      grid1_name = 상품명
+      grid1_product_name_options = 상품명+옵션
+      grid1_p_options = 옵션명
+      grid1_qty = 주문수량
+      grid1_order_products_qty = 상품수량
+      grid1_amount = 판매가
+      grid1_supply_price = 정산금액
+      grid1_stock = 현재고
+    """
+    if progress:
+        progress("scraping_sales")
+    if target_date is None:
+        target_date = (date.today() - timedelta(days=1)).isoformat()
+    log.info(f"확장주문검색2 페이지 이동 (DS00) — 날짜: {target_date}")
+    page.goto(f"{BASE}/template35.htm?template=DS00", timeout=30000, wait_until="domcontentloaded")
+    page.wait_for_timeout(5000)
+    clear_popups(page)
+
+    # 날짜 설정 (start_date, end_date만 — start_date2/end_date2는 보조 필터)
+    page.evaluate(
+        f"""
+        (() => {{
+            const s = document.getElementById('start_date');
+            const e = document.getElementById('end_date');
+            if (s) s.value = '{target_date}';
+            if (e) e.value = '{target_date}';
+        }})()
+        """
+    )
+
+    # 검색 실행
+    click_search(page)
+    page.wait_for_timeout(8000)
+    clear_popups(page)
+
+    # 페이지 크기 최대로 → 재검색으로 반영
+    set_max_page_size(page)
+    page.wait_for_timeout(2000)
+    click_search(page)
+    page.wait_for_timeout(6000)
+    clear_popups(page)
+
+    # 전체 데이터 수집 (페이지네이션)
+    all_data = []
+    max_pages = 20
+
+    for pg in range(max_pages):
+        page_data = page.evaluate(
+            """
+            (() => {
+                const tbl = document.getElementById('grid1') || document.querySelector('.ui-jqgrid-btable');
+                if (!tbl) return [];
+                const rows = [...tbl.querySelectorAll('tr.jqgrow')];
+                const data = [];
+                rows.forEach(tr => {
+                    const get = key => {
+                        const td = tr.querySelector('td[aria-describedby="grid1_' + key + '"]');
+                        return td ? td.textContent.trim() : '';
+                    };
+                    const parseNum = v => parseInt((v || '0').replace(/,/g, '')) || 0;
+
+                    const shop = get('shop_id');
+                    const dt = get('collect_date');
+                    const code = get('product_id');
+                    const name = get('name');
+                    const nameOpt = get('product_name_options');
+                    const option = get('p_options');
+                    const orderQty = parseNum(get('qty'));
+                    const productQty = parseNum(get('order_products_qty'));
+                    const amount = parseNum(get('amount'));
+                    const settlement = parseNum(get('supply_price'));
+                    const stock = parseNum(get('stock'));
+
+                    if (code) {
+                        data.push({
+                            shop, date: dt, code, name, nameOpt,
+                            option, orderQty, productQty,
+                            amount, settlement, stock
+                        });
+                    }
+                });
+                return data;
+            })()
+            """
+        )
+
+        if not page_data:
+            if pg == 0:
+                log.warning("DS00 첫 페이지 데이터 없음")
+            break
+
+        all_data.extend(page_data)
+
+        if pg == 0:
+            for item in page_data[:3]:
+                log.info(f"  샘플: {item['shop']} | {item['code']} {item['nameOpt']} | "
+                         f"수량={item['productQty']} 판매가={item['amount']:,} 정산={item['settlement']:,}")
+
+        if not go_next_page(page):
+            log.info(f"DS00 페이지 {pg+1} — 마지막 도달 ({len(all_data)}건)")
+            break
+        log.info(f"DS00 페이지 {pg+1} 완료 ({len(all_data)}건) — 다음 페이지로...")
+        page.wait_for_timeout(4000)
+        clear_popups(page)
+
+    log.info(f"확장주문검색2 총 {len(all_data)}건 수집")
+
+    # 채널별 집계
+    channel_summary = {}
+    product_summary = {}
+    total_amount = 0
+    total_settlement = 0
+
+    for row in all_data:
+        shop = row["shop"]
+        code = row["code"]
+
+        if shop not in channel_summary:
+            channel_summary[shop] = {"count": 0, "qty": 0, "amount": 0, "settlement": 0}
+        channel_summary[shop]["count"] += 1
+        channel_summary[shop]["qty"] += row["productQty"]
+        channel_summary[shop]["amount"] += row["amount"]
+        channel_summary[shop]["settlement"] += row["settlement"]
+
+        if code not in product_summary:
+            product_summary[code] = {"name": row["nameOpt"] or row["name"], "qty": 0, "amount": 0, "settlement": 0}
+        product_summary[code]["qty"] += row["productQty"]
+        product_summary[code]["amount"] += row["amount"]
+        product_summary[code]["settlement"] += row["settlement"]
+
+        total_amount += row["amount"]
+        total_settlement += row["settlement"]
+
+    # 로그 출력
+    log.info(f"=== {target_date} 매출 요약 ===")
+    log.info(f"  총 판매금액: {total_amount:,}원 / 정산예정: {total_settlement:,}원")
+    for shop, d in sorted(channel_summary.items(), key=lambda x: -x[1]["amount"]):
+        log.info(f"  {shop}: {d['count']}건, 수량 {d['qty']}, 판매 {d['amount']:,}원, 정산 {d['settlement']:,}원")
+
+    return {
+        "date": target_date,
+        "total_amount": total_amount,
+        "total_settlement": total_settlement,
+        "total_count": len(all_data),
+        "by_channel": channel_summary,
+        "by_product": product_summary,
+        "orders": all_data,
+    }
+
+
 def fetch_all_data(progress=None):
     """전체 데이터 수집 오케스트레이션"""
     if progress:
@@ -372,6 +528,7 @@ def fetch_all_data(progress=None):
 
             inventory = scrape_inventory(page, progress=progress)
             orders = scrape_outbound(page, days=90, progress=progress)
+            sales = scrape_sales(page, progress=progress)
 
             if progress:
                 progress("done")
@@ -379,6 +536,7 @@ def fetch_all_data(progress=None):
             return {
                 "inventory": inventory,
                 "orders": orders,
+                "sales": sales,
             }
         except Exception as e:
             log.error(f"데이터 수집 오류: {e}")

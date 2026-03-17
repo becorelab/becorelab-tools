@@ -54,6 +54,7 @@ def save_cache(result):
         "timestamp": datetime.now().isoformat(),
         "inventory": result["inventory"],
         "orders": result["orders"],
+        "sales": result.get("sales"),
     }
     # 1. 로컬 캐시 저장
     fd, tmp = tempfile.mkstemp(dir=os.path.dirname(CACHE_PATH), suffix=".tmp")
@@ -97,6 +98,23 @@ def _save_to_firestore(payload):
         "inventory": payload["inventory"],
         "orders": payload["orders"],
     })
+
+    # 매출 데이터 저장 (sales_daily 컬렉션)
+    sales = payload.get("sales")
+    if sales and sales.get("date"):
+        sales_date = sales["date"]
+        # orders 필드는 너무 크므로 요약만 저장
+        sales_summary = {
+            "date": sales_date,
+            "timestamp": ts,
+            "total_amount": sales.get("total_amount", 0),
+            "total_settlement": sales.get("total_settlement", 0),
+            "total_count": sales.get("total_count", 0),
+            "by_channel": sales.get("by_channel", {}),
+            "by_product": sales.get("by_product", {}),
+        }
+        db.collection("sales_daily").document(sales_date).set(sales_summary)
+        log.info(f"Firestore sales_daily/{sales_date} 저장 완료")
 
 
 def load_cache():
@@ -247,6 +265,32 @@ def api_get_purchases():
         if doc.exists:
             return jsonify({"status": "ok", "data": doc.to_dict()})
         return jsonify({"status": "empty"}), 204
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/sales-daily")
+def api_sales_daily():
+    """매출 일별 데이터 조회 (쿼리: ?date=2026-03-16 또는 ?days=7)"""
+    if not _firestore_ok:
+        return jsonify({"status": "no_firestore"}), 503
+    try:
+        target_date = request.args.get("date")
+        if target_date:
+            doc = fdb.db().collection("sales_daily").document(target_date).get()
+            if doc.exists:
+                return jsonify({"status": "ok", "data": doc.to_dict()})
+            return jsonify({"status": "empty"}), 204
+
+        days = int(request.args.get("days", 7))
+        from datetime import timedelta
+        results = []
+        for i in range(days):
+            d = (datetime.now() - timedelta(days=i+1)).strftime("%Y-%m-%d")
+            doc = fdb.db().collection("sales_daily").document(d).get()
+            if doc.exists:
+                results.append(doc.to_dict())
+        return jsonify({"status": "ok", "data": results})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

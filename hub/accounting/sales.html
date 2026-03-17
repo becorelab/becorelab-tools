@@ -250,6 +250,31 @@ tr:hover td{background:#1a1d2788;}
 /* MONTHLY RECORDS */
 .records-section{display:none;}
 .records-section.visible{display:block;}
+
+/* DAILY SALES */
+.daily-section{display:none;}
+.daily-section.visible{display:block;}
+.daily-date-picker{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.daily-date-picker input[type=date]{background:#1a1d27;border:1px solid #334155;color:#e2e8f0;padding:8px 12px;border-radius:8px;font-family:inherit;font-size:.85rem;}
+.daily-date-picker button{background:#0f766e;color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:500;transition:background .15s;}
+.daily-date-picker button:hover{background:#0d9488;}
+.daily-date-picker .daily-nav{background:#1e293b;color:#94a3b8;padding:8px 10px;font-size:.9rem;}
+.daily-date-picker .daily-nav:hover{background:#334155;color:#e2e8f0;}
+.daily-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;}
+.daily-card{background:#161b27;border:1px solid #1e293b;border-radius:12px;padding:16px;}
+.daily-card .label{font-size:.72rem;color:#64748b;margin-bottom:6px;font-weight:500;}
+.daily-card .val{font-size:1.3rem;font-weight:700;color:#e2e8f0;}
+.daily-card .val.teal{color:#2dd4bf;}
+.daily-card .val.green{color:#10b981;}
+.daily-card .val.amber{color:#fbbf24;}
+.daily-table{width:100%;border-collapse:collapse;margin-bottom:20px;}
+.daily-table th{background:#1a1d27;color:#94a3b8;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:10px 14px;text-align:left;border-bottom:1px solid #1e293b;}
+.daily-table th.right,.daily-table td.right{text-align:right;}
+.daily-table td{padding:10px 14px;border-bottom:1px solid #1e293b22;font-size:.82rem;color:#cbd5e1;}
+.daily-table tr:hover td{background:#1e293b33;}
+.daily-table .ch-bar{height:6px;border-radius:3px;background:#0f766e;margin-top:4px;transition:width .3s;}
+.daily-section-title{font-size:.88rem;font-weight:600;color:#e2e8f0;margin:20px 0 10px;display:flex;align-items:center;gap:8px;}
+.daily-empty{text-align:center;padding:60px 20px;color:#475569;font-size:.88rem;}
 .record-card{background:#161b27;border:1px solid #1e293b;border-radius:10px;margin-bottom:10px;overflow:hidden;transition:all .15s;}
 .record-card:hover{border-color:#334155;}
 .record-header{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;}
@@ -369,6 +394,7 @@ tr:hover td{background:#1a1d2788;}
       <button class="main-tab active" onclick="switchMainTab('dashboard')">📈 매출 대시보드</button>
       <button class="main-tab" onclick="switchMainTab('input')">📊 매출 입력</button>
       <button class="main-tab" onclick="switchMainTab('records')">📋 월별 기록</button>
+      <button class="main-tab" onclick="switchMainTab('daily')">📅 일 매출</button>
     </div>
 
     <!-- DASHBOARD SECTION -->
@@ -477,6 +503,19 @@ tr:hover td{background:#1a1d2788;}
     <!-- MONTHLY RECORDS SECTION -->
     <div id="recordsSection" class="records-section">
       <div id="recordsList"></div>
+    </div>
+
+    <!-- DAILY SALES SECTION -->
+    <div id="dailySection" class="daily-section">
+      <div class="daily-date-picker">
+        <button class="daily-nav" onclick="shiftDailyDate(-1)">◀</button>
+        <input type="date" id="dailyDateInput" onchange="loadDailySales()"/>
+        <button class="daily-nav" onclick="shiftDailyDate(1)">▶</button>
+        <button onclick="setDailyToday()">어제</button>
+      </div>
+      <div id="dailyContent">
+        <div class="daily-empty">📅 날짜를 선택하면 일 매출 데이터를 불러옵니다.</div>
+      </div>
     </div>
 
   </main>
@@ -2980,13 +3019,150 @@ async function loadDashboardTrend(currentMonth) {
 
 function switchMainTab(tab) {
   document.querySelectorAll('.main-tab').forEach((btn, i) => {
-    btn.classList.toggle('active', (i === 0 && tab === 'dashboard') || (i === 1 && tab === 'input') || (i === 2 && tab === 'records'));
+    btn.classList.toggle('active', (i === 0 && tab === 'dashboard') || (i === 1 && tab === 'input') || (i === 2 && tab === 'records') || (i === 3 && tab === 'daily'));
   });
   document.getElementById('dashboardSection').className = 'dashboard-section' + (tab === 'dashboard' ? ' visible' : '');
   document.getElementById('inputSection').style.display = tab === 'input' ? 'block' : 'none';
   document.getElementById('recordsSection').className = 'records-section' + (tab === 'records' ? ' visible' : '');
+  document.getElementById('dailySection').className = 'daily-section' + (tab === 'daily' ? ' visible' : '');
   if (tab === 'dashboard') renderDashboard();
   if (tab === 'records') loadMonthlyRecords();
+  if (tab === 'daily') { initDailyDate(); loadDailySales(); }
+}
+
+// ═══════════════════════════════════════════════════════
+// DAILY SALES (이지어드민 자동 수집 데이터)
+// ═══════════════════════════════════════════════════════
+let dailyDateInitialized = false;
+
+function initDailyDate() {
+  if (dailyDateInitialized) return;
+  dailyDateInitialized = true;
+  const inp = document.getElementById('dailyDateInput');
+  const d = new Date(); d.setDate(d.getDate() - 1);
+  inp.value = d.toISOString().slice(0, 10);
+}
+
+function setDailyToday() {
+  const d = new Date(); d.setDate(d.getDate() - 1);
+  document.getElementById('dailyDateInput').value = d.toISOString().slice(0, 10);
+  loadDailySales();
+}
+
+function shiftDailyDate(dir) {
+  const inp = document.getElementById('dailyDateInput');
+  const d = new Date(inp.value); d.setDate(d.getDate() + dir);
+  inp.value = d.toISOString().slice(0, 10);
+  loadDailySales();
+}
+
+function fmtWon(n) { return '₩' + (n || 0).toLocaleString('ko-KR'); }
+
+async function loadDailySales() {
+  const container = document.getElementById('dailyContent');
+  const dateStr = document.getElementById('dailyDateInput').value;
+  if (!dateStr) { container.innerHTML = '<div class="daily-empty">날짜를 선택해주세요.</div>'; return; }
+
+  container.innerHTML = '<div class="daily-empty">데이터 불러오는 중...</div>';
+
+  if (!firebaseReady || !db) {
+    container.innerHTML = '<div class="daily-empty">Firebase 연결이 필요합니다.</div>';
+    return;
+  }
+
+  try {
+    const doc = await db.collection('sales_daily').doc(dateStr).get();
+    if (!doc.exists) {
+      container.innerHTML = `<div class="daily-empty">📅 ${dateStr} 데이터가 없습니다.<br><span style="font-size:.75rem;color:#334155;margin-top:8px;display:block;">물류 대시보드에서 데이터를 수집하면 자동으로 반영됩니다.</span></div>`;
+      return;
+    }
+    const data = doc.data();
+    renderDailySales(data, dateStr);
+  } catch(err) {
+    console.warn('일 매출 로드 실패:', err);
+    container.innerHTML = `<div class="daily-empty" style="color:#ef4444;">데이터 로드 실패: ${err.message}</div>`;
+  }
+}
+
+function renderDailySales(data, dateStr) {
+  const container = document.getElementById('dailyContent');
+  const channels = data.by_channel || {};
+  const products = data.by_product || {};
+  const totalAmt = data.total_amount || 0;
+  const totalSettle = data.total_settlement || 0;
+  const totalCount = data.total_count || 0;
+
+  // 요일 계산
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
+  const dayName = days[new Date(dateStr).getDay()];
+
+  // 채널 정렬 (판매금액 순)
+  const chSorted = Object.entries(channels).sort((a, b) => b[1].amount - a[1].amount);
+  const maxChAmt = chSorted.length > 0 ? chSorted[0][1].amount : 1;
+
+  // 상품 정렬 (판매금액 순)
+  const prSorted = Object.entries(products).sort((a, b) => b[1].amount - a[1].amount);
+  const maxPrAmt = prSorted.length > 0 ? prSorted[0][1].amount : 1;
+
+  let html = '';
+
+  // 날짜 헤더
+  html += `<div style="font-size:1.1rem;font-weight:700;color:#e2e8f0;margin-bottom:16px;">${dateStr} (${dayName}) 매출 현황</div>`;
+
+  // 요약 카드
+  html += `<div class="daily-summary">
+    <div class="daily-card"><div class="label">총 판매금액</div><div class="val teal">${fmtWon(totalAmt)}</div></div>
+    <div class="daily-card"><div class="label">총 정산금액</div><div class="val green">${fmtWon(totalSettle)}</div></div>
+    <div class="daily-card"><div class="label">수수료·차감</div><div class="val amber">${fmtWon(totalAmt - totalSettle)}</div></div>
+    <div class="daily-card"><div class="label">주문 건수</div><div class="val">${totalCount.toLocaleString()}건</div></div>
+  </div>`;
+
+  // 채널별 매출
+  html += `<div class="daily-section-title">📊 채널별 매출</div>`;
+  html += `<table class="daily-table"><thead><tr>
+    <th>채널</th><th class="right">건수</th><th class="right">수량</th>
+    <th class="right">판매금액</th><th class="right">정산금액</th><th style="width:120px;">비중</th>
+  </tr></thead><tbody>`;
+  for (const [ch, d] of chSorted) {
+    const pct = totalAmt > 0 ? (d.amount / totalAmt * 100) : 0;
+    html += `<tr>
+      <td style="font-weight:500;">${ch}</td>
+      <td class="right">${d.count.toLocaleString()}</td>
+      <td class="right">${d.qty.toLocaleString()}</td>
+      <td class="right" style="font-weight:600;color:#2dd4bf;">${fmtWon(d.amount)}</td>
+      <td class="right" style="color:#10b981;">${fmtWon(d.settlement)}</td>
+      <td><div class="ch-bar" style="width:${(d.amount / maxChAmt * 100).toFixed(1)}%;"></div><span style="font-size:.7rem;color:#64748b;">${pct.toFixed(1)}%</span></td>
+    </tr>`;
+  }
+  // 합계 행
+  const totalQty = chSorted.reduce((s, [, d]) => s + d.qty, 0);
+  html += `<tr style="border-top:2px solid #334155;font-weight:700;">
+    <td>합계</td><td class="right">${totalCount.toLocaleString()}</td><td class="right">${totalQty.toLocaleString()}</td>
+    <td class="right" style="color:#2dd4bf;">${fmtWon(totalAmt)}</td>
+    <td class="right" style="color:#10b981;">${fmtWon(totalSettle)}</td><td></td>
+  </tr>`;
+  html += `</tbody></table>`;
+
+  // 상품별 매출 TOP 15
+  html += `<div class="daily-section-title">📦 상품별 매출 TOP 15</div>`;
+  html += `<table class="daily-table"><thead><tr>
+    <th>상품코드</th><th>상품명</th><th class="right">수량</th>
+    <th class="right">판매금액</th><th class="right">정산금액</th><th style="width:120px;">비중</th>
+  </tr></thead><tbody>`;
+  for (const [code, d] of prSorted.slice(0, 15)) {
+    const pct = totalAmt > 0 ? (d.amount / totalAmt * 100) : 0;
+    html += `<tr>
+      <td style="color:#94a3b8;font-size:.78rem;">${code}</td>
+      <td style="font-weight:500;">${d.name || ''}</td>
+      <td class="right">${d.qty.toLocaleString()}</td>
+      <td class="right" style="font-weight:600;color:#2dd4bf;">${fmtWon(d.amount)}</td>
+      <td class="right" style="color:#10b981;">${fmtWon(d.settlement)}</td>
+      <td><div class="ch-bar" style="width:${(d.amount / maxPrAmt * 100).toFixed(1)}%;"></div><span style="font-size:.7rem;color:#64748b;">${pct.toFixed(1)}%</span></td>
+    </tr>`;
+  }
+  html += `</tbody></table>`;
+
+  container.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════════
