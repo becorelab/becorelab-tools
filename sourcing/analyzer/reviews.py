@@ -208,12 +208,61 @@ def analyze_reviews_basic(reviews: list, keyword: str = '') -> dict:
     }
 
 
+def _analyze_with_claude(reviews: list, keyword: str, api_key: str) -> dict:
+    """Anthropic Claude API로 리뷰 심층 분석"""
+    import anthropic
+    review_texts = []
+    for r in reviews[:300]:
+        pname = r.get('productName', '')
+        stars = '★' * r.get('rating', 0)
+        text = f"[{stars}] [{pname}] {r.get('headline', '')} {r.get('content', '')}"
+        review_texts.append(text.strip())
+
+    review_block = '\n---\n'.join(review_texts)
+    prompt = f"""다음은 쿠팡에서 "{keyword}" 키워드로 판매되는 상위 상품들의 소비자 리뷰입니다.
+
+{review_block}
+
+위 리뷰를 분석하여 다음 항목을 JSON 형식으로 답해주세요:
+1. "summary": 소비자가 이 제품군에 대해 전반적으로 느끼는 점 (3줄)
+2. "pros": 소비자가 가장 많이 언급하는 장점 5가지 (배열)
+3. "cons": 소비자가 가장 많이 언급하는 단점/불만 5가지 (배열)
+4. "popular_types": 가장 인기 있는 제품 형태/타입 3가지와 이유 (배열, 각 항목은{{"type": "", "reason": ""}})
+5. "key_features": 소비자가 중요하게 생각하는 기능/특성 5가지 (배열)
+6. "sourcing_tips": 이 제품을 소싱할 때 포커스해야 할 포인트 3가지 (배열)
+7. "differentiation": 기존 제품 대비 차별화할 수 있는 아이디어 3가지 (배열)
+8. "top_products": 리뷰에서 가장 많이 언급된 상품 3개와 소비자 평가 요약 (배열, 각 항목은{{"name": "상품명", "summary": "한줄평"}})
+JSON만 답해주세요."""
+
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        message = client.messages.create(
+            model='claude-haiku-4-5-20251001',
+            max_tokens=4000,
+            messages=[{'role': 'user', 'content': prompt}]
+        )
+        content = message.content[0].text
+        json_match = re.search(r'\{[\s\S]*\}', content)
+        if json_match:
+            analysis = json.loads(json_match.group())
+            analysis['_source'] = 'claude'
+            return analysis
+    except Exception as e:
+        logger.error(f'Claude API 호출 실패: {e}')
+
+    return analyze_reviews_basic(reviews, keyword)
+
+
 def analyze_reviews_claude(reviews: list, keyword: str, api_key: str = '') -> dict:
     """
-    Gemini Flash로 리뷰 심층 분석 (무료, 기존 Claude 대체)
-    api_key 파라미터는 호환성 유지용 (사용하지 않음)
+    Gemini Flash로 리뷰 심층 분석 (무료)
+    Gemini 키 없으면 Anthropic Claude로 폴백
     """
     if not GEMINI_API_KEY:
+        # Gemini 키 없으면 Claude로 시도
+        _key = api_key or ANTHROPIC_API_KEY
+        if _key:
+            return _analyze_with_claude(reviews, keyword, _key)
         return analyze_reviews_basic(reviews, keyword)
 
     # 리뷰 텍스트 준비 (최대 300개) — 상품명 포함

@@ -1537,6 +1537,42 @@ def api_review_chat(scan_id):
         return jsonify({'error': f'API 호출 실패: {str(e)}'})
 
 
+@app.route('/api/scan/<int:scan_id>/reanalyze-reviews', methods=['POST'])
+def reanalyze_reviews(scan_id):
+    """기존 수집된 리뷰로 AI 재분석 (재수집 없이)"""
+    state = _review_state.get(scan_id)
+    if not state:
+        db_state = fdb.load_reviews_from_db(scan_id)
+        if db_state:
+            _review_state[scan_id] = db_state
+            state = db_state
+
+    if not state or not state.get('reviews'):
+        return jsonify({'success': False, 'error': '저장된 리뷰가 없습니다'})
+
+    reviews = state['reviews']
+    scan = fdb.get_scan(scan_id)
+    keyword = scan['keyword'] if scan else ''
+
+    _review_state[scan_id]['status'] = 'analyzing'
+
+    def _run():
+        with app.app_context():
+            try:
+                from analyzer.reviews import analyze_reviews_claude, ANTHROPIC_API_KEY
+                analysis = analyze_reviews_claude(reviews, keyword, ANTHROPIC_API_KEY)
+                _review_state[scan_id]['analysis'] = analysis
+                _review_state[scan_id]['status'] = 'done'
+                fdb.save_review_analysis(scan_id, keyword, len(reviews), analysis)
+                print(f'[REANALYZE] 완료: {keyword} ({len(reviews)}개)')
+            except Exception as e:
+                import traceback; traceback.print_exc()
+                _review_state[scan_id]['status'] = 'error'
+
+    threading.Thread(target=_run, daemon=True).start()
+    return jsonify({'success': True, 'message': f'{len(reviews)}개 리뷰 AI 재분석 시작!'})
+
+
 @app.route('/api/scan/<int:scan_id>/status', methods=['PUT'])
 def update_scan_status(scan_id):
     """스캔 상태 변경 (go / pass)"""
