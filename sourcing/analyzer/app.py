@@ -53,7 +53,8 @@ app.config['SECRET_KEY'] = 'becorelab-sourcing-analyzer-2026'
 # ─────────────────────────────────────────────
 @app.route('/')
 def index():
-    return render_template('index.html')
+    is_server = os.environ.get('MARKET_FINDER_ENV', 'local') == 'server'
+    return render_template('index.html', is_server=is_server)
 
 
 # === 시장스캔 API ===
