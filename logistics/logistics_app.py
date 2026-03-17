@@ -4,11 +4,12 @@ iLBiA 물류 대시보드 서버
 - 발주대시보드 HTML 서빙
 - 이지어드민 데이터 자동 수집 API
 - 매일 10시 예약 수집 (APScheduler)
-- 서버 캐시 (data/cache.json)
+- 로컬 캐시 (data/cache.json) + Firebase Firestore 실시간 연동
 """
 import json
 import logging
 import os
+import sys
 import subprocess
 import tempfile
 import threading
@@ -20,6 +21,16 @@ from apscheduler.triggers.cron import CronTrigger
 from flask import Flask, jsonify, make_response, request, send_file
 
 from ezadmin_scraper import fetch_all_data
+
+# Firestore 연동 — sourcing/analyzer/firestore_db.py 재사용
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'sourcing', 'analyzer'))
+try:
+    import firestore_db as fdb
+    fdb.init_firestore()
+    _firestore_ok = True
+except Exception as e:
+    _firestore_ok = False
+    logging.warning(f"Firestore 연결 실패 (로컬 캐시만 사용): {e}")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 log = logging.getLogger(__name__)
@@ -37,35 +48,79 @@ scrape_lock = threading.Lock()
 
 # ── 캐시 관리 ──
 def save_cache(result):
-    """수집 결과를 data/cache.json에 atomic write"""
+    """수집 결과를 로컬 캐시 + Firestore에 동시 저장"""
     os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
     payload = {
         "timestamp": datetime.now().isoformat(),
         "inventory": result["inventory"],
         "orders": result["orders"],
     }
+    # 1. 로컬 캐시 저장
     fd, tmp = tempfile.mkstemp(dir=os.path.dirname(CACHE_PATH), suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False)
         os.replace(tmp, CACHE_PATH)
-        log.info(f"캐시 저장 완료: {CACHE_PATH}")
+        log.info(f"로컬 캐시 저장 완료: {CACHE_PATH}")
     except Exception:
         if os.path.exists(tmp):
             os.unlink(tmp)
         raise
 
+    # 2. Firestore 저장
+    if _firestore_ok:
+        try:
+            _save_to_firestore(payload)
+            log.info("Firestore 동기화 완료")
+        except Exception as e:
+            log.warning(f"Firestore 저장 실패 (로컬 캐시는 정상): {e}")
+
+
+def _save_to_firestore(payload):
+    """Firestore에 물류 데이터 저장 (logistics 컬렉션)"""
+    db = fdb.db()
+    ts = payload["timestamp"]
+
+    # 최신 스냅샷 저장 (서버에서 바로 조회용)
+    db.collection("logistics").document("latest").set({
+        "timestamp": ts,
+        "inventory": payload["inventory"],
+        "orders": payload["orders"],
+        "updated_at": datetime.now().isoformat(),
+    })
+
+    # 일별 히스토리 저장 (매출 추이용)
+    today = datetime.now().strftime("%Y-%m-%d")
+    db.collection("logistics_daily").document(today).set({
+        "date": today,
+        "timestamp": ts,
+        "inventory": payload["inventory"],
+        "orders": payload["orders"],
+    })
+
 
 def load_cache():
-    """캐시 파일 로드. 없으면 None"""
-    if not os.path.exists(CACHE_PATH):
-        return None
-    try:
-        with open(CACHE_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as e:
-        log.warning(f"캐시 로드 실패: {e}")
-        return None
+    """캐시 로드: 로컬 파일 → Firestore 폴백"""
+    # 1. 로컬 캐시
+    if os.path.exists(CACHE_PATH):
+        try:
+            with open(CACHE_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            log.warning(f"로컬 캐시 로드 실패: {e}")
+
+    # 2. Firestore 폴백 (서버 환경에서 유용)
+    if _firestore_ok:
+        try:
+            doc = fdb.db().collection("logistics").document("latest").get()
+            if doc.exists:
+                data = doc.to_dict()
+                log.info("Firestore에서 데이터 로드 완료")
+                return data
+        except Exception as e:
+            log.warning(f"Firestore 로드 실패: {e}")
+
+    return None
 
 
 # ── macOS 알림 ──
@@ -179,6 +234,38 @@ def api_fetch_status(task_id):
     if not task:
         return jsonify({"error": "not found"}), 404
     return jsonify(task)
+
+
+# ── 발주/MOQ Firestore 동기화 API ──
+@app.route("/api/purchases", methods=["GET"])
+def api_get_purchases():
+    """Firestore에서 발주 데이터 로드"""
+    if not _firestore_ok:
+        return jsonify({"status": "no_firestore"}), 503
+    try:
+        doc = fdb.db().collection("logistics").document("purchases").get()
+        if doc.exists:
+            return jsonify({"status": "ok", "data": doc.to_dict()})
+        return jsonify({"status": "empty"}), 204
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/purchases", methods=["POST"])
+def api_save_purchases():
+    """발주 + MOQ 데이터를 Firestore에 저장"""
+    if not _firestore_ok:
+        return jsonify({"status": "no_firestore"}), 503
+    try:
+        data = request.get_json()
+        fdb.db().collection("logistics").document("purchases").set({
+            "purchases": data.get("purchases", []),
+            "moq": data.get("moq", {}),
+            "updated_at": datetime.now().isoformat(),
+        })
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":

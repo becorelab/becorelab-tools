@@ -37,25 +37,61 @@ def get_browser(p):
 
 
 def ezadmin_login(page):
-    """로그인 + 보안코드 대기"""
+    """로그인 + 보안코드 대기 (www.ezadmin.co.kr 메인 로그인)"""
     log.info("이지어드민 로그인 중...")
-    page.goto(EZADMIN["url"], timeout=30000)
+    page.goto(EZADMIN["url"], timeout=30000, wait_until="domcontentloaded")
     page.wait_for_timeout(3000)
-    page.evaluate(
-        f"document.getElementById('login-domain').value = '{EZADMIN['domain']}'"
-    )
-    page.evaluate(f"document.getElementById('login-id').value = '{EZADMIN['id']}'")
-    page.evaluate(f"document.getElementById('login-pwd').value = '{EZADMIN['pw']}'")
-    page.evaluate('document.querySelector(\'input[type="button"]\').click()')
-    page.wait_for_timeout(6000)
-    log.info("로그인 전송 완료 — 보안코드 대기...")
+
+    # 로그인 팝업 표시
+    page.evaluate("document.getElementById('login-popup').style.display = 'block'")
+    page.wait_for_timeout(1000)
+
+    # Playwright fill()로 입력 (jQuery .val()이 인식하도록)
+    page.fill("#login-domain", EZADMIN["domain"])
+    page.fill("#login-id", EZADMIN["id"])
+    page.fill("#login-pwd", EZADMIN["pw"])
+
+    # login_check → do_login (RSA 암호화 후 submit)
+    page.evaluate("login_check(null)")
+    page.wait_for_timeout(8000)
+    log.info(f"로그인 전송 완료 — 현재 URL: {page.url}")
+    log.info("보안코드 대기...")
     return True
 
 
 def wait_for_captcha(page, progress=None, timeout_sec=120):
-    """보안코드 팝업이 사라질 때까지 대기 (사용자가 수동 입력)"""
+    """보안코드 팝업이 사라질 때까지 대기 (사용자가 수동 입력)
+    보안코드가 없으면 (이미 인증됨) 바로 통과"""
     if progress:
         progress("captcha_wait")
+
+    # 먼저 보안코드 팝업이 있는지 확인 (5초 대기)
+    has_captcha = False
+    for i in range(5):
+        has_captcha = page.evaluate(
+            """
+            (() => {
+                const blocks = document.querySelectorAll('.blockUI.blockMsg');
+                for (const b of blocks) {
+                    if (b.offsetWidth > 0 && b.offsetHeight > 0
+                        && !b.querySelector('#wrap')) return true;
+                }
+                return false;
+            })()
+            """
+        )
+        if has_captcha:
+            break
+        time.sleep(1)
+
+    if not has_captcha:
+        log.info("보안코드 없음 — 이미 인증됨, 바로 진행")
+        return True
+
+    # 보안코드 대기
+    if progress:
+        progress("captcha_input")
+    log.info("보안코드 입력 대기 중...")
     for i in range(timeout_sec):
         has_block = page.evaluate(
             """
@@ -77,29 +113,10 @@ def wait_for_captcha(page, progress=None, timeout_sec=120):
 
 
 def clear_popups(page):
-    """dim + 팝업 제거"""
+    """blockUI 팝업 + dim 레이어 전체 제거 (매일 다른 팝업도 대응)"""
+    page.evaluate("try { $('.blockUI').remove(); } catch(e) {}")
     page.evaluate("document.querySelectorAll('.dim').forEach(el => el.remove())")
     page.wait_for_timeout(500)
-    for _ in range(5):
-        closed = page.evaluate(
-            """
-            (() => {
-                const blocks = document.querySelectorAll('.blockUI.blockMsg');
-                let closed = 0;
-                blocks.forEach(b => {
-                    if (b.offsetWidth > 0 && b.querySelector('#wrap') === null) {
-                        const btn = b.querySelector('.close_btn, [class*="close"], button');
-                        if (btn) { btn.click(); closed++; }
-                    }
-                });
-                document.querySelectorAll('.dim').forEach(el => el.remove());
-                return closed;
-            })()
-            """
-        )
-        if closed == 0:
-            break
-        page.wait_for_timeout(800)
 
 
 def click_search(page):
@@ -349,6 +366,7 @@ def fetch_all_data(progress=None):
             if progress:
                 progress("logging_in")
             ezadmin_login(page)
+            clear_popups(page)
             wait_for_captcha(page, progress=progress, timeout_sec=120)
             clear_popups(page)
 
