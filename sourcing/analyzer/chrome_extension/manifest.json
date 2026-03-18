@@ -4,7 +4,7 @@
   "version": "1.2",
   "description": "쿠팡 리뷰 수집 + 알리바바 RFQ 자동 등록",
   "permissions": ["tabs", "activeTab", "scripting"],
-  "host_permissions": ["*://www.coupang.com/*", "*://rfq.alibaba.com/*", "http://localhost:8090/*"],
+  "host_permissions": ["*://www.coupang.com/*", "*://rfq.alibaba.com/*", "http://localhost:8090/*", "http://localhost:8095/*"],
   "background": {
     "service_worker": "background.js"
   },

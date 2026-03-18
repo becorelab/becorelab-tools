@@ -14,6 +14,159 @@
     const productIndex = urlParams.get('mf_idx');
     const totalProducts = urlParams.get('mf_total');
 
+    // ----------------------------------------------------------
+    // 소싱 분석 버튼 (쿠팡 상품 페이지에 플로팅 버튼 추가)
+    // ----------------------------------------------------------
+    if (!autoCollect) {
+        setTimeout(() => injectSourcingButton(), 2000);
+    }
+
+    function injectSourcingButton() {
+        if (document.getElementById('mf-sourcing-btn')) return;
+
+        const btn = document.createElement('div');
+        btn.id = 'mf-sourcing-btn';
+        btn.innerHTML = '🔍 소싱 분석';
+        btn.style.cssText = `
+            position: fixed; bottom: 80px; right: 20px; z-index: 99999;
+            background: #1a1a2e; color: #fff; border: 1px solid #4a4aff;
+            padding: 10px 16px; border-radius: 6px; cursor: pointer;
+            font-size: 13px; font-weight: 600; font-family: sans-serif;
+            box-shadow: 0 4px 12px rgba(74,74,255,0.4);
+            transition: all 0.2s;
+        `;
+        btn.onmouseenter = () => btn.style.background = '#2a2a4e';
+        btn.onmouseleave = () => btn.style.background = '#1a1a2e';
+        btn.onclick = extractAndSendProductInfo;
+        document.body.appendChild(btn);
+    }
+
+    async function extractAndSendProductInfo() {
+        const btn = document.getElementById('mf-sourcing-btn');
+        btn.innerHTML = '⏳ 추출 중...';
+
+        // 상품명 추출
+        const nameSelectors = [
+            'h1.prod-buy-header__title',
+            'h2.prod-buy-header__title',
+            '.prod-buy-header__title',
+            'h1[class*="title"]',
+            'h1'
+        ];
+        let productName = '';
+        for (const sel of nameSelectors) {
+            const el = document.querySelector(sel);
+            if (el && el.innerText.trim()) {
+                productName = el.innerText.trim();
+                break;
+            }
+        }
+        if (!productName) {
+            productName = document.title.replace(/[-|].*쿠팡.*$/i, '').trim();
+        }
+
+        // 메인 이미지 URL 추출 (src + data-src lazy loading 대응)
+        function getImgSrc(el) {
+            if (!el) return '';
+            const src = el.src || el.getAttribute('data-src') || el.getAttribute('data-lazy-src') || '';
+            if (src.startsWith('http') && !src.includes('icon') && !src.includes('logo')) return src;
+            return '';
+        }
+
+        const imgSelectors = [
+            '.prod-image__detail img',
+            '.prod-image__item--first img',
+            '.prod-image__item img',
+            'img.prod-image__detail',
+            '[class*="prod-image"] img',
+            '.main-image img',
+            '#prodImage img',
+            '.thumbnail-image img',
+            'img[class*="prod-image"]'
+        ];
+        let imageUrl = '';
+        for (const sel of imgSelectors) {
+            const el = document.querySelector(sel);
+            const src = getImgSrc(el);
+            if (src) { imageUrl = src; break; }
+        }
+        // 폴백: 페이지 내 가장 큰 이미지 (src + data-src 모두 체크)
+        if (!imageUrl) {
+            const allImgs = document.querySelectorAll('img');
+            let maxArea = 0;
+            allImgs.forEach(img => {
+                const src = getImgSrc(img);
+                if (!src) return;
+                const w = img.naturalWidth || img.width || 0;
+                const h = img.naturalHeight || img.height || 0;
+                if (w > 200 && h > 200 && w * h > maxArea) {
+                    maxArea = w * h;
+                    imageUrl = src;
+                }
+            });
+        }
+
+        // 상품 스펙 추출 (사이즈, 소재, 색상 등)
+        let specs = [];
+        const specSelectors = [
+            '.prod-attr-item',
+            '[class*="prod-attr"]',
+            '.detail-item',
+            'table.prod-table tr',
+            '[class*="spec"] li',
+            '.item-options li'
+        ];
+        for (const sel of specSelectors) {
+            const els = document.querySelectorAll(sel);
+            if (els.length > 0) {
+                els.forEach(el => {
+                    const text = el.innerText.trim().replace(/\s+/g, ' ');
+                    if (text && text.length < 100) specs.push(text);
+                });
+                if (specs.length > 0) break;
+            }
+        }
+        // 폴백: 색상/사이즈 옵션에서 추출
+        if (specs.length === 0) {
+            const optionText = document.querySelector('.prod-buy-header__info, [class*="prod-option"]');
+            if (optionText) specs = [optionText.innerText.trim().substring(0, 200)];
+        }
+        specs = specs.slice(0, 8); // 최대 8개
+
+        const data = {
+            name: productName,
+            imageUrl: imageUrl,
+            specs: specs,
+            pageUrl: window.location.href,
+            source: 'coupang'
+        };
+
+        try {
+            await fetch('http://localhost:8095/api/product-info', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            btn.innerHTML = '✅ 전송 완료!';
+            btn.style.background = '#0a3a1a';
+            btn.style.borderColor = '#3fb950';
+            setTimeout(() => {
+                btn.innerHTML = '🔍 소싱 분석';
+                btn.style.background = '#1a1a2e';
+                btn.style.borderColor = '#4a4aff';
+            }, 3000);
+        } catch (e) {
+            btn.innerHTML = '❌ 실패 (서버 확인)';
+            btn.style.background = '#3a0a0a';
+            btn.style.borderColor = '#f85149';
+            setTimeout(() => {
+                btn.innerHTML = '🔍 소싱 분석';
+                btn.style.background = '#1a1a2e';
+                btn.style.borderColor = '#4a4aff';
+            }, 3000);
+        }
+    }
+
     if (autoCollect === '1' && scanId) {
         console.log(`[마켓파인더] 자동 리뷰 수집 시작 (scan=${scanId}, idx=${productIndex}/${totalProducts})`);
         setTimeout(async () => {

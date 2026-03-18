@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>알리바바 유사상품 검색 테스트</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Pretendard', 'Segoe UI', sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    min-height: 100vh;
+    padding: 32px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #7d8590;
+    margin-bottom: 32px;
+  }
+
+  /* 입력 섹션 */
+  .input-section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .input-section h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e6edf3;
+    margin-bottom: 16px;
+  }
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .input-box {
+    flex: 1;
+  }
+  .input-box label {
+    display: block;
+    font-size: 12px;
+    color: #7d8590;
+    margin-bottom: 6px;
+  }
+  .input-box input {
+    width: 100%;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #e6edf3;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .input-box input:focus { border-color: #388bfd; }
+  .input-box input::placeholder { color: #484f58; }
+
+  .btn-gen {
+    margin-top: 22px;
+    padding: 10px 20px;
+    background: #238636;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .btn-gen:hover { background: #2ea043; }
+
+  /* 프롬프트 출력 */
+  .prompt-section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 24px;
+    margin-bottom: 24px;
+    display: none;
+  }
+  .prompt-section h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e6edf3;
+    margin-bottom: 4px;
+  }
+  .prompt-section .desc {
+    font-size: 12px;
+    color: #7d8590;
+    margin-bottom: 14px;
+  }
+  .prompt-box {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 14px;
+    font-size: 12px;
+    color: #c9d1d9;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+  }
+  .btn-copy {
+    padding: 8px 16px;
+    background: #21262d;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-copy:hover { background: #30363d; }
+  .btn-copy.copied { background: #238636; border-color: #238636; }
+
+  /* 결과 섹션 */
+  .result-section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 24px;
+  }
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .result-header h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e6edf3;
+  }
+  .btn-refresh {
+    padding: 6px 12px;
+    background: #21262d;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .btn-refresh:hover { background: #30363d; }
+  .btn-clear {
+    padding: 6px 12px;
+    background: #21262d;
+    color: #f85149;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-left: 8px;
+  }
+  .btn-clear:hover { background: #30363d; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #484f58;
+    font-size: 13px;
+  }
+
+  .result-card {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .result-card .query-url {
+    font-size: 12px;
+    color: #58a6ff;
+    margin-bottom: 4px;
+    word-break: break-all;
+  }
+  .result-card .product-info {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e6edf3;
+    margin-bottom: 4px;
+  }
+  .result-card .received-at {
+    font-size: 11px;
+    color: #484f58;
+    margin-bottom: 16px;
+  }
+  .supplier-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .supplier-item {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 12px;
+    align-items: start;
+  }
+  .supplier-rank {
+    font-size: 14px;
+    font-weight: 700;
+    color: #f0a500;
+    text-align: center;
+    padding-top: 2px;
+  }
+  .supplier-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e6edf3;
+    margin-bottom: 4px;
+  }
+  .supplier-meta {
+    font-size: 12px;
+    color: #7d8590;
+    line-height: 1.6;
+  }
+  .supplier-meta span {
+    display: inline-block;
+    margin-right: 12px;
+  }
+  .supplier-meta .price { color: #3fb950; }
+  .supplier-meta .moq { color: #a5d6ff; }
+  .supplier-url a {
+    font-size: 12px;
+    color: #58a6ff;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .supplier-url a:hover { text-decoration: underline; }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .tag-gold { background: #3a2a00; color: #f0a500; }
+  .tag-verified { background: #0a2a10; color: #3fb950; }
+</style>
+</head>
+<body>
+
+<h1>알리바바 유사상품 검색 테스트</h1>
+<p class="subtitle">판매 페이지 URL 또는 이미지 URL을 입력하면 Claude in Chrome이 알리바바에서 유사 공급업체를 찾아요.</p>
+
+<!-- 입력 -->
+<div class="input-section">
+  <h2>검색 대상 입력</h2>
+  <div class="input-row">
+    <div class="input-box">
+      <label>판매 페이지 URL (쿠팡, 네이버, 11번가 등)</label>
+      <input type="text" id="pageUrl" placeholder="https://www.coupang.com/vp/products/..." />
+    </div>
+    <div class="input-box" style="max-width:300px">
+      <label>또는 이미지 URL (선택)</label>
+      <input type="text" id="imageUrl" placeholder="https://...jpg" />
+    </div>
+    <button class="btn-gen" onclick="generatePrompt()">프롬프트 생성</button>
+  </div>
+</div>
+
+<!-- 프롬프트 출력 -->
+<div class="prompt-section" id="promptSection">
+  <h2>Claude in Chrome 프롬프트</h2>
+  <p class="desc">아래 프롬프트를 복사해서 Claude in Chrome에 붙여넣으세요.</p>
+  <div class="prompt-box" id="promptBox"></div>
+  <button class="btn-copy" id="copyBtn" onclick="copyPrompt()">복사</button>
+</div>
+
+<!-- 결과 -->
+<div class="result-section">
+  <div class="result-header">
+    <h2>수신된 결과</h2>
+    <div>
+      <button class="btn-refresh" onclick="loadResults()">새로고침</button>
+      <button class="btn-clear" onclick="clearResults()">초기화</button>
+    </div>
+  </div>
+  <div id="resultList"><div class="empty-state">아직 수신된 결과가 없어요.<br>프롬프트를 실행하면 여기에 결과가 표시돼요.</div></div>
+</div>
+
+<script>
+function generatePrompt() {
+  const pageUrl = document.getElementById('pageUrl').value.trim();
+  const imageUrl = document.getElementById('imageUrl').value.trim();
+
+  if (!pageUrl && !imageUrl) {
+    alert('판매 페이지 URL 또는 이미지 URL을 입력해주세요.');
+    return;
+  }
+
+  const prompt = buildPrompt(pageUrl, imageUrl);
+  document.getElementById('promptBox').textContent = prompt;
+  document.getElementById('promptSection').style.display = 'block';
+  document.getElementById('copyBtn').textContent = '복사';
+  document.getElementById('copyBtn').classList.remove('copied');
+  document.getElementById('promptSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function buildPrompt(pageUrl, imageUrl) {
+  const hasPage = !!pageUrl;
+  const hasImage = !!imageUrl;
+
+  let step1 = '';
+  if (hasPage) {
+    step1 = `[1단계] 레퍼런스 페이지 분석
+────────────────────────────
+URL: ${pageUrl}
+
+1) 페이지 방문 후 3초 대기
+2) 페이지 최상단 h1 또는 메인 상품명 태그에서 **이 페이지의 주력 상품명만** 추출해:
+   - 연관상품, 추천상품, 광고 상품 제외
+   - 상품명 (한국어/영어)
+   - 메인 이미지 URL (상품 대표 이미지 1개, 썸네일/추천 이미지 제외)
+   - 핵심 키워드 (이 상품의 재질, 기능, 용도 등 3~5개)
+   - 영문 검색어 (이 상품만을 설명하는 영어 키워드 1~2개)
+3) 추출한 정보를 productInfo 변수에 저장:
+   {
+     name: "상품명",
+     mainImageUrl: "이미지URL",
+     keywords: ["키워드1", "키워드2"],
+     searchQuery: "english search query"
+   }`;
+  } else {
+    step1 = `[1단계] 이미지 정보 준비
+────────────────────────────
+이미지 URL: ${imageUrl}
+
+1) productInfo 변수에 아래 저장:
+   {
+     name: "이미지 기반 검색",
+     mainImageUrl: "${imageUrl}",
+     keywords: [],
+     searchQuery: ""
+   }`;
+  }
+
+  const imageSearchUrl = hasImage
+    ? imageUrl
+    : '(1단계에서 추출한 mainImageUrl)';
+
+  return `아래 순서대로 알리바바에서 유사 상품 공급업체를 찾아줘.
+
+${step1}
+
+────────────────────────────
+[2단계] 알리바바 이미지 검색
+────────────────────────────
+
+URL: https://www.alibaba.com/
+
+1) 페이지 방문 후 3초 대기
+2) 검색창 옆 카메라(이미지 검색) 아이콘 클릭
+3) "Paste image URL" 또는 URL 입력 탭 선택
+4) 이미지 URL 입력: ${imageSearchUrl}
+5) 검색 실행 후 5초 대기
+6) 검색 결과가 없으면 → 텍스트 검색으로 전환:
+   - 검색창에 productInfo.searchQuery 입력 후 검색
+
+────────────────────────────
+[3단계] 공급업체 리스트 수집 (100개 목표)
+────────────────────────────
+
+알리바바는 무한 스크롤 방식이므로 아래 순서로 진행:
+
+1) 현재 페이지에서 보이는 상품 카드 수집
+2) 페이지 맨 아래로 스크롤 다운 (window.scrollTo(0, document.body.scrollHeight))
+3) 3초 대기 후 다시 카드 수집
+4) 총 100개 이상 모일 때까지 반복 (최대 15회 스크롤)
+5) 100개 미만이면 다음 페이지 버튼 클릭 후 추가 수집
+
+각 상품마다:
+- 상품명 (title)
+- 가격 범위 (price, 예: "$1.50 - $3.00")
+- 최소주문수량 (moq, 예: "100 pieces")
+- 공급업체명 (supplier)
+- Gold/Verified 여부 (isGold: true/false)
+- 거래 건수 또는 평점 (rating)
+- 상품 URL (url)
+- 이미지 URL (imageUrl)
+
+suppliers 배열에 저장 (목표 100개, 중복 URL 제외):
+[{rank: 1, title, price, moq, supplier, isGold, rating, url, imageUrl}, ...]
+
+────────────────────────────
+[4단계] 결과 전송
+────────────────────────────
+
+fetch('http://localhost:8095/api/result', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({
+    query_url: '${pageUrl || imageUrl}',
+    product_info: productInfo,
+    suppliers: suppliers
+  })
+})
+.then(r => r.json())
+.then(d => console.log('전송 완료', d))
+
+전송 후 결과 요약:
+- 분석한 상품명
+- 찾은 공급업체 수
+- 가격 범위 (최저 ~ 최고)
+- Gold Supplier 수
+를 알려줘.`;
+}
+
+function copyPrompt() {
+  const text = document.getElementById('promptBox').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ 복사됨';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '복사';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+function loadResults() {
+  fetch('http://localhost:8095/api/results')
+    .then(r => r.json())
+    .then(data => renderResults(data))
+    .catch(() => {
+      document.getElementById('resultList').innerHTML =
+        '<div class="empty-state">서버에 연결할 수 없어요.<br>test_server.py가 실행 중인지 확인해주세요.</div>';
+    });
+}
+
+function clearResults() {
+  fetch('http://localhost:8095/api/clear', { method: 'POST' })
+    .then(() => loadResults());
+}
+
+function renderResults(data) {
+  const el = document.getElementById('resultList');
+  if (!data || data.length === 0) {
+    el.innerHTML = '<div class="empty-state">아직 수신된 결과가 없어요.<br>프롬프트를 실행하면 여기에 결과가 표시돼요.</div>';
+    return;
+  }
+
+  el.innerHTML = [...data].reverse().map(r => `
+    <div class="result-card">
+      <div class="query-url">🔍 ${r.query_url || '-'}</div>
+      <div class="product-info">${r.product_info?.name || '상품명 없음'}</div>
+      <div class="received-at">${r.received_at} · 공급업체 ${(r.suppliers || []).length}개</div>
+      <div class="supplier-list">
+        ${(r.suppliers || []).map(s => `
+          <div class="supplier-item">
+            <div class="supplier-rank">${s.rank}</div>
+            <div>
+              <div class="supplier-name">${s.title || '-'}</div>
+              <div class="supplier-meta">
+                <span class="price">💰 ${s.price || '-'}</span>
+                <span class="moq">📦 MOQ: ${s.moq || '-'}</span>
+                <span>${s.supplier || '-'}</span>
+                ${s.isGold ? '<span class="tag tag-gold">Gold</span>' : ''}
+                ${s.rating ? `<span>⭐ ${s.rating}</span>` : ''}
+              </div>
+            </div>
+            <div class="supplier-url">
+              ${s.url ? `<a href="${s.url}" target="_blank">보기 →</a>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// 결과 3초마다 자동 새로고침
+loadResults();
+setInterval(loadResults, 3000);
+
+// 쿠팡 상품 자동 감지 (2초마다 폴링)
+setInterval(checkPending, 2000);
+
+function checkPending() {
+  fetch('http://localhost:8095/api/pending')
+    .then(r => r.json())
+    .then(data => {
+      if (!data || !data.name) return;
+
+      // 상품 정보 자동 입력
+      document.getElementById('pageUrl').value = data.pageUrl || '';
+      if (data.imageUrl) document.getElementById('imageUrl').value = data.imageUrl;
+
+      // 알림 표시
+      showToast(`📦 쿠팡 상품 감지: ${data.name}`);
+
+      // 프롬프트 자동 생성
+      generatePromptFromData(data);
+    })
+    .catch(() => {});
+}
+
+function generatePromptFromData(data) {
+  const prompt = buildPromptFromData(data);
+  document.getElementById('promptBox').textContent = prompt;
+  document.getElementById('promptSection').style.display = 'block';
+  document.getElementById('copyBtn').textContent = '복사';
+  document.getElementById('copyBtn').classList.remove('copied');
+
+  // 클립보드 자동 복사
+  navigator.clipboard.writeText(prompt).then(() => {
+    showToast('✅ 프롬프트 자동 복사 완료! Claude in Chrome에 붙여넣기 하세요.');
+  });
+
+  document.getElementById('promptSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function buildPromptFromData(data) {
+  return `아래 순서대로 알리바바에서 유사 상품 공급업체를 찾아줘.
+
+[1단계] 상품 정보 (쿠팡에서 미리 추출됨)
+────────────────────────────
+상품명: ${data.name}
+메인 이미지 URL: ${data.imageUrl || '없음'}
+상품 스펙: ${data.specs && data.specs.length ? data.specs.join(' / ') : '없음'}
+쿠팡 페이지: ${data.pageUrl}
+
+productInfo 변수에 저장:
+{
+  name: "${data.name}",
+  mainImageUrl: "${data.imageUrl || ''}",
+  specs: ${JSON.stringify(data.specs || [])},
+  searchQuery: "${toEnglishQuery(data.name)}"
+}
+
+────────────────────────────
+[2단계] 알리바바 이미지 검색
+────────────────────────────
+
+URL: https://www.alibaba.com/
+
+1) 페이지 방문 후 3초 대기
+${data.imageUrl ? `2) 검색창 옆 카메라(이미지 검색) 아이콘 클릭
+3) "Paste image URL" 탭 선택
+4) 이미지 URL 입력: ${data.imageUrl}
+5) 검색 실행 후 5초 대기
+6) 검색 결과가 없으면 → 텍스트 검색으로 전환 (아래 7번)
+7) 상품명과 스펙을 참고해서 영어 키워드로 텍스트 검색:
+   - 상품명: "${data.name}"
+   - 스펙: ${data.specs && data.specs.length ? data.specs.join(', ') : '없음'}` : `2) 상품명과 스펙을 참고해서 영어 키워드로 검색창에 입력:
+   - 상품명: "${data.name}"
+   - 스펙: ${data.specs && data.specs.length ? data.specs.join(', ') : '없음'}
+   - 위 정보를 종합해서 가장 적합한 영어 검색어 만들어서 검색 (예: "lumbar support pillow memory foam half-moon")`}
+
+────────────────────────────
+[3단계] 공급업체 리스트 수집 (100개 목표)
+────────────────────────────
+
+알리바바는 무한 스크롤 방식이므로 아래 순서로 진행:
+
+1) 현재 페이지에서 보이는 상품 카드 수집
+2) 페이지 맨 아래로 스크롤 다운 (window.scrollTo(0, document.body.scrollHeight))
+3) 3초 대기 후 다시 카드 수집
+4) 총 100개 이상 모일 때까지 반복 (최대 15회 스크롤)
+5) 100개 미만이면 다음 페이지 버튼 클릭 후 추가 수집
+
+각 상품마다:
+- 상품명 (title)
+- 가격 범위 (price)
+- 최소주문수량 (moq)
+- 공급업체명 (supplier)
+- Gold/Verified 여부 (isGold: true/false)
+- 거래 건수 또는 평점 (rating)
+- 상품 URL (url)
+- 이미지 URL (imageUrl)
+
+suppliers 배열에 저장 (목표 100개, 중복 URL 제외):
+[{rank: 1, title, price, moq, supplier, isGold, rating, url, imageUrl}, ...]
+
+────────────────────────────
+[4단계] 결과 전송
+────────────────────────────
+
+fetch('http://localhost:8095/api/result', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({
+    query_url: '${data.pageUrl}',
+    product_info: productInfo,
+    suppliers: suppliers
+  })
+})
+.then(r => r.json())
+.then(d => console.log('전송 완료', d))
+
+결과 요약: 상품명, 공급업체 수, 가격 범위, Gold 수 알려줘.`;
+}
+
+function toEnglishQuery(koreanName) {
+  // 간단한 키워드 변환 힌트 (Claude가 더 잘 번역할 것임)
+  return koreanName.replace(/[()（）]/g, ' ').trim();
+}
+
+function showToast(msg) {
+  const toast = document.createElement('div');
+  toast.textContent = msg;
+  toast.style.cssText = `
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: #238636; color: #fff; padding: 12px 24px;
+    border-radius: 6px; font-size: 13px; z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+</script>
+</body>
+</html>
