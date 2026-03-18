@@ -265,18 +265,25 @@ tr:last-child td{border-bottom:none;}
 
     <div class="sb-section">
       <div class="sb-label">자동 수집</div>
-      <button class="btn btn-mint btn-block" id="btn-fetch" onclick="fetchEzAdmin()">🔄 이지어드민 데이터 가져오기</button>
+      <button class="btn btn-mint btn-block" id="btn-fetch" onclick="startChromeCollect()">🔄 이지어드민 데이터 가져오기</button>
       <div class="fetch-status" id="fetch-status">
         <div class="fetch-spinner"></div>
         <span id="fetch-step">연결 중...</span>
       </div>
       <div style="font-size:.65rem;color:var(--muted);margin-top:6px;line-height:1.5;">
-        브라우저가 열리면 보안코드만 입력하세요.<br/>
-        이후 재고+주문 자동 수집됩니다.
+        크롬 확장프로그램이 자동 수집합니다.<br/>
+        이지어드민 탭에서 완료될 때까지 기다려주세요.
       </div>
       <div id="cache-info" style="font-size:.65rem;color:var(--muted);margin-top:8px;padding:6px 8px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);display:none;">
         <span style="color:var(--mint);font-weight:600;">서버 캐시</span>
         <span id="cache-time" style="margin-left:4px;">—</span>
+      </div>
+      <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px;">
+        <div style="font-size:.72rem;font-weight:600;color:var(--muted2);margin-bottom:8px;">크롬 수집</div>
+        <button class="btn btn-sm" style="width:100%;background:var(--purple);color:#fff;padding:8px;border-radius:8px;font-size:.72rem;cursor:pointer;" onclick="openChromeGuide()">
+          🌐 클로드 인 크롬 가이드
+        </button>
+        <div id="chrome-upload-status" style="font-size:.65rem;color:var(--muted2);margin-top:6px;"></div>
       </div>
     </div>
 
@@ -830,7 +837,65 @@ document.getElementById('order-modal').addEventListener('click',e=>{if(e.target=
 // ── API 베이스 경로 (허브 프록시 vs 직접 접속 자동 감지) ──
 const API_BASE = location.pathname.startsWith('/logistics') ? '/logistics/api' : '/api';
 
-// ── 이지어드민 자동 수집 ──
+// ── 클로드 인 크롬 가이드 ──
+function openChromeGuide(){
+  window.open('http://localhost:8082/chrome-guide','_blank');
+}
+async function checkChromeUploadStatus(){
+  try{
+    const res=await fetch(`${API_BASE}/chrome-upload-status`);
+    if(!res.ok)return;
+    const data=await res.json();
+    if(data&&data.last_upload){
+      const d=new Date(data.last_upload);
+      const mo=d.getMonth()+1;
+      const day=d.getDate();
+      const ampm=d.getHours()<12?'오전':'오후';
+      const h=d.getHours()%12||12;
+      const m=String(d.getMinutes()).padStart(2,'0');
+      document.getElementById('chrome-upload-status').textContent=`마지막 크롬 수집: ${mo}. ${day}. ${ampm} ${h}:${m}`;
+    }
+  }catch(e){/* 서버 미응답 시 무시 */}
+}
+
+// ── 크롬 확장프로그램 연동 수집 ──
+function startChromeCollect() {
+  const collectUrl = 'https://ka04.ezadmin.co.kr/template35.htm?template=I100&ilbia_collect=start';
+  window.open(collectUrl, '_blank');
+
+  const statusEl = document.getElementById('chrome-upload-status');
+  if (statusEl) {
+    statusEl.innerHTML = '<span style="color:var(--mint)">🔄 수집 시작... 이지어드민 탭을 확인하세요</span>';
+  }
+
+  const startTime = Date.now();
+  const checkInterval = setInterval(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/cached-data`);
+      if (res.ok) {
+        const json = await res.json();
+        const cacheTime = new Date(json.data?.timestamp).getTime();
+        if (cacheTime > startTime) {
+          clearInterval(checkInterval);
+          if (statusEl) {
+            statusEl.innerHTML = '<span style="color:var(--mint)">✅ 수집 완료! 데이터 반영됨</span>';
+          }
+          await initLoad();
+        }
+      }
+    } catch(e) {}
+
+    // 5분 타임아웃
+    if (Date.now() - startTime > 300000) {
+      clearInterval(checkInterval);
+      if (statusEl) {
+        statusEl.innerHTML = '<span style="color:var(--danger)">⏰ 수집 시간 초과</span>';
+      }
+    }
+  }, 5000);
+}
+
+// ── 이지어드민 자동 수집 (Playwright 백업) ──
 async function fetchEzAdmin(){
   const btn=document.getElementById('btn-fetch');
   const statusDiv=document.getElementById('fetch-status');
@@ -935,19 +1000,21 @@ async function loadServerCache(){
 }
 
 // ── 초기 로드: 서버 캐시 → 폴백 7일 체크 ──
-(async function initLoad(){
+async function initLoad(){
   await _loadPurchasesFromServer();
   renderAll();
+  checkChromeUploadStatus();
   const cached=await loadServerCache();
   if(!cached){
     const last=parseInt(localStorage.getItem('ilbia_last_fetch')||'0');
     const daysSince=last?(Date.now()-last)/86400000:999;
     if(daysSince>=7){
       showToast('📡 7일 경과 — 이지어드민 데이터 자동 수집을 시작합니다');
-      setTimeout(()=>fetchEzAdmin(),2000);
+      setTimeout(()=>startChromeCollect(),2000);
     }
   }
-})();
+}
+initLoad();
 </script>
 </body>
 </html>

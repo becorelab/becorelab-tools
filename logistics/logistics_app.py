@@ -19,6 +19,7 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from flask import Flask, jsonify, make_response, request, send_file
+from flask_cors import CORS
 
 from ezadmin_scraper import fetch_all_data
 
@@ -36,6 +37,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 log = logging.getLogger(__name__)
 
 app = Flask(__name__)
+CORS(app)
+
 DIR = os.path.dirname(os.path.abspath(__file__))
 CACHE_PATH = os.path.join(DIR, "data", "cache.json")
 
@@ -293,6 +296,54 @@ def api_sales_daily():
         return jsonify({"status": "ok", "data": results})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/chrome-upload", methods=["POST"])
+def api_chrome_upload():
+    """클로드 인 크롬에서 재고 + 주문 + 매출 데이터를 한 번에 수신"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"status": "error", "message": "JSON 데이터가 없습니다"}), 400
+
+        inventory = data.get("inventory", {})
+        orders = data.get("orders", [])
+        sales = data.get("sales")
+
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        # inventory 항목에 updated 날짜 추가
+        for code in inventory:
+            inventory[code]["updated"] = today
+
+        # save_cache()와 동일한 형식으로 payload 구성
+        result = {
+            "inventory": inventory,
+            "orders": orders,
+            "sales": sales,
+        }
+        save_cache(result)
+
+        # 응답 구성
+        saved = {
+            "inventory": len(inventory),
+            "orders": len(orders),
+        }
+        if sales and sales.get("date"):
+            saved["sales_date"] = sales["date"]
+
+        sales_msg = f", 매출 {saved['sales_date']}" if "sales_date" in saved else ""
+        log.info(f"[chrome-upload] 저장 완료: 재고 {saved['inventory']}건, 주문 {saved['orders']}건{sales_msg}")
+
+        return jsonify({
+            "status": "ok",
+            "message": "데이터 저장 완료",
+            "saved": saved,
+        })
+
+    except Exception as e:
+        log.error(f"[chrome-upload] 오류: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @app.route("/api/purchases", methods=["POST"])

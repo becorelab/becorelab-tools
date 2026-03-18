@@ -409,14 +409,39 @@ const LS = {
   inv:          () => JSON.parse(localStorage.getItem('ilbia_inv_base')||'{}'),
   saveInv:      d  => localStorage.setItem('ilbia_inv_base', JSON.stringify(d)),
   purchases:    () => JSON.parse(localStorage.getItem('ilbia_purchases')||'[]'),
-  savePurchases:d  => localStorage.setItem('ilbia_purchases', JSON.stringify(d)),
+  savePurchases:d  => { localStorage.setItem('ilbia_purchases', JSON.stringify(d)); _syncPurchasesToServer(); },
   moq: () => {
     const s = JSON.parse(localStorage.getItem('ilbia_moq')||'null');
     if(s) return s;
     const m={}; PRODUCTS.forEach(p=>m[p.code]=p.moq); return m;
   },
-  saveMoq: m => localStorage.setItem('ilbia_moq', JSON.stringify(m)),
+  saveMoq: m => { localStorage.setItem('ilbia_moq', JSON.stringify(m)); _syncPurchasesToServer(); },
 };
+
+// ── 발주/MOQ Firestore 동기화 ──
+function _syncPurchasesToServer(){
+  fetch(`${API_BASE}/purchases`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({purchases:LS.purchases(), moq:LS.moq()})
+  }).catch(()=>{});
+}
+async function _loadPurchasesFromServer(){
+  try{
+    const res=await fetch(`${API_BASE}/purchases`);
+    if(res.status===204) return;
+    const json=await res.json();
+    if(json.status==='ok'&&json.data){
+      const local=LS.purchases();
+      if(!local.length && json.data.purchases && json.data.purchases.length){
+        localStorage.setItem('ilbia_purchases', JSON.stringify(json.data.purchases));
+      }
+      if(!localStorage.getItem('ilbia_moq') && json.data.moq){
+        localStorage.setItem('ilbia_moq', JSON.stringify(json.data.moq));
+      }
+    }
+  }catch(e){}
+}
 
 function today(){ return new Date().toISOString().split('T')[0]; }
 function addDays(d,n){ const dt=new Date(d); dt.setDate(dt.getDate()+n); return dt.toISOString().split('T')[0]; }
@@ -802,6 +827,9 @@ function showToast(msg){ const t=document.getElementById('toast'); t.textContent
 
 document.getElementById('order-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 
+// ── API 베이스 경로 (허브 프록시 vs 직접 접속 자동 감지) ──
+const API_BASE = location.port === '8082' ? '/api' : 'http://localhost:8082/api';
+
 // ── 이지어드민 자동 수집 ──
 async function fetchEzAdmin(){
   const btn=document.getElementById('btn-fetch');
@@ -813,11 +841,11 @@ async function fetchEzAdmin(){
   stepEl.textContent='브라우저 실행 중...';
   const LABELS={starting:'브라우저 실행 중...',logging_in:'이지어드민 로그인 중...',captcha_wait:'보안코드를 입력해주세요!',scraping_inventory:'재고 데이터 수집 중...',scraping_outbound:'출고+배송 데이터 수집 중...',scraping_orders:'주문 데이터 수집 중...',done:'완료!'};
   try{
-    const res=await fetch('/api/fetch-data',{method:'POST'});
+    const res=await fetch(`${API_BASE}/fetch-data`,{method:'POST'});
     const{task_id}=await res.json();
     for(let i=0;i<180;i++){
       await new Promise(r=>setTimeout(r,2000));
-      const poll=await fetch(`/api/fetch-status/${task_id}`);
+      const poll=await fetch(`${API_BASE}/fetch-status/${task_id}`);
       const data=await poll.json();
       stepEl.textContent=LABELS[data.step]||data.step;
       if(data.status==='done'){
@@ -868,7 +896,7 @@ renderAll();
 // ── 서버 캐시 로드 ──
 async function loadServerCache(){
   try{
-    const res=await fetch('/api/cached-data');
+    const res=await fetch(`${API_BASE}/cached-data`);
     if(res.status===204) return false;
     const json=await res.json();
     if(json.status!=='ok'||!json.data) return false;
@@ -908,6 +936,8 @@ async function loadServerCache(){
 
 // ── 초기 로드: 서버 캐시 → 폴백 7일 체크 ──
 (async function initLoad(){
+  await _loadPurchasesFromServer();
+  renderAll();
   const cached=await loadServerCache();
   if(!cached){
     const last=parseInt(localStorage.getItem('ilbia_last_fetch')||'0');

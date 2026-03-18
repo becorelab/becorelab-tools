@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "iLBiA EZAdmin Collector",
+  "version": "1.0",
+  "description": "이지어드민 재고/주문/매출 자동 수집",
+  "permissions": ["tabs", "scripting", "activeTab"],
+  "host_permissions": ["https://ka04.ezadmin.co.kr/*", "http://localhost:8082/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://ka04.ezadmin.co.kr/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "externally_connectable": {
+    "matches": ["http://localhost:*/*", "http://127.0.0.1:*/*"]
+  }
+}
