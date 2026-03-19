@@ -298,6 +298,41 @@ def api_sales_daily():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/settlements/<month>")
+def api_settlements(month):
+    """매출 정산 데이터 조회 (Firestore settlements 컬렉션)"""
+    if not _firestore_ok:
+        return jsonify({"status": "error", "message": "Firestore 미연결"}), 503
+    try:
+        db = fdb.db()
+        uid = 'JCyLkAQDUmN8DulO3EeQ7FR8pCG3'
+        month_doc = db.collection('settlements').document(uid).collection('months').document(month).get()
+        result = month_doc.to_dict() if month_doc.exists else {}
+        if not result:
+            return '', 204
+        return jsonify({"status": "ok", "month": month, "data": result})
+    except Exception as e:
+        log.error(f"[settlements] 조회 오류: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/api/settlements")
+def api_settlements_list():
+    """저장된 매출 정산 월 목록 조회"""
+    if not _firestore_ok:
+        return jsonify({"status": "error", "message": "Firestore 미연결"}), 503
+    try:
+        db = fdb.db()
+        uid = 'JCyLkAQDUmN8DulO3EeQ7FR8pCG3'
+        month_docs = db.collection('settlements').document(uid).collection('months').get()
+        months = [md.id for md in month_docs]
+        months.sort(reverse=True)
+        return jsonify({"status": "ok", "months": months})
+    except Exception as e:
+        log.error(f"[settlements] 목록 오류: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 @app.route("/api/chrome-upload", methods=["POST"])
 def api_chrome_upload():
     """클로드 인 크롬에서 재고 + 주문 + 매출 데이터를 한 번에 수신"""
