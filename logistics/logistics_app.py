@@ -6,6 +6,7 @@ iLBiA 물류 대시보드 서버
 - 매일 10시 예약 수집 (APScheduler)
 - 로컬 캐시 (data/cache.json) + Firebase Firestore 실시간 연동
 """
+import io
 import json
 import logging
 import os
@@ -20,6 +21,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from flask import Flask, jsonify, make_response, request, send_file
 from flask_cors import CORS
+from openpyxl import Workbook
 
 from ezadmin_scraper import fetch_all_data
 
@@ -103,6 +105,8 @@ def _save_to_firestore(payload):
     })
 
     # 매출 데이터 저장 (sales_daily 컬렉션)
+    # 기준 금액: total_settlement (정산금액) — 대표님 판매현황 리포트 기준
+    # 참고 금액: total_amount (판매가/소비자가)
     sales = payload.get("sales")
     if sales and sales.get("date"):
         sales_date = sales["date"]
@@ -110,14 +114,29 @@ def _save_to_firestore(payload):
         sales_summary = {
             "date": sales_date,
             "timestamp": ts,
-            "total_amount": sales.get("total_amount", 0),
-            "total_settlement": sales.get("total_settlement", 0),
+            "total_amount": sales.get("total_amount", 0),         # 판매가 (참고용)
+            "total_settlement": sales.get("total_settlement", 0), # 정산금액 (기준)
             "total_count": sales.get("total_count", 0),
             "by_channel": sales.get("by_channel", {}),
             "by_product": sales.get("by_product", {}),
         }
         db.collection("sales_daily").document(sales_date).set(sales_summary)
-        log.info(f"Firestore sales_daily/{sales_date} 저장 완료")
+        log.info(f"Firestore sales_daily/{sales_date} 저장 완료 (정산금액: {sales_summary['total_settlement']:,}원)")
+
+        # ERP용 주문 상세 데이터 저장 (sales_daily_orders 컬렉션)
+        orders = sales.get("orders", [])
+        if orders:
+            # Firestore 문서 크기 제한(1MB)을 고려하여 500건씩 분할 저장
+            chunk_size = 500
+            chunks = [orders[i:i+chunk_size] for i in range(0, len(orders), chunk_size)]
+            for idx, chunk in enumerate(chunks):
+                db.collection("sales_daily_orders").document(f"{sales_date}_part{idx}").set({
+                    "date": sales_date,
+                    "part": idx,
+                    "total_parts": len(chunks),
+                    "orders": chunk,
+                })
+            log.info(f"Firestore sales_daily_orders/{sales_date} 저장 완료 ({len(orders)}건, {len(chunks)}파트)")
 
 
 def load_cache():
@@ -296,6 +315,208 @@ def api_sales_daily():
         return jsonify({"status": "ok", "data": results})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# ── 거래처코드 매핑 (이카운트 ERP용) ──
+_ERP_CUSTOMER_CODES_PATH = os.path.join(DIR, "erp_customer_codes.json")
+_erp_customer_codes = {}
+if os.path.exists(_ERP_CUSTOMER_CODES_PATH):
+    with open(_ERP_CUSTOMER_CODES_PATH, "r", encoding="utf-8") as _f:
+        _erp_customer_codes = json.load(_f)
+    log.info(f"ERP 거래처코드 매핑 로드: {len(_erp_customer_codes)}건")
+
+
+def _load_sales_orders(target_date):
+    """매출 주문 상세 데이터 로드 (로컬 캐시 → Firestore 순서)"""
+    # 1. 로컬 캐시에서 시도
+    if os.path.exists(CACHE_PATH):
+        try:
+            with open(CACHE_PATH, "r", encoding="utf-8") as f:
+                cache = json.load(f)
+            sales = cache.get("sales", {})
+            if sales and sales.get("date") == target_date:
+                orders = sales.get("orders", [])
+                if orders:
+                    log.info(f"ERP: 로컬 캐시에서 {target_date} 주문 {len(orders)}건 로드")
+                    return orders
+        except Exception as e:
+            log.warning(f"ERP: 로컬 캐시 로드 실패: {e}")
+
+    # 2. Firestore에서 시도
+    if _firestore_ok:
+        try:
+            db = fdb.db()
+            # 파트 0부터 조회하여 모든 파트 합치기
+            all_orders = []
+            for part_idx in range(100):  # 최대 100파트
+                doc = db.collection("sales_daily_orders").document(f"{target_date}_part{part_idx}").get()
+                if not doc.exists:
+                    break
+                data = doc.to_dict()
+                all_orders.extend(data.get("orders", []))
+            if all_orders:
+                log.info(f"ERP: Firestore에서 {target_date} 주문 {len(all_orders)}건 로드")
+                return all_orders
+        except Exception as e:
+            log.warning(f"ERP: Firestore 로드 실패: {e}")
+
+    return []
+
+
+def _lookup_customer_code(shop_name):
+    """판매처 이름으로 거래처코드 조회 (부분 매칭 지원)"""
+    # 정확한 매칭 우선
+    if shop_name in _erp_customer_codes:
+        return _erp_customer_codes[shop_name]
+
+    # 부분 매칭 (shop_name이 매핑 키에 포함되거나, 매핑 키가 shop_name에 포함)
+    shop_lower = shop_name.strip()
+    for key, code in _erp_customer_codes.items():
+        if shop_lower in key or key in shop_lower:
+            return code
+
+    return ""
+
+
+def _build_erp_rows(orders):
+    """주문 데이터를 ERP 양식 행으로 변환"""
+    rows = []
+    for order in orders:
+        shop = order.get("shop", "")
+        date_raw = order.get("date", "")
+        # 일자: YYYY-MM-DD → YYYYMMDD
+        erp_date = date_raw.replace("-", "")
+
+        # 거래처코드 조회
+        customer_code = _lookup_customer_code(shop)
+
+        # 품목코드 (상품코드)
+        product_code = order.get("code", "")
+
+        # 수량
+        qty = order.get("productQty", 0)
+
+        # 정산금액 (supply_price)
+        settlement = order.get("settlement", 0)
+
+        # 배송비 (선결제금액) — 현재 데이터에 없으므로 0
+        shipping_fee = 0
+
+        # 공급가액 = ROUND(정산금액/1.1, 0) + ROUND(배송비/1.1, 0)
+        supply_amount = round(settlement / 1.1) + round(shipping_fee / 1.1)
+
+        # 부가세 = ROUND(공급가액 * 0.1, 0)
+        vat = round(supply_amount * 0.1)
+
+        # 공급가합계 = 공급가액 + 부가세
+        total_supply = supply_amount + vat
+
+        # ERP 행 구성 (A~Y열 = 25컬럼)
+        row = [
+            erp_date,           # A: 일자
+            "",                 # B: (auto-calculated, skip)
+            customer_code,      # C: 거래처코드
+            "",                 # D: (skip)
+            "00002",            # E: 담당자
+            "200",              # F: 출하창고
+            "11",               # G: 거래유형
+            "",                 # H: 통화
+            "",                 # I: 환율
+            product_code,       # J: 품목코드
+            "",                 # K: 품목명 (ERP 자동)
+            "",                 # L: 규격
+            qty,                # M: 수량
+            "",                 # N: 단가(vat포함)
+            "",                 # O: 단가
+            "",                 # P: 외화금액
+            supply_amount,      # Q: 공급가액
+            vat,                # R: 부가세
+            total_supply,       # S: 공급가합계
+            "",                 # T: 주문번호
+            "",                 # U: 수취인
+            "",                 # V: 수령자전화
+            "",                 # W: 수령자휴대폰
+            "",                 # X: 운송장번호
+            shipping_fee,       # Y: 배송비
+        ]
+        rows.append(row)
+
+    return rows
+
+
+@app.route("/api/sales-daily-erp")
+def api_sales_daily_erp():
+    """매출 데이터를 이카운트 ERP 양식 엑셀로 다운로드
+
+    쿼리 파라미터:
+        date: YYYY-MM-DD (기본값: 오늘)
+
+    반환: .xlsx 파일 다운로드
+    """
+    target_date = request.args.get("date", datetime.now().strftime("%Y-%m-%d"))
+
+    try:
+        # 주문 상세 데이터 로드
+        orders = _load_sales_orders(target_date)
+        if not orders:
+            return jsonify({
+                "status": "empty",
+                "message": f"{target_date} 주문 데이터가 없습니다. 먼저 데이터를 수집해주세요."
+            }), 404
+
+        # ERP 행 변환
+        erp_rows = _build_erp_rows(orders)
+
+        # Excel 생성
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "2.판매입력"
+
+        # 헤더 행
+        headers = [
+            "일자", "", "거래처코드", "", "담당자", "출하창고", "거래유형",
+            "통화", "환율", "품목코드", "품목명", "규격", "수량",
+            "단가(vat포함)", "단가", "외화금액", "공급가액", "부가세",
+            "공급가합계", "주문번호", "수취인", "수령자전화",
+            "수령자휴대폰", "운송장번호", "배송비"
+        ]
+        ws.append(headers)
+
+        # 데이터 행
+        for row in erp_rows:
+            ws.append(row)
+
+        # 열 너비 조정
+        col_widths = {
+            'A': 10, 'C': 14, 'E': 8, 'F': 8, 'G': 8,
+            'J': 10, 'M': 8, 'Q': 12, 'R': 10, 'S': 12, 'Y': 10
+        }
+        for col, width in col_widths.items():
+            ws.column_dimensions[col].width = width
+
+        # BytesIO에 저장
+        output = io.BytesIO()
+        wb.save(output)
+        output.seek(0)
+
+        # 매핑 실패 건수 집계
+        unmapped = sum(1 for r in erp_rows if not r[2])  # C열(거래처코드)이 빈 건
+        if unmapped:
+            log.warning(f"ERP 변환: 거래처코드 매핑 실패 {unmapped}건")
+
+        filename = f"이카운트_매출입력_{target_date}.xlsx"
+        log.info(f"ERP 엑셀 생성 완료: {target_date} ({len(erp_rows)}건, 매핑실패 {unmapped}건)")
+
+        return send_file(
+            output,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=filename,
+        )
+
+    except Exception as e:
+        log.error(f"ERP 엑셀 생성 오류: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @app.route("/api/settlements/<month>")

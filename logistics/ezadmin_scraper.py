@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
 이지어드민 데이터 자동 수집 스크래퍼
-- 로그인 + 보안코드 대기 + 재고현황(I100) + 재고수불부(I500) 출고량 수집
+- 로그인 + 보안코드 자동인식 + 재고현황(I100) + 재고수불부(I500) 출고량 수집
 """
 import logging
 import time
 import os
+import base64
+import tempfile
 from datetime import date, timedelta
 from playwright.sync_api import sync_playwright
 
@@ -59,13 +61,111 @@ def ezadmin_login(page):
     return True
 
 
+def _read_captcha_with_vision(screenshot_path, max_retries=2):
+    """스크린샷에서 보안코드 숫자를 Claude Vision으로 읽기"""
+    try:
+        import anthropic
+    except ImportError:
+        log.error("anthropic 모듈 없음 — pip install anthropic 필요")
+        return None
+
+    # API 키: 환경변수 → OpenClaw auth-profiles 순서로 탐색
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        try:
+            import json
+            auth_path = os.path.expanduser("~/.openclaw/agents/main/agent/auth-profiles.json")
+            with open(auth_path, "r") as f:
+                profiles = json.load(f)
+            api_key = profiles["profiles"]["anthropic:default"]["key"]
+        except Exception as e:
+            log.error(f"Anthropic API 키를 찾을 수 없음: {e}")
+            return None
+
+    client = anthropic.Anthropic(api_key=api_key)
+
+    with open(screenshot_path, "rb") as f:
+        img_data = base64.standard_b64encode(f.read()).decode("utf-8")
+
+    for attempt in range(max_retries):
+        try:
+            response = client.messages.create(
+                model="claude-sonnet-4-6-20250514",
+                max_tokens=50,
+                messages=[{
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "image/png",
+                                "data": img_data,
+                            },
+                        },
+                        {
+                            "type": "text",
+                            "text": "이 이미지에 보안코드 숫자 4자리가 보입니다. 숫자만 정확히 알려주세요. 숫자 4자리만 출력하세요. 예: 1234"
+                        }
+                    ],
+                }],
+            )
+            code = response.content[0].text.strip()
+            digits = ''.join(c for c in code if c.isdigit())
+            if len(digits) >= 4:
+                return digits[:4]
+            log.warning(f"보안코드 인식 결과 부족: '{code}' (시도 {attempt+1})")
+        except Exception as e:
+            log.error(f"Claude Vision API 호출 실패 (시도 {attempt+1}): {e}")
+
+    return None
+
+
+def _enter_captcha(page, code):
+    """보안코드 입력 + 확인 버튼 클릭"""
+    result = page.evaluate("""
+        ((code) => {
+            const blocks = document.querySelectorAll('.blockUI.blockMsg');
+            for (const b of blocks) {
+                if (b.offsetWidth <= 0 || b.offsetHeight <= 0) continue;
+                if (b.querySelector('#wrap')) continue;
+                // input 필드 찾기
+                const inputs = b.querySelectorAll('input');
+                for (const inp of inputs) {
+                    if (inp.type === 'hidden') continue;
+                    inp.value = code;
+                    inp.dispatchEvent(new Event('input', {bubbles: true}));
+                    inp.dispatchEvent(new Event('change', {bubbles: true}));
+                }
+                // 확인 버튼 클릭
+                const btns = b.querySelectorAll('button, input[type="submit"], input[type="button"], a');
+                for (const btn of btns) {
+                    const txt = btn.textContent || btn.value || '';
+                    if (txt.includes('확인') || txt.includes('인증') || txt.includes('전송')) {
+                        btn.click();
+                        return 'clicked: ' + txt;
+                    }
+                }
+                // 버튼 못 찾으면 첫 번째 버튼 클릭
+                if (btns.length > 0) {
+                    btns[0].click();
+                    return 'clicked first button';
+                }
+                return 'no button found';
+            }
+            return 'no captcha block';
+        })
+    """, code)
+    log.info(f"보안코드 입력 결과: {result}")
+    return result
+
+
 def wait_for_captcha(page, progress=None, timeout_sec=120):
-    """보안코드 팝업이 사라질 때까지 대기 (사용자가 수동 입력)
-    보안코드가 없으면 (이미 인증됨) 바로 통과"""
+    """보안코드 자동 인식 — 없으면 바로 통과, 있으면 Vision AI로 읽고 입력"""
     if progress:
         progress("captcha_wait")
 
-    # 먼저 보안코드 팝업이 있는지 확인 (5초 대기)
+    # 보안코드 팝업 확인 (5초 대기)
     has_captcha = False
     for i in range(5):
         has_captcha = page.evaluate(
@@ -88,10 +188,53 @@ def wait_for_captcha(page, progress=None, timeout_sec=120):
         log.info("보안코드 없음 — 이미 인증됨, 바로 진행")
         return True
 
-    # 보안코드 대기
+    # 보안코드 자동 인식 시도 (최대 3회)
+    log.info("보안코드 발견! AI 자동 인식 시도...")
     if progress:
         progress("captcha_input")
-    log.info("보안코드 입력 대기 중...")
+
+    for attempt in range(3):
+        # 스크린샷 촬영
+        screenshot_path = os.path.join(tempfile.gettempdir(), f"captcha_{attempt}.png")
+        page.screenshot(path=screenshot_path)
+        log.info(f"스크린샷 촬영 완료: {screenshot_path}")
+
+        # Claude Vision으로 읽기
+        code = _read_captcha_with_vision(screenshot_path)
+        if not code:
+            log.warning(f"보안코드 인식 실패 (시도 {attempt+1}/3)")
+            time.sleep(2)
+            continue
+
+        log.info(f"인식된 보안코드: {code} (시도 {attempt+1}/3)")
+
+        # 보안코드 입력
+        _enter_captcha(page, code)
+        page.wait_for_timeout(5000)
+
+        # 통과 확인
+        still_blocked = page.evaluate(
+            """
+            (() => {
+                const blocks = document.querySelectorAll('.blockUI.blockMsg');
+                for (const b of blocks) {
+                    if (b.offsetWidth > 0 && b.offsetHeight > 0
+                        && !b.querySelector('#wrap')) return true;
+                }
+                return false;
+            })()
+            """
+        )
+
+        if not still_blocked:
+            log.info("보안코드 자동 통과 성공!")
+            return True
+
+        log.warning(f"보안코드 통과 실패, 재시도... (시도 {attempt+1}/3)")
+        time.sleep(2)
+
+    # 3회 실패 시 수동 대기로 폴백
+    log.warning("AI 자동 인식 3회 실패 — 수동 입력 대기로 전환")
     for i in range(timeout_sec):
         has_block = page.evaluate(
             """

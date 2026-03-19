@@ -3095,23 +3095,21 @@ function renderDailySales(data, dateStr) {
   const days = ['일', '월', '화', '수', '목', '금', '토'];
   const dayName = days[new Date(dateStr).getDay()];
 
-  // 채널 정렬 (판매금액 순)
-  const chSorted = Object.entries(channels).sort((a, b) => b[1].amount - a[1].amount);
-  const maxChAmt = chSorted.length > 0 ? chSorted[0][1].amount : 1;
+  // 채널 정렬 (정산금액 순)
+  const chSorted = Object.entries(channels).sort((a, b) => (b[1].settlement || 0) - (a[1].settlement || 0));
 
-  // 상품 정렬 (판매금액 순)
-  const prSorted = Object.entries(products).sort((a, b) => b[1].amount - a[1].amount);
-  const maxPrAmt = prSorted.length > 0 ? prSorted[0][1].amount : 1;
+  // 상품 정렬 (정산금액 순)
+  const prSorted = Object.entries(products).sort((a, b) => (b[1].settlement || 0) - (a[1].settlement || 0));
 
   let html = '';
 
   // 날짜 헤더
   html += `<div style="font-size:1.1rem;font-weight:700;color:#e2e8f0;margin-bottom:16px;">${dateStr} (${dayName}) 매출 현황</div>`;
 
-  // 요약 카드
+  // 요약 카드 — 정산금액(공급가) 기준
   html += `<div class="daily-summary">
-    <div class="daily-card"><div class="label">총 판매금액</div><div class="val teal">${fmtWon(totalAmt)}</div></div>
-    <div class="daily-card"><div class="label">총 정산금액</div><div class="val green">${fmtWon(totalSettle)}</div></div>
+    <div class="daily-card"><div class="label">총 정산금액</div><div class="val green" style="font-size:1.4rem;">${fmtWon(totalSettle)}</div></div>
+    <div class="daily-card"><div class="label">총 판매금액</div><div class="val teal" style="opacity:.7;">${fmtWon(totalAmt)}</div></div>
     <div class="daily-card"><div class="label">수수료·차감</div><div class="val amber">${fmtWon(totalAmt - totalSettle)}</div></div>
     <div class="daily-card"><div class="label">주문 건수</div><div class="val">${totalCount.toLocaleString()}건</div></div>
   </div>`;
@@ -3122,15 +3120,16 @@ function renderDailySales(data, dateStr) {
     <th>채널</th><th class="right">건수</th><th class="right">수량</th>
     <th class="right">판매금액</th><th class="right">정산금액</th><th style="width:120px;">비중</th>
   </tr></thead><tbody>`;
+  const maxChSettle = Math.max(...chSorted.map(([, d]) => d.settlement || 0), 1);
   for (const [ch, d] of chSorted) {
-    const pct = totalAmt > 0 ? (d.amount / totalAmt * 100) : 0;
+    const pct = totalSettle > 0 ? (d.settlement / totalSettle * 100) : 0;
     html += `<tr>
       <td style="font-weight:500;">${ch}</td>
       <td class="right">${d.count.toLocaleString()}</td>
       <td class="right">${d.qty.toLocaleString()}</td>
-      <td class="right" style="font-weight:600;color:#2dd4bf;">${fmtWon(d.amount)}</td>
-      <td class="right" style="color:#10b981;">${fmtWon(d.settlement)}</td>
-      <td><div class="ch-bar" style="width:${(d.amount / maxChAmt * 100).toFixed(1)}%;"></div><span style="font-size:.7rem;color:#64748b;">${pct.toFixed(1)}%</span></td>
+      <td class="right" style="color:#2dd4bf;opacity:.7;">${fmtWon(d.amount)}</td>
+      <td class="right" style="font-weight:600;color:#10b981;">${fmtWon(d.settlement)}</td>
+      <td><div class="ch-bar" style="width:${(d.settlement / maxChSettle * 100).toFixed(1)}%;"></div><span style="font-size:.7rem;color:#64748b;">${pct.toFixed(1)}%</span></td>
     </tr>`;
   }
   // 합계 행
@@ -3148,15 +3147,16 @@ function renderDailySales(data, dateStr) {
     <th>상품코드</th><th>상품명</th><th class="right">수량</th>
     <th class="right">판매금액</th><th class="right">정산금액</th><th style="width:120px;">비중</th>
   </tr></thead><tbody>`;
+  const maxPrSettle = Math.max(...prSorted.slice(0, 15).map(([, d]) => d.settlement || 0), 1);
   for (const [code, d] of prSorted.slice(0, 15)) {
-    const pct = totalAmt > 0 ? (d.amount / totalAmt * 100) : 0;
+    const pct = totalSettle > 0 ? (d.settlement / totalSettle * 100) : 0;
     html += `<tr>
       <td style="color:#94a3b8;font-size:.78rem;">${code}</td>
       <td style="font-weight:500;">${d.name || ''}</td>
       <td class="right">${d.qty.toLocaleString()}</td>
-      <td class="right" style="font-weight:600;color:#2dd4bf;">${fmtWon(d.amount)}</td>
-      <td class="right" style="color:#10b981;">${fmtWon(d.settlement)}</td>
-      <td><div class="ch-bar" style="width:${(d.amount / maxPrAmt * 100).toFixed(1)}%;"></div><span style="font-size:.7rem;color:#64748b;">${pct.toFixed(1)}%</span></td>
+      <td class="right" style="color:#2dd4bf;opacity:.7;">${fmtWon(d.amount)}</td>
+      <td class="right" style="font-weight:600;color:#10b981;">${fmtWon(d.settlement)}</td>
+      <td><div class="ch-bar" style="width:${(d.settlement / maxPrSettle * 100).toFixed(1)}%;"></div><span style="font-size:.7rem;color:#64748b;">${pct.toFixed(1)}%</span></td>
     </tr>`;
   }
   html += `</tbody></table>`;
