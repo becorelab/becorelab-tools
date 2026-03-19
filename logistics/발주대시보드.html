@@ -265,14 +265,14 @@ tr:last-child td{border-bottom:none;}
 
     <div class="sb-section">
       <div class="sb-label">자동 수집</div>
-      <button class="btn btn-mint btn-block" id="btn-fetch" onclick="startChromeCollect()">🔄 이지어드민 데이터 가져오기</button>
+      <button class="btn btn-mint btn-block" id="btn-fetch" onclick="fetchEzAdmin()">🔄 이지어드민 데이터 가져오기</button>
       <div class="fetch-status" id="fetch-status">
         <div class="fetch-spinner"></div>
         <span id="fetch-step">연결 중...</span>
       </div>
       <div style="font-size:.65rem;color:var(--muted);margin-top:6px;line-height:1.5;">
-        크롬 확장프로그램이 자동 수집합니다.<br/>
-        이지어드민 탭에서 완료될 때까지 기다려주세요.
+        브라우저가 열리면 보안코드만 입력하세요.<br/>
+        이후 재고+주문 자동 수집됩니다.
       </div>
       <div id="cache-info" style="font-size:.65rem;color:var(--muted);margin-top:8px;padding:6px 8px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);display:none;">
         <span style="color:var(--mint);font-weight:600;">서버 캐시</span>
@@ -626,21 +626,22 @@ function renderAll(){
         <div class="pr-name">${p.name}<span class="pr-code">${p.code}</span></div>
         <div class="pr-badges">${statusBadge}${pendingBadge}</div>
       </div>
-      <div class="pr-bars">
-        <div class="bar-label">판매량</div>
-        <div class="bar-track">
-          <div class="bar-fill ${i<3?'bar-sales-fill-top':'bar-sales-fill'}" data-w="${salesPct}"></div>
+      <div style="display:flex;align-items:center;gap:16px;margin:8px 0 4px;">
+        <div style="flex-shrink:0;text-align:center;min-width:100px;">
+          <div style="font-size:1.5rem;font-weight:800;color:${p.status==='urgent'?'var(--danger)':p.status==='warning'?'var(--warn)':'var(--mint)'};">${stockDisplay}</div>
+          <div style="font-size:.6rem;color:var(--muted2);margin-top:2px;">현재고${p.pendingQty>0?` <span style="color:var(--sky)">+${p.pendingQty.toLocaleString()}</span>`:''}</div>
         </div>
-        <div class="bar-value"><strong>${p.dailyAvg.toFixed(1)}</strong> 개/일 · ${p.totalSold.toLocaleString()}개</div>
-      </div>
-      <div class="pr-bars" style="margin-top:5px;">
-        <div class="bar-label">재고</div>
-        <div class="bar-track">
-          <div class="bar-fill ${stockColor}" data-w="${stockPct}"></div>
-          ${p.pendingQty>0?`<div class="bar-pending" data-w="${pendingPct}" data-l="${stockPct}" title="발주중 +${p.pendingQty.toLocaleString()}개"></div>`:''}
-          ${p.currentStock!==null&&p.dailyAvg>0?`<div class="bar-reorder-marker" style="left:${markerPct}%" title="재주문점 ${Math.round(p.reorderPoint).toLocaleString()}개"></div>`:''}
+        <div style="flex:1;min-width:0;">
+          <div class="bar-track" style="height:8px;">
+            <div class="bar-fill ${stockColor}" data-w="${stockPct}"></div>
+            ${p.pendingQty>0?`<div class="bar-pending" data-w="${pendingPct}" data-l="${stockPct}" title="발주중 +${p.pendingQty.toLocaleString()}개"></div>`:''}
+            ${p.currentStock!==null&&p.dailyAvg>0?`<div class="bar-reorder-marker" style="left:${markerPct}%" title="재주문점 ${Math.round(p.reorderPoint).toLocaleString()}개"></div>`:''}
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;">
+            <span style="font-size:.65rem;color:var(--muted2);">${daysDisplay}</span>
+            <span style="font-size:.65rem;color:var(--muted2);">판매 ${p.dailyAvg.toFixed(1)}개/일 · ${p.totalSold.toLocaleString()}개</span>
+          </div>
         </div>
-        <div class="bar-value">${stockDisplay}개${p.pendingQty>0?` <span style="color:var(--sky)">+${p.pendingQty.toLocaleString()}</span>`:''} · ${daysDisplay}</div>
       </div>
     </div>`;
   }).join('');
@@ -1010,7 +1011,7 @@ async function initLoad(){
     const daysSince=last?(Date.now()-last)/86400000:999;
     if(daysSince>=7){
       showToast('📡 7일 경과 — 이지어드민 데이터 자동 수집을 시작합니다');
-      setTimeout(()=>startChromeCollect(),2000);
+      setTimeout(()=>fetchEzAdmin(),2000);
     }
   }
 }
