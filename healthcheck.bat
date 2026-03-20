@@ -9,6 +9,13 @@ if errorlevel 1 (
     start /b "" C:\Users\info\AppData\Local\Python\pythoncore-3.14-64\python.exe logistics\logistics_app.py
 )
 
+REM 허브 서버 (8000)
+netstat -ano | findstr ":8000.*LISTENING" >nul 2>&1
+if errorlevel 1 (
+    echo [%date% %time%] 허브 서버 재시작 >> C:\Users\info\ClaudeAITeam\logistics\data\healthcheck.log
+    start /b "" C:\Users\info\AppData\Local\Python\pythoncore-3.14-64\python.exe -m http.server 8000 --directory C:\Users\info\ClaudeAITeam\hub
+)
+
 REM OpenClaw 게이트웨이 (18789)
 netstat -ano | findstr ":18789.*LISTENING" >nul 2>&1
 if errorlevel 1 (
