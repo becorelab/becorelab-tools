@@ -2594,7 +2594,7 @@ async function loadOpportunities() {
                     <td><span class="status-badge status-${s.status}">${getStatusText(s.status)}</span></td>
                     <td onclick="event.stopPropagation()">
                         <button class="btn btn-sm btn-primary" onclick="viewScanWithReview(${s.id})" style="margin-right:2px;">분석</button>
-                        <button class="btn btn-sm btn-success" onclick="markScan(${s.id},'go')" ${s.status==='go'?'disabled':''}>GO</button>
+                        ${s.status==='go' ? `<button class="btn btn-sm" onclick="generateRFQ(${s.id})" style="background:#ff9500;color:#fff;">RFQ</button>` : `<button class="btn btn-sm btn-success" onclick="markScan(${s.id},'go')">GO</button>`}
                         <button class="btn btn-sm" onclick="markScan(${s.id},'pass')" style="background:var(--danger);color:#fff;margin-left:2px;" ${s.status==='pass'?'disabled':''}>PASS</button>
                     </td>
                 </tr>
@@ -2747,9 +2747,9 @@ async function saveRFQ(scanId) {
     });
     const result = await res.json();
     if (result.success) {
-        alert('RFQ 저장 완료!');
         document.getElementById('rfqModal').style.display = 'none';
         _lastRfqData = null;
+        switchToTab('rfq');
         loadRfqList();
     }
 }
