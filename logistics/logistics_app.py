@@ -931,8 +931,16 @@ def api_daily_report():
             lines.append(f"{name} — {qty}개 | ₩{ps:,}")
 
         report = "\n".join(lines)
+
+        # ?format=text 이면 plain text 반환 (인코딩 깨짐 방지)
+        if request.args.get("format") == "text":
+            resp = make_response(report)
+            resp.headers["Content-Type"] = "text/plain; charset=utf-8"
+            return resp
         return jsonify({"status": "ok", "date": target, "report": report})
     except Exception as e:
+        if request.args.get("format") == "text":
+            return make_response(f"❌ 보고서 생성 실패: {str(e)}", 500)
         return jsonify({"status": "error", "report": f"❌ 보고서 생성 실패: {str(e)}"}), 500
 
 
@@ -984,6 +992,10 @@ def api_inventory_report():
                 lines.append(f"  {name} — {stock:,}개")
 
         report = "\n".join(lines)
+        if request.args.get("format") == "text":
+            resp = make_response(report)
+            resp.headers["Content-Type"] = "text/plain; charset=utf-8"
+            return resp
         return jsonify({"status": "ok", "report": report})
     except Exception as e:
         return jsonify({"status": "error", "report": f"❌ 재고 보고서 생성 실패: {str(e)}"}), 500
