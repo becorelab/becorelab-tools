@@ -129,68 +129,54 @@ def _run_scan_api(scan_id: int, keyword: str):
     # 3. 띄어쓰기 변형 키워드 생성 및 저장
     _save_keyword_variants(scan_id, keyword, result.related_keywords)
 
-    # 4. 기회점수 산출 (서버 API 데이터 기반)
-    _scan_progress[scan_id] = {'step': 2, 'total': 3, 'message': '기회점수 분석 중...'}
-    keyword_nospace = keyword.replace(' ', '')
-    main_kw = None
-    for kw in result.related_keywords:
-        if kw.keyword == keyword or kw.keyword.replace(' ', '') == keyword_nospace:
-            main_kw = kw
-            break
+    # 4. 상품 데이터 수집 (윙 서버 시도 → 실패 시 키워드 데이터만)
+    _scan_progress[scan_id] = {'step': 2, 'total': 3, 'message': '상품 데이터 수집 중...'}
+    products = []
+    try:
+        products = wing_search(keyword)
+        for p in products:
+            fdb.add_product(scan_id, {
+                'ranking': p.ranking, 'product_name': p.product_name,
+                'brand': p.brand, 'manufacturer': p.manufacturer,
+                'price': p.price, 'sales_monthly': p.sales_monthly,
+                'revenue_monthly': p.revenue_monthly, 'review_count': p.review_count,
+                'click_count': p.click_count, 'conversion_rate': p.conversion_rate,
+                'page_views': p.page_views, 'category': p.category,
+                'category_code': p.category_code, 'product_url': p.product_url,
+            })
+        print(f'[SCAN-API] 윙 상품 {len(products)}개 수집 완료')
+    except Exception as wing_err:
+        print(f'[SCAN-API] 윙 데이터 수집 실패 (키워드 데이터만 사용): {wing_err}')
 
-    search_volume = main_kw.total_search if main_kw else result.total_search_volume
-    product_count = main_kw.product_count if main_kw else result.product_count
-    competition = main_kw.competition if main_kw else result.competition
+    # 5. 기회점수 산출 (scoring.py 통일 — UI와 동일한 점수)
+    _scan_progress[scan_id] = {'step': 3, 'total': 3, 'message': '기회점수 분석 중...'}
+    opp_score = calculate_opportunity(
+        products=products,
+        inflow_keywords=[],
+        related_keywords=result.related_keywords,
+        keyword=keyword
+    )
 
-    # 기회점수 산출
-    import math
-    supply_demand_score = 0
-    if product_count > 0 and search_volume > 0:
-        ratio = search_volume / product_count
-        supply_demand_score = min(100, ratio * 15)
-
-    market_score = 0
-    if search_volume > 0:
-        market_score = min(100, max(0,
-            (math.log10(search_volume) - math.log10(500)) /
-            (math.log10(100000) - math.log10(500)) * 100
-        ))
-
-    comp_score = 50
-    if competition == '낮음':
-        comp_score = 90
-    elif competition == '보통':
-        comp_score = 60
-    elif competition == '높음':
-        comp_score = 30
-
-    simple_score = supply_demand_score * 0.4 + market_score * 0.35 + comp_score * 0.25
-
-    recommended = ''
-    best_ratio = 0
-    for kw in result.related_keywords[:50]:
-        if kw.product_count > 0 and kw.total_search >= 1000:
-            r = kw.total_search / kw.product_count
-            if r > best_ratio and not kw.is_brand:
-                best_ratio = r
-                recommended = kw.keyword
-
-    # 5. 스캔 결과 업데이트
-    _scan_progress[scan_id] = {'step': 3, 'total': 3, 'message': '결과 저장 중...'}
+    # 6. 스캔 결과 업데이트
     fdb.update_scan(scan_id,
         status='scanned',
         category=result.main_category,
-        opportunity_score=round(simple_score, 1),
-        top10_avg_revenue=0,
-        top10_avg_sales=0,
-        top10_avg_price=0,
-        revenue_equality=0,
-        new_product_rate=0,
-        ad_dependency=0,
-        recommended_keyword=recommended,
+        opportunity_score=round(opp_score.total_score, 1),
+        top10_avg_revenue=opp_score.top4_10_avg_revenue,
+        top10_avg_sales=opp_score.top4_10_avg_sales,
+        top10_avg_price=opp_score.top4_10_avg_price,
+        revenue_concentration=round(opp_score.top3_share * 100, 1),
+        revenue_equality=round(opp_score.revenue_equality * 100, 1),
+        new_product_rate=round(opp_score.new_product_rate * 100, 1),
+        ad_dependency=round(opp_score.avg_new_product_weight, 1),
+        recommended_keyword=opp_score.recommended_keyword,
     )
     _scan_progress.pop(scan_id, None)
-    print(f'[SCAN-API] 완료: {keyword} (점수: {simple_score:.1f}, 연관키워드: {len(result.related_keywords)}개)')
+    print(
+        f'[SCAN-API] 완료: {keyword}\n'
+        f'  기회점수: {opp_score.total_score:.1f} ({opp_score.grade})\n'
+        f'  상품 {len(products)}개 | 연관키워드 {len(result.related_keywords)}개'
+    )
 
 
 def _run_scan_cdp(scan_id: int, keyword: str):

@@ -1,5 +1,5 @@
 // =============================================================
-// 마켓 파인더 리뷰 수집기 — Content Script (Coupang 상품 페이지)
+// 소싱콕 리뷰 수집기 — Content Script (Coupang 상품 페이지)
 // =============================================================
 
 (function () {
@@ -168,7 +168,7 @@
     }
 
     if (autoCollect === '1' && scanId) {
-        console.log(`[마켓파인더] 자동 리뷰 수집 시작 (scan=${scanId}, idx=${productIndex}/${totalProducts})`);
+        console.log(`[소싱콕] 자동 리뷰 수집 시작 (scan=${scanId}, idx=${productIndex}/${totalProducts})`);
         setTimeout(async () => {
             // 1) 리뷰 탭 클릭 (쿠팡은 리뷰가 별도 탭에 있음)
             const reviewTabSelectors = [
@@ -185,14 +185,14 @@
                 if (el.textContent.includes('상품평') && !el.classList.contains('_found')) {
                     el.classList.add('_found');
                     el.click();
-                    console.log('[마켓파인더] 상품평 탭 클릭 (텍스트 매칭)');
+                    console.log('[소싱콕] 상품평 탭 클릭 (텍스트 매칭)');
                 }
             });
             for (const sel of reviewTabSelectors) {
                 const tab = document.querySelector(sel);
                 if (tab) {
                     tab.click();
-                    console.log('[마켓파인더] 리뷰 탭 클릭:', sel);
+                    console.log('[소싱콕] 리뷰 탭 클릭:', sel);
                     await sleep(3000);
                     break;
                 }
@@ -237,7 +237,7 @@
 
             // 첫 페이지 수집
             collectCurrentPage();
-            console.log(`[마켓파인더] 1페이지: ${reviews.length}개`);
+            console.log(`[소싱콕] 1페이지: ${reviews.length}개`);
 
             // 페이지네이션으로 모든 페이지 순회 (최대 50페이지)
             for (let page = 2; page <= 50; page++) {
@@ -270,7 +270,7 @@
                 }
 
                 if (!clicked) {
-                    console.log(`[마켓파인더] ${page}페이지 버튼 없음 — 수집 종료`);
+                    console.log(`[소싱콕] ${page}페이지 버튼 없음 — 수집 종료`);
                     break;
                 }
 
@@ -283,11 +283,11 @@
                 const before = reviews.length;
                 collectCurrentPage();
                 const added = reviews.length - before;
-                console.log(`[마켓파인더] ${page}페이지: +${added}개 (누적 ${reviews.length}개)`);
+                console.log(`[소싱콕] ${page}페이지: +${added}개 (누적 ${reviews.length}개)`);
 
                 // 새 리뷰가 없으면 종료
                 if (added === 0) {
-                    console.log(`[마켓파인더] 새 리뷰 없음 — 수집 종료`);
+                    console.log(`[소싱콕] 새 리뷰 없음 — 수집 종료`);
                     break;
                 }
             }
@@ -301,10 +301,10 @@
                     for (let i = 1; i < chunks.length && i <= 30; i++) {
                         if (chunks[i].trim().length > 30) reviews.push({ rating: 5, headline: '', content: chunks[i].trim().substring(0, 800), date: '', option: '' });
                     }
-                    console.log(`[마켓파인더] 텍스트 기반: ${reviews.length}개`);
+                    console.log(`[소싱콕] 텍스트 기반: ${reviews.length}개`);
                 }
             }
-            console.log(`[마켓파인더] 최종 리뷰: ${reviews.length}개`);
+            console.log(`[소싱콕] 최종 리뷰: ${reviews.length}개`);
 
             // 상품명 추출 (페이지 타이틀에서)
             const productName = document.title.replace(' - 쿠팡!', '').replace(' | 쿠팡', '').trim();
@@ -324,7 +324,7 @@
                         partial: true
                     })
                 });
-            } catch(e) { console.error('[마켓파인더] 전송 실패:', e); }
+            } catch(e) { console.error('[소싱콕] 전송 실패:', e); }
 
             // 수집 완료 후 탭 닫기
             setTimeout(() => window.close(), 1000);
@@ -362,7 +362,7 @@
 
             sendResponse({ reviews });
         } catch (err) {
-            console.error('[MarketFinder Content] Error:', err);
+            console.error('[소싱콕 Content] Error:', err);
             sendResponse({ reviews: [] });
         }
     }
@@ -490,7 +490,7 @@
                         });
                     }
                 }
-                console.log(`[마켓파인더] 텍스트 기반 수집: ${reviews.length}개`);
+                console.log(`[소싱콕] 텍스트 기반 수집: ${reviews.length}개`);
             }
         }
 
