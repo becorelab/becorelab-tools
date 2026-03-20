@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>마켓 파인더 — 비코어랩</title>
+<title>소싱콕 — 비코어랩</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/css/SpoqaHanSansNeo.css" rel="stylesheet">
@@ -1247,7 +1247,7 @@ body {
 <header class="header">
     <div class="header-title">
         <span class="logo">BECORELAB</span>
-        <span>마켓 파인더</span>
+        <span>소싱콕</span>
     </div>
     <div class="header-stats" id="headerStats">
         <span>스캔<span class="stat-value" id="statTotalScans">0</span></span>
@@ -1263,7 +1263,7 @@ body {
         <span class="tab-icon">&#x1F50D;</span> 키워드 스캔
     </button>
     <button class="tab-btn" data-tab="insight">
-        <span class="tab-icon">&#x1F4CA;</span> 마켓 인사이트
+        <span class="tab-icon">&#x1F4CA;</span> 소싱콕 인사이트
     </button>
     <button class="tab-btn" data-tab="rfq">
         <span class="tab-icon">&#x1F4DD;</span> RFQ
@@ -1569,6 +1569,7 @@ body {
         <div class="card-header">
             <span class="card-title">기회 랭킹</span>
             <div>
+                <button class="btn btn-sm" onclick="filterOpportunities('star')" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b;padding:6px 14px;font-size:13px;font-weight:700;">⭐ 관심</button>
                 <button class="btn btn-sm btn-secondary" onclick="filterOpportunities('all')">전체</button>
                 <button class="btn btn-sm btn-success" onclick="filterOpportunities('go')">GO만</button>
                 <button class="btn btn-sm btn-secondary" onclick="filterOpportunities('scanned')">미판정</button>
@@ -1577,6 +1578,7 @@ body {
         <table class="data-table">
             <thead>
                 <tr>
+                    <th style="width:36px;"></th>
                     <th>#</th>
                     <th>키워드</th>
                     <th>기회점수</th>
@@ -2100,7 +2102,9 @@ document.getElementById('btnWingScan').addEventListener('click', async () => {
         if (data.success) {
             document.getElementById('scanEmpty').style.display = 'none';
             document.getElementById('scanResult').style.display = 'block';
-            pollScanResult(data.scan_id, keyword, 60);
+            pollScanResult(data.scan_id, keyword, 120);
+            // 버튼은 pollScanResult 완료 시 리셋됨
+            return;
         } else {
             showWingStatus(data.error || '스캔 실패', 'error');
         }
@@ -2130,16 +2134,24 @@ btnScan.addEventListener('click', async () => {
         if (data.success) {
             document.getElementById('scanEmpty').style.display = 'none';
             document.getElementById('scanResult').style.display = 'block';
-            pollScanResult(data.scan_id, keyword, 30);
+            pollScanResult(data.scan_id, keyword, 60);
         }
     } catch (err) {
         console.error('scan error:', err);
+        btnScan.disabled = false;
+        btnScan.textContent = '키워드 분석';
     }
-    btnScan.disabled = false;
-    btnScan.textContent = '키워드 분석';
 });
 
-async function pollScanResult(scanId, keyword, maxAttempts = 30) {
+function _resetScanButtons() {
+    btnScan.disabled = false;
+    btnScan.textContent = '키워드 분석';
+    const wBtn = document.getElementById('btnWingScan');
+    wBtn.disabled = false;
+    wBtn.innerHTML = '윙 스캔';
+}
+
+async function pollScanResult(scanId, keyword, maxAttempts = 60) {
     let attempts = 0;
 
     const poll = async () => {
@@ -2148,13 +2160,25 @@ async function pollScanResult(scanId, keyword, maxAttempts = 30) {
             const res = await fetch(`/api/scan/${scanId}/poll`);
             const data = await res.json();
 
+            // 진척도 표시 — 양쪽 버튼 모두에 표시
+            if (data.progress) {
+                const p = data.progress;
+                const pct = Math.round(p.step / p.total * 100);
+                const msg = `<span class="loading-spinner"></span> ${p.message} (${pct}%)`;
+                btnScan.innerHTML = msg;
+                document.getElementById('btnWingScan').innerHTML = msg;
+            }
+
             if (data.success && data.scan.status !== 'scanning') {
-                // 스캔 완료!
-                btnScan.disabled = false;
-                btnScan.textContent = '조사하기';
+                _resetScanButtons();
                 showScanResult(scanId, data.scan);
                 loadScanHistory();
                 loadStats();
+                return;
+            }
+
+            if (data.success && data.scan.status === 'failed') {
+                _resetScanButtons();
                 return;
             }
         } catch (err) {
@@ -2164,8 +2188,7 @@ async function pollScanResult(scanId, keyword, maxAttempts = 30) {
         if (attempts < maxAttempts) {
             setTimeout(poll, 1000);
         } else {
-            btnScan.disabled = false;
-            btnScan.textContent = '조사하기';
+            _resetScanButtons();
             loadScanHistory();
         }
     };
@@ -2502,15 +2525,37 @@ async function loadScanHistory() {
 }
 
 let _oppFilter = 'go';  // 기본: GO만 보기
+let _watchlistIds = new Set();
 
 function filterOpportunities(filter) {
     _oppFilter = filter;
     loadOpportunities();
 }
 
+async function toggleWatchlist(scanId, event) {
+    event.stopPropagation();
+    try {
+        const res = await fetch(`/api/watchlist/${scanId}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+            if (data.added) _watchlistIds.add(scanId);
+            else _watchlistIds.delete(scanId);
+            loadOpportunities();
+        }
+    } catch(e) { console.error('watchlist 에러:', e); }
+}
+
 async function loadOpportunities() {
     try {
-        const res = await fetch('/api/opportunities?status=' + _oppFilter);
+        // watchlist 로드
+        try {
+            const wRes = await fetch('/api/watchlist');
+            const wData = await wRes.json();
+            if (wData.success) _watchlistIds = new Set(wData.scan_ids);
+        } catch(e) {}
+
+        const statusParam = _oppFilter === 'star' ? 'all' : _oppFilter;
+        const res = await fetch('/api/opportunities?status=' + statusParam);
         const data = await res.json();
         if (data.success) {
             const tbody = document.getElementById('opportunityBody');
@@ -2526,11 +2571,11 @@ async function loadOpportunities() {
             const top = all[0];
             if (top) document.getElementById('oppTopScore').textContent = top.opportunity_score?.toFixed(1) || '-';
 
-            let filtered = all; // 서버에서 이미 필터링됨
+            let filtered = _oppFilter === 'star' ? all.filter(s => _watchlistIds.has(s.id)) : all;
 
             if (filtered.length === 0) {
                 empty.style.display = 'block';
-                empty.querySelector('.empty-desc').textContent = _oppFilter === 'go' ? 'GO 판정된 항목이 없습니다' : '데이터가 없습니다';
+                empty.querySelector('.empty-desc').textContent = _oppFilter === 'star' ? '⭐ 관심 표시된 항목이 없습니다' : _oppFilter === 'go' ? 'GO 판정된 항목이 없습니다' : '데이터가 없습니다';
                 tbody.innerHTML = '';
                 return;
             }
@@ -2538,6 +2583,7 @@ async function loadOpportunities() {
             empty.style.display = 'none';
             tbody.innerHTML = filtered.map((s, i) => `
                 <tr onclick="viewScanDetail(${s.id})" style="cursor:pointer;">
+                    <td onclick="event.stopPropagation()" style="text-align:center;"><button onclick="toggleWatchlist(${s.id},event)" style="font-size:1.2rem;background:none;border:none;cursor:pointer;padding:4px 6px;filter:${_watchlistIds.has(s.id) ? 'none' : 'brightness(0.5)'};" title="관심 표시">${_watchlistIds.has(s.id) ? '⭐' : '⭐'}</button></td>
                     <td>${i+1}</td>
                     <td><strong>${s.keyword}</strong></td>
                     <td><span class="score-badge ${getScoreClass(s.opportunity_score)}">${s.opportunity_score?.toFixed(1) || '-'}</span></td>
@@ -2557,7 +2603,7 @@ async function loadOpportunities() {
     } catch(e) { console.error('기회분석 로딩 에러:', e); }
 }
 
-// ─── 마켓 인사이트 모달 (6탭) ───
+// ─── 소싱콕 인사이트 모달 (6탭) ───
 async function generateRFQ(scanId) {
     let modal = document.getElementById('rfqModal');
     if (!modal) {
@@ -2729,7 +2775,7 @@ function viewScanWithReview(scanId) {
 <div id="insightBox" style="background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;width:95%;max-width:1400px;height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 60px rgba(0,0,0,0.6);">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg-card);flex-shrink:0;">
         <div style="display:flex;align-items:center;gap:12px;">
-            <span style="font-size:17px;font-weight:800;background:linear-gradient(135deg,#ff6b2b,#ff9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">MARKET INSIGHT</span>
+            <span style="font-size:17px;font-weight:800;background:linear-gradient(135deg,#ff6b2b,#ff9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">소싱콕 인사이트</span>
             <span id="insightKeyword" style="font-size:14px;color:var(--text-secondary);font-weight:500;"></span>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
@@ -2841,7 +2887,8 @@ function _renderStructureTab(el, products, scan) {
     const top1Share = totalRev > 0 ? ((sorted[0]?.revenue_monthly||0) / totalRev * 100) : 0;
     const top3Rev = sorted.slice(0,3).reduce((s,p) => s + (p.revenue_monthly||0), 0);
     const top3Share = totalRev > 0 ? (top3Rev / totalRev * 100) : 0;
-    const equality = scan.revenue_equality || (sorted.length >= 10 && sorted[0].revenue_monthly > 0 ? (sorted[9].revenue_monthly / sorted[0].revenue_monthly) : 0);
+    // 항상 상품 데이터에서 직접 계산 (DB에 잘못 저장된 과거 데이터 무시)
+    const equality = (sorted.length >= 10 && sorted[0].revenue_monthly > 0) ? (sorted[9].revenue_monthly / sorted[0].revenue_monthly) : (scan.revenue_equality ? scan.revenue_equality / 100 : 0);
 
     let verdictClass, verdictText;
     if (top1Share < 15 && equality > 0.3) {
@@ -3007,7 +3054,7 @@ function _renderNewProductTab(el, products, scan) {
                     <tbody>${[...newProdsWithRev].sort((a,b)=>(b.revenue_monthly||0)-(a.revenue_monthly||0)).slice(0,10).map(p => `
                         <tr style="border-bottom:1px solid rgba(42,47,64,0.3);">
                             <td style="padding:8px;color:var(--text-secondary);">${p.ranking||'-'}</td>
-                            <td style="padding:8px;color:var(--text-primary);max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.product_name||'-'}</td>
+                            <td style="padding:8px;color:var(--text-primary);max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.product_url ? `<a href="${p.product_url}" target="_blank" style="color:var(--text-primary);text-decoration:none;border-bottom:1px dashed var(--text-muted);" title="쿠팡에서 보기">${p.product_name||'-'}</a>` : (p.product_name||'-')}</td>
                             <td style="padding:8px;text-align:right;color:var(--text-secondary);">${formatNumber(p.price||0)}원</td>
                             <td style="padding:8px;text-align:right;color:var(--accent);font-weight:700;">${formatNumber(p.revenue_monthly||0)}원</td>
                             <td style="padding:8px;text-align:right;color:var(--cyan);">${formatNumber(p.review_count||0)}</td>
@@ -3461,59 +3508,26 @@ async function _startInsightReview(scanId) {
         }
     } catch(e) {}
 
-    // 기존 리뷰 없으면 새로 수집
+    // 기존 리뷰 없으면 서버사이드 Playwright로 수집 + 분석
     btn.textContent = '수집 중...';
     _review_state_local[scanId] = 'collecting';
 
     try {
-        const scanRes = await fetch(`/api/scan/${scanId}`);
-        const scanData = await scanRes.json();
-        if (!scanData.success || !scanData.products || scanData.products.length === 0) {
-            document.getElementById('insightReviewContent').innerHTML = '<div style="padding:20px;color:var(--danger);">상품 데이터가 없습니다. 윙 스캔을 먼저 해주세요.</div>';
+        document.getElementById('insightReviewContent').innerHTML = `
+            <div style="text-align:center;padding:30px;">
+                <span class="loading-spinner"></span>
+                <div style="margin-top:12px;color:var(--text-secondary);">리뷰 수집 + AI 분석 중...</div>
+                <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">상위 10개 상품에서 리뷰를 수집합니다 (1~2분 소요)</div>
+            </div>`;
+
+        // 서버사이드 수집 시작 (POST)
+        const postRes = await fetch(`/api/scan/${scanId}/reviews`, { method: 'POST' });
+        const postData = await postRes.json();
+        if (!postData.success) {
+            document.getElementById('insightReviewContent').innerHTML = `<div style="padding:20px;color:var(--danger);">${postData.error || '수집 시작 실패'}</div>`;
             btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
             return;
         }
-
-        // 매출순 상위 10개 선택
-        const products = [...scanData.products]
-            .sort((a,b) => (b.revenue_monthly||0) - (a.revenue_monthly||0))
-            .slice(0, 10)
-            .filter(p => p.product_url);
-
-        // 수집 대상 상품 로그
-        console.log('[리뷰 수집 대상]', products.map((p,i) => `${i+1}. ${p.product_name?.substring(0,20)} (매출:${(p.revenue_monthly||0).toLocaleString()}원)`));
-        const total = products.length;
-
-        document.getElementById('insightReviewContent').innerHTML = `
-            <div style="text-align:center;padding:30px;">
-                <span class="loading-spinner"></span>
-                <div style="margin-top:12px;color:var(--text-secondary);">리뷰 수집 중... (0/${total} 상품)</div>
-                <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">쿠팡 탭이 순차적으로 열리고 닫힙니다</div>
-                <div id="insightReviewProgress" style="margin-top:12px;"></div>
-            </div>`;
-
-        // 상품별 순차적으로 탭 열기 (확장 content.js가 자동 수집)
-        for (let i = 0; i < total; i++) {
-            const url = products[i].product_url;
-            const sep = url.includes('?') ? '&' : '?';
-            const collectUrl = `${url}${sep}mf_collect=1&mf_scan=${scanId}&mf_idx=${i}&mf_total=${total}`;
-
-            window.open(collectUrl, '_blank');
-
-            // 진행 상황 업데이트
-            const progress = document.getElementById('insightReviewProgress');
-            if (progress) progress.textContent = `${i+1}/${total} 상품 탭 열림`;
-
-            // 다음 상품까지 대기 (쿠팡 차단 방지 — 15초 간격)
-            await new Promise(r => setTimeout(r, 15000));
-        }
-
-        // 모든 탭 열기 완료 → 분석 대기
-        document.getElementById('insightReviewContent').innerHTML = `
-            <div style="text-align:center;padding:30px;">
-                <span class="loading-spinner"></span>
-                <div style="margin-top:12px;color:var(--text-secondary);">리뷰 수집 완료! AI 분석 중...</div>
-            </div>`;
 
         // 결과 폴링
         _pollInsightReview(scanId, btn);
@@ -3553,7 +3567,9 @@ window.addEventListener('message', (event) => {
 });
 
 function _pollInsightReview(scanId, btn) {
+    let pollCount = 0;
     const poll = async () => {
+        pollCount++;
         try {
             const res = await fetch(`/api/scan/${scanId}/reviews`);
             const data = await res.json();
@@ -3570,12 +3586,14 @@ function _pollInsightReview(scanId, btn) {
             } else if (data.status === 'error') {
                 document.getElementById('insightReviewContent').innerHTML = `<div style="padding:20px;color:var(--danger);">분석 실패: ${data.analysis?.error || ''}</div>`;
                 btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
+            } else if (pollCount > 60) {
+                document.getElementById('insightReviewContent').innerHTML = '<div style="padding:20px;color:var(--danger);">시간 초과. 다시 시도해주세요.</div>';
+                btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
             } else {
-                // 아직 확장프로그램에서 리뷰가 안 왔을 수 있음 → 계속 폴링
                 setTimeout(poll, 3000);
             }
         } catch (e) {
-            setTimeout(poll, 3000);
+            if (pollCount < 60) setTimeout(poll, 3000);
         }
     };
     setTimeout(poll, 3000);

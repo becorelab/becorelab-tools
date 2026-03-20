@@ -1,5 +1,5 @@
 """
-비코어랩 마켓 파인더 — Firestore DB 레이어
+비코어랩 소싱콕 — Firestore DB 레이어
 SQLite → Firestore 전환 모듈
 
 컬렉션 구조:

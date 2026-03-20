@@ -1,5 +1,5 @@
 """
-비코어랩 쿠팡 마켓 파인더 — 메인 Flask 앱
+비코어랩 쿠팡 소싱콕 — 메인 Flask 앱
 포트: 8090 (기존 sourcing_app.py 8080과 분리)
 """
 
@@ -26,6 +26,9 @@ from analyzer.wing import wing_search, wing_ensure_login, get_wing_status
 from analyzer.reviews import analyze_reviews_basic, analyze_reviews_claude
 
 app = Flask(__name__)
+
+# 스캔 진척도 추적
+_scan_progress = {}  # {scan_id: {'step': 1, 'total': 3, 'message': '...'}}
 
 
 @app.after_request
@@ -109,6 +112,7 @@ def _run_scan_background(scan_id: int, keyword: str, use_cdp: bool = False):
 def _run_scan_api(scan_id: int, keyword: str):
     """서버 API 전용 스캔 (기존 로직)"""
     # 1. 헬프스토어 서버 API로 키워드 데이터 수집
+    _scan_progress[scan_id] = {'step': 1, 'total': 3, 'message': '키워드 데이터 수집 중...'}
     api = get_helpstore()
     result = api.search_keyword(keyword)
 
@@ -126,6 +130,7 @@ def _run_scan_api(scan_id: int, keyword: str):
     _save_keyword_variants(scan_id, keyword, result.related_keywords)
 
     # 4. 기회점수 산출 (서버 API 데이터 기반)
+    _scan_progress[scan_id] = {'step': 2, 'total': 3, 'message': '기회점수 분석 중...'}
     keyword_nospace = keyword.replace(' ', '')
     main_kw = None
     for kw in result.related_keywords:
@@ -171,6 +176,7 @@ def _run_scan_api(scan_id: int, keyword: str):
                 recommended = kw.keyword
 
     # 5. 스캔 결과 업데이트
+    _scan_progress[scan_id] = {'step': 3, 'total': 3, 'message': '결과 저장 중...'}
     fdb.update_scan(scan_id,
         status='scanned',
         category=result.main_category,
@@ -183,6 +189,7 @@ def _run_scan_api(scan_id: int, keyword: str):
         ad_dependency=0,
         recommended_keyword=recommended,
     )
+    _scan_progress.pop(scan_id, None)
     print(f'[SCAN-API] 완료: {keyword} (점수: {simple_score:.1f}, 연관키워드: {len(result.related_keywords)}개)')
 
 
@@ -194,9 +201,11 @@ def _run_scan_cdp(scan_id: int, keyword: str):
     print(f'[SCAN-CDP] 시작: {keyword} (Chrome CDP 연동)')
 
     # 전체 스캔 (서버 API + 브라우저 자동화)
+    _scan_progress[scan_id] = {'step': 1, 'total': 4, 'message': '쿠팡 실데이터 수집 중...'}
     result = scan_keyword_full_sync(keyword)
 
     # ─── 상품 데이터 저장 ───
+    _scan_progress[scan_id] = {'step': 2, 'total': 4, 'message': f'상품 {len(result.products)}개 저장 중...'}
     for product in result.products:
         fdb.add_product(scan_id, {
             'ranking': product.ranking, 'product_name': product.product_name,
@@ -229,6 +238,7 @@ def _run_scan_cdp(scan_id: int, keyword: str):
     _save_keyword_variants(scan_id, keyword, result.related_keywords)
 
     # ─── 기회점수 산출 (실제 쿠팡 데이터 기반!) ───
+    _scan_progress[scan_id] = {'step': 3, 'total': 4, 'message': '기회점수 분석 중...'}
     opp_score = calculate_opportunity(
         products=result.products,
         inflow_keywords=result.inflow_keywords,
@@ -237,6 +247,7 @@ def _run_scan_cdp(scan_id: int, keyword: str):
     )
 
     # ─── 스캔 결과 업데이트 ───
+    _scan_progress[scan_id] = {'step': 4, 'total': 4, 'message': '결과 저장 중...'}
     fdb.update_scan(scan_id,
         status='scanned',
         category=result.main_category,
@@ -260,6 +271,7 @@ def _run_scan_cdp(scan_id: int, keyword: str):
         f'  신상품진입률: {opp_score.new_product_rate*100:.1f}% | 광고의존도: {opp_score.ad_dependency:.1f}%\n'
         f'  추천키워드: {opp_score.recommended_keyword}'
     )
+    _scan_progress.pop(scan_id, None)
 
 
 def _save_keyword_variants(scan_id: int, keyword: str, related_keywords: list):
@@ -408,7 +420,7 @@ def _run_scan_wing(scan_id: int, keyword: str):
                 top10_avg_sales=opp_score.top4_10_avg_sales,
                 top10_avg_price=opp_score.top4_10_avg_price,
                 revenue_concentration=round(opp_score.top3_share * 100, 1),
-                revenue_equality=round(opp_score.sellers_over_3m_rate * 100, 1),
+                revenue_equality=round(opp_score.revenue_equality * 100, 1),
                 new_product_rate=round(opp_score.new_product_rate * 100, 1),
                 ad_dependency=round(opp_score.avg_new_product_weight, 1),
                 recommended_keyword=opp_score.recommended_keyword,
@@ -926,7 +938,7 @@ def _run_autoscan(seeds: list, min_search: int, max_scan: int):
                         top10_avg_sales=opp.top4_10_avg_sales,
                         top10_avg_price=opp.top4_10_avg_price,
                         revenue_concentration=round(opp.top3_share * 100, 1),
-                        revenue_equality=round(opp.sellers_over_3m_rate * 100, 1),
+                        revenue_equality=round(opp.revenue_equality * 100, 1),
                         new_product_rate=round(opp.new_product_rate * 100, 1),
                         ad_dependency=round(opp.avg_new_product_weight, 1),
                         recommended_keyword=opp.recommended_keyword,
@@ -1107,7 +1119,8 @@ def poll_scan(scan_id):
     scan = fdb.get_scan(scan_id)
     if not scan:
         return jsonify({'success': False})
-    return jsonify({'success': True, 'scan': scan})
+    progress = _scan_progress.get(scan_id)
+    return jsonify({'success': True, 'scan': scan, 'progress': progress})
 
 
 @app.route('/api/scans')
@@ -1333,28 +1346,9 @@ def _run_review_analysis(scan_id: int, api_key: str = ''):
                 _review_state[scan_id] = {'status': 'error', 'reviews': [], 'analysis': {'error': '상품 데이터 없음'}}
                 return
 
-            # 리뷰 수집 — Wing 워커 큐로 (스캔 완료 후라 워커 비어있음)
+            # 리뷰 수집 — Playwright 직접 수집
             _review_state[scan_id]['status'] = 'collecting'
-            from analyzer.wing import _send
-            import time as _time
-
-            all_reviews = []
-            for p in products[:10]:
-                url = p['product_url']
-                if not url:
-                    continue
-                try:
-                    reviews = _send('collect_reviews', {
-                        'product_url': url,
-                        'max_reviews': 100
-                    }, timeout=60)
-                    if reviews:
-                        all_reviews.extend(reviews)
-                        print(f'[REVIEW] {p["product_name"][:20]} → {len(all_reviews)}개 누적')
-                except Exception as e:
-                    print(f'[REVIEW] 실패: {p["product_name"][:20]} — {e}')
-                _time.sleep(0.5)
-
+            all_reviews = _collect_reviews_direct(products)
             _review_state[scan_id]['reviews'] = all_reviews
             print(f'[REVIEW] 총 {len(all_reviews)}개 리뷰 수집 완료')
 
@@ -1383,76 +1377,68 @@ def _run_review_analysis(scan_id: int, api_key: str = ''):
 
 
 def _collect_reviews_direct(products) -> list:
-    """별도 Playwright로 리뷰 수집 (Wing 워커와 독립)"""
+    """CDP 연결된 Chrome에서 DOM 파싱으로 리뷰 수집"""
     from playwright.sync_api import sync_playwright
-    import re, time
+    import time
 
     all_reviews = []
-    is_server = os.environ.get('DOCKER_ENV') == '1'
     pw = sync_playwright().start()
-    browser = pw.chromium.launch(
-        headless=is_server,
-        args=['--disable-blink-features=AutomationControlled', '--window-position=-2000,-2000']
-    )
-    context = browser.new_context(
-        user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
-    )
-    page = context.new_page()
 
     try:
+        browser = pw.chromium.connect_over_cdp('http://127.0.0.1:9222')
+        context = browser.contexts[0]
+        page = context.new_page()
+
         for p in products[:10]:
-            url = p['product_url']
+            url = p.get('product_url', '')
             if not url:
                 continue
-            pid_match = re.search(r'products/(\d+)', url)
-            if not pid_match:
-                continue
-            pid = pid_match.group(1)
+            pname = p.get('product_name', '')[:20]
 
             try:
-                # 상품 상세 페이지에 먼저 접속하여 쿠키/세션 컨텍스트 확보
                 page.goto(url, wait_until='domcontentloaded', timeout=15000)
-                page.wait_for_timeout(3000)
+                time.sleep(3)
+                # 리뷰 영역으로 스크롤
+                page.evaluate("window.scrollTo(0, document.body.scrollHeight * 0.7)")
+                time.sleep(2)
 
-                for pg in range(1, 6):  # 최대 5페이지 = 100개
-                    result = page.evaluate(f'''() => {{
-                        return new Promise(resolve => {{
-                            fetch('/next-api/review?productId={pid}&page={pg}&size=20&sortBy=DATE_DESC&ratingSummary=true', {{
-                                credentials: 'include',
-                                headers: {{ 'accept': 'application/json' }}
-                            }})
-                            .then(r => r.json())
-                            .then(d => resolve(d))
-                            .catch(e => resolve({{error: e.toString()}}));
-                        }});
-                    }}''')
+                # DOM에서 리뷰 추출 (article 태그 기반)
+                reviews = page.evaluate("""() => {
+                    const articles = document.querySelectorAll('article');
+                    const result = [];
+                    articles.forEach(a => {
+                        const text = a.textContent.trim().replace(/\\s+/g, ' ');
+                        if (text.length > 30 && !text.includes('장바구니') && !text.includes('최근본상품') && !text.includes('prev') ) {
+                            result.push({
+                                rating: 5,
+                                headline: '',
+                                content: text.substring(0, 500),
+                            });
+                        }
+                    });
+                    return result;
+                }""")
 
-                    if result.get('error'):
-                        break
+                if reviews:
+                    # 상품명 추가
+                    for r in reviews:
+                        r['productName'] = pname
+                    all_reviews.extend(reviews)
+                    print(f'[REVIEW] {pname} → {len(reviews)}개 (누적 {len(all_reviews)})')
+                else:
+                    print(f'[REVIEW] {pname} → 0개')
 
-                    review_list = result.get('data', {}).get('reviews', [])
-                    for r in review_list:
-                        all_reviews.append({
-                            'rating': r.get('rating', 0),
-                            'headline': r.get('headline', ''),
-                            'content': r.get('content', ''),
-                        })
-
-                    if len(review_list) < 20:
-                        break
-                    time.sleep(0.3)
-
-                print(f'[REVIEW] {p["product_name"][:20]} → {len(all_reviews)}개 누적')
             except Exception as e:
-                print(f'[REVIEW] 수집 실패: {p["product_name"][:20]} — {e}')
+                print(f'[REVIEW] 수집 실패: {pname} — {e}')
 
-            time.sleep(0.5)
+            time.sleep(1)
+
+        page.close()
 
     except Exception as e:
-        print(f'[REVIEW] 크롤링 에러: {e}')
+        print(f'[REVIEW] CDP 연결 실패: {e}')
+        print('[REVIEW] Chrome을 --remote-debugging-port=9222로 실행해주세요')
     finally:
-        context.close()
-        browser.close()
         pw.stop()
 
     print(f'[REVIEW] 총 {len(all_reviews)}개 수집 완료')
@@ -1477,14 +1463,19 @@ def api_review_chat(scan_id):
     if not question:
         return jsonify({'error': '질문을 입력해주세요.'})
 
-    # DB에서 리뷰 로드 (메모리에 없으면)
+    # DB에서 리뷰/분석 로드 (메모리에 없으면)
     state = _review_state.get(scan_id)
     if not state or not state.get('reviews'):
         state = fdb.load_reviews_from_db(scan_id)
-    if not state or not state.get('reviews'):
-        return jsonify({'error': '리뷰 데이터가 없습니다. 먼저 리뷰 분석을 실행해주세요.'})
+    if not state:
+        state = {}
 
-    reviews = state['reviews']
+    reviews = state.get('reviews', [])
+    analysis = state.get('analysis')
+
+    # 리뷰도 분석도 없으면 에러
+    if not reviews and not analysis:
+        return jsonify({'error': '리뷰 데이터가 없습니다. 먼저 리뷰 분석을 실행해주세요.'})
 
     # 키워드 조회
     keyword = ''
@@ -1492,33 +1483,39 @@ def api_review_chat(scan_id):
     if scan:
         keyword = scan['keyword']
 
-    # 리뷰 텍스트 조합
-    review_texts = []
-    for i, r in enumerate(reviews[:200], 1):  # 최대 200개
-        parts = []
-        if r.get('rating'):
-            parts.append(f"평점:{r['rating']}")
-        if r.get('headline'):
-            parts.append(r['headline'])
-        if r.get('content'):
-            parts.append(r['content'])
-        if parts:
-            review_texts.append(f"{i}. {' | '.join(parts)}")
-
-    review_block = '\n'.join(review_texts)
+    # 리뷰 원본이 있으면 원본 사용, 없으면 분석 결과로 대체
+    if reviews:
+        review_texts = []
+        for i, r in enumerate(reviews[:200], 1):
+            parts = []
+            if r.get('rating'):
+                parts.append(f"평점:{r['rating']}")
+            if r.get('headline'):
+                parts.append(r['headline'])
+            if r.get('content'):
+                parts.append(r['content'])
+            if parts:
+                review_texts.append(f"{i}. {' | '.join(parts)}")
+        context_block = '\n'.join(review_texts)
+        context_label = f'상위 판매 상품 {len(reviews)}개의 소비자 리뷰'
+    else:
+        # 분석 결과를 컨텍스트로 사용
+        import json as _json
+        context_block = _json.dumps(analysis, ensure_ascii=False, indent=2)
+        context_label = 'AI 분석 결과 (장단점, 인기 형태, 소싱 포인트 등)'
 
     prompt = f"""당신은 쿠팡 "{keyword}" 카테고리 제품 전문가입니다.
-상위 판매 상품 {len(reviews)}개의 소비자 리뷰를 모두 읽었습니다.
+다음은 {context_label}입니다.
 
-[리뷰 데이터]
-{review_block}
+[분석 데이터]
+{context_block}
 
 [사용자 질문]
 {question}
 
-위 리뷰 데이터를 참고하여 사용자의 질문에 자연스럽게 대화하듯 답해주세요.
-- 질문이 인사면 간단히 인사하고 리뷰에서 알 수 있는 것을 안내해주세요.
-- 질문이 구체적이면 리뷰 근거를 들어 답해주세요.
+위 데이터를 참고하여 사용자의 질문에 자연스럽게 대화하듯 답해주세요.
+- 질문이 인사면 간단히 인사하고 분석에서 알 수 있는 것을 안내해주세요.
+- 질문이 구체적이면 데이터 근거를 들어 답해주세요.
 - 이모지나 마크다운은 사용하지 마세요.
 - 한국어로 답해주세요."""
 
@@ -1589,6 +1586,28 @@ def get_opportunities():
     status_filter = request.args.get('status', '')
     scans = fdb.get_opportunities(status_filter)
     return jsonify({'success': True, 'opportunities': scans})
+
+
+# === 관심 상품 (Watchlist) API ===
+@app.route('/api/watchlist', methods=['GET'])
+def get_watchlist():
+    doc = fdb.db().collection('_meta').document('watchlist').get()
+    scan_ids = (doc.to_dict() or {}).get('scan_ids', []) if doc.exists else []
+    return jsonify({'success': True, 'scan_ids': scan_ids})
+
+@app.route('/api/watchlist/<int:scan_id>', methods=['POST'])
+def toggle_watchlist(scan_id):
+    ref = fdb.db().collection('_meta').document('watchlist')
+    doc = ref.get()
+    scan_ids = (doc.to_dict() or {}).get('scan_ids', []) if doc.exists else []
+    if scan_id in scan_ids:
+        scan_ids.remove(scan_id)
+        added = False
+    else:
+        scan_ids.append(scan_id)
+        added = True
+    ref.set({'scan_ids': scan_ids})
+    return jsonify({'success': True, 'added': added})
 
 
 # === RFQ API ===
@@ -2197,6 +2216,6 @@ if __name__ == '__main__':
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
     fdb.init_firestore()
     _load_all_reviews_from_db()
-    print("\n[BECORELAB] Market Finder v0.1")
+    print("\n[BECORELAB] 소싱콕 v0.1")
     print("[BECORELAB] http://localhost:8090\n")
     app.run(host='0.0.0.0', port=8090, debug=True, use_reloader=False)

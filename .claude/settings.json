@@ -19,8 +19,12 @@
       "Bash(tail *)",
       "Bash(export *)",
       "WebFetch",
-      "WebSearch"
+      "WebSearch",
+      "Bash(find /c/Users/info/ClaudeAITeam -type f \\\\\\(-name *.py -o -name *.json \\\\\\))"
     ],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": [
+      "C:\\Users\\info\\.claude"
+    ]
   }
 }

@@ -50,6 +50,48 @@ tasks = {}
 # 동시 실행 방지 lock
 scrape_lock = threading.Lock()
 
+# ── Firestore 읽기 캐시 (메모리 + 로컬 파일) — 읽기 쿼터 절약 ──
+_sales_cache = {}  # 메모리 캐시: { "2026-03-19": data }
+_SALES_FILE_CACHE_DIR = os.path.join(DIR, "data", "sales_cache")
+
+def _get_sales_cached(date_str):
+    """sales_daily 데이터를 3단계로 조회: 메모리 → 로컬파일 → Firestore"""
+    # 1. 메모리 캐시
+    if date_str in _sales_cache:
+        return _sales_cache[date_str]
+
+    # 2. 로컬 파일 캐시
+    os.makedirs(_SALES_FILE_CACHE_DIR, exist_ok=True)
+    cache_file = os.path.join(_SALES_FILE_CACHE_DIR, f"{date_str}.json")
+    if os.path.exists(cache_file):
+        try:
+            with open(cache_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            _sales_cache[date_str] = data
+            return data
+        except Exception:
+            pass
+
+    # 3. Firestore (최후 수단)
+    if not _firestore_ok:
+        return None
+    try:
+        doc = fdb.db().collection("sales_daily").document(date_str).get()
+        data = doc.to_dict() if doc.exists else None
+    except Exception as e:
+        log.warning(f"Firestore 읽기 실패 ({date_str}): {e}")
+        return None
+
+    # 데이터가 있으면 로컬 파일에 캐시 저장 (다음번엔 Firestore 안 읽음)
+    if data:
+        _sales_cache[date_str] = data
+        try:
+            with open(cache_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False)
+        except Exception:
+            pass
+    return data
+
 
 # ── 캐시 관리 ──
 def save_cache(result):
@@ -122,6 +164,17 @@ def _save_to_firestore(payload):
         }
         db.collection("sales_daily").document(sales_date).set(sales_summary)
         log.info(f"Firestore sales_daily/{sales_date} 저장 완료 (정산금액: {sales_summary['total_settlement']:,}원)")
+
+        # 로컬 파일 캐시에도 저장 (Firestore 읽기 쿼터 절약)
+        os.makedirs(_SALES_FILE_CACHE_DIR, exist_ok=True)
+        try:
+            cache_file = os.path.join(_SALES_FILE_CACHE_DIR, f"{sales_date}.json")
+            with open(cache_file, "w", encoding="utf-8") as cf:
+                json.dump(sales_summary, cf, ensure_ascii=False)
+            _sales_cache[sales_date] = sales_summary
+            log.info(f"로컬 매출 캐시 저장: {cache_file}")
+        except Exception as ce:
+            log.warning(f"로컬 매출 캐시 저장 실패: {ce}")
 
         # ERP용 주문 상세 데이터 저장 (sales_daily_orders 컬렉션)
         orders = sales.get("orders", [])
@@ -293,15 +346,16 @@ def api_get_purchases():
 
 @app.route("/api/sales-daily")
 def api_sales_daily():
-    """매출 일별 데이터 조회 (쿼리: ?date=2026-03-16 또는 ?days=7)"""
+    """매출 일별 데이터 조회 (쿼리: ?date=2026-03-16 또는 ?days=7)
+    메모리 캐시 적용으로 Firestore 읽기 쿼터 절약"""
     if not _firestore_ok:
         return jsonify({"status": "no_firestore"}), 503
     try:
         target_date = request.args.get("date")
         if target_date:
-            doc = fdb.db().collection("sales_daily").document(target_date).get()
-            if doc.exists:
-                return jsonify({"status": "ok", "data": doc.to_dict()})
+            data = _get_sales_cached(target_date)
+            if data:
+                return jsonify({"status": "ok", "data": data})
             return jsonify({"status": "empty"}), 204
 
         days = int(request.args.get("days", 7))
@@ -309,10 +363,54 @@ def api_sales_daily():
         results = []
         for i in range(days):
             d = (datetime.now() - timedelta(days=i+1)).strftime("%Y-%m-%d")
-            doc = fdb.db().collection("sales_daily").document(d).get()
-            if doc.exists:
-                results.append(doc.to_dict())
+            data = _get_sales_cached(d)
+            if data:
+                results.append(data)
         return jsonify({"status": "ok", "data": results})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/sales-monthly")
+def api_sales_monthly():
+    """월간 누적 매출 (Firestore 읽기 최소화 — 메모리 캐시 활용)
+    쿼리: ?month=2026-03 (생략 시 이번 달)"""
+    if not _firestore_ok:
+        return jsonify({"status": "no_firestore"}), 503
+    try:
+        from datetime import timedelta
+        month = request.args.get("month", datetime.now().strftime("%Y-%m"))
+        year, mon = int(month[:4]), int(month[5:7])
+
+        total_settlement = 0
+        total_amount = 0
+        total_count = 0
+        days_with_data = 0
+
+        # 해당 월의 1일부터 말일까지 순회
+        import calendar
+        last_day = calendar.monthrange(year, mon)[1]
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        for day in range(1, last_day + 1):
+            d = f"{year}-{mon:02d}-{day:02d}"
+            if d > today:
+                break
+            data = _get_sales_cached(d)
+            if data:
+                total_settlement += data.get("total_settlement", 0)
+                total_amount += data.get("total_amount", 0)
+                total_count += data.get("total_count", 0)
+                days_with_data += 1
+
+        return jsonify({
+            "status": "ok",
+            "month": month,
+            "days_with_data": days_with_data,
+            "total_settlement": total_settlement,
+            "total_amount": total_amount,
+            "total_count": total_count,
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -617,6 +715,278 @@ def api_save_purchases():
         return jsonify({"status": "ok"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/cache-sales-from-firestore")
+def api_cache_sales_from_firestore():
+    """Firestore의 sales_daily를 로컬 파일로 일괄 캐시 (1회 실행용)
+    쿼리: ?month=2026-03 (생략 시 이번 달)"""
+    if not _firestore_ok:
+        return jsonify({"status": "no_firestore"}), 503
+    try:
+        import calendar
+        from datetime import timedelta
+        month = request.args.get("month", datetime.now().strftime("%Y-%m"))
+        year, mon = int(month[:4]), int(month[5:7])
+        last_day = calendar.monthrange(year, mon)[1]
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        os.makedirs(_SALES_FILE_CACHE_DIR, exist_ok=True)
+        cached = 0
+        skipped = 0
+        for day in range(1, last_day + 1):
+            d = f"{year}-{mon:02d}-{day:02d}"
+            if d > today:
+                break
+            cache_file = os.path.join(_SALES_FILE_CACHE_DIR, f"{d}.json")
+            if os.path.exists(cache_file):
+                skipped += 1
+                continue
+            doc = fdb.db().collection("sales_daily").document(d).get()
+            if doc.exists:
+                data = doc.to_dict()
+                with open(cache_file, "w", encoding="utf-8") as f:
+                    json.dump(data, f, ensure_ascii=False)
+                _sales_cache[d] = data
+                cached += 1
+        return jsonify({"status": "ok", "month": month, "cached": cached, "skipped": skipped})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ── 상품코드→상품명 매핑 ──
+_PRODUCT_NAMES = {
+    "S10357": "건조기시트 코튼블루", "S10358": "건조기시트 베이비크림",
+    "S13565": "건조기시트 바이올렛머스크", "10892": "식기세척기세제(하트)",
+    "10460": "식기세척기세제", "12594": "캡슐세탁세제 버블코튼",
+    "10894": "하트 틴케이스", "S10897": "하트집게 Light Blue",
+    "S10896": "하트집게 Deep Blue", "S13591": "섬유탈취제 100ml",
+    "S13590": "섬유탈취제 400ml", "10909": "스페셜에디션 패키지",
+    "10964": "올인원 세제수세미", "13208": "얼룩제거제 350ml",
+    "13209": "얼룩제거제 휴대용100ml", "10377": "이염방지시트",
+    "11511": "세제샘플 테스트키트", "11512": "건조기 테스트키트",
+    "11789": "감사카드", "13578": "건조기 바이올렛2장추가",
+    "13628": "캡슐세제 틴케이스", "13996": "캡슐표백제",
+    "13998": "건조기시트 베이비크림(쿠팡)", "13303": "리필세트",
+    "09996": "세제보관용기", "9996": "세제보관용기",
+    "10378": "다목적세정제", "10530": "에코백",
+    "10922": "스페셜에디션(LightBlue)", "10923": "스페셜에디션(DeepBlue)",
+    "13234": "건조기 베이비크림 낱장", "S10365": "건조기시트 믹스",
+    "13394": "계란보관함", "13600": "스타배송 건조기 코튼블루",
+    "13858": "섬유탈취제 샘플키트", "13623": "섬유탈취제카드",
+    "S13451": "샘플(소)", "S13452": "샘플(중)", "S13453": "샘플(대)",
+    "S13450": "샘플(극소)", "12489": "수세미(유통기한경과)",
+    "11756": "식기세척기세제(로켓/2개입)",
+    "S13381": "2단구급함(대)", "S13382": "2단구급함(소)",
+    "S13383": "멀티탭보관함(그린티-대)", "S13384": "멀티탭보관함(그린티-중)",
+    "S13385": "멀티탭보관함(카푸치노-대)", "S13386": "멀티탭보관함(카푸치노-중)",
+    "S13388": "와인보관함(1칸)", "S13389": "와인보관함(2칸)", "S13390": "와인보관함(3칸)",
+    "S13392": "캡슐보관함(화이트)", "S13393": "캡슐보관함(그린)",
+    "13998": "PU가죽홀더",
+}
+
+def _product_name(code, by_product=None):
+    """상품코드→상품명 변환"""
+    if by_product and code in by_product:
+        name = by_product[code].get("name", "")
+        if name:
+            # [비코어랩] 접두사 제거
+            import re
+            name = re.sub(r'^\[비코어랩\]\s*', '', name)
+            name = re.sub(r'^[♥★(공박스)]+\s*', '', name)
+            name = name.strip()
+            if name:
+                return name
+    return _PRODUCT_NAMES.get(code, code)
+
+# ── 채널명 정리 ──
+def _channel_short(ch):
+    """채널명을 짧게 정리"""
+    mapping = {
+        "비코어랩 카페24 일비아": "카페24",
+        "비코어랩 로켓배송": "쿠팡 로켓배송",
+        "비코어랩 11번가": "11번가",
+        "비코어랩 일비아 스스": "스마트스토어",
+        "(주)비코어랩": "자사몰",
+        "비코어랩 이마트": "이마트",
+        "비코어랩 G마켓": "G마켓",
+        "비코어랩 옥션": "옥션",
+        "비코어랩 오늘의집": "오늘의집",
+    }
+    return mapping.get(ch, ch)
+
+
+@app.route("/api/daily-report")
+def api_daily_report():
+    """완성된 일매출 보고서 텍스트 반환 (DeepSeek도 그대로 전달 가능)
+    쿼리: ?date=2026-03-19 (생략 시 어제)"""
+    from datetime import timedelta
+    try:
+        target = request.args.get("date")
+        if not target:
+            target = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+
+        # 어제 + 전일 매출
+        data = _get_sales_cached(target)
+        if not data:
+            return jsonify({"status": "empty", "report": f"❌ {target} 매출 데이터 없음"}), 204
+
+        # 전일 데이터 (비교용)
+        d = datetime.strptime(target, "%Y-%m-%d")
+        prev_date = (d - timedelta(days=1)).strftime("%Y-%m-%d")
+        prev = _get_sales_cached(prev_date)
+
+        settlement = data.get("total_settlement", 0)
+        amount = data.get("total_amount", 0)
+        count = data.get("total_count", 0)
+
+        # 전일 대비
+        if prev and prev.get("total_settlement"):
+            prev_s = prev["total_settlement"]
+            change = (settlement - prev_s) / prev_s * 100
+            change_str = f"▲{change:.1f}%" if change >= 0 else f"▼{abs(change):.1f}%"
+        else:
+            change_str = "전일 데이터 없음"
+
+        # 월간 누적
+        month = target[:7]
+        year, mon = int(month[:4]), int(month[5:7])
+        import calendar as cal
+        last_day = cal.monthrange(year, mon)[1]
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        m_total = 0
+        m_days = 0
+        for day in range(1, last_day + 1):
+            dd = f"{year}-{mon:02d}-{day:02d}"
+            if dd > today_str:
+                break
+            dd_data = _get_sales_cached(dd)
+            if dd_data:
+                m_total += dd_data.get("total_settlement", 0)
+                m_days += 1
+
+        # 채널별 (정산금액 큰 순)
+        by_ch = data.get("by_channel", {})
+        ch_sorted = sorted(by_ch.items(), key=lambda x: x[1].get("settlement", 0), reverse=True)
+
+        # 재고 현황
+        cache = load_cache()
+        inv = cache.get("inventory", {}) if cache else {}
+        by_product = data.get("by_product", {})
+
+        # 재고 알림
+        alerts_red = []
+        alerts_yellow = []
+        for code, info in sorted(inv.items()):
+            stock = info.get("stock")
+            if stock is None:
+                continue
+            name = _product_name(code, by_product)
+            if isinstance(stock, (int, float)):
+                if stock < 0:
+                    alerts_red.append(f"🔴 {name} — {stock}개 (마이너스 재고!)")
+                elif 0 < stock <= 10:
+                    alerts_yellow.append(f"⚠️ {name} — {stock}개")
+
+        # 상품 TOP 5
+        pr_sorted = sorted(by_product.items(), key=lambda x: x[1].get("settlement", 0), reverse=True)
+
+        # 보고서 텍스트 생성
+        lines = []
+        lines.append(f"📊 iLBiA 일간 보고 ({target})")
+        lines.append("")
+        lines.append(f"💵 총 정산: ₩{settlement:,} (전일 대비 {change_str})")
+        lines.append(f"💰 총 판매: ₩{amount:,} (참고)")
+        lines.append(f"📦 주문: {count}건")
+        lines.append("")
+        lines.append(f"📊 {mon}월 누적: ₩{m_total:,} ({m_days}일간)")
+        lines.append("")
+
+        # 채널별
+        lines.append("📈 채널별 (정산금액 큰 순)")
+        for ch_name, ch_data in ch_sorted:
+            short = _channel_short(ch_name)
+            ch_count = ch_data.get("count", 0)
+            ch_settle = ch_data.get("settlement", 0)
+            lines.append(f"{short} — {ch_count}건 | ₩{ch_settle:,}")
+        lines.append("")
+
+        # 재고 알림
+        lines.append("🚨 재고 알림")
+        if alerts_red or alerts_yellow:
+            for a in alerts_red:
+                lines.append(a)
+            for a in alerts_yellow:
+                lines.append(a)
+        else:
+            lines.append("✅ 모든 상품 재고 양호")
+        lines.append("")
+
+        # 상품 TOP 5
+        lines.append("🏷️ 상품 TOP 5 (정산금액)")
+        for code, pdata in pr_sorted[:5]:
+            name = _product_name(code, by_product)
+            qty = pdata.get("qty", 0)
+            ps = pdata.get("settlement", 0)
+            lines.append(f"{name} — {qty}개 | ₩{ps:,}")
+
+        report = "\n".join(lines)
+        return jsonify({"status": "ok", "date": target, "report": report})
+    except Exception as e:
+        return jsonify({"status": "error", "report": f"❌ 보고서 생성 실패: {str(e)}"}), 500
+
+
+@app.route("/api/inventory-report")
+def api_inventory_report():
+    """완성된 재고 보고서 텍스트 반환 (상품명 매핑 완료)"""
+    try:
+        cache = load_cache()
+        if not cache or "inventory" not in cache:
+            return jsonify({"status": "empty", "report": "❌ 재고 데이터 없음"}), 204
+
+        inv = cache["inventory"]
+        alerts_red = []
+        alerts_yellow = []
+        normal = []
+
+        for code in sorted(inv.keys()):
+            info = inv[code]
+            stock = info.get("stock")
+            if stock is None:
+                continue
+            name = _product_name(code)
+            if isinstance(stock, (int, float)):
+                if stock < 0:
+                    alerts_red.append((name, stock))
+                elif 0 < stock <= 10:
+                    alerts_yellow.append((name, stock))
+                elif stock > 0:
+                    normal.append((name, stock))
+
+        lines = ["📦 재고 현황 보고서"]
+        lines.append("")
+
+        if alerts_red:
+            lines.append("🔴 마이너스 재고 (긴급 발주 필요)")
+            for name, stock in sorted(alerts_red, key=lambda x: x[1]):
+                lines.append(f"  {name} — {stock}개")
+            lines.append("")
+
+        if alerts_yellow:
+            lines.append("⚠️ 재고 부족 (10개 이하)")
+            for name, stock in sorted(alerts_yellow, key=lambda x: x[1]):
+                lines.append(f"  {name} — {stock}개")
+            lines.append("")
+
+        if normal:
+            lines.append("✅ 정상 재고")
+            for name, stock in sorted(normal, key=lambda x: -x[1]):
+                lines.append(f"  {name} — {stock:,}개")
+
+        report = "\n".join(lines)
+        return jsonify({"status": "ok", "report": report})
+    except Exception as e:
+        return jsonify({"status": "error", "report": f"❌ 재고 보고서 생성 실패: {str(e)}"}), 500
 
 
 if __name__ == "__main__":
