@@ -3477,15 +3477,27 @@ function _renderReviewTab(el, scan) {
     el.innerHTML = `
         <div style="text-align:center;padding:40px 0;">
             <div style="font-size:15px;color:var(--text-secondary);margin-bottom:16px;">상위 상품의 리뷰를 수집하고 AI로 분석합니다</div>
-            <button id="btnInsightReview" onclick="_startInsightReview(${scanId})" style="background:linear-gradient(135deg,#ff6b2b,#ff9500);border:none;color:#fff;padding:12px 32px;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;">리뷰 분석 시작</button>
+            <div style="display:flex;gap:12px;justify-content:center;">
+                <button id="btnInsightReview" onclick="_startInsightReview(${scanId})" style="background:linear-gradient(135deg,#ff6b2b,#ff9500);border:none;color:#fff;padding:12px 32px;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;">리뷰 분석</button>
+                <button id="btnDetailAnalysis" onclick="_startDetailAnalysis(${scanId})" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;padding:12px 32px;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;">상세 분석</button>
+            </div>
         </div>
         <div id="insightReviewContent"></div>
+        <div id="detailAnalysisContent"></div>
     `;
 
     fetch(`/api/scan/${scanId}/reviews`).then(r=>r.json()).then(data => {
         if (data.status === 'done' && data.analysis) {
             _displayInsightReview(data);
             document.getElementById('btnInsightReview').textContent = '다시 분석';
+        }
+    }).catch(()=>{});
+
+    // 기존 상세 분석 결과 있으면 표시
+    fetch(`/api/scan/${scanId}/detail-analysis`).then(r=>r.json()).then(data => {
+        if (data.status === 'done' && data.analysis) {
+            _displayDetailAnalysis(data);
+            document.getElementById('btnDetailAnalysis').textContent = '다시 분석';
         }
     }).catch(()=>{});
 }
@@ -3597,6 +3609,140 @@ function _pollInsightReview(scanId, btn) {
         }
     };
     setTimeout(poll, 3000);
+}
+
+// ─── 상세 분석 (CDP + Gemini) ───
+async function _startDetailAnalysis(scanId) {
+    const btn = document.getElementById('btnDetailAnalysis');
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.textContent = '수집 중...';
+
+    document.getElementById('detailAnalysisContent').innerHTML = `
+        <div style="text-align:center;padding:30px;">
+            <span class="loading-spinner"></span>
+            <div style="margin-top:12px;color:var(--text-secondary);">상위 상품 상세페이지 수집 + AI 분석 중...</div>
+            <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">Chrome CDP로 각 상품 페이지를 방문합니다 (2~3분 소요)</div>
+        </div>`;
+
+    try {
+        const res = await fetch(`/api/scan/${scanId}/detail-analysis`, { method: 'POST' });
+        const data = await res.json();
+        if (!data.success) {
+            document.getElementById('detailAnalysisContent').innerHTML = `<div style="padding:20px;color:var(--danger);">${data.error || '시작 실패'}</div>`;
+            btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
+            return;
+        }
+        _pollDetailAnalysis(scanId, btn);
+    } catch (e) {
+        document.getElementById('detailAnalysisContent').innerHTML = `<div style="padding:20px;color:var(--danger);">오류: ${e.message}</div>`;
+        btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
+    }
+}
+
+function _pollDetailAnalysis(scanId, btn) {
+    let pollCount = 0;
+    const poll = async () => {
+        pollCount++;
+        try {
+            const res = await fetch(`/api/scan/${scanId}/detail-analysis`);
+            const data = await res.json();
+            if (data.status === 'collecting') {
+                document.getElementById('detailAnalysisContent').innerHTML = `<div style="text-align:center;padding:30px;"><span class="loading-spinner"></span> 상품 정보 수집 중... (${data.progress})</div>`;
+                setTimeout(poll, 3000);
+            } else if (data.status === 'analyzing') {
+                document.getElementById('detailAnalysisContent').innerHTML = `<div style="text-align:center;padding:30px;"><span class="loading-spinner"></span> AI 비교 분석 중...</div>`;
+                setTimeout(poll, 3000);
+            } else if (data.status === 'done' && data.analysis) {
+                _displayDetailAnalysis(data);
+                btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 분석';
+            } else if (data.status === 'error') {
+                document.getElementById('detailAnalysisContent').innerHTML = `<div style="padding:20px;color:var(--danger);">분석 실패: ${data.analysis?.error || ''}</div>`;
+                btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
+            } else if (pollCount > 120) {
+                document.getElementById('detailAnalysisContent').innerHTML = '<div style="padding:20px;color:var(--danger);">시간 초과. 다시 시도해주세요.</div>';
+                btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 시도';
+            } else {
+                setTimeout(poll, 3000);
+            }
+        } catch (e) {
+            if (pollCount < 120) setTimeout(poll, 3000);
+        }
+    };
+    setTimeout(poll, 3000);
+}
+
+function _displayDetailAnalysis(data) {
+    const a = data.analysis;
+    if (!a || a.error) {
+        document.getElementById('detailAnalysisContent').innerHTML = `<div style="padding:20px;color:var(--danger);">${a?.error || '분석 데이터 없음'}</div>`;
+        return;
+    }
+
+    let html = `<div style="margin-top:20px;border-top:1px solid var(--border);padding-top:20px;">
+        <div style="font-size:16px;font-weight:800;margin-bottom:16px;color:#8b5cf6;">상세 분석 리포트 <span style="font-size:12px;font-weight:400;color:var(--text-muted);">(${a._products_analyzed||0}개 상품)</span></div>`;
+
+    // 시장 개요
+    if (a.market_overview) {
+        html += `<div class="ins-chart-wrap"><div class="ins-section-title"><span class="dot" style="background:#8b5cf6;"></span>시장 개요</div>
+            <div style="font-size:14px;color:var(--text-secondary);line-height:2;">${a.market_overview}</div></div>`;
+    }
+
+    // 공통 스펙 + 추천 스펙
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">';
+    if (a.common_specs) {
+        html += `<div class="ins-chart-wrap"><div class="ins-section-title"><span class="dot" style="background:var(--cyan);"></span>공통 스펙</div>
+            ${a.common_specs.map(s=>'<div style="font-size:13px;padding:4px 0;color:var(--text-secondary);">'+s+'</div>').join('')}</div>`;
+    }
+    if (a.recommended_specs) {
+        html += `<div class="ins-chart-wrap"><div class="ins-section-title"><span class="dot" style="background:var(--success);"></span>추천 스펙</div>
+            ${a.recommended_specs.map(s=>'<div style="font-size:13px;padding:4px 0;color:var(--text-secondary);">'+s+'</div>').join('')}</div>`;
+    }
+    html += '</div>';
+
+    // 가격대
+    if (a.price_range) {
+        const pr = a.price_range;
+        html += `<div class="ins-chart-wrap"><div class="ins-section-title"><span class="dot" style="background:var(--warning);"></span>가격 분석</div>
+            <div style="font-size:13px;color:var(--text-secondary);line-height:2;">
+                최저가: ${pr.min} / 최고가: ${pr.max}<br>
+                <strong style="color:var(--accent);">적정 가격대: ${pr.sweet_spot}</strong><br>
+                ${pr.reason || ''}
+            </div></div>`;
+    }
+
+    // 셀링 포인트 + 상세페이지 패턴
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">';
+    if (a.key_selling_points) {
+        html += `<div class="ins-chart-wrap"><div class="ins-section-title"><span class="dot" style="background:var(--success);"></span>공통 셀링 포인트</div>
+            ${a.key_selling_points.map((t,i)=>'<div style="font-size:13px;padding:4px 0;color:var(--text-secondary);">'+(i+1)+'. '+t+'</div>').join('')}</div>`;
+    }
+    if (a.detail_page_patterns) {
+        html += `<div class="ins-chart-wrap"><div class="ins-section-title"><span class="dot" style="background:var(--purple);"></span>상세페이지 패턴</div>
+            ${a.detail_page_patterns.map((t,i)=>'<div style="font-size:13px;padding:4px 0;color:var(--text-secondary);">'+(i+1)+'. '+t+'</div>').join('')}</div>`;
+    }
+    html += '</div>';
+
+    // 소싱 포인트 + 차별화
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">';
+    if (a.sourcing_tips) {
+        html += `<div class="ins-chart-wrap"><div class="ins-section-title"><span class="dot" style="background:var(--warning);"></span>소싱 포인트</div>
+            ${a.sourcing_tips.map((t,i)=>'<div style="font-size:13px;padding:4px 0;color:var(--text-secondary);">'+(i+1)+'. '+t+'</div>').join('')}</div>`;
+    }
+    if (a.differentiation) {
+        html += `<div class="ins-chart-wrap"><div class="ins-section-title"><span class="dot" style="background:var(--accent);"></span>차별화 아이디어</div>
+            ${a.differentiation.map((t,i)=>'<div style="font-size:13px;padding:4px 0;color:var(--text-secondary);">'+(i+1)+'. '+t+'</div>').join('')}</div>`;
+    }
+    html += '</div>';
+
+    // 리스크
+    if (a.risk_factors) {
+        html += `<div class="ins-chart-wrap"><div class="ins-section-title"><span class="dot" style="background:var(--danger);"></span>주의 사항</div>
+            ${a.risk_factors.map((t,i)=>'<div style="font-size:13px;padding:4px 0;color:var(--text-secondary);">'+(i+1)+'. '+t+'</div>').join('')}</div>`;
+    }
+
+    html += '</div>';
+    document.getElementById('detailAnalysisContent').innerHTML = html;
 }
 
 function _displayInsightReview(data) {
@@ -4639,17 +4785,20 @@ async function markScan(scanId, status) {
 }
 
 function viewScanDetail(scanId) {
-    // 직접 조사 탭으로 전환 + 해당 스캔 결과 표시
+    // 키워드 스캔 탭으로 전환 + 해당 스캔 결과 표시
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.querySelector('[data-tab="scan"]').classList.add('active');
     document.getElementById('tab-scan').classList.add('active');
 
-    // 직접 조사 모드
+    // 스캔 모드 버튼 (있으면)
     document.querySelectorAll('.scan-mode-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('[data-mode="manual"]').classList.add('active');
-    document.getElementById('manualScanPanel').style.display = 'block';
-    document.getElementById('autoScanPanel').style.display = 'none';
+    const manualBtn = document.querySelector('[data-mode="manual"]');
+    if (manualBtn) manualBtn.classList.add('active');
+    const manualPanel = document.getElementById('manualScanPanel');
+    if (manualPanel) manualPanel.style.display = 'block';
+    const autoPanel = document.getElementById('autoScanPanel');
+    if (autoPanel) autoPanel.style.display = 'none';
 
     // 결과 표시
     document.getElementById('scanEmpty').style.display = 'none';

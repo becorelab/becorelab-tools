@@ -1187,6 +1187,7 @@ def api_scan_keywords(scan_id):
 
 # === 리뷰 분석 ===
 _review_state = {}  # scan_id → {status, reviews, analysis}
+_detail_state = {}  # scan_id → {status, progress, analysis}
 
 
 @app.route('/api/scan/<int:scan_id>/reviews', methods=['POST'])
@@ -1544,6 +1545,216 @@ def reanalyze_reviews(scan_id):
 
     threading.Thread(target=_run, daemon=True).start()
     return jsonify({'success': True, 'message': f'{len(reviews)}개 리뷰 AI 재분석 시작!'})
+
+
+# ══════════════════════════════════════════════
+# 상세 분석 (CDP + Gemini)
+# ══════════════════════════════════════════════
+@app.route('/api/scan/<int:scan_id>/detail-analysis', methods=['POST'])
+def start_detail_analysis(scan_id):
+    """상위 상품 상세페이지 수집 + AI 비교 분석"""
+    if scan_id in _detail_state and _detail_state[scan_id].get('status') in ('collecting', 'analyzing'):
+        return jsonify({'success': True, 'message': '이미 분석 중...'})
+
+    products = fdb.get_products(scan_id)[:10]
+    if not products:
+        return jsonify({'success': False, 'error': '상품 데이터가 없습니다'})
+
+    scan = fdb.get_scan(scan_id)
+    keyword = scan['keyword'] if scan else ''
+
+    _detail_state[scan_id] = {'status': 'collecting', 'progress': '0/' + str(len(products)), 'analysis': None}
+
+    def _run():
+        with app.app_context():
+            try:
+                collected = _collect_product_details(products, scan_id)
+                if not collected:
+                    _detail_state[scan_id] = {'status': 'error', 'progress': '', 'analysis': {'error': '상품 정보를 수집하지 못했습니다. Chrome CDP가 실행 중인지 확인해주세요.'}}
+                    return
+
+                _detail_state[scan_id]['status'] = 'analyzing'
+                analysis = _analyze_product_details(collected, keyword)
+                _detail_state[scan_id]['analysis'] = analysis
+                _detail_state[scan_id]['status'] = 'done'
+                fdb.save_detail_analysis(scan_id, keyword, analysis)
+                print(f'[DETAIL] 분석 완료: {keyword} ({len(collected)}개 상품)')
+            except Exception as e:
+                import traceback; traceback.print_exc()
+                _detail_state[scan_id] = {'status': 'error', 'progress': '', 'analysis': {'error': str(e)}}
+
+    threading.Thread(target=_run, daemon=True).start()
+    return jsonify({'success': True, 'message': f'{len(products)}개 상품 상세 분석 시작!'})
+
+
+@app.route('/api/scan/<int:scan_id>/detail-analysis')
+def get_detail_analysis(scan_id):
+    """상세 분석 결과 조회"""
+    state = _detail_state.get(scan_id)
+    if not state or state.get('status') == 'none':
+        saved = fdb.get_detail_analysis(scan_id)
+        if saved:
+            _detail_state[scan_id] = {'status': 'done', 'progress': '', 'analysis': saved}
+            state = _detail_state[scan_id]
+    if not state:
+        state = {'status': 'none', 'progress': '', 'analysis': None}
+    return jsonify({
+        'success': True,
+        'status': state.get('status', 'none'),
+        'progress': state.get('progress', ''),
+        'analysis': state.get('analysis'),
+    })
+
+
+def _collect_product_details(products, scan_id) -> list:
+    """CDP Chrome으로 상품 상세페이지 정보 수집"""
+    from playwright.sync_api import sync_playwright
+    import time
+
+    collected = []
+    pw = sync_playwright().start()
+
+    try:
+        browser = pw.chromium.connect_over_cdp('http://127.0.0.1:9222')
+        context = browser.contexts[0]
+        page = context.new_page()
+        total = len(products)
+
+        for i, p in enumerate(products):
+            url = p.get('product_url', '')
+            pname = p.get('product_name', '')[:30]
+            _detail_state[scan_id]['progress'] = f'{i+1}/{total}'
+
+            if not url:
+                continue
+            try:
+                page.goto(url, wait_until='domcontentloaded', timeout=20000)
+                time.sleep(3)
+
+                # 상세페이지까지 스크롤
+                page.evaluate("window.scrollTo(0, document.body.scrollHeight * 0.6)")
+                time.sleep(2)
+
+                data = page.evaluate("""() => {
+                    const title = document.querySelector('h1, .prod-buy-header__title, [class*="title"]')?.textContent?.trim() || '';
+                    const price = document.querySelector('.total-price strong, [class*="total-price"], [class*="sale-price"]')?.textContent?.trim() || '';
+
+                    // 상세페이지 텍스트
+                    let detailText = '';
+                    const detailSelectors = ['.product-detail-content-inside', '.product-detail-content', '#productDetail', '.prod-description'];
+                    for (const sel of detailSelectors) {
+                        const el = document.querySelector(sel);
+                        if (el && el.textContent.trim().length > 30) {
+                            detailText = el.textContent.trim().replace(/\\s+/g, ' ').substring(0, 1500);
+                            break;
+                        }
+                    }
+
+                    // 상세페이지 이미지 URL
+                    const imgSelectors = ['.product-detail-content-inside img', '.product-detail-content img', '#productDetail img', '.prod-description img'];
+                    let images = [];
+                    for (const sel of imgSelectors) {
+                        const imgs = document.querySelectorAll(sel);
+                        if (imgs.length > 0) {
+                            images = Array.from(imgs).slice(0, 15).map(img => img.src || img.dataset?.src || '').filter(s => s && s.startsWith('http'));
+                            break;
+                        }
+                    }
+
+                    // 전체 페이지 텍스트 (상세 못 찾으면)
+                    if (!detailText) {
+                        detailText = document.body.innerText.substring(0, 2000).replace(/\\s+/g, ' ');
+                    }
+
+                    return { title, price, detailText, images };
+                }""")
+
+                if data.get('title') and 'Access Denied' not in data['title']:
+                    collected.append({
+                        'product_name': pname,
+                        'product_url': url,
+                        'title': data['title'],
+                        'price': data['price'],
+                        'detail_text': data['detailText'],
+                        'image_urls': data['images'],
+                        'ranking': p.get('ranking', i+1),
+                        'revenue_monthly': p.get('revenue_monthly', 0),
+                        'review_count': p.get('review_count', 0),
+                    })
+                    print(f'[DETAIL] {i+1}/{total} {pname} → 텍스트 {len(data["detailText"])}자, 이미지 {len(data["images"])}장')
+                else:
+                    print(f'[DETAIL] {i+1}/{total} {pname} → 접근 차단')
+
+            except Exception as e:
+                print(f'[DETAIL] {i+1}/{total} {pname} → 실패: {e}')
+
+            time.sleep(2)
+
+        page.close()
+    except Exception as e:
+        print(f'[DETAIL] CDP 연결 실패: {e}')
+    finally:
+        pw.stop()
+
+    print(f'[DETAIL] 총 {len(collected)}/{len(products)}개 수집 완료')
+    return collected
+
+
+def _analyze_product_details(collected: list, keyword: str) -> dict:
+    """수집된 상품 데이터를 Gemini로 비교 분석"""
+    from analyzer.reviews import _call_gemini
+
+    # 상품 데이터 텍스트 구성
+    product_texts = []
+    for i, p in enumerate(collected, 1):
+        text = f"""[상품 {i}] {p['title']}
+가격: {p['price']}
+월매출: {p['revenue_monthly']:,}원 | 리뷰: {p['review_count']}개 | 순위: {p['ranking']}위
+상세페이지: {p['detail_text'][:800]}
+이미지 수: {len(p['image_urls'])}장"""
+        product_texts.append(text)
+
+    products_block = '\n\n---\n\n'.join(product_texts)
+
+    prompt = f"""당신은 쿠팡 소싱 전문가입니다.
+아래는 "{keyword}" 키워드의 상위 {len(collected)}개 상품의 상세페이지 데이터입니다.
+
+{products_block}
+
+위 데이터를 분석하여 아래 항목을 JSON 형식으로 답해주세요:
+
+1. "market_overview": 이 시장의 전반적 특징 요약 (3줄)
+2. "common_specs": 대부분의 상품이 채택한 공통 스펙 (배열, "소재: ...", "사이즈: ..." 등)
+3. "price_range": {{"min": "최저가", "max": "최고가", "sweet_spot": "가장 많은 가격대", "reason": "이유"}}
+4. "popular_compositions": 가장 많이 쓰이는 구성/입수 패턴 3가지 (배열, 각 {{"type": "", "count": "상품수", "reason": ""}})
+5. "key_selling_points": 상세페이지에서 공통적으로 강조하는 셀링 포인트 5가지 (배열)
+6. "detail_page_patterns": 상세페이지 디자인/구성 공통 패턴 3가지 (배열)
+7. "differentiation": 기존 제품 대비 차별화 아이디어 3가지 (배열)
+8. "sourcing_tips": 이 제품을 소싱할 때 집중할 포인트 3가지 (배열)
+9. "risk_factors": 주의해야 할 리스크 2가지 (배열)
+10. "recommended_specs": 추천 스펙 시트 (배열, "소재: ...", "사이즈: ..." 등)
+
+JSON만 답해주세요."""
+
+    content = _call_gemini(prompt, max_tokens=8000)
+    if content:
+        import re
+        json_match = re.search(r'\{[\s\S]*\}', content)
+        if json_match:
+            import json
+            try:
+                analysis = json.loads(json_match.group())
+                analysis['_source'] = 'gemini'
+                analysis['_products_analyzed'] = len(collected)
+                return analysis
+            except json.JSONDecodeError:
+                pass
+
+    return {
+        'error': 'AI 분석 실패',
+        '_products_analyzed': len(collected),
+        '_raw_data': [{'name': p['title'], 'price': p['price']} for p in collected],
+    }
 
 
 @app.route('/api/scan/<int:scan_id>/status', methods=['PUT'])
