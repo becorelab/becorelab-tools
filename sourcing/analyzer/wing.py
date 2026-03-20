@@ -219,10 +219,9 @@ def _do_search(keyword):
         if not result.get('success'):
             raise Exception('WING_LOGIN_REQUIRED')
 
-    # 쿠팡 분석 페이지 확인
-    if 'keyword_analyze_coupang' not in _page.url:
-        _page.goto(COUPANG_PAGE, wait_until='domcontentloaded', timeout=15000)
-        _page.wait_for_timeout(2000)
+    # 매번 페이지 새로 로드 (이전 검색 결과 캐시 방지)
+    _page.goto(COUPANG_PAGE, wait_until='domcontentloaded', timeout=15000)
+    _page.wait_for_timeout(3000)
 
     # extension/page로 리다이렉트 되면 확장 미감지
     if '/extension/page' in _page.url:
@@ -235,7 +234,7 @@ def _do_search(keyword):
     _page.wait_for_timeout(300)
     _page.locator('#btnSearch').click()
 
-    # 결과 로딩 대기 (확장이 윙 API 호출 → DOM 렌더)
+    # 결과 로딩 대기 (DOM 비운 후 새 결과가 나타날 때까지)
     try:
         _page.wait_for_selector(
             '.keyword_analyze_coupang .listProducts li',

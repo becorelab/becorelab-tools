@@ -64,7 +64,8 @@ def index():
 @app.route('/api/scan/manual', methods=['POST'])
 def manual_scan():
     """직접 조사 — 키워드 입력하면 헬프스토어에서 데이터 수집"""
-    data = request.json
+    # PowerShell Invoke-WebRequest 한글 인코딩 대응 (force=True로 charset 무시)
+    data = request.get_json(force=True, silent=True) or {}
     keyword = data.get('keyword', '').strip()
     use_cdp = data.get('use_cdp', False)  # CDP 모드 (쿠팡 실데이터)
     if not keyword:
@@ -1505,19 +1506,8 @@ def api_review_chat(scan_id):
 - 이모지나 마크다운은 사용하지 마세요.
 - 한국어로 답해주세요."""
 
-    # Gemini Flash API 호출 (무료)
-    from analyzer.reviews import GEMINI_API_KEY, _call_gemini
-    if not GEMINI_API_KEY:
-        return jsonify({'error': 'GEMINI_API_KEY가 설정되지 않았습니다.'})
-
-    try:
-        answer = _call_gemini(prompt, max_tokens=1024)
-        if answer:
-            return jsonify({'answer': answer})
-        else:
-            return jsonify({'error': 'AI 응답이 비어있습니다.'})
-    except Exception as e:
-        return jsonify({'error': f'API 호출 실패: {str(e)}'})
+    # AI API 제거 — 리뷰 Q&A 비활성화
+    return jsonify({'error': '리뷰 Q&A 기능은 현재 비활성화되어 있습니다.'})
 
 
 @app.route('/api/scan/<int:scan_id>/reanalyze-reviews', methods=['POST'])
@@ -2191,6 +2181,86 @@ def get_stats():
     """대시보드 통계"""
     stats = fdb.get_stats()
     return jsonify({'success': True, 'stats': stats})
+
+
+# ─────────────────────────────────────────────
+# 기존 스캔 점수 일괄 재계산 (scoring.py 통일)
+# ─────────────────────────────────────────────
+@app.route('/api/rescore-all', methods=['POST'])
+def rescore_all():
+    """기존 스캔의 기회점수를 scoring.py 기반으로 일괄 재계산
+    상품 데이터가 있는 스캔만 재계산 (없으면 스킵)"""
+    scans = fdb.list_scans(limit=500)
+    updated = 0
+    skipped = 0
+    errors = 0
+
+    for scan in scans:
+        scan_id = scan.get('id')
+        keyword = scan.get('keyword', '')
+        if not scan_id:
+            continue
+
+        try:
+            # Firestore에서 상품 데이터 로드
+            products_raw = fdb.get_products(scan_id)
+            if not products_raw:
+                skipped += 1
+                continue
+
+            # dict → CoupangProduct 변환
+            products = []
+            for pr in products_raw:
+                products.append(CoupangProduct(
+                    ranking=pr.get('ranking', 0),
+                    product_name=pr.get('product_name', ''),
+                    brand=pr.get('brand', ''),
+                    manufacturer=pr.get('manufacturer', ''),
+                    price=pr.get('price', 0),
+                    sales_monthly=pr.get('sales_monthly', 0),
+                    revenue_monthly=pr.get('revenue_monthly', 0),
+                    review_count=pr.get('review_count', 0),
+                    click_count=pr.get('click_count', 0),
+                    conversion_rate=pr.get('conversion_rate', 0),
+                    page_views=pr.get('page_views', 0),
+                    category=pr.get('category', ''),
+                    category_code=pr.get('category_code', ''),
+                    product_url=pr.get('product_url', ''),
+                ))
+
+            # scoring.py로 재계산
+            opp_score = calculate_opportunity(
+                products=products,
+                inflow_keywords=[],
+                related_keywords=[],
+                keyword=keyword
+            )
+
+            # Firestore 업데이트
+            fdb.update_scan(scan_id,
+                opportunity_score=round(opp_score.total_score, 1),
+                top10_avg_revenue=opp_score.top4_10_avg_revenue,
+                top10_avg_sales=opp_score.top4_10_avg_sales,
+                top10_avg_price=opp_score.top4_10_avg_price,
+                revenue_concentration=round(opp_score.top3_share * 100, 1),
+                revenue_equality=round(opp_score.revenue_equality * 100, 1),
+                new_product_rate=round(opp_score.new_product_rate * 100, 1),
+                ad_dependency=round(opp_score.avg_new_product_weight, 1),
+            )
+            updated += 1
+            print(f'[RESCORE] {scan_id} {keyword}: {scan.get("opportunity_score")} → {opp_score.total_score:.1f}')
+
+        except Exception as e:
+            errors += 1
+            print(f'[RESCORE] 에러 {scan_id} {keyword}: {e}')
+
+    return jsonify({
+        'success': True,
+        'updated': updated,
+        'skipped': skipped,
+        'errors': errors,
+        'message': f'{updated}개 재계산 완료 ({skipped}개 스킵, {errors}개 에러)'
+    })
 
 
 # ─────────────────────────────────────────────
