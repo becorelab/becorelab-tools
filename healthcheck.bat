@@ -14,4 +14,7 @@ netstat -ano | findstr ":18789.*LISTENING" >nul 2>&1
 if errorlevel 1 (
     echo [%date% %time%] OpenClaw 게이트웨이 재시작 >> C:\Users\info\ClaudeAITeam\logistics\data\healthcheck.log
     start /b "" C:\Users\info\AppData\Roaming\npm\openclaw.cmd gateway
+    REM 게이트웨이 시작 후 브라우저도 시작
+    timeout /t 15 /nobreak >nul
+    start /b "" C:\Users\info\AppData\Roaming\npm\openclaw.cmd browser start
 )
