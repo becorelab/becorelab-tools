@@ -2518,4 +2518,4 @@ if __name__ == '__main__':
     _load_all_reviews_from_db()
     print("\n[BECORELAB] 소싱콕 v0.1")
     print("[BECORELAB] http://localhost:8090\n")
-    app.run(host='0.0.0.0', port=8090, debug=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=8090, debug=False, use_reloader=False)
