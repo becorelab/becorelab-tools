@@ -3365,7 +3365,7 @@ function _renderDetailTab(el, products, scan) {
     // 기존 분석 결과 있으면 바로 표시
     fetch('/api/scan/' + scanId + '/detail-analysis').then(r=>r.json()).then(data => {
         if (data.status === 'done' && data.analysis) {
-            _displayDetailAnalysis(data);
+            _displayDetailAnalysis(data, scanId);
             document.getElementById('btnDetailAnalysis').textContent = '다시 분석';
         }
     }).catch(()=>{});
@@ -3720,7 +3720,7 @@ function _pollDetailAnalysis(scanId, btn) {
                 document.getElementById('detailAnalysisContent').innerHTML = `<div style="text-align:center;padding:30px;"><span class="loading-spinner"></span> AI 비교 분석 중...</div>`;
                 setTimeout(poll, 3000);
             } else if (data.status === 'done' && data.analysis) {
-                _displayDetailAnalysis(data);
+                _displayDetailAnalysis(data, scanId);
                 btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 분석';
             } else if (data.status === 'error') {
                 document.getElementById('detailAnalysisContent').innerHTML = `<div style="padding:20px;color:var(--danger);">분석 실패: ${data.analysis?.error || ''}</div>`;
@@ -3738,7 +3738,8 @@ function _pollDetailAnalysis(scanId, btn) {
     setTimeout(poll, 3000);
 }
 
-function _displayDetailAnalysis(data) {
+function _displayDetailAnalysis(data, scanId) {
+    scanId = scanId || _currentScanId;
     const a = data.analysis;
     if (!a || a.error) {
         document.getElementById('detailAnalysisContent').innerHTML = `<div style="padding:20px;color:var(--danger);">${a?.error || '분석 데이터 없음'}</div>`;
@@ -3824,7 +3825,50 @@ function _displayDetailAnalysis(data) {
     }
 
     html += '</div>';
+
+    // 추가 질문 박스
+    html += `
+    <div class="ins-chart-wrap" id="detailChatBox" style="margin-top:16px;">
+        <div class="ins-section-title"><span class="dot" style="background:#6366f1;"></span>수집 데이터에 추가 질문</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">성분, 색상, 구성, 용량 등 상세페이지에서 수집된 원본 데이터를 기반으로 질문할 수 있어요.</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <input id="detailChatInput" type="text" placeholder="예) 색상 종류 알려줘 / 공통 성분이 뭐야? / 몇 개입이 많아?" style="flex:1;background:var(--card-bg);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:4px;font-size:13px;" onkeydown="if(event.key==='Enter') _sendDetailChat(${scanId})"/>
+            <button onclick="_sendDetailChat(${scanId})" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;padding:8px 18px;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer;">질문</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+            ${['색상 종류 알려줘','공통 성분/소재 뭐야?','몇 개입 구성이 많아?','평균 용량/사이즈?','차별화된 상품 특징?'].map(q=>`<span onclick="document.getElementById('detailChatInput').value='${q}';_sendDetailChat(${scanId})" style="cursor:pointer;font-size:11px;padding:3px 9px;border:1px solid var(--border);border-radius:20px;color:var(--text-secondary);">${q}</span>`).join('')}
+        </div>
+        <div id="detailChatAnswer" style="display:none;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:4px;padding:14px;font-size:13px;color:var(--text-primary);line-height:1.7;white-space:pre-wrap;"></div>
+    </div>`;
+
     document.getElementById('detailAnalysisContent').innerHTML = html;
+}
+
+async function _sendDetailChat(scanId) {
+    const input = document.getElementById('detailChatInput');
+    const answerEl = document.getElementById('detailChatAnswer');
+    if (!input || !answerEl) return;
+    const question = input.value.trim();
+    if (!question) return;
+
+    answerEl.style.display = 'block';
+    answerEl.textContent = '답변 생성 중...';
+
+    try {
+        const res = await fetch(`/api/scan/${scanId}/detail-chat`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({question})
+        });
+        const data = await res.json();
+        if (data.success) {
+            answerEl.textContent = data.answer;
+        } else {
+            answerEl.textContent = '오류: ' + (data.error || '알 수 없는 오류');
+        }
+    } catch(e) {
+        answerEl.textContent = '오류: ' + e.message;
+    }
 }
 
 function _displayInsightReview(data) {

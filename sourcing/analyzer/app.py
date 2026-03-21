@@ -1580,7 +1580,7 @@ def start_detail_analysis(scan_id):
                 analysis = _analyze_product_details(collected, keyword)
                 _detail_state[scan_id]['analysis'] = analysis
                 _detail_state[scan_id]['status'] = 'done'
-                fdb.save_detail_analysis(scan_id, keyword, analysis)
+                fdb.save_detail_analysis(scan_id, keyword, analysis, raw_products=collected)
                 print(f'[DETAIL] 분석 완료: {keyword} ({len(collected)}개 상품)')
             except Exception as e:
                 import traceback; traceback.print_exc()
@@ -1607,6 +1607,48 @@ def get_detail_analysis(scan_id):
         'progress': state.get('progress', ''),
         'analysis': state.get('analysis'),
     })
+
+
+@app.route('/api/scan/<int:scan_id>/detail-chat', methods=['POST'])
+def detail_chat(scan_id):
+    """수집된 상품 원본 데이터 기반으로 추가 질문에 Gemini가 답변"""
+    data = request.get_json(force=True, silent=True) or {}
+    question = data.get('question', '').strip()
+    if not question:
+        return jsonify({'success': False, 'error': '질문을 입력해주세요'})
+
+    raw_products = fdb.get_detail_raw_products(scan_id)
+    if not raw_products:
+        return jsonify({'success': False, 'error': '원본 데이터가 없습니다. 상세 분석을 먼저 실행해주세요.'})
+
+    scan = fdb.get_scan(scan_id)
+    keyword = scan['keyword'] if scan else ''
+
+    # 원본 데이터 텍스트 구성
+    product_blocks = []
+    for i, p in enumerate(raw_products, 1):
+        block = f'[상품 {i}] {p.get("title", p.get("product_name", ""))} (순위 {p.get("ranking", i)}위)\n'
+        block += f'가격: {p.get("price", "미확인")} | 월매출: {p.get("revenue_monthly", 0):,}원 | 리뷰: {p.get("review_count", 0)}개\n'
+        block += f'상세내용:\n{p.get("detail_text", "")[:1200]}'
+        product_blocks.append(block)
+
+    context = '\n\n---\n\n'.join(product_blocks)
+
+    from analyzer.reviews import _call_gemini
+    prompt = f'''아래는 쿠팡 "{keyword}" 키워드 상위 {len(raw_products)}개 상품의 실제 상세페이지 데이터입니다.
+
+{context}
+
+---
+질문: {question}
+
+위 상품 데이터를 바탕으로 질문에 정확하게 답해주세요. 없는 정보는 "확인 불가"라고 솔직하게 말해주세요.'''
+
+    answer = _call_gemini(prompt, max_tokens=3000)
+    if not answer:
+        return jsonify({'success': False, 'error': 'AI 응답 실패'})
+
+    return jsonify({'success': True, 'answer': answer, 'products_count': len(raw_products)})
 
 
 def _get_cdp_cookies(domain_filter: str = '') -> list:
