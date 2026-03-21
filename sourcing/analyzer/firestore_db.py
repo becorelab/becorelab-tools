@@ -473,8 +473,8 @@ def get_review_analysis(scan_id: int) -> dict:
 # ══════════════════════════════════════════════
 # detail_analyses (상세 분석)
 # ══════════════════════════════════════════════
-def save_detail_analysis(scan_id: int, keyword: str, analysis: dict):
-    """상세 분석 결과 저장"""
+def save_detail_analysis(scan_id: int, keyword: str, analysis: dict, raw_products: list = None):
+    """상세 분석 결과 + 원본 상품 데이터 저장"""
     old_docs = (db().collection('detail_analyses')
                 .where('scan_id', '==', scan_id)
                 .stream())
@@ -483,12 +483,15 @@ def save_detail_analysis(scan_id: int, keyword: str, analysis: dict):
         batch.delete(d.reference)
     batch.commit()
 
-    db().collection('detail_analyses').add({
+    doc = {
         'scan_id': scan_id,
         'keyword': keyword,
         'analysis_json': json.dumps(analysis, ensure_ascii=False),
         'analyzed_at': _now(),
-    })
+    }
+    if raw_products:
+        doc['raw_products_json'] = json.dumps(raw_products, ensure_ascii=False)
+    db().collection('detail_analyses').add(doc)
 
 
 def get_detail_analysis(scan_id: int) -> dict:
@@ -505,6 +508,24 @@ def get_detail_analysis(scan_id: int) -> dict:
         return json.loads(data.get('analysis_json', '{}'))
     except (json.JSONDecodeError, KeyError):
         return None
+
+
+def get_detail_raw_products(scan_id: int) -> list:
+    """원본 상품 데이터 조회 (추가 질문용)"""
+    docs = list(db().collection('detail_analyses')
+                .where('scan_id', '==', scan_id)
+                .stream())
+    if not docs:
+        return []
+    results = [d.to_dict() for d in docs]
+    results.sort(key=lambda x: x.get('analyzed_at', ''), reverse=True)
+    raw_json = results[0].get('raw_products_json', '')
+    if not raw_json:
+        return []
+    try:
+        return json.loads(raw_json)
+    except (json.JSONDecodeError, KeyError):
+        return []
 
 
 def get_scan_ids_with_reviews() -> list:
