@@ -1,5 +1,5 @@
 // =============================================================
-// 마켓 파인더 리뷰 수집기 — Background Service Worker
+// 소싱콕 리뷰 수집기 — Background Service Worker
 // =============================================================
 
 // Listen for messages from web pages (localhost:8090)
@@ -19,8 +19,8 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
         }
 
         collectReviews(products, scanId)
-            .then(() => console.log('[MarketFinder] Review collection finished'))
-            .catch(err => console.error('[MarketFinder] Collection failed:', err));
+            .then(() => console.log('[소싱콕] Review collection finished'))
+            .catch(err => console.error('[소싱콕] Collection failed:', err));
 
         sendResponse({ status: 'started', count: products.length });
         return true;
@@ -57,7 +57,7 @@ async function collectReviews(products, scanId) {
         const url = product.url;
 
         if (!url || !url.includes('coupang.com')) {
-            console.warn(`[MarketFinder] Skipping invalid URL: ${url}`);
+            console.warn(`[소싱콕] Skipping invalid URL: ${url}`);
             continue;
         }
 
@@ -82,7 +82,7 @@ async function collectReviews(products, scanId) {
                 );
             }
 
-            console.log(`[MarketFinder] Product ${i + 1}/${maxProducts}: ${reviews.length} reviews`);
+            console.log(`[소싱콕] Product ${i + 1}/${maxProducts}: ${reviews.length} reviews`);
 
             // Close the tab
             try { await chrome.tabs.remove(tab.id); } catch (_) {}
@@ -95,11 +95,11 @@ async function collectReviews(products, scanId) {
                 await sleep(1500 + Math.random() * 1500);
             }
         } catch (err) {
-            console.error(`[MarketFinder] Error on product ${i + 1}:`, err);
+            console.error(`[소싱콕] Error on product ${i + 1}:`, err);
         }
     }
 
-    // Send all reviews to the Market Finder server
+    // Send all reviews to the 소싱콕 server
     await sendToServer(scanId, allReviews);
 }
 
@@ -126,7 +126,7 @@ function collectFromTab(tabId) {
                 setTimeout(() => {
                     chrome.tabs.sendMessage(tabId, { type: 'COLLECT' }, (retryResp) => {
                         if (chrome.runtime.lastError) {
-                            console.warn('[MarketFinder] Content script unreachable:', chrome.runtime.lastError.message);
+                            console.warn('[소싱콕] Content script unreachable:', chrome.runtime.lastError.message);
                             clearTimeout(timeout);
                             _pendingReviews = null;
                             resolve([]);
@@ -166,9 +166,9 @@ async function sendToServer(scanId, reviews) {
             })
         });
         const result = await response.json();
-        console.log('[MarketFinder] Reviews sent to server:', result);
+        console.log('[소싱콕] Reviews sent to server:', result);
     } catch (err) {
-        console.error('[MarketFinder] Failed to send reviews to server:', err);
+        console.error('[소싱콕] Failed to send reviews to server:', err);
     }
 }
 

@@ -64,7 +64,8 @@ def index():
 @app.route('/api/scan/manual', methods=['POST'])
 def manual_scan():
     """직접 조사 — 키워드 입력하면 헬프스토어에서 데이터 수집"""
-    data = request.json
+    # PowerShell Invoke-WebRequest 한글 인코딩 대응 (force=True로 charset 무시)
+    data = request.get_json(force=True, silent=True) or {}
     keyword = data.get('keyword', '').strip()
     use_cdp = data.get('use_cdp', False)  # CDP 모드 (쿠팡 실데이터)
     if not keyword:
@@ -129,68 +130,54 @@ def _run_scan_api(scan_id: int, keyword: str):
     # 3. 띄어쓰기 변형 키워드 생성 및 저장
     _save_keyword_variants(scan_id, keyword, result.related_keywords)
 
-    # 4. 기회점수 산출 (서버 API 데이터 기반)
-    _scan_progress[scan_id] = {'step': 2, 'total': 3, 'message': '기회점수 분석 중...'}
-    keyword_nospace = keyword.replace(' ', '')
-    main_kw = None
-    for kw in result.related_keywords:
-        if kw.keyword == keyword or kw.keyword.replace(' ', '') == keyword_nospace:
-            main_kw = kw
-            break
+    # 4. 상품 데이터 수집 (윙 서버 시도 → 실패 시 키워드 데이터만)
+    _scan_progress[scan_id] = {'step': 2, 'total': 3, 'message': '상품 데이터 수집 중...'}
+    products = []
+    try:
+        products = wing_search(keyword)
+        for p in products:
+            fdb.add_product(scan_id, {
+                'ranking': p.ranking, 'product_name': p.product_name,
+                'brand': p.brand, 'manufacturer': p.manufacturer,
+                'price': p.price, 'sales_monthly': p.sales_monthly,
+                'revenue_monthly': p.revenue_monthly, 'review_count': p.review_count,
+                'click_count': p.click_count, 'conversion_rate': p.conversion_rate,
+                'page_views': p.page_views, 'category': p.category,
+                'category_code': p.category_code, 'product_url': p.product_url,
+            })
+        print(f'[SCAN-API] 윙 상품 {len(products)}개 수집 완료')
+    except Exception as wing_err:
+        print(f'[SCAN-API] 윙 데이터 수집 실패 (키워드 데이터만 사용): {wing_err}')
 
-    search_volume = main_kw.total_search if main_kw else result.total_search_volume
-    product_count = main_kw.product_count if main_kw else result.product_count
-    competition = main_kw.competition if main_kw else result.competition
+    # 5. 기회점수 산출 (scoring.py 통일 — UI와 동일한 점수)
+    _scan_progress[scan_id] = {'step': 3, 'total': 3, 'message': '기회점수 분석 중...'}
+    opp_score = calculate_opportunity(
+        products=products,
+        inflow_keywords=[],
+        related_keywords=result.related_keywords,
+        keyword=keyword
+    )
 
-    # 기회점수 산출
-    import math
-    supply_demand_score = 0
-    if product_count > 0 and search_volume > 0:
-        ratio = search_volume / product_count
-        supply_demand_score = min(100, ratio * 15)
-
-    market_score = 0
-    if search_volume > 0:
-        market_score = min(100, max(0,
-            (math.log10(search_volume) - math.log10(500)) /
-            (math.log10(100000) - math.log10(500)) * 100
-        ))
-
-    comp_score = 50
-    if competition == '낮음':
-        comp_score = 90
-    elif competition == '보통':
-        comp_score = 60
-    elif competition == '높음':
-        comp_score = 30
-
-    simple_score = supply_demand_score * 0.4 + market_score * 0.35 + comp_score * 0.25
-
-    recommended = ''
-    best_ratio = 0
-    for kw in result.related_keywords[:50]:
-        if kw.product_count > 0 and kw.total_search >= 1000:
-            r = kw.total_search / kw.product_count
-            if r > best_ratio and not kw.is_brand:
-                best_ratio = r
-                recommended = kw.keyword
-
-    # 5. 스캔 결과 업데이트
-    _scan_progress[scan_id] = {'step': 3, 'total': 3, 'message': '결과 저장 중...'}
+    # 6. 스캔 결과 업데이트
     fdb.update_scan(scan_id,
         status='scanned',
         category=result.main_category,
-        opportunity_score=round(simple_score, 1),
-        top10_avg_revenue=0,
-        top10_avg_sales=0,
-        top10_avg_price=0,
-        revenue_equality=0,
-        new_product_rate=0,
-        ad_dependency=0,
-        recommended_keyword=recommended,
+        opportunity_score=round(opp_score.total_score, 1),
+        top10_avg_revenue=opp_score.top4_10_avg_revenue,
+        top10_avg_sales=opp_score.top4_10_avg_sales,
+        top10_avg_price=opp_score.top4_10_avg_price,
+        revenue_concentration=round(opp_score.top3_share * 100, 1),
+        revenue_equality=round(opp_score.revenue_equality * 100, 1),
+        new_product_rate=round(opp_score.new_product_rate * 100, 1),
+        ad_dependency=round(opp_score.avg_new_product_weight, 1),
+        recommended_keyword=opp_score.recommended_keyword,
     )
     _scan_progress.pop(scan_id, None)
-    print(f'[SCAN-API] 완료: {keyword} (점수: {simple_score:.1f}, 연관키워드: {len(result.related_keywords)}개)')
+    print(
+        f'[SCAN-API] 완료: {keyword}\n'
+        f'  기회점수: {opp_score.total_score:.1f} ({opp_score.grade})\n'
+        f'  상품 {len(products)}개 | 연관키워드 {len(result.related_keywords)}개'
+    )
 
 
 def _run_scan_cdp(scan_id: int, keyword: str):
@@ -1200,6 +1187,7 @@ def api_scan_keywords(scan_id):
 
 # === 리뷰 분석 ===
 _review_state = {}  # scan_id → {status, reviews, analysis}
+_detail_state = {}  # scan_id → {status, progress, analysis}
 
 
 @app.route('/api/scan/<int:scan_id>/reviews', methods=['POST'])
@@ -1377,17 +1365,21 @@ def _run_review_analysis(scan_id: int, api_key: str = ''):
 
 
 def _collect_reviews_direct(products) -> list:
-    """CDP 연결된 Chrome에서 DOM 파싱으로 리뷰 수집"""
+    """CDP 연결된 Chrome에서 DOM 파싱으로 리뷰 수집 (playwright-stealth 적용)"""
     from playwright.sync_api import sync_playwright
+    from playwright_stealth import Stealth
     import time
 
     all_reviews = []
     pw = sync_playwright().start()
+    stealth = Stealth()
 
     try:
         browser = pw.chromium.connect_over_cdp('http://127.0.0.1:9222')
         context = browser.contexts[0]
-        page = context.new_page()
+        # 기존 탭 재사용 (봇 감지 우회)
+        page = context.pages[0] if context.pages else context.new_page()
+        stealth.apply_stealth_sync(page)
 
         for p in products[:10]:
             url = p.get('product_url', '')
@@ -1402,19 +1394,20 @@ def _collect_reviews_direct(products) -> list:
                 page.evaluate("window.scrollTo(0, document.body.scrollHeight * 0.7)")
                 time.sleep(2)
 
-                # DOM에서 리뷰 추출 (article 태그 기반)
+                # DOM에서 리뷰 추출 (article 태그 + 날짜 패턴 필터)
                 reviews = page.evaluate("""() => {
                     const articles = document.querySelectorAll('article');
                     const result = [];
                     articles.forEach(a => {
                         const text = a.textContent.trim().replace(/\\s+/g, ' ');
-                        if (text.length > 30 && !text.includes('장바구니') && !text.includes('최근본상품') && !text.includes('prev') ) {
-                            result.push({
-                                rating: 5,
-                                headline: '',
-                                content: text.substring(0, 500),
-                            });
-                        }
+                        // 날짜 패턴(YYYY.MM.DD)이 있는 article만 리뷰로 인식
+                        if (!/\\d{4}\\.\\d{2}\\.\\d{2}/.test(text)) return;
+                        if (text.length < 30) return;
+                        result.push({
+                            rating: 5,
+                            headline: '',
+                            content: text.substring(0, 500),
+                        });
                     });
                     return result;
                 }""")
@@ -1432,8 +1425,6 @@ def _collect_reviews_direct(products) -> list:
                 print(f'[REVIEW] 수집 실패: {pname} — {e}')
 
             time.sleep(1)
-
-        page.close()
 
     except Exception as e:
         print(f'[REVIEW] CDP 연결 실패: {e}')
@@ -1519,19 +1510,8 @@ def api_review_chat(scan_id):
 - 이모지나 마크다운은 사용하지 마세요.
 - 한국어로 답해주세요."""
 
-    # Gemini Flash API 호출 (무료)
-    from analyzer.reviews import GEMINI_API_KEY, _call_gemini
-    if not GEMINI_API_KEY:
-        return jsonify({'error': 'GEMINI_API_KEY가 설정되지 않았습니다.'})
-
-    try:
-        answer = _call_gemini(prompt, max_tokens=1024)
-        if answer:
-            return jsonify({'answer': answer})
-        else:
-            return jsonify({'error': 'AI 응답이 비어있습니다.'})
-    except Exception as e:
-        return jsonify({'error': f'API 호출 실패: {str(e)}'})
+    # AI API 제거 — 리뷰 Q&A 비활성화
+    return jsonify({'error': '리뷰 Q&A 기능은 현재 비활성화되어 있습니다.'})
 
 
 @app.route('/api/scan/<int:scan_id>/reanalyze-reviews', methods=['POST'])
@@ -1568,6 +1548,245 @@ def reanalyze_reviews(scan_id):
 
     threading.Thread(target=_run, daemon=True).start()
     return jsonify({'success': True, 'message': f'{len(reviews)}개 리뷰 AI 재분석 시작!'})
+
+
+# ══════════════════════════════════════════════
+# 상세 분석 (CDP + Gemini)
+# ══════════════════════════════════════════════
+@app.route('/api/scan/<int:scan_id>/detail-analysis', methods=['POST'])
+def start_detail_analysis(scan_id):
+    """상위 상품 상세페이지 수집 + AI 비교 분석"""
+    if scan_id in _detail_state and _detail_state[scan_id].get('status') in ('collecting', 'analyzing'):
+        return jsonify({'success': True, 'message': '이미 분석 중...'})
+
+    products = fdb.get_products(scan_id)[:10]
+    if not products:
+        return jsonify({'success': False, 'error': '상품 데이터가 없습니다'})
+
+    scan = fdb.get_scan(scan_id)
+    keyword = scan['keyword'] if scan else ''
+
+    _detail_state[scan_id] = {'status': 'collecting', 'progress': '0/' + str(len(products)), 'analysis': None}
+
+    def _run():
+        with app.app_context():
+            try:
+                collected = _collect_product_details(products, scan_id)
+                if not collected:
+                    _detail_state[scan_id] = {'status': 'error', 'progress': '', 'analysis': {'error': '상품 정보를 수집하지 못했습니다. Chrome CDP가 실행 중인지 확인해주세요.'}}
+                    return
+
+                _detail_state[scan_id]['status'] = 'analyzing'
+                analysis = _analyze_product_details(collected, keyword)
+                _detail_state[scan_id]['analysis'] = analysis
+                _detail_state[scan_id]['status'] = 'done'
+                fdb.save_detail_analysis(scan_id, keyword, analysis)
+                print(f'[DETAIL] 분석 완료: {keyword} ({len(collected)}개 상품)')
+            except Exception as e:
+                import traceback; traceback.print_exc()
+                _detail_state[scan_id] = {'status': 'error', 'progress': '', 'analysis': {'error': str(e)}}
+
+    threading.Thread(target=_run, daemon=True).start()
+    return jsonify({'success': True, 'message': f'{len(products)}개 상품 상세 분석 시작!'})
+
+
+@app.route('/api/scan/<int:scan_id>/detail-analysis')
+def get_detail_analysis(scan_id):
+    """상세 분석 결과 조회"""
+    state = _detail_state.get(scan_id)
+    if not state or state.get('status') == 'none':
+        saved = fdb.get_detail_analysis(scan_id)
+        if saved:
+            _detail_state[scan_id] = {'status': 'done', 'progress': '', 'analysis': saved}
+            state = _detail_state[scan_id]
+    if not state:
+        state = {'status': 'none', 'progress': '', 'analysis': None}
+    return jsonify({
+        'success': True,
+        'status': state.get('status', 'none'),
+        'progress': state.get('progress', ''),
+        'analysis': state.get('analysis'),
+    })
+
+
+def _get_cdp_cookies(domain_filter: str = '') -> list:
+    """CDP Chrome에서 쿠키 추출"""
+    import requests as req
+    try:
+        # CDP 엔드포인트에서 WebSocket URL 가져오기
+        tabs = req.get('http://127.0.0.1:9222/json', timeout=5).json()
+        if not tabs:
+            return []
+
+        # 탭 WebSocket으로 쿠키 추출 (browser WS 대신 탭 WS 사용)
+        import websocket, json
+        tab_ws = tabs[0].get('webSocketDebuggerUrl', '')
+        ws = websocket.create_connection(tab_ws, timeout=5)
+        ws.send(json.dumps({'id': 1, 'method': 'Network.getAllCookies'}))
+        result = json.loads(ws.recv())
+        ws.close()
+
+        cookies = result.get('result', {}).get('cookies', [])
+        if domain_filter:
+            cookies = [c for c in cookies if domain_filter in c.get('domain', '')]
+        print(f'[CDP] 쿠키 {len(cookies)}개 추출 ({domain_filter})')
+        return cookies
+    except Exception as e:
+        print(f'[CDP] 쿠키 추출 실패: {e}')
+        return []
+
+
+def _collect_product_details(products, scan_id) -> list:
+    """CDP 쿠키 추출 + curl_cffi로 상품 상세페이지 수집 (Akamai 우회)"""
+    import time, re
+    from bs4 import BeautifulSoup
+
+    collected = []
+    total = len(products)
+
+    # 1. CDP에서 쿠팡 쿠키 추출
+    cookies = _get_cdp_cookies('coupang.com')
+    if not cookies:
+        print('[DETAIL] CDP 쿠키 추출 실패 — Chrome CDP가 실행 중인지 확인')
+        return []
+
+    # 2. curl_cffi 세션 (Chrome TLS fingerprint 흉내)
+    try:
+        from curl_cffi import requests as cf_requests
+    except ImportError:
+        print('[DETAIL] curl_cffi 미설치 — pip install curl-cffi')
+        return []
+
+    session = cf_requests.Session(impersonate="chrome120")
+    for c in cookies:
+        session.cookies.set(c['name'], c['value'], domain=c.get('domain', '.coupang.com'))
+
+    headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8',
+        'Referer': 'https://www.coupang.com/',
+    }
+
+    for i, p in enumerate(products):
+        url = p.get('product_url', '')
+        pname = p.get('product_name', '')[:30]
+        _detail_state[scan_id]['progress'] = f'{i+1}/{total}'
+
+        if not url:
+            continue
+        try:
+            resp = session.get(url, headers=headers, timeout=15)
+            if resp.status_code != 200 or 'Access Denied' in resp.text[:500]:
+                print(f'[DETAIL] {i+1}/{total} {pname} → 차단 (status={resp.status_code})')
+                time.sleep(2)
+                continue
+
+            soup = BeautifulSoup(resp.text, 'html.parser')
+
+            # 상품명
+            title_el = soup.select_one('h1, .prod-buy-header__title')
+            title = title_el.get_text(strip=True) if title_el else pname
+
+            # 가격
+            price_el = soup.select_one('.total-price strong, [class*="total-price"]')
+            price = price_el.get_text(strip=True) if price_el else ''
+
+            # 상세페이지 텍스트
+            detail_text = ''
+            for sel in ['.product-detail-content-inside', '.product-detail-content', '#productDetail', '.prod-description']:
+                el = soup.select_one(sel)
+                if el and len(el.get_text(strip=True)) > 30:
+                    detail_text = ' '.join(el.get_text().split())[:1500]
+                    break
+            if not detail_text:
+                detail_text = ' '.join(soup.get_text().split())[:2000]
+
+            # 상세페이지 이미지
+            images = []
+            for sel in ['.product-detail-content-inside img', '.product-detail-content img', '#productDetail img']:
+                imgs = soup.select(sel)
+                if imgs:
+                    images = [img.get('src', '') or img.get('data-src', '') for img in imgs[:15]]
+                    images = [s for s in images if s and s.startswith('http')]
+                    break
+
+            collected.append({
+                'product_name': pname,
+                'product_url': url,
+                'title': title,
+                'price': price,
+                'detail_text': detail_text,
+                'image_urls': images,
+                'ranking': p.get('ranking', i+1),
+                'revenue_monthly': p.get('revenue_monthly', 0),
+                'review_count': p.get('review_count', 0),
+            })
+            print(f'[DETAIL] {i+1}/{total} {pname} → 텍스트 {len(detail_text)}자, 이미지 {len(images)}장')
+
+        except Exception as e:
+            print(f'[DETAIL] {i+1}/{total} {pname} → 실패: {e}')
+
+        time.sleep(1.5)
+
+    print(f'[DETAIL] 총 {len(collected)}/{len(products)}개 수집 완료')
+    return collected
+
+
+def _analyze_product_details(collected: list, keyword: str) -> dict:
+    """수집된 상품 데이터를 Gemini로 비교 분석"""
+    from analyzer.reviews import _call_gemini
+
+    # 상품 데이터 텍스트 구성
+    product_texts = []
+    for i, p in enumerate(collected, 1):
+        text = f"""[상품 {i}] {p['title']}
+가격: {p['price']}
+월매출: {p['revenue_monthly']:,}원 | 리뷰: {p['review_count']}개 | 순위: {p['ranking']}위
+상세페이지: {p['detail_text'][:800]}
+이미지 수: {len(p['image_urls'])}장"""
+        product_texts.append(text)
+
+    products_block = '\n\n---\n\n'.join(product_texts)
+
+    prompt = f"""당신은 쿠팡 소싱 전문가입니다.
+아래는 "{keyword}" 키워드의 상위 {len(collected)}개 상품의 상세페이지 데이터입니다.
+
+{products_block}
+
+위 데이터를 분석하여 아래 항목을 JSON 형식으로 답해주세요:
+
+1. "market_overview": 이 시장의 전반적 특징 요약 (3줄)
+2. "common_specs": 대부분의 상품이 채택한 공통 스펙 (배열, "소재: ...", "사이즈: ..." 등)
+3. "price_range": {{"min": "최저가", "max": "최고가", "sweet_spot": "가장 많은 가격대", "reason": "이유"}}
+4. "popular_compositions": 가장 많이 쓰이는 구성/입수 패턴 3가지 (배열, 각 {{"type": "", "count": "상품수", "reason": ""}})
+5. "key_selling_points": 상세페이지에서 공통적으로 강조하는 셀링 포인트 5가지 (배열)
+6. "detail_page_patterns": 상세페이지 디자인/구성 공통 패턴 3가지 (배열)
+7. "differentiation": 기존 제품 대비 차별화 아이디어 3가지 (배열)
+8. "sourcing_tips": 이 제품을 소싱할 때 집중할 포인트 3가지 (배열)
+9. "risk_factors": 주의해야 할 리스크 2가지 (배열)
+10. "recommended_specs": 추천 스펙 시트 (배열, "소재: ...", "사이즈: ..." 등)
+
+JSON만 답해주세요."""
+
+    content = _call_gemini(prompt, max_tokens=8000)
+    if content:
+        import re
+        json_match = re.search(r'\{[\s\S]*\}', content)
+        if json_match:
+            import json
+            try:
+                analysis = json.loads(json_match.group())
+                analysis['_source'] = 'gemini'
+                analysis['_products_analyzed'] = len(collected)
+                return analysis
+            except json.JSONDecodeError:
+                pass
+
+    return {
+        'error': 'AI 분석 실패',
+        '_products_analyzed': len(collected),
+        '_raw_data': [{'name': p['title'], 'price': p['price']} for p in collected],
+    }
 
 
 @app.route('/api/scan/<int:scan_id>/status', methods=['PUT'])
@@ -2205,6 +2424,86 @@ def get_stats():
     """대시보드 통계"""
     stats = fdb.get_stats()
     return jsonify({'success': True, 'stats': stats})
+
+
+# ─────────────────────────────────────────────
+# 기존 스캔 점수 일괄 재계산 (scoring.py 통일)
+# ─────────────────────────────────────────────
+@app.route('/api/rescore-all', methods=['POST'])
+def rescore_all():
+    """기존 스캔의 기회점수를 scoring.py 기반으로 일괄 재계산
+    상품 데이터가 있는 스캔만 재계산 (없으면 스킵)"""
+    scans = fdb.list_scans(limit=500)
+    updated = 0
+    skipped = 0
+    errors = 0
+
+    for scan in scans:
+        scan_id = scan.get('id')
+        keyword = scan.get('keyword', '')
+        if not scan_id:
+            continue
+
+        try:
+            # Firestore에서 상품 데이터 로드
+            products_raw = fdb.get_products(scan_id)
+            if not products_raw:
+                skipped += 1
+                continue
+
+            # dict → CoupangProduct 변환
+            products = []
+            for pr in products_raw:
+                products.append(CoupangProduct(
+                    ranking=pr.get('ranking', 0),
+                    product_name=pr.get('product_name', ''),
+                    brand=pr.get('brand', ''),
+                    manufacturer=pr.get('manufacturer', ''),
+                    price=pr.get('price', 0),
+                    sales_monthly=pr.get('sales_monthly', 0),
+                    revenue_monthly=pr.get('revenue_monthly', 0),
+                    review_count=pr.get('review_count', 0),
+                    click_count=pr.get('click_count', 0),
+                    conversion_rate=pr.get('conversion_rate', 0),
+                    page_views=pr.get('page_views', 0),
+                    category=pr.get('category', ''),
+                    category_code=pr.get('category_code', ''),
+                    product_url=pr.get('product_url', ''),
+                ))
+
+            # scoring.py로 재계산
+            opp_score = calculate_opportunity(
+                products=products,
+                inflow_keywords=[],
+                related_keywords=[],
+                keyword=keyword
+            )
+
+            # Firestore 업데이트
+            fdb.update_scan(scan_id,
+                opportunity_score=round(opp_score.total_score, 1),
+                top10_avg_revenue=opp_score.top4_10_avg_revenue,
+                top10_avg_sales=opp_score.top4_10_avg_sales,
+                top10_avg_price=opp_score.top4_10_avg_price,
+                revenue_concentration=round(opp_score.top3_share * 100, 1),
+                revenue_equality=round(opp_score.revenue_equality * 100, 1),
+                new_product_rate=round(opp_score.new_product_rate * 100, 1),
+                ad_dependency=round(opp_score.avg_new_product_weight, 1),
+            )
+            updated += 1
+            print(f'[RESCORE] {scan_id} {keyword}: {scan.get("opportunity_score")} → {opp_score.total_score:.1f}')
+
+        except Exception as e:
+            errors += 1
+            print(f'[RESCORE] 에러 {scan_id} {keyword}: {e}')
+
+    return jsonify({
+        'success': True,
+        'updated': updated,
+        'skipped': skipped,
+        'errors': errors,
+        'message': f'{updated}개 재계산 완료 ({skipped}개 스킵, {errors}개 에러)'
+    })
 
 
 # ─────────────────────────────────────────────

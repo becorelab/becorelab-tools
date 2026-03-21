@@ -254,16 +254,8 @@ JSON만 답해주세요."""
 
 
 def analyze_reviews_claude(reviews: list, keyword: str, api_key: str = '') -> dict:
-    """
-    Gemini Flash로 리뷰 심층 분석 (무료)
-    Gemini 키 없으면 Anthropic Claude로 폴백
-    """
-    if not GEMINI_API_KEY:
-        # Gemini 키 없으면 Claude로 시도
-        _key = api_key or ANTHROPIC_API_KEY
-        if _key:
-            return _analyze_with_claude(reviews, keyword, _key)
-        return analyze_reviews_basic(reviews, keyword)
+    """리뷰 분석 — API 없이 기본 분석만 사용"""
+    return analyze_reviews_basic(reviews, keyword)
 
     # 리뷰 텍스트 준비 (최대 300개) — 상품명 포함
     review_texts = []
