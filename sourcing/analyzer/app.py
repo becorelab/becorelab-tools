@@ -1390,19 +1390,20 @@ def _collect_reviews_direct(products) -> list:
                 page.evaluate("window.scrollTo(0, document.body.scrollHeight * 0.7)")
                 time.sleep(2)
 
-                # DOM에서 리뷰 추출 (article 태그 기반)
+                # DOM에서 리뷰 추출 (article 태그 + 날짜 패턴 필터)
                 reviews = page.evaluate("""() => {
                     const articles = document.querySelectorAll('article');
                     const result = [];
                     articles.forEach(a => {
                         const text = a.textContent.trim().replace(/\\s+/g, ' ');
-                        if (text.length > 30 && !text.includes('장바구니') && !text.includes('최근본상품') && !text.includes('prev') ) {
-                            result.push({
-                                rating: 5,
-                                headline: '',
-                                content: text.substring(0, 500),
-                            });
-                        }
+                        // 날짜 패턴(YYYY.MM.DD)이 있는 article만 리뷰로 인식
+                        if (!/\\d{4}\\.\\d{2}\\.\\d{2}/.test(text)) return;
+                        if (text.length < 30) return;
+                        result.push({
+                            rating: 5,
+                            headline: '',
+                            content: text.substring(0, 500),
+                        });
                     });
                     return result;
                 }""")
