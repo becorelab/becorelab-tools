@@ -1580,7 +1580,7 @@ def start_detail_analysis(scan_id):
                 analysis = _analyze_product_details(collected, keyword)
                 _detail_state[scan_id]['analysis'] = analysis
                 _detail_state[scan_id]['status'] = 'done'
-                fdb.save_detail_analysis(scan_id, keyword, analysis, raw_products=collected)
+                fdb.save_detail_analysis(scan_id, keyword, analysis)
                 print(f'[DETAIL] 분석 완료: {keyword} ({len(collected)}개 상품)')
             except Exception as e:
                 import traceback; traceback.print_exc()
@@ -1609,48 +1609,6 @@ def get_detail_analysis(scan_id):
     })
 
 
-@app.route('/api/scan/<int:scan_id>/detail-chat', methods=['POST'])
-def detail_chat(scan_id):
-    """수집된 상품 원본 데이터 기반으로 추가 질문에 Gemini가 답변"""
-    data = request.get_json(force=True, silent=True) or {}
-    question = data.get('question', '').strip()
-    if not question:
-        return jsonify({'success': False, 'error': '질문을 입력해주세요'})
-
-    raw_products = fdb.get_detail_raw_products(scan_id)
-    if not raw_products:
-        return jsonify({'success': False, 'error': '원본 데이터가 없습니다. 상세 분석을 먼저 실행해주세요.'})
-
-    scan = fdb.get_scan(scan_id)
-    keyword = scan['keyword'] if scan else ''
-
-    # 원본 데이터 텍스트 구성
-    product_blocks = []
-    for i, p in enumerate(raw_products, 1):
-        block = f'[상품 {i}] {p.get("title", p.get("product_name", ""))} (순위 {p.get("ranking", i)}위)\n'
-        block += f'가격: {p.get("price", "미확인")} | 월매출: {p.get("revenue_monthly", 0):,}원 | 리뷰: {p.get("review_count", 0)}개\n'
-        block += f'상세내용:\n{p.get("detail_text", "")[:1200]}'
-        product_blocks.append(block)
-
-    context = '\n\n---\n\n'.join(product_blocks)
-
-    from analyzer.reviews import _call_gemini
-    prompt = f'''아래는 쿠팡 "{keyword}" 키워드 상위 {len(raw_products)}개 상품의 실제 상세페이지 데이터입니다.
-
-{context}
-
----
-질문: {question}
-
-위 상품 데이터를 바탕으로 질문에 정확하게 답해주세요. 없는 정보는 "확인 불가"라고 솔직하게 말해주세요.'''
-
-    answer = _call_gemini(prompt, max_tokens=3000)
-    if not answer:
-        return jsonify({'success': False, 'error': 'AI 응답 실패'})
-
-    return jsonify({'success': True, 'answer': answer, 'products_count': len(raw_products)})
-
-
 def _get_cdp_cookies(domain_filter: str = '') -> list:
     """CDP Chrome에서 쿠키 추출"""
     import requests as req
@@ -1662,16 +1620,13 @@ def _get_cdp_cookies(domain_filter: str = '') -> list:
 
         # 탭 WebSocket으로 쿠키 추출 (browser WS 대신 탭 WS 사용)
         import websocket, json
-        page_tab = next((t for t in tabs if t.get('type') == 'page'), tabs[0])
-        tab_ws = page_tab.get('webSocketDebuggerUrl', '')
+        tab_ws = tabs[0].get('webSocketDebuggerUrl', '')
         ws = websocket.create_connection(tab_ws, timeout=5)
-        ws.send(json.dumps({'id': 1, 'method': 'Network.enable'}))
-        ws.recv()
-        ws.send(json.dumps({'id': 2, 'method': 'Network.getAllCookies'}))
+        ws.send(json.dumps({'id': 1, 'method': 'Network.getAllCookies'}))
         result = json.loads(ws.recv())
         ws.close()
 
-        cookies = result.get('result', {}).get('cookies', []) or []
+        cookies = result.get('result', {}).get('cookies', [])
         if domain_filter:
             cookies = [c for c in cookies if domain_filter in c.get('domain', '')]
         print(f'[CDP] 쿠키 {len(cookies)}개 추출 ({domain_filter})')
@@ -1681,121 +1636,36 @@ def _get_cdp_cookies(domain_filter: str = '') -> list:
         return []
 
 
-def _fetch_page_via_cdp(url: str, wait_seconds: int = 7) -> dict:
-    """Chrome CDP 새 탭으로 쿠팡 상품 데이터 추출 (Akamai 완전 우회)
-    Returns: {'title': ..., 'price': ..., 'detail': ..., 'images': [...]}
-    """
-    import requests as req, websocket, json as _json, time
-    tab_id = None
-    try:
-        # 새 탭 생성
-        new_tab = req.put('http://127.0.0.1:9222/json/new', timeout=5).json()
-        tab_id = new_tab.get('id', '')
-        tab_ws = new_tab.get('webSocketDebuggerUrl', '')
-        if not tab_ws:
-            return {}
-
-        ws = websocket.create_connection(tab_ws, timeout=60)
-
-        def _send_wait(cmd_id, method, params=None):
-            """명령 전송 후 해당 id 응답 올 때까지 대기"""
-            ws.send(_json.dumps({'id': cmd_id, 'method': method, 'params': params or {}}))
-            for _ in range(100):
-                try:
-                    msg = _json.loads(ws.recv())
-                    if msg.get('id') == cmd_id:
-                        return msg
-                except Exception:
-                    break
-            return {}
-
-        # 페이지 이동
-        _send_wait(1, 'Page.navigate', {'url': url})
-
-        # JS 렌더링 대기
-        time.sleep(wait_seconds)
-
-        # 필요한 데이터만 JS로 추출 (outerHTML 전체 대신)
-        js = r"""
-(function() {
-  var title = '';
-  var titleSelectors = ['h2.prod-buy-header__title','h1.prod-buy-header__title','.prod-buy-header__title','[class*="prod-title"]','h1','h2'];
-  for (var ti=0; ti<titleSelectors.length; ti++) {
-    var el = document.querySelector(titleSelectors[ti]);
-    if (el && el.textContent.trim().length > 3) { title = el.textContent.trim(); break; }
-  }
-
-  var price = '';
-  var priceSelectors = ['.total-price strong','[class*="total-price"] strong','.prod-coupon-price strong','[class*="prod-price"] strong','[class*="price"] strong'];
-  for (var pi=0; pi<priceSelectors.length; pi++) {
-    var pel = document.querySelector(priceSelectors[pi]);
-    if (pel && pel.textContent.trim()) { price = pel.textContent.trim(); break; }
-  }
-
-  var detail = '';
-  var detailSelectors = ['.product-detail-content-inside','.product-detail-content','#productDetail','.prod-description-detail','.prod-description','[class*="detail-content"]','[id*="productDetail"]'];
-  for (var di=0; di<detailSelectors.length; di++) {
-    var del_ = document.querySelector(detailSelectors[di]);
-    if (del_ && del_.innerText && del_.innerText.trim().length > 50) {
-      detail = del_.innerText.trim().substring(0, 1500); break;
-    }
-  }
-  if (!detail) {
-    var allText = document.body.innerText || '';
-    var lines = allText.split('\n').filter(function(l){ return l.trim().length > 10; });
-    detail = lines.slice(0, 80).join('\n').substring(0, 2000);
-  }
-
-  var images = [];
-  var imgSelectors = ['.product-detail-content-inside img','.product-detail-content img','#productDetail img','[class*="detail"] img'];
-  for (var j=0; j<imgSelectors.length; j++) {
-    var imgs = document.querySelectorAll(imgSelectors[j]);
-    if (imgs.length > 0) {
-      for (var k=0; k<Math.min(imgs.length,15); k++) {
-        var src = imgs[k].src || imgs[k].getAttribute('data-src') || '';
-        if (src && src.indexOf('http') === 0) images.push(src);
-      }
-      if (images.length > 0) break;
-    }
-  }
-
-  return JSON.stringify({title: title, price: price, detail: detail, images: images});
-})()
-"""
-        resp = _send_wait(2, 'Runtime.evaluate', {'expression': js, 'returnByValue': True})
-        ws.close()
-
-        value = resp.get('result', {}).get('result', {}).get('value', '{}') or '{}'
-        return _json.loads(value)
-
-    except Exception as e:
-        print(f'[CDP_FETCH] 오류: {e}')
-        return {}
-    finally:
-        if tab_id:
-            try:
-                req.get(f'http://127.0.0.1:9222/json/close/{tab_id}', timeout=5)
-            except Exception:
-                pass
-
-
 def _collect_product_details(products, scan_id) -> list:
-    """Chrome CDP 직접 네비게이션으로 상품 상세페이지 수집 (Akamai 완전 우회)"""
-    import time, requests as req
+    """CDP 쿠키 추출 + curl_cffi로 상품 상세페이지 수집 (Akamai 우회)"""
+    import time, re
+    from bs4 import BeautifulSoup
 
     collected = []
     total = len(products)
 
-    # CDP 연결 확인
-    try:
-        tabs = req.get('http://127.0.0.1:9222/json', timeout=5).json()
-        if not tabs:
-            print('[DETAIL] CDP 미연결 — Chrome CDP 실행 필요')
-            return []
-        print(f'[DETAIL] CDP 연결 확인 (탭 {len(tabs)}개)')
-    except Exception as e:
-        print(f'[DETAIL] CDP 연결 실패: {e}')
+    # 1. CDP에서 쿠팡 쿠키 추출
+    cookies = _get_cdp_cookies('coupang.com')
+    if not cookies:
+        print('[DETAIL] CDP 쿠키 추출 실패 — Chrome CDP가 실행 중인지 확인')
         return []
+
+    # 2. curl_cffi 세션 (Chrome TLS fingerprint 흉내)
+    try:
+        from curl_cffi import requests as cf_requests
+    except ImportError:
+        print('[DETAIL] curl_cffi 미설치 — pip install curl-cffi')
+        return []
+
+    session = cf_requests.Session(impersonate="chrome120")
+    for c in cookies:
+        session.cookies.set(c['name'], c['value'], domain=c.get('domain', '.coupang.com'))
+
+    headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8',
+        'Referer': 'https://www.coupang.com/',
+    }
 
     for i, p in enumerate(products):
         url = p.get('product_url', '')
@@ -1805,16 +1675,40 @@ def _collect_product_details(products, scan_id) -> list:
         if not url:
             continue
         try:
-            data = _fetch_page_via_cdp(url, wait_seconds=7)
-            if not data or not data.get('detail'):
-                print(f'[DETAIL] {i+1}/{total} {pname} → 데이터 없음')
+            resp = session.get(url, headers=headers, timeout=15)
+            if resp.status_code != 200 or 'Access Denied' in resp.text[:500]:
+                print(f'[DETAIL] {i+1}/{total} {pname} → 차단 (status={resp.status_code})')
                 time.sleep(2)
                 continue
 
-            title = data.get('title') or pname
-            price = data.get('price', '')
-            detail_text = data.get('detail', '')
-            images = data.get('images', [])
+            soup = BeautifulSoup(resp.text, 'html.parser')
+
+            # 상품명
+            title_el = soup.select_one('h1, .prod-buy-header__title')
+            title = title_el.get_text(strip=True) if title_el else pname
+
+            # 가격
+            price_el = soup.select_one('.total-price strong, [class*="total-price"]')
+            price = price_el.get_text(strip=True) if price_el else ''
+
+            # 상세페이지 텍스트
+            detail_text = ''
+            for sel in ['.product-detail-content-inside', '.product-detail-content', '#productDetail', '.prod-description']:
+                el = soup.select_one(sel)
+                if el and len(el.get_text(strip=True)) > 30:
+                    detail_text = ' '.join(el.get_text().split())[:1500]
+                    break
+            if not detail_text:
+                detail_text = ' '.join(soup.get_text().split())[:2000]
+
+            # 상세페이지 이미지
+            images = []
+            for sel in ['.product-detail-content-inside img', '.product-detail-content img', '#productDetail img']:
+                imgs = soup.select(sel)
+                if imgs:
+                    images = [img.get('src', '') or img.get('data-src', '') for img in imgs[:15]]
+                    images = [s for s in images if s and s.startswith('http')]
+                    break
 
             collected.append({
                 'product_name': pname,
@@ -1832,7 +1726,7 @@ def _collect_product_details(products, scan_id) -> list:
         except Exception as e:
             print(f'[DETAIL] {i+1}/{total} {pname} → 실패: {e}')
 
-        time.sleep(2)
+        time.sleep(1.5)
 
     print(f'[DETAIL] 총 {len(collected)}/{len(products)}개 수집 완료')
     return collected
@@ -2624,4 +2518,4 @@ if __name__ == '__main__':
     _load_all_reviews_from_db()
     print("\n[BECORELAB] 소싱콕 v0.1")
     print("[BECORELAB] http://localhost:8090\n")
-    app.run(host='0.0.0.0', port=8090, debug=False, use_reloader=False)
+    app.run(host='0.0.0.0', port=8090, debug=True, use_reloader=False)
