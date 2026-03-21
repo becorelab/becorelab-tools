@@ -2786,6 +2786,7 @@ function viewScanWithReview(scanId) {
     <div style="display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg-card);flex-shrink:0;padding:0 24px;" id="insightTabBar">
         <button class="ins-tab active" data-tab="structure" onclick="_switchInsightTab('structure',this)">시장구조</button>
         <button class="ins-tab" data-tab="price" onclick="_switchInsightTab('price',this)">가격대</button>
+        <button class="ins-tab" data-tab="detail" onclick="_switchInsightTab('detail',this)">상세 분석</button>
         <button class="ins-tab" data-tab="newprod" onclick="_switchInsightTab('newprod',this)">신상품</button>
         <button class="ins-tab" data-tab="keywords" onclick="_switchInsightTab('keywords',this)">키워드</button>
         <button class="ins-tab" data-tab="profit" onclick="_switchInsightTab('profit',this)">수익성</button>
@@ -2872,6 +2873,7 @@ function _renderInsightTab(tab) {
     switch(tab) {
         case 'structure': _renderStructureTab(el, products, scan); break;
         case 'price': _renderPriceTab(el, products, scan); break;
+        case 'detail': _renderDetailTab(el, products, scan); break;
         case 'newprod': _renderNewProductTab(el, products, scan); break;
         case 'keywords': _renderKeywordsTab(el, keywords, variants, scan); break;
         case 'profit': _renderProfitTab(el, products, scan); break;
@@ -3334,6 +3336,41 @@ function _calcProfit() {
     `;
 }
 
+// ── 상세 분석 탭 (CDP + Gemini) ──
+function _renderDetailTab(el, products, scan) {
+    const scanId = scan.id;
+
+    // 분석 대상 상품 목록 (상위 10개)
+    const top10 = [...products].sort((a,b) => (b.revenue_monthly||0) - (a.revenue_monthly||0)).slice(0, 10);
+    let productListHtml = top10.map((p, i) => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(42,47,64,0.3);font-size:13px;">
+            <span style="color:var(--text-muted);min-width:20px;">${i+1}</span>
+            <a href="${p.product_url||'#'}" target="_blank" style="color:var(--cyan);text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.product_name||''}">${(p.product_name||'-').substring(0,40)}</a>
+            <span style="color:var(--text-secondary);min-width:70px;text-align:right;">${p.price ? formatNumber(p.price)+'원' : '-'}</span>
+            <span style="color:var(--text-muted);min-width:60px;text-align:right;font-size:11px;">${p.revenue_monthly ? formatNumber(Math.round(p.revenue_monthly/10000))+'만' : '-'}</span>
+        </div>
+    `).join('');
+
+    el.innerHTML = `
+        <div class="ins-chart-wrap" style="margin-bottom:16px;">
+            <div class="ins-section-title"><span class="dot" style="background:var(--cyan);"></span>분석 대상 상품 (매출 TOP 10)</div>
+            ${productListHtml}
+        </div>
+        <div style="text-align:center;padding:20px 0;">
+            <button id="btnDetailAnalysis" onclick="_startDetailAnalysis(${scanId})" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;padding:12px 32px;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;">상세 분석 시작</button>
+        </div>
+        <div id="detailAnalysisContent"></div>
+    `;
+
+    // 기존 분석 결과 있으면 바로 표시
+    fetch('/api/scan/' + scanId + '/detail-analysis').then(r=>r.json()).then(data => {
+        if (data.status === 'done' && data.analysis) {
+            _displayDetailAnalysis(data);
+            document.getElementById('btnDetailAnalysis').textContent = '다시 분석';
+        }
+    }).catch(()=>{});
+}
+
 // ── 6. 소싱원가 탭 ──
 function _renderSourcingCostTab(el, products, scan) {
     // 시장 4~10등 평균가 계산
@@ -3517,28 +3554,16 @@ function _renderReviewTab(el, scan) {
     const scanId = scan.id;
     el.innerHTML = `
         <div style="text-align:center;padding:40px 0;">
-            <div style="font-size:15px;color:var(--text-secondary);margin-bottom:16px;">상위 상품의 리뷰를 수집하고 AI로 분석합니다</div>
-            <div style="display:flex;gap:12px;justify-content:center;">
-                <button id="btnInsightReview" onclick="_startInsightReview(${scanId})" style="background:linear-gradient(135deg,#ff6b2b,#ff9500);border:none;color:#fff;padding:12px 32px;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;">리뷰 분석</button>
-                <button id="btnDetailAnalysis" onclick="_startDetailAnalysis(${scanId})" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;padding:12px 32px;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;">상세 분석</button>
-            </div>
+            <div style="font-size:15px;color:var(--text-secondary);margin-bottom:16px;">상위 상품의 리뷰를 수집하고 분석합니다</div>
+            <button id="btnInsightReview" onclick="_startInsightReview(${scanId})" style="background:linear-gradient(135deg,#ff6b2b,#ff9500);border:none;color:#fff;padding:12px 32px;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;">리뷰 분석</button>
         </div>
         <div id="insightReviewContent"></div>
-        <div id="detailAnalysisContent"></div>
     `;
 
     fetch(`/api/scan/${scanId}/reviews`).then(r=>r.json()).then(data => {
         if (data.status === 'done' && data.analysis) {
             _displayInsightReview(data);
             document.getElementById('btnInsightReview').textContent = '다시 분석';
-        }
-    }).catch(()=>{});
-
-    // 기존 상세 분석 결과 있으면 표시
-    fetch(`/api/scan/${scanId}/detail-analysis`).then(r=>r.json()).then(data => {
-        if (data.status === 'done' && data.analysis) {
-            _displayDetailAnalysis(data);
-            document.getElementById('btnDetailAnalysis').textContent = '다시 분석';
         }
     }).catch(()=>{});
 }
@@ -3720,8 +3745,24 @@ function _displayDetailAnalysis(data) {
         return;
     }
 
-    let html = `<div style="margin-top:20px;border-top:1px solid var(--border);padding-top:20px;">
-        <div style="font-size:16px;font-weight:800;margin-bottom:16px;color:#8b5cf6;">상세 분석 리포트 <span style="font-size:12px;font-weight:400;color:var(--text-muted);">(${a._products_analyzed||0}개 상품)</span></div>`;
+    // 분석된 상품 목록
+    let productsHtml = '';
+    if (a._analyzed_products && a._analyzed_products.length > 0) {
+        productsHtml = `<div class="ins-chart-wrap" style="margin-bottom:16px;">
+            <div class="ins-section-title"><span class="dot" style="background:#8b5cf6;"></span>분석된 상품 (${a._analyzed_products.length}개)</div>
+            ${a._analyzed_products.map((p, i) => `
+                <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(42,47,64,0.3);font-size:13px;">
+                    <span style="color:var(--text-muted);min-width:20px;">${i+1}</span>
+                    <a href="${p.url||'#'}" target="_blank" style="color:var(--cyan);text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name||'-'}</a>
+                    <span style="color:var(--text-secondary);min-width:70px;text-align:right;">${p.price||'-'}</span>
+                </div>
+            `).join('')}
+        </div>`;
+    }
+
+    let html = `<div style="margin-top:20px;">
+        ${productsHtml}
+        <div style="font-size:16px;font-weight:800;margin-bottom:16px;color:#8b5cf6;">AI 분석 리포트</div>`;
 
     // 시장 개요
     if (a.market_overview) {

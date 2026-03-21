@@ -1778,6 +1778,7 @@ JSON만 답해주세요."""
                 analysis = json.loads(json_match.group())
                 analysis['_source'] = 'gemini'
                 analysis['_products_analyzed'] = len(collected)
+                analysis['_analyzed_products'] = [{'name': p['title'], 'price': p['price'], 'url': p['product_url']} for p in collected]
                 return analysis
             except json.JSONDecodeError:
                 pass
