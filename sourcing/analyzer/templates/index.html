@@ -3871,6 +3871,94 @@ async function _sendDetailChat(scanId) {
     }
 }
 
+// ── NotebookLM 연동 함수 ──
+let _nlmConvId = {};  // scanId → conversation_id (대화 이어가기)
+
+async function _nlmUpload(scanId) {
+    const btn = document.getElementById('btnNlmUpload');
+    const msg = document.getElementById('nlmStatusMsg');
+    if (!btn || !msg) return;
+    btn.disabled = true; btn.textContent = '업로드 중...'; btn.style.opacity = '0.6';
+    msg.textContent = '노트북 생성 중...';
+
+    try {
+        const res = await fetch(`/api/scan/${scanId}/nlm/upload`, { method: 'POST' });
+        const data = await res.json();
+        if (!data.success) {
+            msg.textContent = '오류: ' + (data.error || '실패');
+            btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'NotebookLM에 업로드';
+            return;
+        }
+        // 폴링으로 상태 확인
+        _nlmPollUpload(scanId);
+    } catch(e) {
+        msg.textContent = '오류: ' + e.message;
+        btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'NotebookLM에 업로드';
+    }
+}
+
+async function _nlmPollUpload(scanId) {
+    const btn = document.getElementById('btnNlmUpload');
+    const msg = document.getElementById('nlmStatusMsg');
+    let count = 0;
+    const poll = async () => {
+        count++;
+        try {
+            const res = await fetch(`/api/scan/${scanId}/nlm/status`);
+            const data = await res.json();
+            if (data.status === 'uploading') {
+                msg.textContent = data.message || '업로드 중...';
+                if (count < 60) setTimeout(poll, 3000);
+            } else if (data.status === 'ready') {
+                msg.textContent = '✓ ' + (data.message || '완료');
+                btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '다시 업로드';
+                document.getElementById('nlmChatBox').style.display = 'block';
+            } else if (data.status === 'error') {
+                msg.textContent = '오류: ' + (data.message || '실패');
+                btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'NotebookLM에 업로드';
+            } else {
+                if (count < 60) setTimeout(poll, 3000);
+            }
+        } catch(e) {
+            msg.textContent = '오류: ' + e.message;
+        }
+    };
+    poll();
+}
+
+async function _nlmQuery(scanId) {
+    const input = document.getElementById('nlmInput');
+    const answerEl = document.getElementById('nlmAnswer');
+    if (!input || !answerEl) return;
+    const question = input.value.trim();
+    if (!question) return;
+
+    answerEl.style.display = 'block';
+    answerEl.textContent = '답변 생성 중...';
+    input.value = '';
+
+    try {
+        const res = await fetch(`/api/scan/${scanId}/nlm/query`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ question, conversation_id: _nlmConvId[scanId] || '' })
+        });
+        const data = await res.json();
+        if (data.success) {
+            _nlmConvId[scanId] = data.conversation_id || '';
+            let text = data.answer || '';
+            if (data.citations && data.citations.length) {
+                text += '\n\n— 출처: ' + data.citations.map(c => c.citation_number ? `[${c.citation_number}]` : '').join(' ');
+            }
+            answerEl.textContent = text;
+        } else {
+            answerEl.textContent = '오류: ' + (data.error || '알 수 없는 오류');
+        }
+    } catch(e) {
+        answerEl.textContent = '오류: ' + e.message;
+    }
+}
+
 function _displayInsightReview(data) {
     const a = data.analysis;
     let html = '';
@@ -3936,6 +4024,28 @@ function _displayInsightReview(data) {
             <div style="display:flex; gap:8px;">
                 <input type="text" id="reviewChatInput" placeholder="리뷰에 대해 물어보세요..." style="flex:1; background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius); color:var(--text-primary); font-size:14px; padding:10px 14px; outline:none;">
                 <button onclick="askReviewQuestion()" style="background:var(--accent); color:#fff; border:none; padding:10px 20px; border-radius:var(--radius); font-weight:700; cursor:pointer;">질문</button>
+            </div>
+        </div>
+
+        <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:16px;" id="nlmSection">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                <div style="font-size:15px; font-weight:700;">NotebookLM 연동</div>
+                <span style="font-size:11px; background:rgba(99,102,241,0.15); color:#a5b4fc; padding:2px 8px; border-radius:10px;">API 비용 0원</span>
+            </div>
+            <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">리뷰 전체를 NotebookLM에 업로드하고 더 깊은 질문을 할 수 있어요.</div>
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">
+                <button id="btnNlmUpload" onclick="_nlmUpload(${scanId})" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;padding:8px 18px;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer;">NotebookLM에 업로드</button>
+                <span id="nlmStatusMsg" style="font-size:12px; color:var(--text-secondary);"></span>
+            </div>
+            <div id="nlmChatBox" style="display:none;">
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+                    ${['주요 불만 사항은?','가장 칭찬받은 점?','개선 요청이 많은 기능?','재구매 의향 높은 이유?','경쟁 상품 언급 있어?'].map(q=>`<span onclick="document.getElementById('nlmInput').value='${q}';_nlmQuery(${scanId})" style="cursor:pointer;font-size:11px;padding:3px 9px;border:1px solid var(--border);border-radius:20px;color:var(--text-secondary);">${q}</span>`).join('')}
+                </div>
+                <div style="display:flex; gap:8px; margin-bottom:10px;">
+                    <input type="text" id="nlmInput" placeholder="NotebookLM에 질문하세요..." style="flex:1; background:var(--bg-input); border:1px solid rgba(99,102,241,0.4); border-radius:var(--radius); color:var(--text-primary); font-size:13px; padding:8px 12px; outline:none;" onkeydown="if(event.key==='Enter') _nlmQuery(${scanId})"/>
+                    <button onclick="_nlmQuery(${scanId})" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;padding:8px 16px;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer;">질문</button>
+                </div>
+                <div id="nlmAnswer" style="display:none; background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.2); border-radius:4px; padding:14px; font-size:13px; color:var(--text-primary); line-height:1.7; white-space:pre-wrap;"></div>
             </div>
         </div>`;
     }
