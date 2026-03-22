@@ -26,6 +26,7 @@ from analyzer.wing import wing_search, wing_ensure_login, get_wing_status
 from analyzer.reviews import analyze_reviews_basic, analyze_reviews_claude
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # 스캔 진척도 추적
 _scan_progress = {}  # {scan_id: {'step': 1, 'total': 3, 'message': '...'}}

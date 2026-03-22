@@ -38,8 +38,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             _pendingReviews.resolve(message.reviews || []);
             _pendingReviews = null;
         }
+        return false;
     }
-    return true;
+
+    if (message.type === 'MARKET_FINDER_COLLECT_REVIEWS') {
+        const products = message.products || [];
+        const scanId = message.scanId || null;
+
+        if (!products.length) {
+            sendResponse({ status: 'error', message: 'No products provided' });
+            return false;
+        }
+
+        collectReviews(products, scanId)
+            .then(() => console.log('[소싱콕] Review collection finished'))
+            .catch(err => console.error('[소싱콕] Collection failed:', err));
+
+        sendResponse({ status: 'started', count: products.length });
+        return false;
+    }
+
+    return false;
 });
 
 // ----------------------------------------------------------
