@@ -3564,6 +3564,9 @@ function _renderReviewTab(el, scan) {
         if (data.status === 'done' && data.analysis) {
             _displayInsightReview(data);
             document.getElementById('btnInsightReview').textContent = '다시 분석';
+        } else if (data.review_count > 0) {
+            // 리뷰는 수집됐지만 분석 전 → NLM 섹션만 바로 표시
+            _renderNlmSection(scanId);
         }
     }).catch(()=>{});
 }
@@ -3869,6 +3872,46 @@ async function _sendDetailChat(scanId) {
     } catch(e) {
         answerEl.textContent = '오류: ' + e.message;
     }
+}
+
+// ── NotebookLM 섹션 렌더링 (리뷰 수집 완료 시 단독 표시용) ──
+function _renderNlmSection(scanId) {
+    const content = document.getElementById('insightReviewContent');
+    if (!content) return;
+    content.innerHTML += `
+    <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:16px;" id="nlmSection">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+            <div style="font-size:15px; font-weight:700;">NotebookLM 연동</div>
+            <span style="font-size:11px; background:rgba(99,102,241,0.15); color:#a5b4fc; padding:2px 8px; border-radius:10px;">API 비용 0원</span>
+        </div>
+        <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">수집된 리뷰를 NotebookLM에 업로드하고 자유롭게 질문할 수 있어요.</div>
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">
+            <button id="btnNlmUpload" onclick="_nlmUpload(${scanId})" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;padding:8px 18px;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer;">NotebookLM에 업로드</button>
+            <span id="nlmStatusMsg" style="font-size:12px; color:var(--text-secondary);"></span>
+        </div>
+        <div id="nlmChatBox" style="display:none;">
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+                ${['주요 불만 사항은?','가장 칭찬받은 점?','개선 요청이 많은 기능?','재구매 의향 높은 이유?','경쟁 상품 언급 있어?'].map(q=>`<span onclick="document.getElementById('nlmInput').value='${q}';_nlmQuery(${scanId})" style="cursor:pointer;font-size:11px;padding:3px 9px;border:1px solid var(--border);border-radius:20px;color:var(--text-secondary);">${q}</span>`).join('')}
+            </div>
+            <div style="display:flex; gap:8px; margin-bottom:10px;">
+                <input type="text" id="nlmInput" placeholder="NotebookLM에 질문하세요..." style="flex:1; background:var(--bg-input); border:1px solid rgba(99,102,241,0.4); border-radius:var(--radius); color:var(--text-primary); font-size:13px; padding:8px 12px; outline:none;" onkeydown="if(event.key==='Enter') _nlmQuery(${scanId})"/>
+                <button onclick="_nlmQuery(${scanId})" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;padding:8px 16px;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer;">질문</button>
+            </div>
+            <div id="nlmAnswer" style="display:none; background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.2); border-radius:4px; padding:14px; font-size:13px; color:var(--text-primary); line-height:1.7; white-space:pre-wrap;"></div>
+        </div>
+    </div>`;
+
+    // 이미 업로드된 상태면 바로 질문 박스 표시
+    fetch(`/api/scan/${scanId}/nlm/status`).then(r=>r.json()).then(d => {
+        if (d.status === 'ready') {
+            const msg = document.getElementById('nlmStatusMsg');
+            const box = document.getElementById('nlmChatBox');
+            const btn = document.getElementById('btnNlmUpload');
+            if (msg) msg.textContent = '✓ ' + (d.message || '업로드 완료');
+            if (box) box.style.display = 'block';
+            if (btn) btn.textContent = '다시 업로드';
+        }
+    }).catch(()=>{});
 }
 
 // ── NotebookLM 연동 함수 ──
