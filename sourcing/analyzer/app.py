@@ -26,6 +26,7 @@ from analyzer.wing import wing_search, wing_ensure_login, get_wing_status
 from analyzer.reviews import analyze_reviews_basic, analyze_reviews_claude
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # 스캔 진척도 추적
 _scan_progress = {}  # {scan_id: {'step': 1, 'total': 3, 'message': '...'}}
@@ -1607,6 +1608,152 @@ def get_detail_analysis(scan_id):
         'progress': state.get('progress', ''),
         'analysis': state.get('analysis'),
     })
+
+
+@app.route('/api/scan/<int:scan_id>/detail-chat', methods=['POST'])
+def detail_chat(scan_id):
+    """수집된 상품 원본 데이터 기반으로 추가 질문에 Gemini가 답변"""
+    data = request.get_json(force=True, silent=True) or {}
+    question = data.get('question', '').strip()
+    if not question:
+        return jsonify({'success': False, 'error': '질문을 입력해주세요'})
+
+    raw_products = fdb.get_detail_raw_products(scan_id)
+    if not raw_products:
+        return jsonify({'success': False, 'error': '원본 데이터가 없습니다. 상세 분석을 먼저 실행해주세요.'})
+
+    scan = fdb.get_scan(scan_id)
+    keyword = scan['keyword'] if scan else ''
+
+    # 원본 데이터 텍스트 구성
+    product_blocks = []
+    for i, p in enumerate(raw_products, 1):
+        block = f'[상품 {i}] {p.get("title", p.get("product_name", ""))} (순위 {p.get("ranking", i)}위)\n'
+        block += f'가격: {p.get("price", "미확인")} | 월매출: {p.get("revenue_monthly", 0):,}원 | 리뷰: {p.get("review_count", 0)}개\n'
+        block += f'상세내용:\n{p.get("detail_text", "")[:1200]}'
+        product_blocks.append(block)
+
+    context = '\n\n---\n\n'.join(product_blocks)
+
+    from analyzer.reviews import _call_gemini
+    prompt = f'''아래는 쿠팡 "{keyword}" 키워드 상위 {len(raw_products)}개 상품의 실제 상세페이지 데이터입니다.
+
+{context}
+
+---
+질문: {question}
+
+위 상품 데이터를 바탕으로 질문에 정확하게 답해주세요. 없는 정보는 "확인 불가"라고 솔직하게 말해주세요.'''
+
+    answer = _call_gemini(prompt, max_tokens=3000)
+    if not answer:
+        return jsonify({'success': False, 'error': 'AI 응답 실패'})
+
+    return jsonify({'success': True, 'answer': answer, 'products_count': len(raw_products)})
+
+
+# ══════════════════════════════════════════════
+# NotebookLM 연동
+# ══════════════════════════════════════════════
+_nlm_state = {}  # scan_id → {status, notebook_id, message}
+
+@app.route('/api/scan/<int:scan_id>/nlm/status')
+def nlm_status(scan_id):
+    """NotebookLM 연동 상태 조회"""
+    from analyzer.notebooklm import is_available
+    state = _nlm_state.get(scan_id, {})
+    return jsonify({
+        'success': True,
+        'nlm_available': is_available(),
+        'status': state.get('status', 'none'),
+        'notebook_id': state.get('notebook_id', ''),
+        'message': state.get('message', ''),
+    })
+
+
+@app.route('/api/scan/<int:scan_id>/nlm/upload', methods=['POST'])
+def nlm_upload(scan_id):
+    """수집된 리뷰를 NotebookLM 노트북에 업로드"""
+    if scan_id in _nlm_state and _nlm_state[scan_id].get('status') == 'uploading':
+        return jsonify({'success': True, 'message': '업로드 중...', 'status': 'uploading'})
+
+    # 리뷰 데이터 확인
+    reviews = fdb.get_reviews(scan_id)
+    if not reviews:
+        return jsonify({'success': False, 'error': '리뷰 데이터가 없습니다. 리뷰 탭에서 수집을 먼저 실행해주세요.'})
+
+    scan = fdb.get_scan(scan_id)
+    keyword = scan['keyword'] if scan else f'scan_{scan_id}'
+
+    _nlm_state[scan_id] = {'status': 'uploading', 'notebook_id': '', 'message': '노트북 생성 중...'}
+
+    def _run():
+        with app.app_context():
+            try:
+                from analyzer.notebooklm import get_or_create_notebook, add_text_source, build_review_text
+
+                # 노트북 생성/조회
+                notebook_id = get_or_create_notebook(scan_id, keyword)
+                if not notebook_id:
+                    _nlm_state[scan_id] = {'status': 'error', 'notebook_id': '', 'message': '노트북 생성 실패'}
+                    return
+
+                _nlm_state[scan_id]['message'] = '리뷰 업로드 중...'
+
+                # 리뷰 데이터를 상품별로 그룹핑
+                reviews_by_product = {}
+                for rv in reviews:
+                    pname = rv.get('product_name') or rv.get('productName') or keyword
+                    reviews_by_product.setdefault(pname, []).append(rv)
+
+                review_text = build_review_text(reviews_by_product, keyword)
+
+                # NotebookLM에 업로드
+                import datetime
+                date_str = datetime.date.today().strftime('%y%m%d')
+                source_id = add_text_source(notebook_id, review_text, title=f'{keyword}_리뷰_{date_str}')
+
+                _nlm_state[scan_id] = {
+                    'status': 'ready',
+                    'notebook_id': notebook_id,
+                    'message': f'업로드 완료! ({len(reviews_by_product)}개 상품 리뷰)',
+                }
+                print(f'[NLM] 업로드 완료: {keyword} → 노트북 {notebook_id[:8]}...')
+
+            except Exception as e:
+                import traceback; traceback.print_exc()
+                _nlm_state[scan_id] = {'status': 'error', 'notebook_id': '', 'message': str(e)}
+
+    threading.Thread(target=_run, daemon=True).start()
+    return jsonify({'success': True, 'status': 'uploading', 'message': '업로드 시작!'})
+
+
+@app.route('/api/scan/<int:scan_id>/nlm/query', methods=['POST'])
+def nlm_query(scan_id):
+    """NotebookLM 노트북에 질문"""
+    data = request.get_json(force=True, silent=True) or {}
+    question = data.get('question', '').strip()
+    conversation_id = data.get('conversation_id', '')
+
+    if not question:
+        return jsonify({'success': False, 'error': '질문을 입력해주세요'})
+
+    state = _nlm_state.get(scan_id, {})
+    notebook_id = state.get('notebook_id', '')
+    if not notebook_id:
+        return jsonify({'success': False, 'error': 'NotebookLM에 업로드되지 않았습니다. 먼저 업로드해주세요.'})
+
+    try:
+        from analyzer.notebooklm import query as nlm_query_fn
+        result = nlm_query_fn(notebook_id, question, conversation_id=conversation_id, timeout=120)
+        return jsonify({
+            'success': True,
+            'answer': result.get('answer', ''),
+            'conversation_id': result.get('conversation_id', ''),
+            'citations': result.get('citations', []),
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 
 def _get_cdp_cookies(domain_filter: str = '') -> list:
