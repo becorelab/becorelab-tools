@@ -233,7 +233,7 @@ def notify_macos(title, message):
 
 
 # ── 수집 실행 ──
-def run_scrape(task_id=None, scheduled=False):
+def run_scrape(task_id=None, scheduled=False, sales_target_date=None):
     """데이터 수집 실행 (lock으로 동시 실행 방지)"""
     if not scrape_lock.acquire(blocking=False):
         msg = "이미 수집이 진행 중입니다"
@@ -255,7 +255,7 @@ def run_scrape(task_id=None, scheduled=False):
                 tasks[task_id]["step"] = step
             log.info(f"[{task_id or 'scheduled'}] {step}")
 
-        result = fetch_all_data(progress=on_progress)
+        result = fetch_all_data(progress=on_progress, sales_target_date=sales_target_date)
         save_cache(result)
 
         if task_id and task_id in tasks:
@@ -311,13 +311,15 @@ def api_cached_data():
 @app.route("/api/fetch-data", methods=["POST"])
 def api_fetch_data():
     task_id = uuid.uuid4().hex[:8]
+    sales_target_date = request.json.get("date") # 요청 바디에서 "date" 파라미터 추출
     tasks[task_id] = {
         "status": "running",
         "step": "starting",
         "result": None,
         "error": None,
     }
-    threading.Thread(target=run_scrape, args=(task_id,), daemon=True).start()
+    # sales_target_date 인자를 run_scrape에 전달
+    threading.Thread(target=run_scrape, args=(task_id, False, sales_target_date), daemon=True).start()
     return jsonify({"task_id": task_id})
 
 
@@ -999,6 +1001,64 @@ def api_inventory_report():
         return jsonify({"status": "ok", "report": report})
     except Exception as e:
         return jsonify({"status": "error", "report": f"❌ 재고 보고서 생성 실패: {str(e)}"}), 500
+
+
+@app.route("/api/cost-report")
+def api_cost_report():
+    """API 비용 현황 보고서 (Anthropic + Gemini + OpenClaw)"""
+    import urllib.request
+    import urllib.error
+    lines = ["💰 API 비용 현황 보고서", ""]
+
+    # 1. Anthropic API 사용량
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'sourcing', 'analyzer'))
+        from reviews import ANTHROPIC_API_KEY
+        if ANTHROPIC_API_KEY:
+            req = urllib.request.Request(
+                "https://api.anthropic.com/v1/usage",
+                headers={"x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01"}
+            )
+            with urllib.request.urlopen(req, timeout=10) as r:
+                data = json.loads(r.read())
+            lines.append("🤖 Anthropic API (소싱콕 리뷰분석)")
+            if "input_tokens" in data:
+                lines.append(f"  입력 토큰: {data.get('input_tokens', 0):,}")
+                lines.append(f"  출력 토큰: {data.get('output_tokens', 0):,}")
+            else:
+                lines.append(f"  응답: {json.dumps(data, ensure_ascii=False)[:200]}")
+        else:
+            lines.append("🤖 Anthropic API: 키 없음")
+    except Exception as e:
+        lines.append(f"🤖 Anthropic API: 조회 실패 ({str(e)[:80]})")
+    lines.append("")
+
+    # 2. Gemini API (무료 티어 — 비용 없음)
+    lines.append("✨ Google Gemini API (소싱콕 상세분석)")
+    lines.append("  플랜: 무료 티어 (Gemini 2.5 Flash)")
+    lines.append("  과금: 없음 (무료 한도 내 사용)")
+    lines.append("")
+
+    # 3. Claude Code 채널 두리
+    lines.append("🐰 Claude Code 채널 두리 (@doori0321_bot)")
+    lines.append("  모델: Claude Sonnet 4.6")
+    lines.append("  과금: Max 구독 포함 — $0")
+    lines.append("")
+
+    # 4. OpenClaw 상태
+    try:
+        req2 = urllib.request.Request("http://localhost:18789/api/status")
+        with urllib.request.urlopen(req2, timeout=3) as r:
+            lines.append("🔧 OpenClaw: 실행 중 (Haiku 과금 확인 필요)")
+    except Exception:
+        lines.append("🔧 OpenClaw: 중지됨 (과금 없음)")
+
+    report = "\n".join(lines)
+    if request.args.get("format") == "text":
+        resp = make_response(report)
+        resp.headers["Content-Type"] = "text/plain; charset=utf-8"
+        return resp
+    return jsonify({"status": "ok", "report": report})
 
 
 if __name__ == "__main__":

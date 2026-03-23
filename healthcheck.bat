@@ -25,3 +25,16 @@ if errorlevel 1 (
     timeout /t 15 /nobreak >nul
     start /b "" C:\Users\info\AppData\Roaming\npm\openclaw.cmd browser start
 )
+
+REM 두리 텔레그램 채널 (Claude Code) — lock 파일로 실행 여부 확인
+set DOORI_LOCK=C:\Users\info\ClaudeAITeam\Channel_doori\.doori.lock
+set DOORI_ALIVE=0
+if exist "%DOORI_LOCK%" (
+    set /p DOORI_PID=<"%DOORI_LOCK%"
+    powershell -NoProfile -Command "if (Get-Process -Id %DOORI_PID% -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >nul 2>&1
+    if not errorlevel 1 set DOORI_ALIVE=1
+)
+if "%DOORI_ALIVE%"=="0" (
+    echo [%date% %time%] 두리 채널 재시작 >> C:\Users\info\ClaudeAITeam\logistics\data\healthcheck.log
+    start "두리 채널 (자동재시작)" /min cmd /c C:\Users\info\ClaudeAITeam\start-doori-channel.bat
+)

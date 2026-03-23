@@ -654,8 +654,13 @@ def scrape_sales(page, target_date=None, progress=None):
     }
 
 
-def fetch_all_data(progress=None):
-    """전체 데이터 수집 오케스트레이션"""
+def fetch_all_data(progress=None, sales_target_date=None):
+    """전체 데이터 수집 오케스트레이션
+    
+    Args:
+        progress: 진행 상황 콜백 함수
+        sales_target_date: 매출 수집 타겟 날짜 (YYYY-MM-DD)
+    """
     if progress:
         progress("starting")
 
@@ -671,7 +676,7 @@ def fetch_all_data(progress=None):
 
             inventory = scrape_inventory(page, progress=progress)
             orders = scrape_outbound(page, days=90, progress=progress)
-            sales = scrape_sales(page, progress=progress)
+            sales = scrape_sales(page, target_date=sales_target_date, progress=progress)
 
             if progress:
                 progress("done")

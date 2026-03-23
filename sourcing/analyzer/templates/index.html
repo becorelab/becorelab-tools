@@ -3342,12 +3342,19 @@ function _renderDetailTab(el, products, scan) {
 
     // 분석 대상 상품 목록 (상위 10개)
     const top10 = [...products].sort((a,b) => (b.revenue_monthly||0) - (a.revenue_monthly||0)).slice(0, 10);
-    let productListHtml = top10.map((p, i) => `
+    let productListHtml = `
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(42,47,64,0.5);font-size:11px;color:var(--text-muted);">
+            <span style="min-width:20px;">#</span>
+            <span style="flex:1;">상품명</span>
+            <span style="min-width:80px;text-align:right;">판매가</span>
+            <span style="min-width:90px;text-align:right;">월매출</span>
+        </div>
+    ` + top10.map((p, i) => `
         <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(42,47,64,0.3);font-size:13px;">
             <span style="color:var(--text-muted);min-width:20px;">${i+1}</span>
             <a href="${p.product_url||'#'}" target="_blank" style="color:var(--cyan);text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.product_name||''}">${(p.product_name||'-').substring(0,40)}</a>
-            <span style="color:var(--text-secondary);min-width:70px;text-align:right;">${p.price ? formatNumber(p.price)+'원' : '-'}</span>
-            <span style="color:var(--text-muted);min-width:60px;text-align:right;font-size:11px;">${p.revenue_monthly ? formatNumber(Math.round(p.revenue_monthly/10000))+'만' : '-'}</span>
+            <span style="color:var(--text-secondary);min-width:80px;text-align:right;font-weight:600;">${p.price ? formatNumber(p.price)+'원' : '-'}</span>
+            <span style="color:var(--accent);min-width:90px;text-align:right;font-weight:600;">${p.revenue_monthly ? formatNumber(Math.round(p.revenue_monthly/10000))+'만원' : '-'}</span>
         </div>
     `).join('');
 
