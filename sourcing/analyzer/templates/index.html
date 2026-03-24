@@ -3393,6 +3393,16 @@ function _renderSourcingCostTab(el, products, scan) {
                 <div><div class="profit-label">그로스 물류비 (원)</div><input type="number" class="profit-input" id="srcLogistics" value="3000" oninput="_calcSourcingCost()"></div>
             </div>
         </div>
+        <div class="ins-chart-wrap" style="margin-top:16px;">
+            <div class="ins-section-title"><span class="dot" style="background:var(--cyan);"></span>판매가 → 소싱가 역산</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">원하는 판매가를 입력하면, 마진율별 최대 알리바바 견적가를 역산합니다</div>
+            <div class="profit-row" style="grid-template-columns:1fr 1fr;">
+                <div><div class="profit-label">목표 판매가 (원)</div><input type="number" class="profit-input" id="srcTargetPrice" value="${marketAvgPrice || ''}" placeholder="판매 희망가" oninput="_calcSourcingCost()"></div>
+                <div style="display:flex;align-items:flex-end;gap:8px;">
+                    <button onclick="document.getElementById('srcTargetPrice').value='${marketAvgPrice}';_calcSourcingCost();" style="background:var(--bg-tertiary);border:1px solid var(--border);color:var(--text-secondary);padding:8px 14px;border-radius:3px;font-size:12px;cursor:pointer;white-space:nowrap;">시장 평균가 (${formatNumber(marketAvgPrice)}원)</button>
+                </div>
+            </div>
+        </div>
         <div id="srcResult"></div>
         <input type="hidden" id="srcMarketAvg" value="${marketAvgPrice}">
     `;
@@ -3412,40 +3422,46 @@ function _calcSourcingCost() {
     const container = document.getElementById('srcResult');
     if (!container) return;
 
-    // ── 시장 평균가 기준 역산 (견적가 없어도 표시) ──
+    // ── 판매가 → 소싱가 역산 ──
+    const targetPrice = parseFloat(document.getElementById('srcTargetPrice')?.value || 0);
     let reverseHtml = '';
-    if (marketAvg > 0) {
+    if (targetPrice > 0) {
         const revMargins = [0.25, 0.30, 0.35, 0.40, 0.45, 0.50];
+        const shippingPerUnit = orderQty > 0 ? shipping / orderQty : 0;
         let revRows = '';
         revMargins.forEach(mr => {
-            // 역산: 판매가(시장평균) → 최대 원가 → 최대 견적가(USD)
-            const maxCostTotal = Math.round(marketAvg * (1 - feeRate - mr) - logistics);
-            // maxCostTotal = (quoteUsd * exRate + shipping/orderQty) * (1 + tariffRate)
-            // quoteUsd = (maxCostTotal / (1+tariffRate) - shipping/orderQty) / exRate
-            const shippingPerUnit = orderQty > 0 ? shipping / orderQty : 0;
+            // 역산: 판매가 → 최대 원가 → 최대 견적가(USD)
+            const maxCostTotal = Math.round(targetPrice * (1 - feeRate - mr) - logistics);
             const maxQuoteUsd = ((maxCostTotal / (1 + tariffRate)) - shippingPerUnit) / exRate;
-            const marginWon = marketAvg - maxCostTotal - logistics - Math.round(marketAvg * feeRate);
+            const feeWon = Math.round(targetPrice * feeRate);
+            const marginWon = targetPrice - maxCostTotal - logistics - feeWon;
+            const m100 = marginWon * 100;
+            const m500 = marginWon * 500;
             const highlight = mr === 0.30 ? 'background:rgba(0,229,255,0.08);' : mr === 0.40 ? 'background:rgba(255,107,43,0.08);' : '';
             const fontW = (mr === 0.30 || mr === 0.40) ? 'font-weight:700;' : '';
             revRows += `<tr style="${highlight}${fontW}">
-                <td style="padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text-primary);">${formatNumber(marketAvg)}원</td>
                 <td style="padding:10px 12px;border-bottom:1px solid var(--border);color:${mr===0.30?'var(--cyan)':mr===0.40?'var(--accent)':'var(--text-secondary)'};">${(mr*100).toFixed(0)}%</td>
                 <td style="padding:10px 12px;border-bottom:1px solid var(--border);color:var(--success);font-weight:700;">$${maxQuoteUsd > 0 ? maxQuoteUsd.toFixed(2) : '-'}</td>
                 <td style="padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text-secondary);">${maxCostTotal > 0 ? formatNumber(maxCostTotal)+'원' : '-'}</td>
                 <td style="padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text-secondary);">${formatNumber(marginWon)}원</td>
+                <td style="padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text-secondary);">${m100>=10000?formatNumber(Math.round(m100/10000))+'만':formatNumber(m100)}원</td>
+                <td style="padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text-secondary);">${m500>=10000?formatNumber(Math.round(m500/10000))+'만':formatNumber(m500)}원</td>
             </tr>`;
         });
+        const isMarketAvg = marketAvg > 0 && Math.abs(targetPrice - marketAvg) < 10;
+        const priceLabel = isMarketAvg ? `${formatNumber(targetPrice)}원 <span style="font-size:11px;color:var(--text-muted);">(시장 4~10등 평균가)</span>` : `${formatNumber(targetPrice)}원`;
         reverseHtml = `
         <div class="ins-chart-wrap" style="margin-bottom:20px;">
-            <div class="ins-section-title"><span class="dot" style="background:var(--success);"></span>시장 평균가 기준 — 최대 견적가 역산</div>
-            <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">시장 4~10등 평균가(${formatNumber(marketAvg)}원)로 판매할 때, 마진율 확보를 위한 최대 알리바바 견적가</div>
+            <div class="ins-section-title"><span class="dot" style="background:var(--success);"></span>판매가 ${priceLabel} 기준 — 최대 소싱 견적가</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">${formatNumber(targetPrice)}원에 판매할 때, 목표 마진율 확보를 위한 최대 알리바바 견적가</div>
             <table style="width:100%;border-collapse:collapse;font-size:13px;">
                 <thead><tr style="border-bottom:2px solid var(--border);">
-                    <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:11px;">판매가</th>
                     <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:11px;">목표 마진</th>
-                    <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:11px;">최대 견적가</th>
+                    <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:11px;">최대 견적가(USD)</th>
                     <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:11px;">최대 원가</th>
                     <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:11px;">마진(원)</th>
+                    <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:11px;">월100개</th>
+                    <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:11px;">월500개</th>
                 </tr></thead>
                 <tbody>${revRows}</tbody>
             </table>
@@ -3454,7 +3470,7 @@ function _calcSourcingCost() {
 
     // 역산 테이블은 견적가 없어도 먼저 표시
     if (quoteUsd <= 0 || orderQty <= 0) {
-        container.innerHTML = reverseHtml || '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:14px;">견적가(USD)를 입력하면 자동 계산됩니다</div>';
+        container.innerHTML = reverseHtml + (reverseHtml ? '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;border-top:1px solid var(--border);margin-top:8px;">위 입력란에 알리바바 견적가(USD)를 넣으면 순방향 계산도 볼 수 있어요</div>' : '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:14px;">판매가 또는 견적가(USD)를 입력하면 자동 계산됩니다</div>');
         return;
     }
 
