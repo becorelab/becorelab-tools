@@ -646,6 +646,19 @@ def api_goldbox_auto_scan_status():
     })
 
 
+@app.route('/api/goldbox/auto-scan/results')
+def api_goldbox_auto_scan_results():
+    """골드박스 스캔 결과 (DB 기반 — 서버 재시작해도 유지)"""
+    scans = fdb.list_scans()
+    gb_scans = [s for s in scans if s.get('scan_type') == 'goldbox']
+    gb_scans.sort(key=lambda x: x.get('opportunity_score', 0), reverse=True)
+    return jsonify({
+        'success': True,
+        'count': len(gb_scans),
+        'scans': gb_scans,
+    })
+
+
 def _run_goldbox_auto_scan(date: str, delay: int):
     """골드박스 자동 스캔 메인 로직"""
     import time, re, json as _json
@@ -671,30 +684,50 @@ def _run_goldbox_auto_scan(date: str, delay: int):
             _goldbox_scan_state['current'] = f'{len(names)}개 상품에서 키워드 추출 중...'
             print(f'[GOLDBOX-SCAN] 상품 {len(names)}개에서 키워드 추출 시작')
 
-            # 2. Gemini로 키워드 추출
+            # 2. Gemini로 키워드 추출 (50개씩 나눠서 전체 처리)
             nl = chr(10)
-            numbered = nl.join(f'{i+1}. {n}' for i, n in enumerate(names[:50]))
-            prompt = f"""쿠팡 상품명에서 검색 키워드를 추출해주세요.
+            items = []
+            batch_size = 50
+            for batch_start in range(0, len(names), batch_size):
+                batch = names[batch_start:batch_start + batch_size]
+                _goldbox_scan_state['current'] = f'키워드 추출 중... ({batch_start+len(batch)}/{len(names)})'
+                numbered = nl.join(f'{i+1}. {n}' for i, n in enumerate(batch))
+                prompt = f"""쿠팡 상품명에서 검색 키워드를 추출해주세요.
 브랜드명, 용량, 수량, 모델번호 제거. 상품 종류 2~3단어만.
-JSON 배열로만 응답: [{{"keyword":"추출결과"}}]
+JSON 배열로만 응답: [{{"name":"원래상품명","keyword":"추출결과"}}]
 
 {numbered}"""
 
-            gemini_result = _call_gemini(prompt, max_tokens=4000)
-            if not gemini_result:
+                gemini_result = _call_gemini(prompt, max_tokens=4000)
+                if not gemini_result:
+                    print(f'[GOLDBOX-SCAN] 배치 {batch_start//batch_size+1} Gemini 실패, 스킵')
+                    continue
+
+                gemini_result = re.sub(r'```json\s*', '', gemini_result)
+                gemini_result = re.sub(r'```\s*', '', gemini_result)
+                json_match = re.search(r'\[[\s\S]*\]', gemini_result)
+                if json_match:
+                    try:
+                        items.extend(_json.loads(json_match.group()))
+                    except _json.JSONDecodeError:
+                        print(f'[GOLDBOX-SCAN] 배치 {batch_start//batch_size+1} JSON 파싱 실패')
+
+            if not items:
                 _goldbox_scan_state.update({'phase': 'error', 'current': 'Gemini 키워드 추출 실패'})
                 return
 
-            # JSON 파싱
-            gemini_result = re.sub(r'```json\s*', '', gemini_result)
-            gemini_result = re.sub(r'```\s*', '', gemini_result)
-            json_match = re.search(r'\[[\s\S]*\]', gemini_result)
-            if not json_match:
-                _goldbox_scan_state.update({'phase': 'error', 'current': 'Gemini 응답 파싱 실패'})
-                return
+            # 키워드→원본 상품명 매핑 (중복 키워드는 상품명 리스트로)
+            keyword_sources = {}  # {keyword: [상품명1, 상품명2, ...]}
+            for item in items:
+                kw = item.get('keyword', '').strip()
+                nm = item.get('name', '').strip()
+                if kw:
+                    if kw not in keyword_sources:
+                        keyword_sources[kw] = []
+                    if nm and nm not in keyword_sources[kw]:
+                        keyword_sources[kw].append(nm)
 
-            items = _json.loads(json_match.group())
-            keywords = list(dict.fromkeys(item.get('keyword', '') for item in items if item.get('keyword')))
+            keywords = list(keyword_sources.keys())
             print(f'[GOLDBOX-SCAN] 키워드 {len(keywords)}개 추출 (중복 제거)')
 
             # 3. 이미 스캔한 키워드 스킵
@@ -728,6 +761,7 @@ JSON 배열로만 응답: [{{"keyword":"추출결과"}}]
                         'keyword': kw,
                         'scan_id': scan_id,
                         'opportunity_score': score,
+                        'source_products': keyword_sources.get(kw, []),
                     })
                     print(f'[GOLDBOX-SCAN] {i+1}/{len(new_keywords)} "{kw}" → 기회점수 {score}')
 
@@ -737,6 +771,7 @@ JSON 배열로만 응답: [{{"keyword":"추출결과"}}]
                         'keyword': kw,
                         'scan_id': None,
                         'opportunity_score': 0,
+                        'source_products': keyword_sources.get(kw, []),
                         'error': str(e),
                     })
 

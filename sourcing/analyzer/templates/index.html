@@ -1469,19 +1469,21 @@ body {
 
     <!-- 골드박스 -->
     <div id="goldboxPanel" style="display:none;">
+        <!-- 상단: 수집 + 자동 스캔 -->
         <div class="card" style="border-color:var(--warning);">
             <div class="card-header">
-                <span class="card-title" style="color:var(--warning);">쿠팡 골드박스 수집</span>
-                <span class="card-subtitle">24시간 행사 인기 상품 수집</span>
+                <span class="card-title" style="color:var(--warning);">골드박스 소싱 기회 발굴</span>
+                <span class="card-subtitle">골드박스 수집 → AI 키워드 추출 → 자동 스캔 → 기회점수 TOP 10</span>
             </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-                <span style="font-size:13px; color:var(--text-secondary);">골드박스 상품을 수집해서 오늘의 행사 상품을 확인합니다</span>
-                <div style="flex:1;"></div>
-                <button class="btn btn-primary" id="btnGoldbox" style="background:var(--warning); color:#000; font-weight:700;">골드박스 수집</button>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <button class="btn btn-primary" id="btnGoldbox" style="background:var(--warning); color:#000; font-weight:700;">1단계: 골드박스 수집</button>
+                <select id="goldboxDateSelect" style="background:var(--bg-input);border:1px solid var(--border-light);color:var(--warning);padding:8px 12px;border-radius:4px;font-size:13px;font-weight:600;"></select>
+                <button class="btn btn-primary" id="btnAutoScan" onclick="_startAutoScan()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6); font-weight:700;">자동 스캔 시작</button>
+                <span style="font-size:12px; color:var(--text-muted);">날짜를 선택하고 스캔하면 기회 아이템을 찾아줘요</span>
             </div>
         </div>
 
-        <!-- 진행 상태 -->
+        <!-- 진행 상태 (수집/스캔 공용) -->
         <div id="goldboxProgress" class="card" style="display:none; border-color:var(--warning);">
             <div style="display:flex; align-items:center; gap:12px;">
                 <span class="loading-spinner" style="border-top-color:var(--warning);"></span>
@@ -1489,6 +1491,62 @@ body {
                     <div style="font-size:14px; font-weight:600;" id="goldboxPhase">수집중...</div>
                     <div style="font-size:12px; color:var(--text-secondary);" id="goldboxDetail"></div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 자동 스캔 진행 상태 -->
+        <div id="autoScanProgress" class="card" style="display:none; border-color:#6366f1;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span class="loading-spinner" style="border-top-color:#6366f1;"></span>
+                <div style="flex:1;">
+                    <div style="font-size:14px; font-weight:600;" id="autoScanPhase">스캔 중...</div>
+                    <div style="font-size:12px; color:var(--text-secondary);" id="autoScanDetail"></div>
+                    <div style="margin-top:6px;background:var(--bg-tertiary);border-radius:3px;height:6px;overflow:hidden;">
+                        <div id="autoScanBar" style="height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);width:0%;transition:width 0.3s;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 자동 스캔 결과: TOP 10 -->
+        <div id="autoScanResults" class="card" style="display:none;">
+            <div class="card-header">
+                <span class="card-title" style="color:#6366f1;">기회점수 TOP 10</span>
+                <span class="card-subtitle" id="autoScanResultCount"></span>
+            </div>
+            <table class="data-table" style="font-size:13px;">
+                <thead>
+                    <tr>
+                        <th style="width:30px;">#</th>
+                        <th>키워드</th>
+                        <th style="width:70px;">기회점수</th>
+                        <th>원본 상품</th>
+                        <th style="width:60px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="autoScanTop10Body"></tbody>
+            </table>
+        </div>
+
+        <!-- 전체 스캔 결과 (접기/펼치기) -->
+        <div class="history-dropdown" id="autoScanAllWrap" style="margin-top:12px; display:none;">
+            <button class="history-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+                <span>전체 스캔 결과</span>
+                <span class="history-count" id="autoScanAllCount" style="background:#6366f1;">0</span>
+                <span class="history-arrow">&#9660;</span>
+            </button>
+            <div style="display:none;">
+                <table class="data-table" style="font-size:12px;">
+                    <thead>
+                        <tr>
+                            <th style="width:30px;">#</th>
+                            <th>키워드</th>
+                            <th style="width:70px;">기회점수</th>
+                            <th>원본 상품</th>
+                        </tr>
+                    </thead>
+                    <tbody id="autoScanAllBody"></tbody>
+                </table>
             </div>
         </div>
 
@@ -2027,6 +2085,7 @@ document.querySelectorAll('.scan-mode-btn').forEach(btn => {
         document.getElementById('smartScanPanel').style.display = mode === 'smart' ? 'block' : 'none';
         document.getElementById('discoverPanel').style.display = mode === 'discover' ? 'block' : 'none';
         document.getElementById('goldboxPanel').style.display = mode === 'goldbox' ? 'block' : 'none';
+        if (mode === 'goldbox') { _loadGoldboxDates(); _loadAutoScanResultsFromDB(); }
     });
 });
 
@@ -5181,6 +5240,118 @@ document.getElementById('btnGoldbox').addEventListener('click', async () => {
         btn.textContent = '골드박스 수집';
     }
 });
+
+// ── 골드박스 인사이트 연결 ──
+function _openOpportunityDetail(scanId) {
+    if (!scanId) return;
+    viewScanWithReview(scanId);
+}
+
+// ── 골드박스 자동 스캔 ──
+async function _loadGoldboxDates() {
+    try {
+        const r = await fetch('/api/goldbox/history');
+        const d = await r.json();
+        const sel = document.getElementById('goldboxDateSelect');
+        if (!sel) return;
+        sel.innerHTML = (d.dates||[]).map(dt => `<option value="${dt.crawled_date}">${dt.crawled_date} (${dt.count}개)</option>`).join('');
+    } catch(e) {}
+}
+
+async function _startAutoScan() {
+    const btn = document.getElementById('btnAutoScan');
+    const dateSelect = document.getElementById('goldboxDateSelect');
+    const selectedDate = dateSelect ? dateSelect.value : '';
+    btn.disabled = true;
+    btn.textContent = '스캔 진행 중...';
+    document.getElementById('autoScanProgress').style.display = 'block';
+
+    try {
+        const r = await fetch('/api/goldbox/auto-scan', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({date: selectedDate, delay:10})});
+        const d = await r.json();
+        if (!d.success) { alert(d.error || '시작 실패'); btn.disabled=false; btn.textContent='자동 스캔 시작'; return; }
+    } catch(e) { alert('API 오류: '+e.message); btn.disabled=false; btn.textContent='자동 스캔 시작'; return; }
+
+    // 폴링
+    const poll = setInterval(async () => {
+        try {
+            const r = await fetch('/api/goldbox/auto-scan/status');
+            const d = await r.json();
+            document.getElementById('autoScanPhase').textContent = d.phase === 'extracting' ? 'AI 키워드 추출 중...' : d.phase === 'scanning' ? `스캔 중 (${d.scanned}/${d.total})` : d.phase === 'done' ? '완료!' : d.current;
+            document.getElementById('autoScanDetail').textContent = d.current;
+            if (d.total > 0) document.getElementById('autoScanBar').style.width = Math.round(d.scanned/d.total*100)+'%';
+
+            if (!d.running) {
+                clearInterval(poll);
+                document.getElementById('autoScanProgress').style.display = 'none';
+                btn.disabled = false;
+                btn.textContent = '자동 스캔 시작';
+                if (d.phase === 'done') _renderAutoScanResults(d.results);
+                else _loadAutoScanResultsFromDB();
+            }
+        } catch(e) { /* retry */ }
+    }, 3000);
+}
+
+function _renderAutoScanResults(results) {
+    const sorted = [...results].filter(r => r.opportunity_score > 0).sort((a,b) => b.opportunity_score - a.opportunity_score);
+    if (sorted.length === 0) { _loadAutoScanResultsFromDB(); return; }
+
+    const top10 = sorted.slice(0, 10);
+    const rest = sorted.slice(10);
+
+    // TOP 10
+    const top10Body = document.getElementById('autoScanTop10Body');
+    top10Body.innerHTML = top10.map((r, i) => {
+        const sources = (r.source_products||[]).map(s => `<span style="font-size:11px;background:var(--bg-tertiary);padding:2px 6px;border-radius:3px;margin:1px;display:inline-block;">${s.length>30?s.substring(0,30)+'...':s}</span>`).join(' ');
+        const scoreColor = r.opportunity_score >= 90 ? '#22c55e' : r.opportunity_score >= 80 ? 'var(--cyan)' : r.opportunity_score >= 70 ? 'var(--warning)' : 'var(--text-secondary)';
+        const scanId = r.scan_id;
+        const analysisBtn = scanId ? `<a href="#" onclick="event.preventDefault();_openOpportunityDetail(${scanId})" style="background:var(--accent);color:#fff;padding:3px 10px;border-radius:3px;font-size:11px;text-decoration:none;font-weight:600;">분석</a>` : '-';
+        return `<tr>
+            <td style="font-weight:700;color:${i<3?'var(--warning)':'var(--text-muted)'};">${i+1}</td>
+            <td style="font-weight:600;"><a href="#" onclick="event.preventDefault();_openOpportunityDetail(${scanId})" style="color:var(--cyan);text-decoration:none;">${r.keyword}</a></td>
+            <td style="font-weight:800;color:${scoreColor};">${r.opportunity_score}</td>
+            <td style="line-height:1.8;">${sources || '<span style="color:var(--text-muted);font-size:11px;">-</span>'}</td>
+            <td>${analysisBtn}</td>
+        </tr>`;
+    }).join('');
+
+    document.getElementById('autoScanResults').style.display = 'block';
+    document.getElementById('autoScanResultCount').textContent = `총 ${sorted.length}개 중 TOP 10`;
+
+    // 전체 목록
+    if (rest.length > 0) {
+        const allBody = document.getElementById('autoScanAllBody');
+        allBody.innerHTML = sorted.map((r, i) => {
+            const sources = (r.source_products||[]).map(s => s.length>25?s.substring(0,25)+'...':s).join(', ');
+            const sc = r.opportunity_score >= 90 ? '#22c55e' : r.opportunity_score >= 80 ? 'var(--cyan)' : r.opportunity_score >= 70 ? 'var(--warning)' : 'var(--text-secondary)';
+            return `<tr style="${i<10?'background:rgba(99,102,241,0.05);':''}">
+                <td>${i+1}</td>
+                <td><a href="#" onclick="event.preventDefault();${r.scan_id?'_openOpportunityDetail('+r.scan_id+')':''}" style="color:${i<10?'var(--cyan)':'var(--text-primary)'};text-decoration:none;">${r.keyword}</a></td>
+                <td style="font-weight:700;color:${sc};">${r.opportunity_score}</td>
+                <td style="color:var(--text-muted);font-size:11px;">${sources||'-'}</td>
+            </tr>`;
+        }).join('');
+        document.getElementById('autoScanAllCount').textContent = sorted.length;
+        document.getElementById('autoScanAllWrap').style.display = 'block';
+    }
+}
+
+async function _loadAutoScanResultsFromDB() {
+    try {
+        const r = await fetch('/api/goldbox/auto-scan/results');
+        const d = await r.json();
+        if (d.success && d.scans.length > 0) {
+            const results = d.scans.map(s => ({
+                keyword: s.keyword,
+                scan_id: s.id,
+                opportunity_score: s.opportunity_score || 0,
+                source_products: [],
+            }));
+            _renderAutoScanResults(results);
+        }
+    } catch(e) { console.log('goldbox results load error:', e); }
+}
 
 async function loadGoldboxProducts() {
     const res = await fetch('/api/goldbox/products');
