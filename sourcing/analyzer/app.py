@@ -648,10 +648,13 @@ def api_goldbox_auto_scan_status():
 
 @app.route('/api/goldbox/auto-scan/results')
 def api_goldbox_auto_scan_results():
-    """골드박스 스캔 결과 (DB 기반 — 서버 재시작해도 유지)"""
-    scans = fdb.list_scans()
+    """골드박스 스캔 결과 (DB 기반 — 날짜 필터 지원)"""
+    date_filter = request.args.get('date', '')
+    scans = fdb.list_scans(limit=500)
     gb_scans = [s for s in scans if s.get('scan_type') == 'goldbox']
-    gb_scans.sort(key=lambda x: x.get('opportunity_score', 0), reverse=True)
+    if date_filter:
+        gb_scans = [s for s in gb_scans if s.get('scanned_at', '').startswith(date_filter)]
+    gb_scans.sort(key=lambda x: x.get('opportunity_score') or 0, reverse=True)
     return jsonify({
         'success': True,
         'count': len(gb_scans),
