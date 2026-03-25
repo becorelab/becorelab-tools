@@ -601,6 +601,168 @@ def _run_goldbox():
             _goldbox_state['running'] = False
 
 
+# === 골드박스 자동 스캔 ===
+_goldbox_scan_state = {
+    'running': False,
+    'phase': '',        # extracting / scanning / done / error
+    'current': '',
+    'scanned': 0,
+    'total': 0,
+    'results': [],      # [{keyword, scan_id, opportunity_score}]
+}
+
+
+@app.route('/api/goldbox/auto-scan', methods=['POST'])
+def api_goldbox_auto_scan():
+    """골드박스 상품 → Gemini 키워드 추출 → 순차 스캔 → TOP5"""
+    if _goldbox_scan_state['running']:
+        return jsonify({'success': False, 'error': '이미 진행 중'})
+
+    data = request.get_json(force=True, silent=True) or {}
+    date = data.get('date', '')  # 특정 날짜, 없으면 최신
+    delay = int(data.get('delay', 10))  # 스캔 간 대기(초)
+    min_search = int(data.get('min_search', 0))  # 최소 검색량 (연관 키워드용, 향후)
+
+    _goldbox_scan_state.update({
+        'running': True, 'phase': 'extracting', 'current': '키워드 추출 중...',
+        'scanned': 0, 'total': 0, 'results': [],
+    })
+
+    thread = threading.Thread(target=_run_goldbox_auto_scan, args=(date, delay), daemon=True)
+    thread.start()
+    return jsonify({'success': True, 'message': '골드박스 자동 스캔 시작!'})
+
+
+@app.route('/api/goldbox/auto-scan/status')
+def api_goldbox_auto_scan_status():
+    return jsonify({
+        'success': True,
+        'running': _goldbox_scan_state['running'],
+        'phase': _goldbox_scan_state['phase'],
+        'current': _goldbox_scan_state['current'],
+        'scanned': _goldbox_scan_state['scanned'],
+        'total': _goldbox_scan_state['total'],
+        'results': _goldbox_scan_state['results'],
+    })
+
+
+def _run_goldbox_auto_scan(date: str, delay: int):
+    """골드박스 자동 스캔 메인 로직"""
+    import time, re, json as _json
+    from analyzer.reviews import _call_gemini
+
+    with app.app_context():
+        try:
+            # 1. 골드박스 상품명 가져오기
+            if date:
+                products = fdb.get_goldbox_by_date(date)
+            else:
+                dates = fdb.get_goldbox_dates()
+                if not dates:
+                    _goldbox_scan_state.update({'phase': 'error', 'current': '골드박스 데이터 없음'})
+                    return
+                products = fdb.get_goldbox_by_date(dates[-1])
+
+            names = [p.get('product_name', '') for p in products if p.get('product_name')]
+            if not names:
+                _goldbox_scan_state.update({'phase': 'error', 'current': '상품명 없음'})
+                return
+
+            _goldbox_scan_state['current'] = f'{len(names)}개 상품에서 키워드 추출 중...'
+            print(f'[GOLDBOX-SCAN] 상품 {len(names)}개에서 키워드 추출 시작')
+
+            # 2. Gemini로 키워드 추출
+            nl = chr(10)
+            numbered = nl.join(f'{i+1}. {n}' for i, n in enumerate(names[:50]))
+            prompt = f"""쿠팡 상품명에서 검색 키워드를 추출해주세요.
+브랜드명, 용량, 수량, 모델번호 제거. 상품 종류 2~3단어만.
+JSON 배열로만 응답: [{{"keyword":"추출결과"}}]
+
+{numbered}"""
+
+            gemini_result = _call_gemini(prompt, max_tokens=4000)
+            if not gemini_result:
+                _goldbox_scan_state.update({'phase': 'error', 'current': 'Gemini 키워드 추출 실패'})
+                return
+
+            # JSON 파싱
+            gemini_result = re.sub(r'```json\s*', '', gemini_result)
+            gemini_result = re.sub(r'```\s*', '', gemini_result)
+            json_match = re.search(r'\[[\s\S]*\]', gemini_result)
+            if not json_match:
+                _goldbox_scan_state.update({'phase': 'error', 'current': 'Gemini 응답 파싱 실패'})
+                return
+
+            items = _json.loads(json_match.group())
+            keywords = list(dict.fromkeys(item.get('keyword', '') for item in items if item.get('keyword')))
+            print(f'[GOLDBOX-SCAN] 키워드 {len(keywords)}개 추출 (중복 제거)')
+
+            # 3. 이미 스캔한 키워드 스킵
+            existing_scans = fdb.list_scans()
+            existing_keywords = set(s.get('keyword', '').strip().lower() for s in existing_scans)
+            new_keywords = [kw for kw in keywords if kw.strip().lower() not in existing_keywords]
+            skipped = len(keywords) - len(new_keywords)
+            if skipped > 0:
+                print(f'[GOLDBOX-SCAN] 기존 스캔 {skipped}개 스킵, 신규 {len(new_keywords)}개')
+
+            _goldbox_scan_state.update({
+                'phase': 'scanning',
+                'total': len(new_keywords),
+                'current': f'{len(new_keywords)}개 키워드 스캔 시작 (기존 {skipped}개 스킵)',
+            })
+
+            # 4. 순차 스캔
+            for i, kw in enumerate(new_keywords):
+                _goldbox_scan_state['current'] = f'[{i+1}/{len(new_keywords)}] "{kw}" 스캔 중...'
+                _goldbox_scan_state['scanned'] = i
+
+                try:
+                    scan_id = fdb.create_scan(kw, 'goldbox', 'scanning')
+                    _run_scan_api(scan_id, kw)
+
+                    # 기회점수 가져오기
+                    scan_data = fdb.get_scan(scan_id)
+                    score = scan_data.get('opportunity_score', 0) if scan_data else 0
+
+                    _goldbox_scan_state['results'].append({
+                        'keyword': kw,
+                        'scan_id': scan_id,
+                        'opportunity_score': score,
+                    })
+                    print(f'[GOLDBOX-SCAN] {i+1}/{len(new_keywords)} "{kw}" → 기회점수 {score}')
+
+                except Exception as e:
+                    print(f'[GOLDBOX-SCAN] "{kw}" 스캔 실패: {e}')
+                    _goldbox_scan_state['results'].append({
+                        'keyword': kw,
+                        'scan_id': None,
+                        'opportunity_score': 0,
+                        'error': str(e),
+                    })
+
+                if i < len(new_keywords) - 1:
+                    time.sleep(delay)
+
+            # 5. TOP5 정리
+            _goldbox_scan_state['scanned'] = len(new_keywords)
+            results_sorted = sorted(
+                [r for r in _goldbox_scan_state['results'] if r.get('opportunity_score', 0) > 0],
+                key=lambda x: x['opportunity_score'],
+                reverse=True
+            )
+            _goldbox_scan_state['results'] = results_sorted
+            _goldbox_scan_state['phase'] = 'done'
+            _goldbox_scan_state['current'] = f'완료! {len(new_keywords)}개 스캔, TOP {min(5, len(results_sorted))} 산출'
+            print(f'[GOLDBOX-SCAN] 완료! TOP5: {[r["keyword"] for r in results_sorted[:5]]}')
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            _goldbox_scan_state.update({'phase': 'error', 'current': str(e)})
+        finally:
+            _goldbox_scan_state['running'] = False
+
+
 def _crawl_goldbox_direct(url: str) -> list:
     """골드박스 크롤링 — 별도 Playwright (Wing 워커와 독립)"""
     from playwright.sync_api import sync_playwright

@@ -1061,10 +1061,147 @@ def api_cost_report():
     return jsonify({"status": "ok", "report": report})
 
 
+# ── 발주 분석 API ──
+
+PRODUCTS_LIST = [
+    {"code": "S10357", "name": "건조기시트 [코튼블루]", "moq": 2700},
+    {"code": "S10358", "name": "건조기시트 [베이비크림]", "moq": 2700},
+    {"code": "S13565", "name": "건조기시트 [바이올렛머스크]", "moq": 2700},
+    {"code": "10892", "name": "식기세척기세제 (하트)", "moq": 3000},
+    {"code": "10460", "name": "식기세척기세제 (일반)", "moq": 3000},
+    {"code": "13208", "name": "얼룩제거제 350ml", "moq": 3000},
+    {"code": "13209", "name": "얼룩제거제 100ml", "moq": 3000},
+    {"code": "S13591", "name": "섬유탈취제 100ml", "moq": 5000},
+    {"code": "S13590", "name": "섬유탈취제 400ml", "moq": 5000},
+    {"code": "10964", "name": "수세미 36매", "moq": 1500},
+    {"code": "12594", "name": "캡슐세탁세제 버블코튼", "moq": 3000},
+    {"code": "S10897", "name": "하트 집게 (A)", "moq": 1000},
+    {"code": "10894", "name": "하트 틴케이스", "moq": 1000},
+    {"code": "S10896", "name": "하트 집게 (B)", "moq": 1000},
+    {"code": "13628", "name": "캡슐세제 틴케이스", "moq": 1000},
+    {"code": "10378", "name": "다목적세정제", "moq": 3000},
+]
+
+
+@app.route("/api/order-analysis")
+def api_order_analysis():
+    """발주 분석 — orders.html calcData()와 동일한 로직"""
+    import math
+
+    lead = int(request.args.get("lead", 30))
+    safety = int(request.args.get("safety", 30))
+    target = int(request.args.get("target", 30))
+    window = int(request.args.get("window", 90))
+    reorder_days = lead + safety
+
+    cache = load_cache()
+    if cache is None:
+        return jsonify({"status": "no_data", "error": "캐시 데이터 없음"}), 204
+
+    inventory = cache.get("inventory", {})
+    orders = cache.get("orders", [])
+
+    purchases_list = []
+    moq_override = {}
+    if _firestore_ok:
+        try:
+            doc = fdb.db().collection("logistics").document("purchases").get()
+            if doc.exists:
+                d = doc.to_dict()
+                purchases_list = d.get("purchases", [])
+                moq_override = d.get("moq", {})
+        except Exception:
+            pass
+
+    sales_map = {}
+    for o in orders:
+        code = o.get("code", "")
+        sales_map[code] = sales_map.get(code, 0) + o.get("qty", 0)
+
+    results = []
+    for p in PRODUCTS_LIST:
+        code = p["code"]
+        name = p["name"]
+        moq_val = moq_override.get(code, p["moq"])
+        total_sold = sales_map.get(code, 0)
+        daily_avg = total_sold / window if window > 0 else 0
+        stock_info = inventory.get(code, {})
+        current_stock = stock_info.get("stock") if stock_info else None
+
+        pending = [x for x in purchases_list if x.get("code") == code and x.get("status") == "pending"]
+        pending_qty = sum(x.get("qty", 0) for x in pending)
+
+        reorder_point = reorder_days * daily_avg
+
+        days_to_reorder = None
+        days_to_stockout = None
+        status = "unknown"
+
+        if current_stock is not None:
+            if daily_avg == 0:
+                days_to_reorder = 999
+                days_to_stockout = 999
+                status = "ok"
+            else:
+                days_to_reorder = (current_stock - reorder_point) / daily_avg
+                days_to_stockout = current_stock / daily_avg
+                if days_to_reorder <= 0:
+                    status = "warning" if pending_qty > 0 else "urgent"
+                elif days_to_reorder <= 30:
+                    status = "warning"
+                else:
+                    status = "ok"
+
+        recommend_qty = max(moq_val, math.ceil(target * daily_avg)) if daily_avg > 0 else moq_val
+
+        results.append({
+            "code": code,
+            "name": name,
+            "current_stock": current_stock,
+            "daily_avg": round(daily_avg, 1),
+            "reorder_point": round(reorder_point),
+            "days_to_reorder": round(days_to_reorder, 1) if days_to_reorder is not None else None,
+            "days_to_stockout": round(days_to_stockout, 1) if days_to_stockout is not None else None,
+            "status": status,
+            "recommend_qty": recommend_qty,
+            "moq": moq_val,
+            "pending_qty": pending_qty,
+            "total_sold": total_sold,
+            "period_days": window,
+        })
+
+    urgent = [r for r in results if r["status"] == "urgent"]
+    warning = [r for r in results if r["status"] == "warning"]
+    ok = [r for r in results if r["status"] == "ok"]
+
+    fmt = request.args.get("format", "")
+    if fmt == "text":
+        lines = [f"📦 발주 분석 보고서 ({lead}일 리드타임 + {safety}일 안전재고)\n"]
+        if urgent:
+            lines.append("🔴 즉시 발주 필요:")
+            for r in urgent:
+                lines.append(f"  • {r['name']} — 재고 {r['current_stock']}개, 일평균 {r['daily_avg']}개, 권장 {r['recommend_qty']}개")
+        if warning:
+            lines.append("\n🟡 30일 내 발주:")
+            for r in warning:
+                pend = f" (발주중 {r['pending_qty']}개)" if r['pending_qty'] > 0 else ""
+                lines.append(f"  • {r['name']} — 재고 {r['current_stock']}개, {round(r['days_to_reorder'])}일 후 재주문점{pend}")
+        if ok:
+            lines.append("\n✅ 양호:")
+            for r in ok:
+                lines.append(f"  • {r['name']} — 재고 {r['current_stock']}개, {round(r['days_to_reorder'])}일 여유")
+        return "\n".join(lines), 200, {"Content-Type": "text/plain; charset=utf-8"}
+
+    return jsonify({
+        "status": "ok",
+        "summary": {"urgent": len(urgent), "warning": len(warning), "ok": len(ok)},
+        "products": results,
+    })
+
+
 if __name__ == "__main__":
     from waitress import serve
 
-    # APScheduler — 매일 10시 자동 수집
     scheduler = BackgroundScheduler()
     scheduler.add_job(
         scheduled_scrape,
