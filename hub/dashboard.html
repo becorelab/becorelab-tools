@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BECORELAB 대시보드</title>
+<title>BECORELAB Work Station</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 :root {
@@ -54,6 +54,9 @@ body { font-family: 'Pretendard','Segoe UI',sans-serif; background:var(--bg); co
 </div>
 
 <script>
+// 접속한 호스트 자동 감지 (localhost / Tailscale / 서버 IP)
+const HOST = location.hostname;
+
 const MENUS = {
     sales: {
         label: '매출',
@@ -64,14 +67,14 @@ const MENUS = {
     logistics: {
         label: '물류',
         items: [
-            {id:'logi-main', icon:'📦', label:'재고/주문 현황', url:'http://localhost:8082'},
+            {id:'logi-main', icon:'📦', label:'재고/주문 현황', url:`http://${HOST}:8082`},
             {id:'logi-orders', icon:'🔁', label:'발주 관리', url:'/logistics/orders.html'},
         ]
     },
     sourcing: {
         label: '소싱',
         items: [
-            {id:'src-main', icon:'🔍', label:'소싱콕 (마켓파인더)', url:'http://localhost:8090'},
+            {id:'src-main', icon:'🔍', label:'소싱콕', url:`http://${HOST}:8090`},
         ]
     },
     marketing: {
@@ -86,8 +89,8 @@ let currentTab = 'sales';
 
 const TAB_URLS = {
     sales: '/accounting/sales.html',
-    logistics: 'http://localhost:8082',
-    sourcing: 'http://localhost:8090',
+    logistics: `http://${HOST}:8082`,
+    sourcing: `http://${HOST}:8090`,
     marketing: '/rocket/rocket_preview.html',
 };
 
@@ -99,7 +102,8 @@ function switchTab(tab) {
     content.innerHTML = `<iframe src="${TAB_URLS[tab]}" allow="clipboard-write"></iframe>`;
 }
 
-// Init
+// Init — 접속 위치에 따라 탭 제목 변경
+document.title = (HOST === 'localhost' || HOST === '127.0.0.1') ? 'BECORELAB Work Station' : 'BECORELAB Remote Station';
 switchTab('sales');
 </script>
 </body>
