@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BECORELAB 대시보드</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+    --bg: #0d1117; --bg-card: #161b22; --bg-hover: #1c2333;
+    --border: #30363d; --text: #e6edf3; --text-muted: #8b949e;
+    --accent: #ff6b2b; --cyan: #00e5ff; --success: #22c55e;
+    --warning: #f59e0b; --danger: #ef4444;
+}
+body { font-family: 'Pretendard','Segoe UI',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+/* Top Nav */
+.top-nav { display:flex; align-items:center; height:48px; background:var(--bg-card); border-bottom:1px solid var(--border); padding:0 16px; flex-shrink:0; }
+.logo { font-size:15px; font-weight:800; color:var(--accent); margin-right:32px; letter-spacing:1px; }
+.top-tabs { display:flex; gap:0; height:100%; }
+.top-tab { padding:0 20px; height:100%; display:flex; align-items:center; font-size:13px; font-weight:600; color:var(--text-muted); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.15s; }
+.top-tab:hover { color:var(--text); background:var(--bg-hover); }
+.top-tab.active { color:var(--cyan); border-bottom-color:var(--cyan); }
+.top-tab .tab-icon { margin-right:6px; font-size:15px; }
+
+/* Main Layout */
+.main { display:flex; flex:1; overflow:hidden; }
+
+/* Content */
+.content { flex:1; overflow:hidden; }
+.content iframe { width:100%; height:100%; border:none; background:var(--bg); }
+.content .placeholder { display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-muted); font-size:14px; }
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<div class="top-nav">
+    <div class="logo">BECORELAB</div>
+    <div class="top-tabs">
+        <div class="top-tab active" onclick="switchTab('sales')"><span class="tab-icon">💰</span>매출</div>
+        <div class="top-tab" onclick="switchTab('logistics')"><span class="tab-icon">🚛</span>물류</div>
+        <div class="top-tab" onclick="switchTab('sourcing')"><span class="tab-icon">📦</span>소싱</div>
+        <div class="top-tab" onclick="switchTab('marketing')"><span class="tab-icon">📱</span>마케팅</div>
+    </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+    <!-- Content -->
+    <div class="content" id="content">
+        <div class="placeholder">메뉴를 선택하세요</div>
+    </div>
+</div>
+
+<script>
+const MENUS = {
+    sales: {
+        label: '매출',
+        items: [
+            {id:'sales-dashboard', icon:'📊', label:'매출정산', url:'/accounting/sales.html'},
+        ]
+    },
+    logistics: {
+        label: '물류',
+        items: [
+            {id:'logi-main', icon:'📦', label:'재고/주문 현황', url:'http://localhost:8082'},
+            {id:'logi-orders', icon:'🔁', label:'발주 관리', url:'/logistics/orders.html'},
+        ]
+    },
+    sourcing: {
+        label: '소싱',
+        items: [
+            {id:'src-main', icon:'🔍', label:'소싱콕 (마켓파인더)', url:'http://localhost:8090'},
+        ]
+    },
+    marketing: {
+        label: '마케팅',
+        items: [
+            {id:'mkt-rocket', icon:'🏷️', label:'로켓 미리보기', url:'/rocket/rocket_preview.html'},
+        ]
+    }
+};
+
+let currentTab = 'sales';
+
+const TAB_URLS = {
+    sales: '/accounting/sales.html',
+    logistics: 'http://localhost:8082',
+    sourcing: 'http://localhost:8090',
+    marketing: '/rocket/rocket_preview.html',
+};
+
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.top-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.top-tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+    const content = document.getElementById('content');
+    content.innerHTML = `<iframe src="${TAB_URLS[tab]}" allow="clipboard-write"></iframe>`;
+}
+
+// Init
+switchTab('sales');
+</script>
+</body>
+</html>
