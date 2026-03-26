@@ -8,6 +8,7 @@ import time
 import os
 import base64
 import tempfile
+import io
 from datetime import date, timedelta
 from playwright.sync_api import sync_playwright
 
@@ -62,61 +63,48 @@ def ezadmin_login(page):
 
 
 def _read_captcha_with_vision(screenshot_path, max_retries=2):
-    """스크린샷에서 보안코드 숫자를 Claude Vision으로 읽기"""
+    """스크린샷에서 보안코드 숫자를 Gemini Vision으로 읽기"""
     try:
-        import anthropic
-    except ImportError:
-        log.error("anthropic 모듈 없음 — pip install anthropic 필요")
+        import google.generativeai as genai
+        from PIL import Image
+    except ImportError as e:
+        log.error(f"Gemini/Pillow 모듈 없음: {e}")
         return None
 
-    # API 키: 환경변수 → OpenClaw auth-profiles 순서로 탐색
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         try:
-            import json
-            auth_path = os.path.expanduser("~/.openclaw/agents/main/agent/auth-profiles.json")
-            with open(auth_path, "r") as f:
-                profiles = json.load(f)
-            api_key = profiles["profiles"]["anthropic:default"]["key"]
+            env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+            if os.path.exists(env_path):
+                with open(env_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        if line.startswith("GEMINI_API_KEY="):
+                            api_key = line.split("=", 1)[1].strip()
+                            break
         except Exception as e:
-            log.error(f"Anthropic API 키를 찾을 수 없음: {e}")
-            return None
+            log.warning(f".env에서 GEMINI_API_KEY 탐색 실패: {e}")
 
-    client = anthropic.Anthropic(api_key=api_key)
+    if not api_key:
+        log.error("GEMINI_API_KEY를 찾을 수 없음")
+        return None
 
-    with open(screenshot_path, "rb") as f:
-        img_data = base64.standard_b64encode(f.read()).decode("utf-8")
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel("gemini-1.5-flash")
 
     for attempt in range(max_retries):
         try:
-            response = client.messages.create(
-                model="claude-sonnet-4-6-20250514",
-                max_tokens=50,
-                messages=[{
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "source": {
-                                "type": "base64",
-                                "media_type": "image/png",
-                                "data": img_data,
-                            },
-                        },
-                        {
-                            "type": "text",
-                            "text": "이 이미지에 보안코드 숫자 4자리가 보입니다. 숫자만 정확히 알려주세요. 숫자 4자리만 출력하세요. 예: 1234"
-                        }
-                    ],
-                }],
-            )
-            code = response.content[0].text.strip()
+            with Image.open(screenshot_path) as img:
+                response = model.generate_content([
+                    "이 이미지에 보안코드 숫자 4자리가 보입니다. 숫자만 정확히 알려주세요. 숫자 4자리만 출력하세요. 예: 1234",
+                    img,
+                ])
+            code = (response.text or "").strip()
             digits = ''.join(c for c in code if c.isdigit())
             if len(digits) >= 4:
                 return digits[:4]
             log.warning(f"보안코드 인식 결과 부족: '{code}' (시도 {attempt+1})")
         except Exception as e:
-            log.error(f"Claude Vision API 호출 실패 (시도 {attempt+1}): {e}")
+            log.error(f"Gemini Vision API 호출 실패 (시도 {attempt+1}): {e}")
 
     return None
 

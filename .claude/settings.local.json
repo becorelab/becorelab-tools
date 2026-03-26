@@ -22,7 +22,14 @@
       "Bash(curl -s \"http://localhost:8090/api/scan/1/detail-analysis\")",
       "Bash(curl -s http://localhost:8090/api/opportunities?status=go)",
       "Bash(python -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(f{d[''''id'''']}: {d[''''keyword'''']}\\) for d in data.get\\(''''opportunities'''',[]\\)]\")",
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Bash(schtasks:*)",
+      "Bash(schtasks.exe /query /tn \"두리채널\" 2>&1)",
+      "Bash(powershell.exe -Command \"Get-ScheduledTask -TaskName '두리채널' -ErrorAction SilentlyContinue\")",
+      "Bash(powershell.exe -Command \"Get-ScheduledTask | Where-Object {$_.TaskName -like '*두리*'}\")",
+      "Bash(powershell.exe -Command \"Get-ScheduledTask | Where-Object { $_.TaskName -like '*doori*' -or $_.TaskName -like '*claude*' } | Select-Object TaskName,State\")",
+      "Bash(powershell.exe -Command \"Get-ScheduledTask | Select-Object TaskName,State | Out-String\")",
+      "Bash(powershell.exe -Command \"\n\\\\$action = New-ScheduledTaskAction -Execute 'cmd.exe' -Argument '/c C:\\\\Users\\\\info\\\\ClaudeAITeam\\\\start-doori-channel.bat'\n\\\\$trigger = New-ScheduledTaskTrigger -AtLogOn\n\\\\$settings = New-ScheduledTaskSettingsSet -RestartCount 99 -RestartInterval \\(New-TimeSpan -Minutes 1\\) -ExecutionTimeLimit \\(New-TimeSpan -Hours 0\\)\nRegister-ScheduledTask -TaskName 'BecorelabDooriChannel' -Action \\\\$action -Trigger \\\\$trigger -Settings \\\\$settings -RunLevel Highest -Force\n\")"
     ]
   }
 }
