@@ -3254,25 +3254,29 @@ function _renderCostProfitTab(el, products, scan) {
             <div class="ins-kpi-card"><div class="label">최고가</div><div class="value" style="color:var(--text-muted);">${priced.length>0?formatNumber(Math.max(...priced.map(p=>p.price)))+'원':'-'}</div></div>
         </div>
 
-        <!-- 2. 소싱 원가 입력 -->
+        <!-- 2. 목표 판매가 → 마진율 → 소싱원가 -->
         <div class="ins-chart-wrap">
             <div class="ins-section-title"><span class="dot" style="background:var(--accent);"></span>소싱 원가 시뮬레이터</div>
-            <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">견적가 또는 판매가를 입력하면 자동 계산됩니다</div>
-            <div class="profit-row" style="grid-template-columns:1fr 30px 1fr;">
-                <div><div class="profit-label" style="color:var(--success);">견적가 (USD)</div><input type="number" class="profit-input" id="srcQuoteUsd" value="" placeholder="알리바바 견적가" oninput="_srcInputChanged('quote')"></div>
-                <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-muted);padding-top:18px;">⇄</div>
-                <div><div class="profit-label" style="color:var(--cyan);">판매가 (원)</div><div style="display:flex;gap:6px;"><input type="number" class="profit-input" id="srcTargetPrice" value="${marketAvgPrice || ''}" placeholder="판매 희망가" oninput="_srcInputChanged('price')" style="flex:1;"><button onclick="document.getElementById('srcTargetPrice').value='${marketAvgPrice}';_srcInputChanged('price');" style="background:var(--bg-tertiary);border:1px solid var(--border);color:var(--text-muted);padding:6px 10px;border-radius:3px;font-size:11px;cursor:pointer;white-space:nowrap;">평균가</button></div></div>
+            <div class="profit-row" style="grid-template-columns:1fr 1fr 30px 1fr;">
+                <div><div class="profit-label" style="color:var(--cyan);">목표 판매가 (원)</div><div style="display:flex;gap:6px;"><input type="number" class="profit-input" id="srcTargetPrice" value="${marketAvgPrice || ''}" placeholder="판매 희망가" oninput="_srcInputChanged('price')" style="flex:1;"><button onclick="document.getElementById('srcTargetPrice').value='${marketAvgPrice}';_srcInputChanged('price');" style="background:var(--bg-tertiary);border:1px solid var(--border);color:var(--text-muted);padding:6px 10px;border-radius:3px;font-size:11px;cursor:pointer;white-space:nowrap;">시장평균</button></div></div>
+                <div><div class="profit-label" style="color:var(--warning);">목표 마진율 (%)</div><input type="number" class="profit-input" id="srcTargetMargin" value="30" step="1" oninput="_srcInputChanged('price')" style="color:var(--warning);font-weight:700;"></div>
+                <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-muted);padding-top:18px;">→</div>
+                <div><div class="profit-label" style="color:var(--success);">목표 소싱원가</div><div id="srcTargetCostDisplay" style="background:var(--bg-primary);border:2px solid var(--success);border-radius:4px;padding:10px;font-size:18px;font-weight:800;color:var(--success);text-align:center;">-</div></div>
             </div>
-            <div class="profit-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;">
-                <div><div class="profit-label">환율</div><input type="number" class="profit-input" id="srcExRate" value="1450" oninput="_srcInputChanged()"></div>
-                <div><div class="profit-label">발주수량</div><input type="number" class="profit-input" id="srcOrderQty" value="3000" oninput="_srcInputChanged()"></div>
-                <div><div class="profit-label">운송비 (원)</div><input type="number" class="profit-input" id="srcShipping" value="500000" oninput="_srcInputChanged()"></div>
-                <div><div class="profit-label">관세 (%)</div><input type="number" class="profit-input" id="srcTariff" value="8" step="0.1" oninput="_srcInputChanged()"></div>
-                <div><div class="profit-label">수수료 (%)</div><input type="number" class="profit-input" id="srcFeeRate" value="10.8" step="0.1" oninput="_srcInputChanged()"></div>
-            </div>
-            <div class="profit-row" style="grid-template-columns:1fr 1fr;">
-                <div><div class="profit-label">그로스 물류비 (원)</div><input type="number" class="profit-input" id="srcLogistics" value="3000" oninput="_srcInputChanged()"></div>
-                <div><div class="profit-label">광고비 비중 (%)</div><input type="number" class="profit-input" id="srcAdRate" value="15" step="1" oninput="_srcInputChanged()"></div>
+            <div style="border-top:1px solid var(--border);margin:16px 0;padding-top:12px;">
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">실제 견적가를 입력하면 실제 마진 분석이 표시됩니다</div>
+                <div class="profit-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;">
+                    <div><div class="profit-label" style="color:var(--success);">견적가 (USD)</div><input type="number" class="profit-input" id="srcQuoteUsd" value="" placeholder="알리바바 견적가" oninput="_srcInputChanged('quote')"></div>
+                    <div><div class="profit-label">환율</div><input type="number" class="profit-input" id="srcExRate" value="1450" oninput="_srcInputChanged()"></div>
+                    <div><div class="profit-label">발주수량</div><input type="number" class="profit-input" id="srcOrderQty" value="3000" oninput="_srcInputChanged()"></div>
+                    <div><div class="profit-label">운송비 (원)</div><input type="number" class="profit-input" id="srcShipping" value="500000" oninput="_srcInputChanged()"></div>
+                    <div><div class="profit-label">관세 (%)</div><input type="number" class="profit-input" id="srcTariff" value="8" step="0.1" oninput="_srcInputChanged()"></div>
+                </div>
+                <div class="profit-row" style="grid-template-columns:1fr 1fr 1fr;">
+                    <div><div class="profit-label">수수료 (%)</div><input type="number" class="profit-input" id="srcFeeRate" value="10.8" step="0.1" oninput="_srcInputChanged()"></div>
+                    <div><div class="profit-label">광고비 비중 (%)</div><input type="number" class="profit-input" id="srcAdRate" value="15" step="1" oninput="_srcInputChanged()"></div>
+                    <div><div class="profit-label">그로스 물류비 (원)</div><input type="number" class="profit-input" id="srcLogistics" value="3000" oninput="_srcInputChanged()"></div>
+                </div>
             </div>
         </div>
 
@@ -3492,12 +3496,42 @@ function _renderSourcingCostTab(el, products, scan) {
     _srcInputChanged('price');
 }
 
+function _calcTargetCost() {
+    const sellPrice = parseFloat(document.getElementById('srcTargetPrice')?.value || 0);
+    const targetMargin = parseFloat(document.getElementById('srcTargetMargin')?.value || 30) / 100;
+    const feeRate = parseFloat(document.getElementById('srcFeeRate')?.value || 10.8) / 100;
+    const adRate = parseFloat(document.getElementById('srcAdRate')?.value || 15) / 100;
+    const logistics = parseFloat(document.getElementById('srcLogistics')?.value || 3000);
+    const exRate = parseFloat(document.getElementById('srcExRate')?.value || 1450);
+    const orderQty = parseInt(document.getElementById('srcOrderQty')?.value || 3000);
+    const shipping = parseFloat(document.getElementById('srcShipping')?.value || 0);
+    const tariffRate = parseFloat(document.getElementById('srcTariff')?.value || 8) / 100;
+    const display = document.getElementById('srcTargetCostDisplay');
+    if (!display || sellPrice <= 0) { if (display) display.textContent = '-'; return; }
+
+    // 목표원가(원) = 판매가 × (1 - 수수료 - 광고비 - 마진율) - 물류비
+    const maxCostKrw = Math.round(sellPrice * (1 - feeRate - adRate - targetMargin) - logistics);
+    // USD 역산: (maxCostKrw / (1+관세율) - 운송비/수량) / 환율
+    const shippingPerUnit = orderQty > 0 ? shipping / orderQty : 0;
+    const maxQuoteUsd = ((maxCostKrw / (1 + tariffRate)) - shippingPerUnit) / exRate;
+
+    if (maxQuoteUsd > 0) {
+        display.innerHTML = `$${maxQuoteUsd.toFixed(2)} <span style="font-size:12px;font-weight:400;color:var(--text-muted);">(${formatNumber(maxCostKrw)}원)</span>`;
+    } else {
+        display.innerHTML = `<span style="color:var(--danger);">마진 확보 불가</span>`;
+    }
+}
+
 // 양방향 입력 핸들러
 function _srcInputChanged(source) {
     const quoteEl = document.getElementById('srcQuoteUsd');
     const priceEl = document.getElementById('srcTargetPrice');
     if (!quoteEl || !priceEl) return;
-    // source가 없으면 결과만 갱신
+
+    // 목표 소싱원가 자동 산출
+    _calcTargetCost();
+
+    // 결과 갱신
     _calcSourcingCost();
 }
 
