@@ -3595,9 +3595,10 @@ function _calcSourcingCost() {
     if (hasQuote && sellPrice > 0) {
         // 둘 다 있으면: "판매가를 바꾸면?" 시뮬레이션
         marginRates.forEach(mr => {
-            const simPrice = Math.round((unitCost + logistics) / (1 - feeRate - mr));
+            const simPrice = Math.round((unitCost + logistics) / (1 - feeRate - adRate - mr));
             const simFee = Math.round(simPrice * feeRate);
-            const simMargin = simPrice - unitCost - logistics - simFee;
+            const simAd = Math.round(simPrice * adRate);
+            const simMargin = simPrice - unitCost - logistics - simFee - simAd;
             const m100 = simMargin * 100;
             const m500 = simMargin * 500;
             const highlight = mr === 0.30 ? 'background:rgba(0,229,255,0.08);' : mr === 0.40 ? 'background:rgba(255,107,43,0.08);' : '';
@@ -3627,10 +3628,11 @@ function _calcSourcingCost() {
     } else if (sellPrice > 0) {
         // 판매가만: "견적가를 바꾸면?" 역산
         marginRates.forEach(mr => {
-            const mc = Math.round(sellPrice * (1 - feeRate - mr) - logistics);
+            const mc = Math.round(sellPrice * (1 - feeRate - adRate - mr) - logistics);
             const mq = ((mc / (1 + tariffRate)) - shippingPerUnit) / exRate;
             const simFee = Math.round(sellPrice * feeRate);
-            const simMargin = sellPrice - mc - logistics - simFee;
+            const simAd = Math.round(sellPrice * adRate);
+            const simMargin = sellPrice - mc - logistics - simFee - simAd;
             const m100 = simMargin * 100;
             const m500 = simMargin * 500;
             const highlight = mr === 0.30 ? 'background:rgba(0,229,255,0.08);' : mr === 0.40 ? 'background:rgba(255,107,43,0.08);' : '';
@@ -3661,8 +3663,8 @@ function _calcSourcingCost() {
     } else {
         // 견적가만: "판매가별 마진" 순방향
         marginRates.forEach(mr => {
-            const simPrice = Math.round((unitCost + logistics) / (1 - feeRate - mr));
-            const simMargin = simPrice - unitCost - logistics - Math.round(simPrice * feeRate);
+            const simPrice = Math.round((unitCost + logistics) / (1 - feeRate - adRate - mr));
+            const simMargin = simPrice - unitCost - logistics - Math.round(simPrice * feeRate) - Math.round(simPrice * adRate);
             const m100 = simMargin * 100;
             const m500 = simMargin * 500;
             const highlight = mr === 0.30 ? 'background:rgba(0,229,255,0.08);' : mr === 0.40 ? 'background:rgba(255,107,43,0.08);' : '';
