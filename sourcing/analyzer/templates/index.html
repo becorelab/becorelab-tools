@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>소싱콕 — 비코어랩</title>
+<title>소싱박스 — 비코어랩</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/gh/spoqa/spoqa-han-sans@latest/css/SpoqaHanSansNeo.css" rel="stylesheet">
@@ -1247,7 +1247,7 @@ body {
 <header class="header">
     <div class="header-title">
         <span class="logo">BECORELAB</span>
-        <span>소싱콕</span>
+        <span>소싱박스</span>
     </div>
     <div class="header-stats" id="headerStats">
         <span>스캔<span class="stat-value" id="statTotalScans">0</span></span>
@@ -1263,7 +1263,7 @@ body {
         <span class="tab-icon">&#x1F50D;</span> 키워드 스캔
     </button>
     <button class="tab-btn" data-tab="insight">
-        <span class="tab-icon">&#x1F4CA;</span> 소싱콕 인사이트
+        <span class="tab-icon">&#x1F4CA;</span> 소싱박스 인사이트
     </button>
     <button class="tab-btn" data-tab="rfq">
         <span class="tab-icon">&#x1F4DD;</span> RFQ
@@ -2663,7 +2663,7 @@ async function loadOpportunities() {
     } catch(e) { console.error('기회분석 로딩 에러:', e); }
 }
 
-// ─── 소싱콕 인사이트 모달 (6탭) ───
+// ─── 소싱박스 인사이트 모달 (6탭) ───
 async function generateRFQ(scanId) {
     let modal = document.getElementById('rfqModal');
     if (!modal) {
@@ -2835,7 +2835,7 @@ function viewScanWithReview(scanId) {
 <div id="insightBox" style="background:var(--bg-primary);border:1px solid var(--border);border-radius:6px;width:95%;max-width:1400px;height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 60px rgba(0,0,0,0.6);">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg-card);flex-shrink:0;">
         <div style="display:flex;align-items:center;gap:12px;">
-            <span style="font-size:17px;font-weight:800;background:linear-gradient(135deg,#ff6b2b,#ff9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">소싱콕 인사이트</span>
+            <span style="font-size:17px;font-weight:800;background:linear-gradient(135deg,#ff6b2b,#ff9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">소싱박스 인사이트</span>
             <span id="insightKeyword" style="font-size:14px;color:var(--text-secondary);font-weight:500;"></span>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
@@ -2849,8 +2849,7 @@ function viewScanWithReview(scanId) {
         <button class="ins-tab" data-tab="detail" onclick="_switchInsightTab('detail',this)">상세 분석</button>
         <button class="ins-tab" data-tab="newprod" onclick="_switchInsightTab('newprod',this)">신상품</button>
         <button class="ins-tab" data-tab="keywords" onclick="_switchInsightTab('keywords',this)">키워드</button>
-        <button class="ins-tab" data-tab="profit" onclick="_switchInsightTab('profit',this)">수익성</button>
-        <button class="ins-tab" data-tab="sourcing" onclick="_switchInsightTab('sourcing',this)">소싱원가</button>
+        <button class="ins-tab" data-tab="costprofit" onclick="_switchInsightTab('costprofit',this)">원가분석</button>
         <button class="ins-tab" data-tab="review" onclick="_switchInsightTab('review',this)">리뷰</button>
     </div>
     <div id="insightContent" style="flex:1;overflow-y:auto;padding:24px;">
@@ -2936,8 +2935,7 @@ function _renderInsightTab(tab) {
         case 'detail': _renderDetailTab(el, products, scan); break;
         case 'newprod': _renderNewProductTab(el, products, scan); break;
         case 'keywords': _renderKeywordsTab(el, keywords, variants, scan); break;
-        case 'profit': _renderProfitTab(el, products, scan); break;
-        case 'sourcing': _renderSourcingCostTab(el, products, scan); break;
+        case 'costprofit': _renderCostProfitTab(el, products, scan); break;
         case 'review': _renderReviewTab(el, scan); break;
     }
 }
@@ -2980,7 +2978,7 @@ function _renderStructureTab(el, products, scan) {
                         <div style="font-size:11px;color:var(--danger);font-weight:700;margin-bottom:4px;">${i+1}위 — ${totalRev>0?((p.revenue_monthly||0)/totalRev*100).toFixed(1):'0'}%</div>
                         <div style="font-size:14px;font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.product_name||'-'}</div>
                         <div style="display:flex;gap:12px;font-size:12px;color:var(--text-secondary);">
-                            <span>매출 <strong style="color:var(--accent);">${(p.revenue_monthly||0)>=10000?((p.revenue_monthly||0)/10000).toFixed(0)+'만':formatNumber(p.revenue_monthly||0)}원</strong></span>
+                            <span>매출 <strong style="color:var(--accent);">${formatRevenue(p.revenue_monthly||0)}</strong></span>
                             <span>판매 <strong>${formatNumber(p.sales_monthly||0)}개</strong></span>
                             <span>${formatNumber(p.price||0)}원</span>
                         </div>
@@ -3236,29 +3234,53 @@ function _renderKeywordsTab(el, keywords, variants, scan) {
 
 // ── 5. 수익성 탭 ──
 let _profitProducts = []; // 수익성 탭 시장 평균가 계산용
-function _renderProfitTab(el, products, scan) {
+function _renderProfitTab(el, products, scan) { _renderCostProfitTab(el, products, scan); }
+
+// ── 통합 원가분석 탭 ──
+function _renderCostProfitTab(el, products, scan) {
     _profitProducts = products;
+    const sorted = [...products].sort((a,b) => (b.revenue_monthly||0) - (a.revenue_monthly||0));
+    const rank4to10 = sorted.slice(3, 10).filter(p => (p.price||0) > 0);
+    const marketAvgPrice = rank4to10.length > 0 ? Math.round(rank4to10.reduce((s,p) => s + (p.price||0), 0) / rank4to10.length) : 0;
     const priced = products.filter(p=>(p.price||0)>0);
     const avgPrice = priced.length > 0 ? Math.round(priced.reduce((s,p)=>s+(p.price||0),0)/priced.length) : 15000;
 
     el.innerHTML = `
+        <!-- 1. 시장 가격 요약 -->
+        <div class="ins-kpi" style="margin-bottom:16px;">
+            <div class="ins-kpi-card"><div class="label">시장 4~10위 평균가</div><div class="value" style="color:var(--warning);">${marketAvgPrice > 0 ? formatNumber(marketAvgPrice)+'원' : '-'}</div></div>
+            <div class="ins-kpi-card"><div class="label">전체 평균가</div><div class="value" style="color:var(--text-primary);">${formatNumber(avgPrice)}원</div></div>
+            <div class="ins-kpi-card"><div class="label">최저가</div><div class="value" style="color:var(--cyan);">${priced.length>0?formatNumber(Math.min(...priced.map(p=>p.price)))+'원':'-'}</div></div>
+            <div class="ins-kpi-card"><div class="label">최고가</div><div class="value" style="color:var(--text-muted);">${priced.length>0?formatNumber(Math.max(...priced.map(p=>p.price)))+'원':'-'}</div></div>
+        </div>
+
+        <!-- 2. 소싱 원가 입력 -->
         <div class="ins-chart-wrap">
-            <div class="ins-section-title"><span class="dot" style="background:var(--success);"></span>수익 시뮬레이터</div>
-            <div class="profit-row">
-                <div><div class="profit-label">목표 판매가 (원)</div><input type="number" class="profit-input" id="profitPrice" value="${avgPrice}" oninput="_calcProfit()"></div>
-                <div><div class="profit-label">예상 원가 (원)</div><input type="number" class="profit-input" id="profitCost" value="${Math.round(avgPrice*0.3)}" oninput="_calcProfit()"></div>
-                <div><div class="profit-label">쿠팡 수수료 (%)</div><input type="number" class="profit-input" id="profitFee" value="10.8" step="0.1" oninput="_calcProfit()"></div>
-                <div><div class="profit-label">광고비 비중 (%)</div><input type="number" class="profit-input" id="profitAd" value="15" step="1" oninput="_calcProfit()"></div>
+            <div class="ins-section-title"><span class="dot" style="background:var(--accent);"></span>소싱 원가 시뮬레이터</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">견적가 또는 판매가를 입력하면 자동 계산됩니다</div>
+            <div class="profit-row" style="grid-template-columns:1fr 30px 1fr;">
+                <div><div class="profit-label" style="color:var(--success);">견적가 (USD)</div><input type="number" class="profit-input" id="srcQuoteUsd" value="" placeholder="알리바바 견적가" oninput="_srcInputChanged('quote')"></div>
+                <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-muted);padding-top:18px;">⇄</div>
+                <div><div class="profit-label" style="color:var(--cyan);">판매가 (원)</div><div style="display:flex;gap:6px;"><input type="number" class="profit-input" id="srcTargetPrice" value="${marketAvgPrice || ''}" placeholder="판매 희망가" oninput="_srcInputChanged('price')" style="flex:1;"><button onclick="document.getElementById('srcTargetPrice').value='${marketAvgPrice}';_srcInputChanged('price');" style="background:var(--bg-tertiary);border:1px solid var(--border);color:var(--text-muted);padding:6px 10px;border-radius:3px;font-size:11px;cursor:pointer;white-space:nowrap;">평균가</button></div></div>
+            </div>
+            <div class="profit-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;">
+                <div><div class="profit-label">환율</div><input type="number" class="profit-input" id="srcExRate" value="1450" oninput="_srcInputChanged()"></div>
+                <div><div class="profit-label">발주수량</div><input type="number" class="profit-input" id="srcOrderQty" value="3000" oninput="_srcInputChanged()"></div>
+                <div><div class="profit-label">운송비 (원)</div><input type="number" class="profit-input" id="srcShipping" value="500000" oninput="_srcInputChanged()"></div>
+                <div><div class="profit-label">관세 (%)</div><input type="number" class="profit-input" id="srcTariff" value="8" step="0.1" oninput="_srcInputChanged()"></div>
+                <div><div class="profit-label">수수료 (%)</div><input type="number" class="profit-input" id="srcFeeRate" value="10.8" step="0.1" oninput="_srcInputChanged()"></div>
             </div>
             <div class="profit-row" style="grid-template-columns:1fr 1fr;">
-                <div><div class="profit-label">배송비 (원, 로켓배송 기준)</div><input type="number" class="profit-input" id="profitShip" value="3000" oninput="_calcProfit()"></div>
-                <div><div class="profit-label">기타 비용 (원)</div><input type="number" class="profit-input" id="profitEtc" value="0" oninput="_calcProfit()"></div>
+                <div><div class="profit-label">그로스 물류비 (원)</div><input type="number" class="profit-input" id="srcLogistics" value="3000" oninput="_srcInputChanged()"></div>
+                <div><div class="profit-label">광고비 비중 (%)</div><input type="number" class="profit-input" id="srcAdRate" value="15" step="1" oninput="_srcInputChanged()"></div>
             </div>
         </div>
-        <div id="profitResult"></div>
-        <div id="profitReverseCalc"></div>
+
+        <!-- 3. 계산 결과 -->
+        <div id="srcResult"></div>
+        <input type="hidden" id="srcMarketAvg" value="${marketAvgPrice}">
     `;
-    _calcProfit();
+    _srcInputChanged('price');
 }
 
 function _calcProfit() {
@@ -3488,6 +3510,7 @@ function _calcSourcingCost() {
     const tariffRate = parseFloat(document.getElementById('srcTariff')?.value || 0) / 100;
     const feeRate = parseFloat(document.getElementById('srcFeeRate')?.value || 0) / 100;
     const logistics = parseFloat(document.getElementById('srcLogistics')?.value || 0);
+    const adRate = parseFloat(document.getElementById('srcAdRate')?.value || 0) / 100;
     const marketAvg = parseFloat(document.getElementById('srcMarketAvg')?.value || 0);
     const shippingPerUnit = orderQty > 0 ? shipping / orderQty : 0;
 
@@ -3507,7 +3530,8 @@ function _calcSourcingCost() {
     // ── 1. 실제 마진 요약 (견적가 + 판매가 둘 다 있을 때) ──
     if (hasQuote && sellPrice > 0) {
         const fee = Math.round(sellPrice * feeRate);
-        const actualMargin = sellPrice - unitCost - logistics - fee;
+        const adCost = Math.round(sellPrice * adRate);
+        const actualMargin = sellPrice - unitCost - logistics - fee - adCost;
         const actualMarginRate = sellPrice > 0 ? (actualMargin / sellPrice * 100).toFixed(1) : 0;
         const marginColor = actualMarginRate >= 35 ? 'var(--success)' : actualMarginRate >= 25 ? 'var(--cyan)' : actualMarginRate >= 15 ? 'var(--warning)' : 'var(--danger)';
         const m100 = actualMargin * 100;
@@ -3518,20 +3542,50 @@ function _calcSourcingCost() {
             <div class="ins-kpi">
                 <div class="ins-kpi-card"><div class="label">원가 (관세포함)</div><div class="value" style="color:var(--accent);">${formatNumber(unitCost)}원</div></div>
                 <div class="ins-kpi-card"><div class="label">수수료</div><div class="value">${formatNumber(fee)}원</div><div class="sub">${(feeRate*100).toFixed(1)}%</div></div>
+                <div class="ins-kpi-card"><div class="label">광고비</div><div class="value">${formatNumber(adCost)}원</div><div class="sub">${(adRate*100).toFixed(0)}%</div></div>
                 <div class="ins-kpi-card"><div class="label">물류비</div><div class="value">${formatNumber(logistics)}원</div></div>
-                <div class="ins-kpi-card"><div class="label">순마진</div><div class="value" style="color:${marginColor};font-size:24px;">${formatNumber(actualMargin)}원</div><div class="sub" style="font-size:14px;font-weight:700;color:${marginColor};">${actualMarginRate}%</div></div>
+                <div class="ins-kpi-card"><div class="label">순마진</div><div class="value" style="color:${marginColor};font-size:24px;">${formatNumber(actualMargin)}원</div></div>
+                <div class="ins-kpi-card" style="border:2px solid ${marginColor};"><div class="label">마진율</div><div class="value" style="color:${marginColor};font-size:28px;font-weight:900;">${actualMarginRate}%</div></div>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">
-                <div style="background:var(--bg-primary);border:1px solid var(--border);border-radius:4px;padding:12px;text-align:center;">
-                    <div style="font-size:11px;color:var(--text-muted);">월 100개 판매</div>
-                    <div style="font-size:18px;font-weight:800;color:var(--text-primary);">${m100>=10000?formatNumber(Math.round(m100/10000))+'만':formatNumber(m100)}원</div>
-                </div>
-                <div style="background:var(--bg-primary);border:1px solid var(--border);border-radius:4px;padding:12px;text-align:center;">
-                    <div style="font-size:11px;color:var(--text-muted);">월 500개 판매</div>
-                    <div style="font-size:18px;font-weight:800;color:var(--text-primary);">${m500>=10000?formatNumber(Math.round(m500/10000))+'만':formatNumber(m500)}원</div>
+            <!-- 판매 시나리오 -->
+            <div class="profit-result-grid" style="margin-top:12px;">
+                ${[{l:'월 100개',u:100},{l:'월 300개',u:300},{l:'월 500개',u:500},{l:'월 1,000개',u:1000}].map(s => {
+                    const p = actualMargin * s.u;
+                    return `<div class="profit-result-card"><div class="title">${s.l}</div><div class="amount" style="color:${p>0?'var(--success)':'var(--danger)'}">${p>=10000?formatNumber(Math.round(p/10000))+'만':formatNumber(Math.round(p))}원</div></div>`;
+                }).join('')}
+            </div>
+
+            <!-- 원가 구조 차트 -->
+            <div style="display:flex;gap:24px;align-items:center;margin-top:16px;">
+                <div style="width:180px;height:180px;position:relative;"><canvas id="chartCostPie2"></canvas></div>
+                <div style="flex:1;font-size:13px;color:var(--text-secondary);line-height:2.2;">
+                    <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(42,47,64,0.3);padding:4px 0;"><span>판매가</span><strong style="color:var(--text-primary)">${formatNumber(sellPrice)}원</strong></div>
+                    <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(42,47,64,0.3);padding:4px 0;"><span style="color:#ff6b2b;">원가</span><strong>${formatNumber(unitCost)}원 (${(unitCost/sellPrice*100).toFixed(1)}%)</strong></div>
+                    <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(42,47,64,0.3);padding:4px 0;"><span style="color:#b388ff;">수수료</span><strong>${formatNumber(fee)}원 (${(feeRate*100).toFixed(1)}%)</strong></div>
+                    <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(42,47,64,0.3);padding:4px 0;"><span style="color:#ffab00;">광고비</span><strong>${formatNumber(adCost)}원 (${(adRate*100).toFixed(0)}%)</strong></div>
+                    <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(42,47,64,0.3);padding:4px 0;"><span style="color:#00e5ff;">물류비</span><strong>${formatNumber(logistics)}원</strong></div>
+                    <div style="display:flex;justify-content:space-between;padding:4px 0;font-weight:700;"><span style="color:${marginColor};">순이익</span><strong style="color:${marginColor};">${formatNumber(actualMargin)}원 (${actualMarginRate}%)</strong></div>
                 </div>
             </div>
+
+            ${actualMargin > 0 ? `<div class="ins-verdict good" style="margin-top:12px;">손익분기점: 월 고정비 50만원 기준 <strong>월 ${formatNumber(Math.ceil(500000/actualMargin))}개</strong> 판매 시 손익분기</div>` : `<div class="ins-verdict bad" style="margin-top:12px;">현재 원가 구조로는 적자 — 원가 절감 또는 판매가 인상 필요</div>`}
         </div>`;
+
+        // 파이차트 그리기
+        setTimeout(() => {
+            _destroyChart('costPie2');
+            const pieCtx = document.getElementById('chartCostPie2');
+            if (pieCtx) {
+                _insightCharts.costPie2 = new Chart(pieCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['원가','수수료','광고비','물류비','이익'],
+                        datasets: [{ data: [unitCost, fee, adCost, logistics, Math.max(actualMargin,0)], backgroundColor: ['#ff6b2b','#b388ff','#ffab00','#00e5ff','#00e676'], borderWidth: 0 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.label + ': ' + formatNumber(Math.round(c.raw)) + '원' } } } }
+                });
+            }
+        }, 100);
     }
 
     // ── 2. 시뮬레이션 테이블 ──
@@ -4944,6 +4998,16 @@ function formatNumber(n) {
     if (!n) return '0';
     return n.toLocaleString('ko-KR');
 }
+function formatRevenue(won) {
+    if (!won) return '0원';
+    if (won >= 100000000) {
+        const eok = Math.floor(won / 100000000);
+        const man = Math.round((won % 100000000) / 10000);
+        return man > 0 ? eok + '억 ' + formatNumber(man) + '만원' : eok + '억원';
+    }
+    if (won >= 10000) return formatNumber(Math.round(won / 10000)) + '만원';
+    return formatNumber(won) + '원';
+}
 
 function formatDate(str) {
     if (!str) return '-';
@@ -5275,7 +5339,7 @@ async function _loadAutoScanResultsByDate(date) {
                 keyword: s.keyword,
                 scan_id: s.id,
                 opportunity_score: s.opportunity_score || 0,
-                source_products: [],
+                source_products: s.source_products || [],
             }));
             _renderAutoScanResults(results);
             const dateEl = document.getElementById('autoScanResultDate');
@@ -5379,7 +5443,7 @@ async function _loadAutoScanResultsFromDB() {
                 keyword: s.keyword,
                 scan_id: s.id,
                 opportunity_score: s.opportunity_score || 0,
-                source_products: [],
+                source_products: s.source_products || [],
             }));
             _renderAutoScanResults(results);
         }

@@ -756,15 +756,18 @@ JSON 배열로만 응답: [{{"name":"원래상품명","keyword":"추출결과"}}
                     scan_id = fdb.create_scan(kw, 'goldbox', 'scanning')
                     _run_scan_api(scan_id, kw)
 
-                    # 기회점수 가져오기
+                    # 기회점수 가져오기 + 원본 상품명 저장
                     scan_data = fdb.get_scan(scan_id)
                     score = scan_data.get('opportunity_score', 0) if scan_data else 0
+                    sources = keyword_sources.get(kw, [])
+                    if sources:
+                        fdb.update_scan(scan_id, source_products=sources)
 
                     _goldbox_scan_state['results'].append({
                         'keyword': kw,
                         'scan_id': scan_id,
                         'opportunity_score': score,
-                        'source_products': keyword_sources.get(kw, []),
+                        'source_products': sources,
                     })
                     print(f'[GOLDBOX-SCAN] {i+1}/{len(new_keywords)} "{kw}" → 기회점수 {score}')
 
