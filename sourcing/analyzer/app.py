@@ -2528,10 +2528,9 @@ def publish_rfq(rfq_id):
         'shipping': rfq.get('shipping_terms', 'FOB'),
     }
 
-    if api_key:
-        try:
-            import requests as _req
-            prompt = f"""Write a concise RFQ email in English for Alibaba. Be polite but get to the point.
+    try:
+        from analyzer.reviews import _call_gemini
+        prompt = f"""Write a concise RFQ email in English for Alibaba. Be polite but get to the point.
 
 Product: {product_name_kr}
 Specs: {specs_text}
@@ -2545,20 +2544,14 @@ Sign as: Becore Lab Co., Ltd. (do NOT include email or URLs in the message - Ali
 JSON only:
 {{"product_name_en": "...", "subject": "RFQ: ...", "message": "Dear Supplier,\\n\\n...\\n\\nBest regards,\\nBecore Lab Co., Ltd.\\nkychung@becorelab.kr", "specs_en": "..."}}"""
 
-            resp = _req.post(
-                'https://api.anthropic.com/v1/messages',
-                headers={'x-api-key': api_key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json'},
-                json={'model': 'claude-haiku-4-5-20251001', 'max_tokens': 2000, 'messages': [{'role': 'user', 'content': prompt}]},
-                timeout=30
-            )
-            if resp.ok:
-                ai_text = resp.json()['content'][0]['text']
-                import re
-                json_match = re.search(r'\{[\s\S]*\}', ai_text)
-                if json_match:
-                    english_data = json.loads(json_match.group())
-        except Exception as e:
-            print(f'[RFQ Publish] 번역 실패: {e}')
+        ai_text = _call_gemini(prompt, max_tokens=2000)
+        if ai_text:
+            import re
+            json_match = re.search(r'\{[\s\S]*\}', ai_text)
+            if json_match:
+                english_data = json.loads(json_match.group())
+    except Exception as e:
+        print(f'[RFQ Publish] 번역 실패: {e}')
 
     # DB 업데이트: 영문명 저장 + 상태 변경
     fdb.update_rfq(rfq_id,
