@@ -288,6 +288,44 @@ tr:hover td{background:#1a1d2788;}
 .record-stat{background:#0d1117;border-radius:6px;padding:8px 14px;border:1px solid #1e293b;flex:1;min-width:120px;}
 .record-stat .rv{font-size:1.05rem;font-weight:700;color:#10b981;}
 .record-stat .rl{font-size:.68rem;color:#475569;margin-top:2px;}
+
+/* ═══ MONTHLY RECORDS v2 — NEON FUNKY ═══ */
+.yr-tabs{display:flex;gap:8px;margin-bottom:20px;}
+.yr-tab{background:#1a1d2788;border:1px solid #2a2f4066;color:#8892b0;padding:10px 24px;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .25s;font-family:inherit;letter-spacing:.3px;}
+.yr-tab:hover{border-color:#a855f766;color:#e0aaff;text-shadow:0 0 8px #a855f744;}
+.yr-tab.active{background:linear-gradient(135deg,#a855f7,#ec4899);border-color:transparent;color:#fff;box-shadow:0 0 20px #a855f733,0 0 40px #ec489911;text-shadow:0 0 10px #ffffff88;}
+.yr-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.yr-kpi{background:linear-gradient(145deg,#161b27,#1a1f30);border:1px solid #2a2f4066;border-radius:14px;padding:18px 20px;text-align:center;position:relative;overflow:hidden;}
+.yr-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#a855f7,#06b6d4,#10b981);opacity:.6;}
+.yr-kpi .kv{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#a855f7,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none;}
+.yr-kpi .kl{font-size:.72rem;color:#64748b;margin-top:5px;text-transform:uppercase;letter-spacing:.5px;}
+.yr-kpi .ksub{font-size:.72rem;color:#8892b0;margin-top:3px;}
+.yr-chart{background:linear-gradient(145deg,#161b27,#1a1f30);border:1px solid #2a2f4066;border-radius:16px;padding:22px;margin-bottom:22px;position:relative;overflow:hidden;}
+.yr-chart::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#06b6d4,#a855f7,#ec4899);opacity:.5;}
+.yr-chart-title{font-size:.85rem;font-weight:700;color:#e2e8f0;margin-bottom:16px;display:flex;align-items:center;gap:8px;letter-spacing:.3px;}
+.yr-chart-title .dot{width:10px;height:10px;border-radius:50%;background:#06b6d4;box-shadow:0 0 8px #06b6d488;}
+.yr-bars{display:flex;align-items:flex-end;gap:8px;height:200px;padding:0 4px;}
+.yr-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.yr-bar{width:100%;border-radius:8px 8px 2px 2px;background:linear-gradient(180deg,#a855f7,#6d28d9);min-height:3px;transition:all .4s cubic-bezier(.4,0,.2,1);position:relative;cursor:pointer;box-shadow:0 0 10px #a855f722;}
+.yr-bar:hover{background:linear-gradient(180deg,#c084fc,#a855f7);box-shadow:0 0 20px #a855f744,0 0 40px #a855f722;transform:scaleY(1.03);}
+.yr-bar-tip{display:none;position:absolute;top:-36px;left:50%;transform:translateX(-50%);background:#0d1117ee;border:1px solid #a855f766;border-radius:8px;padding:5px 10px;font-size:.72rem;color:#e0aaff;white-space:nowrap;z-index:10;box-shadow:0 4px 12px #00000088;}
+.yr-bar:hover .yr-bar-tip{display:block;}
+.yr-bar-label{font-size:.74rem;color:#64748b;font-weight:600;}
+.mo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+.mo-card{background:linear-gradient(145deg,#161b27,#1a1f30);border:1px solid #2a2f4066;border-radius:14px;padding:18px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.mo-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#06b6d4,#a855f7);opacity:0;transition:opacity .25s;}
+.mo-card:hover{border-color:#a855f755;transform:translateY(-3px);box-shadow:0 8px 30px rgba(168,85,247,0.12),0 0 15px rgba(168,85,247,0.05);}
+.mo-card:hover::after{opacity:.8;}
+.mo-card.empty{opacity:.2;cursor:default;pointer-events:none;}
+.mo-card-month{font-size:1.8rem;font-weight:900;color:#2a2f40;position:absolute;top:6px;right:14px;letter-spacing:-1px;}
+.mo-card-sett{font-size:1.15rem;font-weight:800;color:#f0f0f0;margin-top:2px;text-shadow:0 0 20px #a855f711;}
+.mo-card-change{font-size:.76rem;font-weight:700;margin-top:7px;}
+.mo-card-change.up{color:#00ffaa;text-shadow:0 0 8px #00ffaa33;}
+.mo-card-change.down{color:#ff6b8a;text-shadow:0 0 8px #ff6b8a33;}
+.mo-card-change.flat{color:#64748b;}
+.mo-card-sub{font-size:.72rem;color:#8892b0;margin-top:9px;display:flex;gap:12px;}
+.mo-card-sub span{display:flex;align-items:center;gap:3px;}
+.mo-card-spark{position:absolute;bottom:0;left:0;right:0;height:30px;opacity:.15;}
 .cloud-save-btn{background:#0284c7;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:all .15s;}
 .cloud-save-btn:hover{background:#0369a1;}
 .cloud-save-btn:disabled{opacity:.5;cursor:not-allowed;}
@@ -3440,108 +3478,177 @@ async function saveToCloud() {
 // ═══════════════════════════════════════════════════════
 // FIRESTORE: LOAD MONTHLY RECORDS
 // ═══════════════════════════════════════════════════════
+let _recordsCache = null;
+let _recordsYear = null;
+
 async function loadMonthlyRecords() {
   const wrap = document.getElementById('recordsList');
-  if (!currentUser) {
-    wrap.innerHTML = '<div class="no-records">🔑 Google 로그인하면 저장된 월별 매출 기록을 볼 수 있어요</div>';
-    return;
-  }
-  if (!firebaseReady) {
-    wrap.innerHTML = '<div class="no-records">Firebase 설정이 필요해요</div>';
-    return;
-  }
+  if (!currentUser) { wrap.innerHTML = '<div class="no-records">Google 로그인하면 저장된 월별 매출 기록을 볼 수 있어요</div>'; return; }
+  if (!firebaseReady) { wrap.innerHTML = '<div class="no-records">Firebase 설정이 필요해요</div>'; return; }
 
   wrap.innerHTML = '<div class="no-records">불러오는 중...</div>';
 
   try {
     const snapshot = await db.collection('settlements').doc(currentUser.uid)
-      .collection('months').orderBy('savedAt', 'desc').get();
+      .collection('months').orderBy(firebase.firestore.FieldPath.documentId()).get();
 
-    if (snapshot.empty) {
-      wrap.innerHTML = '<div class="no-records">저장된 매출 기록이 없어요.<br>매출 입력 탭에서 데이터 업로드 후 💾 클라우드 저장을 눌러보세요!</div>';
-      return;
-    }
+    if (snapshot.empty) { wrap.innerHTML = '<div class="no-records">저장된 매출 기록이 없어요.</div>'; return; }
 
-    let html = '';
+    // 연도별 그룹핑
+    _recordsCache = {};
     snapshot.forEach(doc => {
-      const data = doc.data();
-      const monthId = doc.id;
-      const savedAt = data.savedAt ? data.savedAt.toDate().toLocaleString('ko-KR') : '';
-      const ts = data.totalSummary || {};
-      const channelNames = Object.keys(data.channels || {});
-      const profitColor = (ts.profit || 0) >= 0 ? '#10b981' : '#ef4444';
-      const profitRate = ts.profitRate ? (ts.profitRate * 100).toFixed(1) + '%' : '-';
-
-      html += `<div class="record-card" id="record-${monthId}">
-        <div class="record-header" onclick="toggleRecord('${monthId}')">
-          <div class="record-month">${monthId}</div>
-          <span style="font-size:.72rem;color:#64748b;">${channelNames.length}개 채널</span>
-          <span style="font-size:.78rem;color:#10b981;font-weight:600;">₩${fmt(ts.settlement || 0)}</span>
-          <span style="font-size:.78rem;color:${profitColor};font-weight:600;">이익 ₩${fmt(ts.profit || 0)} (${profitRate})</span>
-          <div class="record-date">${savedAt}</div>
-          <button class="record-delete" onclick="event.stopPropagation();deleteRecord('${monthId}')">삭제</button>
-        </div>
-        <div class="record-body" id="recordBody-${monthId}">
-          <div class="record-summary">
-            <div class="record-stat"><div class="rv">₩${fmt(ts.settlement || 0)}</div><div class="rl">총 매출금액</div></div>
-            <div class="record-stat"><div class="rv" style="color:#0284c7;">${fmt(ts.qty || 0)}개</div><div class="rl">총 판매수량</div></div>
-            <div class="record-stat"><div class="rv" style="color:${profitColor};">₩${fmt(ts.profit || 0)}</div><div class="rl">총 이익</div></div>
-            <div class="record-stat"><div class="rv" style="color:${profitColor};">${profitRate}</div><div class="rl">이익률</div></div>
-          </div>
-          ${(() => {
-            const chStats = channelNames.map(ch => {
-              const s = data.channels[ch].summary || {};
-              return { name: ch, settlement: s.settlement || 0, profit: s.profit || 0, profitRate: s.profitRate || 0 };
-            }).sort((a, b) => b.settlement - a.settlement);
-            const maxRev = chStats.length > 0 ? chStats[0].settlement : 1;
-            return '<div class="dash-panel" style="margin:12px 0 16px 0;padding:14px 16px;">' +
-              '<div class="dash-panel-title">채널별 매출 비중</div>' +
-              chStats.map(c => {
-                const barW = maxRev > 0 ? Math.max(2, (c.settlement / maxRev) * 100) : 2;
-                const profitCls = c.profit >= 0 ? '#10b981' : '#ef4444';
-                const rate = (c.profitRate * 100).toFixed(1) + '%';
-                return '<div class="dash-bar-row">' +
-                  '<div class="dash-bar-name">' + c.name + '</div>' +
-                  '<div class="dash-bar-track"><div class="dash-bar-fill" style="width:' + barW + '%"></div></div>' +
-                  '<div class="dash-bar-val">₩' + fmt(c.settlement) + ' <span style="color:' + profitCls + ';font-size:.7rem;">(' + rate + ')</span></div>' +
-                '</div>';
-              }).join('') +
-            '</div>';
-          })()}
-          <div class="tbl-wrap"><table>
-            <thead><tr><th>채널</th><th class="num">수량</th><th class="num">매출금액</th><th class="num">원가</th><th class="num">이익</th><th class="num">이익률</th></tr></thead>
-            <tbody>
-              ${channelNames.map(ch => {
-                const s = data.channels[ch].summary || {};
-                const pc = (s.profit || 0) >= 0 ? 'profit-pos' : 'profit-neg';
-                const rate = s.profitRate ? (s.profitRate * 100).toFixed(1) + '%' : '-';
-                return `<tr>
-                  <td>${ch}</td>
-                  <td class="num">${fmt(s.qty || 0)}</td>
-                  <td class="num">₩${fmt(s.settlement || 0)}</td>
-                  <td class="num">₩${fmt(s.cost || 0)}</td>
-                  <td class="num ${pc}">₩${fmt(s.profit || 0)}</td>
-                  <td class="num ${pc}">${rate}</td>
-                </tr>`;
-              }).join('')}
-              <tr style="background:#1a1d27;font-weight:700;">
-                <td>합계</td>
-                <td class="num">${fmt(ts.qty || 0)}</td>
-                <td class="num">₩${fmt(ts.settlement || 0)}</td>
-                <td class="num">₩${fmt(ts.cost || 0)}</td>
-                <td class="num" style="color:${profitColor};">₩${fmt(ts.profit || 0)}</td>
-                <td class="num" style="color:${profitColor};">${profitRate}</td>
-              </tr>
-            </tbody>
-          </table></div>
-        </div>
-      </div>`;
+      const yr = doc.id.substring(0, 4);
+      if (!_recordsCache[yr]) _recordsCache[yr] = {};
+      _recordsCache[yr][doc.id] = doc.data();
     });
 
-    wrap.innerHTML = html;
+    const years = Object.keys(_recordsCache).sort().reverse();
+    if (!_recordsYear || !_recordsCache[_recordsYear]) _recordsYear = years[0];
+
+    renderRecordsView(wrap, years);
   } catch (err) {
     wrap.innerHTML = `<div class="no-records">데이터 로드 실패: ${err.message}</div>`;
   }
+}
+
+function switchRecordsYear(yr) {
+  _recordsYear = yr;
+  renderRecordsView(document.getElementById('recordsList'), Object.keys(_recordsCache).sort().reverse());
+}
+
+function renderRecordsView(wrap, years) {
+  const yr = _recordsYear;
+  const months = _recordsCache[yr] || {};
+
+  // 연도 탭
+  let html = '<div class="yr-tabs">';
+  years.forEach(y => { html += `<button class="yr-tab ${y===yr?'active':''}" onclick="switchRecordsYear('${y}')">${y}년</button>`; });
+  html += '</div>';
+
+  // 연간 KPI
+  let yrSett=0, yrQty=0, yrProfit=0, yrCost=0, monthCount=0;
+  const monthArr = [];
+  for (let m = 1; m <= 12; m++) {
+    const key = `${yr}-${String(m).padStart(2,'0')}`;
+    const d = months[key];
+    const ts = d ? (d.totalSummary || {}) : null;
+    const sett = ts ? (ts.settlement || 0) : 0;
+    const profit = ts ? (ts.profit || 0) : 0;
+    const qty = ts ? (ts.qty || 0) : 0;
+    const cost = ts ? (ts.cost || 0) : 0;
+    const chCount = d ? Object.keys(d.channels || {}).length : 0;
+    monthArr.push({ m, key, sett, profit, qty, cost, chCount, hasData: !!d });
+    if (d) { yrSett += sett; yrQty += qty; yrProfit += profit; yrCost += cost; monthCount++; }
+  }
+
+  const avgMonth = monthCount > 0 ? yrSett / monthCount : 0;
+  const yrProfitRate = yrSett > 0 ? (yrProfit / yrSett * 100).toFixed(1) : '0';
+  const profitColor = yrProfit >= 0 ? '#10b981' : '#ef4444';
+
+  html += `<div class="yr-summary">
+    <div class="yr-kpi"><div class="kv">${yrSett >= 1e8 ? (yrSett/1e8).toFixed(1)+'억' : fmt(yrSett)}원</div><div class="kl">연간 총 매출</div><div class="ksub">${monthCount}개월 합산</div></div>
+    <div class="yr-kpi"><div class="kv" style="background:linear-gradient(135deg,${profitColor},${profitColor}88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${yrProfit >= 1e8 ? (yrProfit/1e8).toFixed(1)+'억' : fmt(yrProfit)}원</div><div class="kl">연간 이익</div><div class="ksub">이익률 ${yrProfitRate}%</div></div>
+    <div class="yr-kpi"><div class="kv">${avgMonth >= 1e8 ? (avgMonth/1e8).toFixed(1)+'억' : fmt(Math.round(avgMonth))}원</div><div class="kl">월평균 매출</div><div class="ksub">${fmt(Math.round(yrQty / Math.max(monthCount,1)))}개/월</div></div>
+    <div class="yr-kpi"><div class="kv">${fmt(yrQty)}개</div><div class="kl">연간 판매수량</div><div class="ksub">${monthCount}개월 합산</div></div>
+  </div>`;
+
+  // 바 차트
+  const maxSett = Math.max(...monthArr.map(m => m.sett), 1);
+  html += `<div class="yr-chart">
+    <div class="yr-chart-title"><span class="dot"></span>${yr}년 월별 매출 추이</div>
+    <div class="yr-bars">`;
+  monthArr.forEach(m => {
+    const h = m.sett > 0 ? Math.max(4, (m.sett / maxSett) * 160) : 2;
+    const label = m.sett >= 1e8 ? (m.sett/1e8).toFixed(1)+'억' : m.sett >= 1e4 ? Math.round(m.sett/1e4)+'만' : fmt(m.sett);
+    html += `<div class="yr-bar-col">
+      <div class="yr-bar" style="height:${h}px;" onclick="${m.hasData ? "toggleRecord('"+m.key+"')" : ''}">
+        <div class="yr-bar-tip">${m.m}월: ${fmt(m.sett)}원</div>
+      </div>
+      <div class="yr-bar-label">${m.m}월</div>
+    </div>`;
+  });
+  html += '</div></div>';
+
+  // 월별 카드 그리드
+  html += '<div class="mo-grid">';
+  monthArr.forEach((m, i) => {
+    if (!m.hasData) {
+      html += `<div class="mo-card empty"><div class="mo-card-month">${m.m}</div><div class="mo-card-sett" style="color:#334155;">-</div></div>`;
+      return;
+    }
+    // 전월 대비
+    const prev = i > 0 ? monthArr[i-1] : null;
+    let changeHtml = '';
+    if (prev && prev.sett > 0) {
+      const pct = ((m.sett - prev.sett) / prev.sett * 100).toFixed(1);
+      const cls = pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat';
+      const arrow = pct > 0 ? '&#9650;' : pct < 0 ? '&#9660;' : '&#9644;';
+      changeHtml = `<div class="mo-card-change ${cls}">${arrow} ${Math.abs(pct)}% 전월 대비</div>`;
+    } else {
+      changeHtml = `<div class="mo-card-change flat">-</div>`;
+    }
+
+    const settStr = m.sett >= 1e8 ? (m.sett/1e8).toFixed(1)+'억원' : m.sett >= 1e4 ? Math.round(m.sett/1e4).toLocaleString()+'만원' : fmt(m.sett)+'원';
+    const profitStr = m.profit >= 0 ? '+'+fmt(m.profit) : fmt(m.profit);
+    const pColor = m.profit >= 0 ? '#10b981' : '#ef4444';
+
+    html += `<div class="mo-card" onclick="toggleRecord('${m.key}')">
+      <div class="mo-card-month">${m.m}</div>
+      <div style="font-size:.7rem;color:#64748b;margin-bottom:4px;">${yr}년 ${m.m}월</div>
+      <div class="mo-card-sett">${settStr}</div>
+      ${changeHtml}
+      <div class="mo-card-sub">
+        <span style="color:${pColor};">이익 ${profitStr}원</span>
+        <span>${m.chCount}개 채널</span>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+
+  // 상세 카드 (접힌 상태, 클릭시 열림)
+  Object.entries(months).sort(([a],[b]) => a.localeCompare(b)).forEach(([monthId, data]) => {
+    const ts = data.totalSummary || {};
+    const channelNames = Object.keys(data.channels || {});
+    const profitColor = (ts.profit || 0) >= 0 ? '#10b981' : '#ef4444';
+    const profitRate = ts.profitRate ? (ts.profitRate * 100).toFixed(1) + '%' : '-';
+
+    html += `<div class="record-card" id="record-${monthId}" style="margin-top:12px;">
+      <div class="record-header" onclick="toggleRecord('${monthId}')">
+        <div class="record-month">${monthId}</div>
+        <span style="font-size:.72rem;color:#64748b;">${channelNames.length}개 채널</span>
+        <span style="font-size:.78rem;color:#10b981;font-weight:600;">${fmt(ts.settlement||0)}원</span>
+        <span style="font-size:.78rem;color:${profitColor};font-weight:600;">이익 ${fmt(ts.profit||0)}원 (${profitRate})</span>
+        <div class="record-date"></div>
+        <button class="record-delete" onclick="event.stopPropagation();deleteRecord('${monthId}')">삭제</button>
+      </div>
+      <div class="record-body" id="recordBody-${monthId}">
+        <div class="record-summary">
+          <div class="record-stat"><div class="rv">${fmt(ts.settlement||0)}원</div><div class="rl">총 매출금액</div></div>
+          <div class="record-stat"><div class="rv" style="color:#0284c7;">${fmt(ts.qty||0)}개</div><div class="rl">총 판매수량</div></div>
+          <div class="record-stat"><div class="rv" style="color:${profitColor};">${fmt(ts.profit||0)}원</div><div class="rl">총 이익</div></div>
+          <div class="record-stat"><div class="rv" style="color:${profitColor};">${profitRate}</div><div class="rl">이익률</div></div>
+        </div>
+        ${(() => {
+          const chStats = channelNames.map(ch => { const s = data.channels[ch].summary||{}; return {name:ch,settlement:s.settlement||0,profit:s.profit||0,profitRate:s.profitRate||0}; }).sort((a,b)=>b.settlement-a.settlement);
+          const maxRev = chStats.length>0 ? chStats[0].settlement : 1;
+          return '<div class="dash-panel" style="margin:12px 0 16px 0;padding:14px 16px;"><div class="dash-panel-title">채널별 매출 비중</div>'+
+            chStats.map(c => { const barW=maxRev>0?Math.max(2,(c.settlement/maxRev)*100):2; const pc=c.profit>=0?'#10b981':'#ef4444'; return '<div class="dash-bar-row"><div class="dash-bar-name">'+c.name+'</div><div class="dash-bar-track"><div class="dash-bar-fill" style="width:'+barW+'%"></div></div><div class="dash-bar-val">'+fmt(c.settlement)+'원 <span style="color:'+pc+';font-size:.7rem;">('+((c.profitRate*100).toFixed(1))+'%)</span></div></div>'; }).join('')+'</div>';
+        })()}
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>채널</th><th class="num">수량</th><th class="num">매출금액</th><th class="num">원가</th><th class="num">이익</th><th class="num">이익률</th></tr></thead>
+          <tbody>
+            ${channelNames.map(ch => { const s=data.channels[ch].summary||{}; const pc=(s.profit||0)>=0?'profit-pos':'profit-neg'; const rate=s.profitRate?(s.profitRate*100).toFixed(1)+'%':'-'; return `<tr><td>${ch}</td><td class="num">${fmt(s.qty||0)}</td><td class="num">${fmt(s.settlement||0)}원</td><td class="num">${fmt(s.cost||0)}원</td><td class="num ${pc}">${fmt(s.profit||0)}원</td><td class="num ${pc}">${rate}</td></tr>`; }).join('')}
+            <tr style="background:#1a1d27;font-weight:700;">
+              <td>합계</td><td class="num">${fmt(ts.qty||0)}</td><td class="num">${fmt(ts.settlement||0)}원</td><td class="num">${fmt(ts.cost||0)}원</td>
+              <td class="num" style="color:${profitColor};">${fmt(ts.profit||0)}원</td><td class="num" style="color:${profitColor};">${profitRate}</td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>`;
+  });
+
+  wrap.innerHTML = html;
 }
 
 function toggleRecord(monthId) {

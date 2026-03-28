@@ -677,7 +677,7 @@ def _run_goldbox_auto_scan(date: str, delay: int):
                 if not dates:
                     _goldbox_scan_state.update({'phase': 'error', 'current': '골드박스 데이터 없음'})
                     return
-                products = fdb.get_goldbox_by_date(dates[-1])
+                products = fdb.get_goldbox_by_date(dates[0].get('crawled_date', dates[0]) if isinstance(dates[0], dict) else dates[0])
 
             names = [p.get('product_name', '') for p in products if p.get('product_name')]
             if not names:
