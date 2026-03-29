@@ -646,15 +646,48 @@ def api_goldbox_auto_scan_status():
     })
 
 
+def _calc_entry_score(scan: dict) -> float:
+    """골드박스 진입점수 — 기회점수에 실전 진입 장벽 보정 적용"""
+    opp = scan.get('opportunity_score', 0) or 0
+    npr = scan.get('new_product_rate', 50) or 0    # 신규진입률 (%)
+    rc = scan.get('revenue_concentration', 50) or 0  # 매출집중도 (%)
+
+    # 1) 신규진입률 보정 — 낮으면 기존 브랜드 장악, 진입 어려움
+    if npr >= 25:
+        npr_mod = 1.0
+    elif npr >= 15:
+        npr_mod = 0.85
+    elif npr >= 10:
+        npr_mod = 0.65
+    elif npr >= 5:
+        npr_mod = 0.35
+    else:
+        npr_mod = 0.15   # 5% 미만: 사실상 진입 불가
+
+    # 2) 매출집중도 보정 — 상위 셀러 독점이면 진입 어려움
+    if rc <= 35:
+        rc_mod = 1.0
+    elif rc <= 50:
+        rc_mod = 0.85
+    elif rc <= 65:
+        rc_mod = 0.65
+    else:
+        rc_mod = 0.45    # 65% 초과: 과점 시장
+
+    return round(opp * npr_mod * rc_mod, 1)
+
+
 @app.route('/api/goldbox/auto-scan/results')
 def api_goldbox_auto_scan_results():
-    """골드박스 스캔 결과 (DB 기반 — 날짜 필터 지원)"""
+    """골드박스 스캔 결과 (DB 기반 — 날짜 필터 지원, 진입점수 포함)"""
     date_filter = request.args.get('date', '')
     scans = fdb.list_scans(limit=500)
     gb_scans = [s for s in scans if s.get('scan_type') == 'goldbox']
     if date_filter:
         gb_scans = [s for s in gb_scans if s.get('scanned_at', '').startswith(date_filter)]
-    gb_scans.sort(key=lambda x: x.get('opportunity_score') or 0, reverse=True)
+    for s in gb_scans:
+        s['entry_score'] = _calc_entry_score(s)
+    gb_scans.sort(key=lambda x: x.get('entry_score') or 0, reverse=True)
     return jsonify({
         'success': True,
         'count': len(gb_scans),
