@@ -29,7 +29,11 @@
       "Bash(powershell.exe -Command \"Get-ScheduledTask | Where-Object {$_.TaskName -like '*두리*'}\")",
       "Bash(powershell.exe -Command \"Get-ScheduledTask | Where-Object { $_.TaskName -like '*doori*' -or $_.TaskName -like '*claude*' } | Select-Object TaskName,State\")",
       "Bash(powershell.exe -Command \"Get-ScheduledTask | Select-Object TaskName,State | Out-String\")",
-      "Bash(powershell.exe -Command \"\n\\\\$action = New-ScheduledTaskAction -Execute 'cmd.exe' -Argument '/c C:\\\\Users\\\\info\\\\ClaudeAITeam\\\\start-doori-channel.bat'\n\\\\$trigger = New-ScheduledTaskTrigger -AtLogOn\n\\\\$settings = New-ScheduledTaskSettingsSet -RestartCount 99 -RestartInterval \\(New-TimeSpan -Minutes 1\\) -ExecutionTimeLimit \\(New-TimeSpan -Hours 0\\)\nRegister-ScheduledTask -TaskName 'BecorelabDooriChannel' -Action \\\\$action -Trigger \\\\$trigger -Settings \\\\$settings -RunLevel Highest -Force\n\")"
+      "Bash(powershell.exe -Command \"\n\\\\$action = New-ScheduledTaskAction -Execute 'cmd.exe' -Argument '/c C:\\\\Users\\\\info\\\\ClaudeAITeam\\\\start-doori-channel.bat'\n\\\\$trigger = New-ScheduledTaskTrigger -AtLogOn\n\\\\$settings = New-ScheduledTaskSettingsSet -RestartCount 99 -RestartInterval \\(New-TimeSpan -Minutes 1\\) -ExecutionTimeLimit \\(New-TimeSpan -Hours 0\\)\nRegister-ScheduledTask -TaskName 'BecorelabDooriChannel' -Action \\\\$action -Trigger \\\\$trigger -Settings \\\\$settings -RunLevel Highest -Force\n\")",
+      "Bash(node -e \"const d = new Date\\(1774986015878\\); console.log\\(''토큰 만료:'', d.toISOString\\(\\)\\)\")",
+      "Bash(claude --version)",
+      "Bash(npx @anthropic-ai/claude-code --version)",
+      "Bash(claude auth:*)"
     ]
   }
 }
