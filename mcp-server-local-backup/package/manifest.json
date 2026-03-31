@@ -1,0 +1,33 @@
+{
+  "manifest_version": "0.3",
+  "name": "becorelab-mcp",
+  "display_name": "비코어랩 MCP 서버",
+  "version": "1.0.0",
+  "description": "비코어랩 물류/소싱콕 API 연동 — 매출, 재고, 발주, GO판정, 골드박스 데이터 조회",
+  "author": {
+    "name": "비코어랩"
+  },
+  "server": {
+    "type": "python",
+    "entry_point": "server/server.py"
+  },
+  "mcp_config": {
+    "command": "C:\\Users\\info\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+    "args": ["${__dirname}/server/server.py"]
+  },
+  "compatibility": {
+    "platforms": ["win32"]
+  },
+  "tools": [
+    {"name": "daily_report", "description": "일매출 보고서"},
+    {"name": "inventory_report", "description": "재고 보고서"},
+    {"name": "order_analysis", "description": "발주 분석"},
+    {"name": "sales_monthly", "description": "월간 매출"},
+    {"name": "go_items", "description": "GO 판정 아이템"},
+    {"name": "scan_keyword", "description": "키워드 스캔"},
+    {"name": "scan_detail", "description": "스캔 상세"},
+    {"name": "goldbox_products", "description": "골드박스 상품"},
+    {"name": "goldbox_autoscan_results", "description": "골드박스 스캔 결과"},
+    {"name": "settlements", "description": "월별 정산"}
+  ]
+}
