@@ -907,7 +907,7 @@ async function fetchEzAdmin(){
   stepEl.textContent='브라우저 실행 중...';
   const LABELS={starting:'브라우저 실행 중...',logging_in:'이지어드민 로그인 중...',captcha_wait:'보안코드를 입력해주세요!',scraping_inventory:'재고 데이터 수집 중...',scraping_outbound:'출고+배송 데이터 수집 중...',scraping_orders:'주문 데이터 수집 중...',done:'완료!'};
   try{
-    const res=await fetch(`${API_BASE}/fetch-data`,{method:'POST'});
+    const res=await fetch(`${API_BASE}/fetch-data`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
     const{task_id}=await res.json();
     for(let i=0;i<180;i++){
       await new Promise(r=>setTimeout(r,2000));
@@ -945,7 +945,7 @@ async function fetchEzAdmin(){
         break;
       }
     }
-  }catch(e){showToast(`❌ 서버 연결 실패 — localhost:8090에서 실행 중인지 확인하세요`);}
+  }catch(e){showToast(`❌ 서버 연결 실패 — ${e.message}`);console.error('fetch-data 오류:',e);}
   finally{
     btn.disabled=false;
     btn.textContent='🔄 이지어드민 데이터 가져오기';
