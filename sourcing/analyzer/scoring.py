@@ -52,6 +52,11 @@ class OpportunityScore:
     revenue_equality: float = 0
     total_products: int = 0
 
+    # 경쟁도
+    avg_review_count: int = 0           # 상위10 평균 리뷰 수
+    competition_penalty: float = 1.0    # 경쟁 페널티 (0.4~1.0)
+    low_competition_score: float = 0    # 저경쟁도 점수
+
     # 추천
     recommended_keyword: str = ''
 
@@ -164,13 +169,38 @@ def calculate_opportunity(products: list, inflow_keywords: list = None,
                     best_ratio = ratio
                     score.recommended_keyword = kw.keyword
 
+    # ─── 경쟁 페널티 (리뷰 기반) ───
+    top10_reviews = sorted_products[:10]
+    avg_review_count = sum(p.review_count for p in top10_reviews) / len(top10_reviews) if top10_reviews else 0
+
+    # 페널티: 500개 이하=1.0, 2000=0.8, 5000=0.6, 10000+=0.4
+    if avg_review_count <= 500:
+        competition_penalty = 1.0
+    elif avg_review_count >= 10000:
+        competition_penalty = 0.4
+    else:
+        # 500~10000 구간 선형 보간
+        competition_penalty = 1.0 - (avg_review_count - 500) / (10000 - 500) * 0.6
+
+    score.competition_penalty = round(competition_penalty, 2)
+    score.avg_review_count = round(avg_review_count)
+
     # ─── 종합 기회점수 ───
-    score.total_score = (
-        score.concentration_score * 0.40 +
-        score.activity_score * 0.25 +
-        score.entry_revenue_score * 0.20 +
+    base_score = (
+        score.concentration_score * 0.30 +
+        score.activity_score * 0.20 +
+        score.entry_revenue_score * 0.15 +
         score.demand_signal_score * 0.15
     )
+
+    # 저경쟁도 점수 (리뷰 적을수록 높음) — 20% 가중치
+    low_competition_score = max(0, min(100, (3000 - avg_review_count) / 2500 * 100))
+    score.low_competition_score = round(low_competition_score, 1)
+
+    base_score += low_competition_score * 0.20
+
+    # 경쟁 페널티 곱하기
+    score.total_score = base_score * competition_penalty
 
     # 등급
     if score.total_score >= 75:
@@ -185,7 +215,8 @@ def calculate_opportunity(products: list, inflow_keywords: list = None,
     logger.info(
         f'기회점수: {keyword} = {score.total_score:.1f} ({score.grade}) '
         f'| 분산 {score.concentration_score:.0f} | 활성 {score.activity_score:.0f} '
-        f'| 기대매출 {score.entry_revenue_score:.0f} | 수요신호 {score.demand_signal_score:.0f}'
+        f'| 기대매출 {score.entry_revenue_score:.0f} | 수요신호 {score.demand_signal_score:.0f} '
+        f'| 저경쟁 {low_competition_score:.0f} | 페널티 x{competition_penalty:.2f}'
     )
 
     return score
