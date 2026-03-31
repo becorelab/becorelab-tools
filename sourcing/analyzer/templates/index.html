@@ -2357,9 +2357,10 @@ async function showScanResult(scanId, scanSummary) {
             `;
         }
 
-        // GO/PASS 판정 버튼
+        // 분석 + GO/PASS 판정 버튼
         statsHtml += `
             <div class="stat-card" style="display:flex; align-items:center; justify-content:center; gap:10px;">
+                <button class="btn" onclick="viewScanWithReview(${scanId})" style="padding:10px 24px; font-size:14px; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff;">분석</button>
                 <button class="btn btn-success" onclick="markScan(${scanId},'go')" style="padding:10px 24px; font-size:14px;">GO</button>
                 <button class="btn" onclick="markScan(${scanId},'pass')" style="padding:10px 24px; font-size:14px; background:var(--danger); color:#fff;">PASS</button>
             </div>
