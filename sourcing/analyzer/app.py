@@ -1608,6 +1608,12 @@ def _collect_reviews_direct(products) -> list:
     import time
 
     all_reviews = []
+
+    # CDP 자동 실행
+    if not _ensure_cdp_running():
+        print('[REVIEW] CDP Chrome 시작 실패')
+        return []
+
     pw = sync_playwright().start()
     stealth = Stealth()
 
@@ -2000,6 +2006,51 @@ def _get_cdp_url() -> str:
     return os.getenv('CDP_ENDPOINT', 'http://127.0.0.1:9222')
 
 
+def _ensure_cdp_running():
+    """CDP Chrome이 안 켜져있으면 자동 실행"""
+    import requests as req, subprocess, time
+    cdp_url = _get_cdp_url()
+    try:
+        req.get(f'{cdp_url}/json/version', timeout=2)
+        return True  # 이미 실행 중
+    except Exception:
+        pass
+
+    # Chrome 경로 탐색
+    chrome_paths = [
+        r'C:\Program Files\Google\Chrome\Application\chrome.exe',
+        r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe',
+    ]
+    chrome_path = None
+    for p in chrome_paths:
+        if os.path.exists(p):
+            chrome_path = p
+            break
+    if not chrome_path:
+        print('[CDP] Chrome 경로를 찾을 수 없습니다')
+        return False
+
+    # CDP 모드로 Chrome 실행 (최소화)
+    user_data = os.path.join(os.path.expanduser('~'), 'ChromeCDP')
+    cmd = [chrome_path, '--remote-debugging-port=9222', '--remote-allow-origins=*',
+           f'--user-data-dir={user_data}', '--window-position=-2000,-2000', '--window-size=800,600']
+    subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    print('[CDP] Chrome 자동 시작...')
+
+    # 연결 대기 (최대 10초)
+    for _ in range(10):
+        time.sleep(1)
+        try:
+            req.get(f'{cdp_url}/json/version', timeout=2)
+            print('[CDP] Chrome 연결 성공!')
+            return True
+        except Exception:
+            pass
+
+    print('[CDP] Chrome 시작 실패')
+    return False
+
+
 def _get_cdp_cookies(domain_filter: str = '') -> list:
     """CDP Chrome에서 쿠키 추출"""
     import requests as req
@@ -2131,6 +2182,11 @@ def _fetch_page_via_cdp(url: str, wait_seconds: int = 7) -> dict:
 def _collect_product_details(products, scan_id) -> list:
     """Chrome CDP 직접 네비게이션으로 상품 상세페이지 수집 (Akamai 완전 우회)"""
     import time, requests as req
+
+    # CDP 자동 실행
+    if not _ensure_cdp_running():
+        print('[DETAIL] CDP Chrome 시작 실패')
+        return []
 
     collected = []
     total = len(products)
