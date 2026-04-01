@@ -328,7 +328,7 @@ def api_wing_status():
 @app.route('/api/scan/wing', methods=['POST'])
 def wing_scan():
     """쿠팡윙 직접 스캔 — 실제 판매 데이터 수집"""
-    data = request.json
+    data = request.get_json(force=True, silent=True) or {}
     keyword = data.get('keyword', '').strip()
     if not keyword:
         return jsonify({'success': False, 'error': '키워드를 입력해주세요'})
@@ -356,6 +356,7 @@ def _run_scan_wing(scan_id: int, keyword: str):
     with app.app_context():
         try:
             # 1. 쿠팡윙 상품 데이터 (서버에서는 크롬 확장 없어서 스킵)
+            _scan_progress[scan_id] = {'step': 1, 'total': 4, 'message': '쿠팡윙 상품 데이터 수집 중...'}
             products = []
             is_server = os.environ.get('DOCKER_ENV') == '1'
             if is_server:
@@ -377,6 +378,7 @@ def _run_scan_wing(scan_id: int, keyword: str):
                     print(f'[SCAN-WING] 윙 데이터 수집 실패 (키워드 데이터만 사용): {wing_err}')
 
             # 2. 헬프스토어 키워드 데이터 (연관키워드/검색량)
+            _scan_progress[scan_id] = {'step': 2, 'total': 4, 'message': '키워드 데이터 수집 중...'}
             api = get_helpstore()
             api_result = api.search_keyword(keyword)
 
@@ -389,9 +391,11 @@ def _run_scan_wing(scan_id: int, keyword: str):
                 })
 
             # 3. 키워드 변형
+            _scan_progress[scan_id] = {'step': 3, 'total': 4, 'message': '키워드 변형 분석 중...'}
             _save_keyword_variants(scan_id, keyword, api_result.related_keywords)
 
             # 4. 기회점수 산출
+            _scan_progress[scan_id] = {'step': 4, 'total': 4, 'message': '기회점수 분석 중...'}
             opp_score = calculate_opportunity(
                 products=products,
                 inflow_keywords=[],
@@ -414,6 +418,7 @@ def _run_scan_wing(scan_id: int, keyword: str):
                 recommended_keyword=opp_score.recommended_keyword,
             )
 
+            _scan_progress.pop(scan_id, None)
             print(
                 f'[SCAN-WING] 완료: {keyword}\n'
                 f'  기회점수: {opp_score.total_score:.1f} ({opp_score.grade})\n'
@@ -425,6 +430,7 @@ def _run_scan_wing(scan_id: int, keyword: str):
             )
 
         except Exception as e:
+            _scan_progress.pop(scan_id, None)
             import traceback
             error_msg = str(e)
             print(f'[SCAN-WING] 에러: {keyword} — {error_msg}')
