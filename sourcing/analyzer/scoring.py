@@ -169,21 +169,30 @@ def calculate_opportunity(products: list, inflow_keywords: list = None,
                     best_ratio = ratio
                     score.recommended_keyword = kw.keyword
 
-    # ─── 경쟁 페널티 (리뷰 기반) ───
-    top10_reviews = sorted_products[:10]
-    avg_review_count = sum(p.review_count for p in top10_reviews) / len(top10_reviews) if top10_reviews else 0
+    # ─── 경쟁 페널티 v4 (4~10위 기준 + 1~3위 보정) ───
+    top3_reviews = sorted_products[:3]
+    top4_10_reviews = sorted_products[3:10]
 
-    # 페널티: 500개 이하=1.0, 2000=0.8, 5000=0.6, 10000+=0.4
-    if avg_review_count <= 500:
+    avg_top3_reviews = sum(p.review_count for p in top3_reviews) / len(top3_reviews) if top3_reviews else 0
+    avg_4_10_reviews = sum(p.review_count for p in top4_10_reviews) / len(top4_10_reviews) if top4_10_reviews else 0
+
+    score.avg_review_count = round(avg_4_10_reviews)
+
+    # 4~10위 기준 페널티: 1000이하=1.0, 10000+=0.5
+    if avg_4_10_reviews <= 1000:
         competition_penalty = 1.0
-    elif avg_review_count >= 10000:
-        competition_penalty = 0.4
+    elif avg_4_10_reviews >= 10000:
+        competition_penalty = 0.5
     else:
-        # 500~10000 구간 선형 보간
-        competition_penalty = 1.0 - (avg_review_count - 500) / (10000 - 500) * 0.6
+        competition_penalty = 1.0 - (avg_4_10_reviews - 1000) / (10000 - 1000) * 0.5
+
+    # 1~3위 보정: 4~10위의 3배 이상이면 추가 페널티 (최대 -0.1)
+    if avg_4_10_reviews > 0 and avg_top3_reviews / avg_4_10_reviews >= 3:
+        ratio = min(avg_top3_reviews / avg_4_10_reviews, 10)
+        extra = (ratio - 3) / 7 * 0.1
+        competition_penalty = max(0.4, competition_penalty - extra)
 
     score.competition_penalty = round(competition_penalty, 2)
-    score.avg_review_count = round(avg_review_count)
 
     # ─── 종합 기회점수 ───
     base_score = (
@@ -193,8 +202,8 @@ def calculate_opportunity(products: list, inflow_keywords: list = None,
         score.demand_signal_score * 0.15
     )
 
-    # 저경쟁도 점수 (리뷰 적을수록 높음) — 20% 가중치
-    low_competition_score = max(0, min(100, (3000 - avg_review_count) / 2500 * 100))
+    # 저경쟁도 점수 (4~10위 리뷰 적을수록 높음) — 20% 가중치
+    low_competition_score = max(0, min(100, (3000 - avg_4_10_reviews) / 2500 * 100))
     score.low_competition_score = round(low_competition_score, 1)
 
     base_score += low_competition_score * 0.20
