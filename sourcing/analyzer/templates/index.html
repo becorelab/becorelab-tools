@@ -5536,10 +5536,10 @@ function renderGoldboxPage() {
     document.getElementById('goldboxProductCount').textContent = `${total}개 상품`;
     document.getElementById('goldboxProductsBody').innerHTML = pageProducts.map((p, i) => {
         const pname = p.name || p.product_name || '';
-        const match = _gbKeywordMap[pname];
-        const kw = match ? match.keyword : '';
-        const sc = match ? match.score : 0;
-        const sid = match ? match.scan_id : 0;
+        // API 매칭 우선, 없으면 프론트 매핑 폴백
+        const kw = p.matched_keyword || (_gbKeywordMap[pname] ? _gbKeywordMap[pname].keyword : '');
+        const sc = p.matched_score || (_gbKeywordMap[pname] ? _gbKeywordMap[pname].score : 0);
+        const sid = p.matched_scan_id || (_gbKeywordMap[pname] ? _gbKeywordMap[pname].scan_id : 0);
         const scoreColor = sc >= 75 ? '#22c55e' : sc >= 55 ? 'var(--cyan)' : sc >= 35 ? 'var(--warning)' : 'var(--text-muted)';
         return `<tr>
             <td>${_gbPage * pageSize + i + 1}</td>
