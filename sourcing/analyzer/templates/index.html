@@ -1579,8 +1579,6 @@ body {
                         <th>상품명</th>
                         <th>가격</th>
                         <th>할인율</th>
-                        <th>대표 키워드</th>
-                        <th>기회점수</th>
                         <th>링크</th>
                     </tr>
                 </thead>
@@ -5536,18 +5534,11 @@ function renderGoldboxPage() {
     document.getElementById('goldboxProductCount').textContent = `${total}개 상품`;
     document.getElementById('goldboxProductsBody').innerHTML = pageProducts.map((p, i) => {
         const pname = p.name || p.product_name || '';
-        // API 매칭 우선, 없으면 프론트 매핑 폴백
-        const kw = p.matched_keyword || (_gbKeywordMap[pname] ? _gbKeywordMap[pname].keyword : '');
-        const sc = p.matched_score || (_gbKeywordMap[pname] ? _gbKeywordMap[pname].score : 0);
-        const sid = p.matched_scan_id || (_gbKeywordMap[pname] ? _gbKeywordMap[pname].scan_id : 0);
-        const scoreColor = sc >= 75 ? '#22c55e' : sc >= 55 ? 'var(--cyan)' : sc >= 35 ? 'var(--warning)' : 'var(--text-muted)';
         return `<tr>
             <td>${_gbPage * pageSize + i + 1}</td>
-            <td style="max-width:280px; word-break:break-all;">${escapeHtml(pname)}</td>
+            <td style="max-width:300px; word-break:break-all;">${escapeHtml(pname)}</td>
             <td>${p.price ? p.price.toLocaleString() + '원' : '-'}</td>
             <td>${p.discount || '-'}</td>
-            <td>${kw ? `<a href="#" onclick="event.preventDefault();${sid ? 'viewScanWithReview('+sid+')' : ''}" style="color:var(--cyan);text-decoration:none;font-weight:600;">${kw}</a>` : '<span style="color:var(--text-muted);">-</span>'}</td>
-            <td style="font-weight:700;color:${scoreColor};">${sc > 0 ? sc.toFixed(1) : '-'}</td>
             <td>${p.url || p.product_url ? `<a href="${p.url || p.product_url}" target="_blank" style="color:var(--accent);">링크</a>` : '-'}</td>
         </tr>`;
     }).join('');
@@ -5578,24 +5569,11 @@ async function loadGoldboxByDate(date) {
     if (!data.success) return;
     _gbAllProducts = data.products;
     _gbPage = 0;
-
-    // 키워드 매핑 없으면 로드
-    if (Object.keys(_gbKeywordMap).length === 0) {
-        try {
-            const sr = await fetch('/api/goldbox/auto-scan/results');
-            const sd = await sr.json();
-            if (sd.scans) {
-                sd.scans.forEach(s => {
-                    (s.source_products || []).forEach(name => {
-                        _gbKeywordMap[name] = {keyword: s.keyword, score: s.opportunity_score || 0, scan_id: s.id};
-                    });
-                });
-            }
-        } catch(e) {}
-    }
-
     renderGoldboxPage();
     document.getElementById('goldboxProductCount').textContent = `${date} — ${data.products.length}개`;
+
+    // 해당 날짜 자동 스캔 TOP10도 표시
+    _loadAutoScanResultsByDate(date);
 }
 
 // 골드박스 탭 열 때 기록 로드

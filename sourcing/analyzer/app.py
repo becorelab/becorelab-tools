@@ -561,27 +561,23 @@ def api_goldbox_history_date(date):
     """특정 날짜의 골드박스 상품 + 키워드/기회점수 매칭"""
     products = fdb.get_goldbox_by_date(date)
 
-    # 골드박스 스캔 결과에서 상품명→키워드 매핑 구축 (부분 매칭)
+    # 골드박스 스캔 키워드로 상품명 매칭 (키워드가 상품명에 포함되는지)
     all_scans = fdb.list_scans(limit=2000)
-    gb_scans = [s for s in all_scans if s.get('scan_type') == 'goldbox']
-    source_list = []  # [(clean_name, {keyword, score, scan_id})]
-    for s in gb_scans:
-        for name in (s.get('source_products') or []):
-            clean = name.split('\n')[0].split(',')[0].strip()[:30]
-            source_list.append((clean, {
-                'keyword': s.get('keyword',''),
-                'score': s.get('opportunity_score',0) or 0,
-                'scan_id': s.get('id',0)
-            }))
+    gb_scans = [s for s in all_scans if s.get('scan_type') == 'goldbox' and s.get('keyword')]
+    # 기회점수 높은 순 정렬 (같은 상품이 여러 키워드에 매칭될 때 높은 점수 우선)
+    gb_scans.sort(key=lambda x: x.get('opportunity_score') or 0, reverse=True)
 
-    # 상품에 매칭 정보 추가 (부분 매칭)
     for p in products:
-        pname = (p.get('product_name') or '').split('\n')[0].strip()
-        for clean_name, scan_info in source_list:
-            if clean_name and len(clean_name) > 5 and clean_name in pname:
-                p['matched_keyword'] = scan_info['keyword']
-                p['matched_score'] = scan_info['score']
-                p['matched_scan_id'] = scan_info['scan_id']
+        pname = (p.get('product_name') or '').split('\n')[0].strip().lower()
+        if not pname:
+            continue
+        for s in gb_scans:
+            kw = s.get('keyword', '').strip().lower()
+            # 키워드가 2글자 이상이고 상품명에 포함되면 매칭
+            if len(kw) >= 2 and kw in pname:
+                p['matched_keyword'] = s.get('keyword', '')
+                p['matched_score'] = s.get('opportunity_score', 0) or 0
+                p['matched_scan_id'] = s.get('id', 0)
                 break
 
     return jsonify({'success': True, 'date': date, 'products': products})
