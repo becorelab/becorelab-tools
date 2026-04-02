@@ -5572,8 +5572,8 @@ async function loadGoldboxByDate(date) {
     renderGoldboxPage();
     document.getElementById('goldboxProductCount').textContent = `${date} — ${data.products.length}개`;
 
-    // 해당 날짜 자동 스캔 TOP10도 표시
-    _loadAutoScanResultsByDate(date);
+    // 골드박스 전체 TOP10 표시
+    _loadAutoScanResultsFromDB();
 }
 
 // 골드박스 탭 열 때 기록 로드
