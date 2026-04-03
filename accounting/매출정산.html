@@ -3218,7 +3218,12 @@ function handleAuth() {
   } else {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).catch(err => {
-      showToast('로그인 실패: ' + err.message, 'error');
+      // iframe 등에서 팝업 차단 시 redirect 방식으로 전환
+      if (err.code === 'auth/popup-blocked' || err.code === 'auth/unauthorized-domain' || err.code === 'auth/popup-closed-by-browser') {
+        auth.signInWithRedirect(provider);
+      } else {
+        showToast('로그인 실패: ' + err.message, 'error');
+      }
     });
   }
 }
