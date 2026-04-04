@@ -7,7 +7,7 @@ def register(mcp, client, base_url):
 
     @mcp.tool()
     async def sourcing_scan_new(keyword: str = "") -> str:
-        """새 키워드로 시장조사(스캔)를 시작합니다.
+        """새 키워드로 시장조사(스캔)를 시작합니다. 주의: 먼저 sourcing_scans로 기존 스캔이 있는지 확인 후, 없을 때만 사용하세요!
         keyword: 검색할 키워드 (필수, 예: '스팟 분')"""
         if not keyword:
             return "[오류] keyword를 입력해주세요."
@@ -31,7 +31,7 @@ def register(mcp, client, base_url):
 
     @mcp.tool()
     async def sourcing_scans() -> str:
-        """전체 시장조사(스캔) 목록을 가져옵니다."""
+        """전체 시장조사(스캔) 목록을 가져옵니다. 새 스캔을 시작하기 전에 반드시 이 도구로 기존 스캔이 있는지 먼저 확인하세요!"""
         try:
             resp = await client.get(f"{base_url}/api/scans")
             return resp.text
