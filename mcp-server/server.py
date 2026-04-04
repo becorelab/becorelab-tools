@@ -22,6 +22,7 @@ mcp = FastMCP(
 ## 도구 사용 흐름
 - 기존 데이터 확인: sourcing_scans → sourcing_scan_detail(scan_id)
 - 기회상품 조회: sourcing_opportunities (GO 판정된 것만 보려면 status=go)
+- **중요**: sourcing_opportunities는 목록만 반환! 상품 상세(가격/매출/순위)를 보려면 반드시 sourcing_scan_detail(scan_id)을 호출하세요!
 - 상세분석: sourcing_detail_analysis(scan_id) — 가격대, 시장구조, 원가
 - 후속질문: sourcing_detail_chat(scan_id, question)
 - 새 스캔: sourcing_scan_new(keyword) → sourcing_scan_poll(scan_id)로 상태 확인

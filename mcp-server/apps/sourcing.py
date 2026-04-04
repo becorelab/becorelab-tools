@@ -122,7 +122,7 @@ def register(mcp, client, base_url):
 
     @mcp.tool()
     async def sourcing_opportunities(status: str = "") -> str:
-        """소싱 기회 상품(인사이트) 목록을 가져옵니다.
+        """소싱 기회 상품(인사이트) 목록을 가져옵니다. 주의: 이 목록에는 개별 상품 데이터가 포함되지 않습니다! 특정 키워드의 상품(가격, 매출, 순위 등)을 보려면 반드시 sourcing_scan_detail(scan_id)을 추가 호출하세요.
         status: 'go' (GO 판정만), 'hold', 'drop' 또는 빈 문자열 (전체)"""
         params = {}
         if status:
