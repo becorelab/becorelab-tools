@@ -25,7 +25,10 @@ mcp = FastMCP(
 - **중요**: sourcing_opportunities는 목록만 반환! 상품 상세(가격/매출/순위)를 보려면 반드시 sourcing_scan_detail(scan_id)을 호출하세요!
 - 상세분석: sourcing_detail_analysis(scan_id) — 가격대, 시장구조, 원가
 - 후속질문: sourcing_detail_chat(scan_id, question)
-- 새 스캔: sourcing_scan_new(keyword) → sourcing_scan_poll(scan_id)로 상태 확인
+- 새 스캔: **sourcing_scan_and_wait(keyword)** 권장 — 시작+대기+결과를 한 번에! (도구 호출 1번)
+  - 옛 방식: sourcing_scan_new → sourcing_scan_poll 반복 호출 (도구 사용 한도 빠르게 소진)
+- 여러 스캔 대기: sourcing_wait_for_scans("2614,2615,2616") — 병렬 대기 후 결과 요약
+- **중요**: 한 턴에 여러 스캔 결과가 필요하면 반드시 _and_wait 또는 _wait_for_scans 사용하세요!
 """
 )
 client = httpx.AsyncClient(timeout=TIMEOUT)

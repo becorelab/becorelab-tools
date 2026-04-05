@@ -1,9 +1,86 @@
 """소싱콕 Market Finder MCP 도구 (포트 8090)"""
 
+import asyncio
+import json as _json
+
 
 def register(mcp, client, base_url):
 
     # ── 키워드 스캔 ──────────────────────────────────────────
+
+    @mcp.tool()
+    async def sourcing_scan_and_wait(keyword: str = "", timeout_seconds: int = 180) -> str:
+        """새 키워드로 스캔 시작 + 완료까지 기다렸다가 결과를 한 번에 반환합니다.
+        여러 번 poll 호출할 필요 없음! 도구 호출 1번으로 끝.
+        keyword: 검색할 키워드 (필수)
+        timeout_seconds: 최대 대기 시간 (기본 180초 = 3분)
+        주의: 먼저 sourcing_scans로 기존 스캔 확인 후, 없을 때만 사용"""
+        if not keyword:
+            return "[오류] keyword를 입력해주세요."
+        try:
+            # 1. 스캔 시작
+            start_resp = await client.post(f"{base_url}/api/scan/manual", json={"keyword": keyword})
+            start_data = _json.loads(start_resp.text)
+            scan_id = start_data.get("scan_id") or start_data.get("id")
+            if not scan_id:
+                return f"[오류] scan_id 못 받음: {start_resp.text[:200]}"
+
+            # 2. 완료까지 polling (10초 간격)
+            elapsed = 0
+            while elapsed < timeout_seconds:
+                await asyncio.sleep(10)
+                elapsed += 10
+                poll_resp = await client.get(f"{base_url}/api/scan/{scan_id}/poll")
+                poll_data = _json.loads(poll_resp.text)
+                status = poll_data.get("scan", {}).get("status", "")
+                if status == "scanned":
+                    # 3. 상세 데이터 반환
+                    detail_resp = await client.get(f"{base_url}/api/scan/{scan_id}")
+                    return f"완료! scan_id={scan_id}\n{detail_resp.text}"
+                elif status == "failed":
+                    return f"[실패] scan_id={scan_id}, status=failed\n{poll_resp.text[:300]}"
+            return f"[타임아웃] {timeout_seconds}초 경과. scan_id={scan_id}로 나중에 sourcing_scan_detail 호출하세요."
+        except Exception as e:
+            return f"[오류] 스캔 실패: {e}"
+
+    @mcp.tool()
+    async def sourcing_wait_for_scans(scan_ids: str = "", timeout_seconds: int = 300) -> str:
+        """여러 진행 중인 스캔이 완료될 때까지 기다립니다 (병렬 polling).
+        scan_ids: 쉼표로 구분된 scan_id (예: '2614,2615,2616')
+        timeout_seconds: 최대 대기 시간 (기본 300초 = 5분)"""
+        if not scan_ids:
+            return "[오류] scan_ids를 입력해주세요."
+        try:
+            ids = [int(s.strip()) for s in scan_ids.split(",") if s.strip()]
+            pending = set(ids)
+            completed = {}
+            elapsed = 0
+            while pending and elapsed < timeout_seconds:
+                await asyncio.sleep(10)
+                elapsed += 10
+                # 병렬 polling
+                tasks = [client.get(f"{base_url}/api/scan/{sid}/poll") for sid in pending]
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                for sid, res in zip(list(pending), results):
+                    if isinstance(res, Exception):
+                        continue
+                    try:
+                        data = _json.loads(res.text)
+                        status = data.get("scan", {}).get("status", "")
+                        if status in ("scanned", "failed"):
+                            completed[sid] = status
+                            pending.discard(sid)
+                    except Exception:
+                        pass
+            # 결과 요약
+            lines = [f"완료 {len(completed)}개, 진행중 {len(pending)}개"]
+            for sid, status in completed.items():
+                lines.append(f"  scan_id={sid}: {status}")
+            for sid in pending:
+                lines.append(f"  scan_id={sid}: 타임아웃 (아직 진행중)")
+            return "\n".join(lines)
+        except Exception as e:
+            return f"[오류] {e}"
 
     @mcp.tool()
     async def sourcing_scan_new(keyword: str = "") -> str:
