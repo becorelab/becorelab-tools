@@ -15,7 +15,7 @@ import subprocess
 import tempfile
 import threading
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -369,6 +369,52 @@ def api_sales_daily():
             if data:
                 results.append(data)
         return jsonify({"status": "ok", "data": results})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/sales-daily-orders")
+def api_sales_daily_orders():
+    """옵션별 주문 상세 조회 (쿼리: ?date=2026-04-03)
+    각 주문의 상품코드, 옵션명, 수량, 정산금액 등 포함"""
+    target_date = request.args.get("date")
+    if not target_date:
+        target_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    try:
+        orders = _load_sales_orders(target_date)
+        if not orders:
+            return jsonify({"status": "empty", "date": target_date, "message": "주문 데이터 없음 (이지어드민 수집 필요)"}), 204
+        # 옵션별 집계
+        by_option = {}
+        for o in orders:
+            key = f"{o.get('code','?')}_{o.get('option','')}"
+            if key not in by_option:
+                by_option[key] = {
+                    "code": o.get("code", ""),
+                    "name": o.get("name", ""),
+                    "option": o.get("option", ""),
+                    "nameOpt": o.get("nameOpt", ""),
+                    "qty": 0,
+                    "amount": 0,
+                    "settlement": 0,
+                    "channels": {},
+                }
+            by_option[key]["qty"] += o.get("productQty", 0) or o.get("orderQty", 0)
+            by_option[key]["amount"] += o.get("amount", 0)
+            by_option[key]["settlement"] += o.get("settlement", 0)
+            shop = o.get("shop", "기타")
+            if shop not in by_option[key]["channels"]:
+                by_option[key]["channels"][shop] = {"qty": 0, "settlement": 0}
+            by_option[key]["channels"][shop]["qty"] += o.get("productQty", 0) or o.get("orderQty", 0)
+            by_option[key]["channels"][shop]["settlement"] += o.get("settlement", 0)
+        # 정산금액 순 정렬
+        sorted_options = sorted(by_option.values(), key=lambda x: x["settlement"], reverse=True)
+        return jsonify({
+            "status": "ok",
+            "date": target_date,
+            "total_orders": len(orders),
+            "by_option": sorted_options,
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
