@@ -67,6 +67,40 @@ def register(mcp, client, base_url):
             return f"[오류] 물류서버 연결 실패: {e}"
 
     @mcp.tool()
+    async def logistics_sales_options(date: str = "") -> str:
+        """옵션별 판매 데이터를 가져옵니다 (색상/사이즈별 + 채널별 크로스 분석).
+        date: YYYY-MM-DD (생략하면 어제)"""
+        params = {}
+        if date:
+            params["date"] = date
+        try:
+            resp = await client.get(f"{base_url}/api/sales-daily-orders", params=params)
+            return resp.text
+        except Exception as e:
+            return f"[오류] 물류서버 연결 실패: {e}"
+
+    @mcp.tool()
+    async def logistics_settlement_months() -> str:
+        """매출 정산 데이터가 있는 전체 월 목록을 가져옵니다 (2023년~현재)."""
+        try:
+            resp = await client.get(f"{base_url}/api/settlements")
+            return resp.text
+        except Exception as e:
+            return f"[오류] 물류서버 연결 실패: {e}"
+
+    @mcp.tool()
+    async def logistics_settlement(month: str = "") -> str:
+        """특정 월의 정산 데이터를 가져옵니다 (채널별 매출/수량/상품 상세 포함).
+        month: YYYY-MM 형식 (필수, 예: '2026-02')"""
+        if not month:
+            return "[오류] month를 입력해주세요 (예: 2026-02)"
+        try:
+            resp = await client.get(f"{base_url}/api/settlements/{month}")
+            return resp.text
+        except Exception as e:
+            return f"[오류] 물류서버 연결 실패: {e}"
+
+    @mcp.tool()
     async def logistics_order_analysis() -> str:
         """재고 분석 (현재 재고 vs 판매속도 기반 발주 필요 여부)"""
         try:
