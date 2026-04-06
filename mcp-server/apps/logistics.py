@@ -1,7 +1,29 @@
 """물류 대시보드 MCP 도구 (포트 8082)"""
 
+import json
+import os
+
+MORNING_DATA_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+    "data", "morning_data.json"
+)
+
 
 def register(mcp, client, base_url):
+
+    @mcp.tool()
+    async def logistics_morning_briefing() -> str:
+        """오늘의 모닝 브리핑 데이터를 가져옵니다 (매일 3:50 자동 수집).
+        매출, 재고, 발주, 골드박스 TOP3, API 비용, 서버 상태 전부 포함.
+        대표님이 '브리핑', '오늘 현황', '모닝' 등 요청하면 이 도구를 사용하세요."""
+        try:
+            if not os.path.exists(MORNING_DATA_PATH):
+                return "[오류] morning_data.json 없음 — 새벽 자동화가 아직 실행 안 됐거나 실패했어요."
+            with open(MORNING_DATA_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return json.dumps(data, ensure_ascii=False, indent=2)
+        except Exception as e:
+            return f"[오류] 모닝 데이터 로드 실패: {e}"
 
     @mcp.tool()
     async def logistics_daily_report(date: str = "") -> str:

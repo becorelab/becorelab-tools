@@ -14,6 +14,11 @@ mcp = FastMCP(
     "becorelab",
     instructions="""비코어랩 소싱/물류 데이터 조회 서버입니다.
 
+## 모닝 브리핑 (가장 빠른 방법!)
+- 대표님이 '오늘 현황', '브리핑', '모닝' 요청 → logistics_morning_briefing 한 번 호출!
+- 매출/재고/발주/골드박스/API비용 전부 포함 (매일 3:50 자동 수집 데이터)
+- 상세 데이터가 더 필요하면 개별 도구(logistics_*, sourcing_*)로 추가 조회
+
 ## 중요: 데이터 조회 순서
 1. 기존 데이터를 먼저 확인하세요! 새로 스캔하기 전에 반드시 sourcing_scans로 기존 스캔 목록을 확인하세요.
 2. 키워드가 이미 스캔되어 있으면 sourcing_scan_detail로 상세 데이터를 가져오세요.
