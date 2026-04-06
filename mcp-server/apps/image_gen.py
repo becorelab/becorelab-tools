@@ -27,9 +27,9 @@ def register(mcp, client, base_url=None):
         try:
             # 모델 선택
             if "pro" in model.lower():
-                model_id = "gemini-2.5-pro-preview-06-05"
+                model_id = "gemini-3-pro-image-preview"
             else:
-                model_id = "gemini-2.5-flash-preview-native-audio-dialog"
+                model_id = "gemini-2.5-flash-image"
 
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_id}:generateContent?key={GEMINI_API_KEY}"
 
