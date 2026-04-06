@@ -8,7 +8,7 @@ import httpx
 from mcp.server.fastmcp import FastMCP
 
 from config import LOGISTICS_BASE, SOURCING_BASE, TIMEOUT
-from apps import logistics, sourcing, goldbox
+from apps import logistics, sourcing, goldbox, naver_searchad
 
 mcp = FastMCP(
     "becorelab",
@@ -42,7 +42,7 @@ client = httpx.AsyncClient(timeout=TIMEOUT)
 logistics.register(mcp, client, LOGISTICS_BASE)
 sourcing.register(mcp, client, SOURCING_BASE)
 goldbox.register(mcp, client, SOURCING_BASE)  # 골드박스도 소싱콕 서버
-# 새 앱 추가 시: from apps import newapp → newapp.register(mcp, client, BASE_URL)
+naver_searchad.register(mcp, client)  # 네이버 검색광고 (자체 URL 사용)
 
 if __name__ == "__main__":
     mcp.run()
