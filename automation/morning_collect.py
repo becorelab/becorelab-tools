@@ -384,6 +384,15 @@ def main():
     except Exception as e:
         log.error(f"7단계 실패: {e}")
 
+    # 8단계: 일일 백업
+    try:
+        log.info("[8단계] 일일 백업")
+        from daily_backup import run_backup
+        success, failed = run_backup()
+        log.info(f"  백업 완료: 성공 {success}건, 실패 {failed}건")
+    except Exception as e:
+        log.error(f"8단계 실패: {e}")
+
     log.info(f"새벽 자동화 완료 (에러 {len(errors)}건)")
     log.info("=" * 50)
 

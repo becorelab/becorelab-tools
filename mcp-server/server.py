@@ -8,7 +8,7 @@ import httpx
 from mcp.server.fastmcp import FastMCP
 
 from config import LOGISTICS_BASE, SOURCING_BASE, TIMEOUT
-from apps import logistics, sourcing, goldbox, naver_searchad
+from apps import logistics, sourcing, goldbox, naver_searchad, image_gen
 
 mcp = FastMCP(
     "becorelab",
@@ -43,6 +43,7 @@ logistics.register(mcp, client, LOGISTICS_BASE)
 sourcing.register(mcp, client, SOURCING_BASE)
 goldbox.register(mcp, client, SOURCING_BASE)  # 골드박스도 소싱콕 서버
 naver_searchad.register(mcp, client)  # 네이버 검색광고 (자체 URL 사용)
+image_gen.register(mcp, client)  # 이미지 생성 (Gemini/나노바나나)
 
 if __name__ == "__main__":
     mcp.run()
