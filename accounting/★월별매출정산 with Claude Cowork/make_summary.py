@@ -150,19 +150,13 @@ for ch in CHANNEL_RANGES:
         row_num = None
         e_name = None
 
-        # 정확 매칭
+        # 정확 매칭만 (부분 매칭 금지 — 오매칭 방지)
         if pivot_name in e_products:
             row_num = e_products[pivot_name]
             e_name = pivot_name
         else:
-            # 유사 매칭 시도
+            # 공백/특수문자 제거 후 정확 비교만
             for ename, erow in e_products.items():
-                # 피벗명이 E열명에 포함 or 반대
-                if pivot_name in ename or ename in pivot_name:
-                    row_num = erow
-                    e_name = ename
-                    break
-                # 공백/특수문자 제거 후 비교
                 p_clean = pivot_name.replace(' ', '').replace('_', '')
                 e_clean = ename.replace(' ', '').replace('_', '')
                 if p_clean == e_clean:
@@ -246,7 +240,7 @@ ws_sum.cell(row=sr, column=3).number_format = '#,##0'
 ws_sum.column_dimensions['A'].width = 18; ws_sum.column_dimensions['B'].width = 10
 ws_sum.column_dimensions['C'].width = 18; ws_sum.column_dimensions['D'].width = 14
 
-outpath = os.path.join(BASE, '★3월 정산 종합 매핑.xlsx')
+outpath = os.path.join(BASE, '★3월 정산 종합 매핑_v2.xlsx')
 wb.save(outpath)
 print(f"\n저장: {outpath}")
 print(f"매칭: {total_matched}개, 행 없음: {total_new}개")
