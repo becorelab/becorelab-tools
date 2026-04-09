@@ -107,6 +107,15 @@ def step1_health_check():
             results[key] = "ok"
         else:
             log.warning(f"  {name}: 죽어있음 -> 재시작")
+            # Chrome CDP는 기존 크롬 먼저 죽이고 재시작
+            if key == "chrome_cdp":
+                log.info("  -> 기존 크롬 프로세스 종료 중...")
+                subprocess.run(
+                    ["powershell", "-NoProfile", "-Command",
+                     "Get-Process chrome -ErrorAction SilentlyContinue | Stop-Process -Force"],
+                    capture_output=True, timeout=10,
+                )
+                time.sleep(3)
             ok = start_service(name, svc["start_cmd"], svc["cwd"])
             results[key] = "restarted" if ok else "failed"
 
@@ -126,6 +135,34 @@ def step1_health_check():
                 log.error(f"  {svc['name']} 재시작 실패!")
 
     return results
+
+
+# ── 1.5단계: 쿠팡윙 로그인 ──
+def step1_5_wing_login():
+    log.info("[1.5단계] 쿠팡윙 로그인")
+    base = "http://localhost:8090"
+    try:
+        # 상태 확인
+        r = requests.get(f"{base}/api/wing/status", timeout=10)
+        status = r.json()
+        if status.get("wing_ok") and status.get("logged_in"):
+            log.info("  쿠팡윙: 이미 로그인됨")
+            return "already_logged_in"
+        # 로그인 시도
+        r = requests.post(f"{base}/api/wing/login", timeout=60)
+        log.info(f"  쿠팡윙 로그인 시도: {r.json().get('message', '')}")
+        time.sleep(15)
+        # 재확인
+        r = requests.get(f"{base}/api/wing/status", timeout=10)
+        if r.json().get("wing_ok"):
+            log.info("  쿠팡윙: 로그인 성공")
+            return "ok"
+        else:
+            log.warning("  쿠팡윙: 로그인 실패")
+            return "failed"
+    except Exception as e:
+        log.error(f"  쿠팡윙 로그인 실패: {e}")
+        return f"error: {e}"
 
 
 # ── 2단계: 골드박스 수집 ──
@@ -339,6 +376,13 @@ def main():
         server_status = {"error": str(e)}
         errors.append(f"1단계(서버체크): {e}")
 
+    # 1.5단계: 쿠팡윙 로그인
+    try:
+        step1_5_wing_login()
+    except Exception as e:
+        log.error(f"1.5단계 실패: {e}")
+        errors.append(f"1.5단계(윙로그인): {e}")
+
     # 2단계: 골드박스
     goldbox_top3 = []
     try:
@@ -392,6 +436,16 @@ def main():
         log.info(f"  백업 완료: 성공 {success}건, 실패 {failed}건")
     except Exception as e:
         log.error(f"8단계 실패: {e}")
+
+    # 9단계: 메타 광고 일일보고서 생성 (옵시디언)
+    try:
+        log.info("[9단계] 메타 광고 일일보고서 생성")
+        from meta_daily_report import run_yesterday
+        report_path = run_yesterday()
+        log.info(f"  보고서 저장: {report_path}")
+    except Exception as e:
+        log.error(f"9단계 실패: {e}")
+        errors.append(f"9단계(메타보고서): {e}")
 
     log.info(f"새벽 자동화 완료 (에러 {len(errors)}건)")
     log.info("=" * 50)
