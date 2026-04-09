@@ -109,6 +109,7 @@ sum_refund = 0.0
 sum_coupon = 0.0
 sum_app_discount = 0.0
 coupon_counted_orders = set()  # 쿠폰은 주문당 1번만
+refund_counted_orders = set()  # 환불도 주문당 1번만
 
 for row in rows:
     total_rows += 1
@@ -139,10 +140,13 @@ for row in rows:
     pivot[final_name]['amount'] += amount
     pivot[final_name]['shipping'] += shipping
 
-    # 차감 항목 누적
-    # 환불: 품목 단위
-    if IDX_REFUND is not None:
-        sum_refund += safe_float(row[IDX_REFUND])
+    # 차감 항목 누적 (주문번호 기준 중복 제거)
+    # 환불: 주문 단위 (같은 주문의 여러 상품에 같은 금액 반복 → 1번만)
+    if IDX_REFUND is not None and order_no not in refund_counted_orders:
+        refund_val = safe_float(row[IDX_REFUND])
+        if refund_val > 0:
+            sum_refund += refund_val
+            refund_counted_orders.add(order_no)
     # 쿠폰: 주문 단위 (첫 품목에만 카운트)
     if IDX_COUPON_ORDER is not None and order_no not in coupon_counted_orders:
         sum_coupon += safe_float(row[IDX_COUPON_ORDER])
@@ -179,15 +183,20 @@ for i, (name, data) in enumerate(sorted_items, 1):
 print(f"{'─'*3}  {'─'*45} {'─'*8} {'─'*15} {'─'*12}")
 print(f"{'':>3}  {'총합계':<45} {total_qty:>8,} {total_amount:>15,.0f} {total_shipping:>12,.0f}")
 
-# 하단 정산 요약 (2월 피벗과 동일한 형태)
+# 하단 정산 요약
 gross = total_amount + total_shipping
-net = gross - sum_refund - sum_coupon - sum_app_discount
+net_revenue = gross - sum_refund - sum_coupon - sum_app_discount
+net_profit = net_revenue  # 환불/쿠폰/앱할인은 매출 차감 = 이익 차감 (원가 없으므로)
 print(f"\n{'─'*80}")
 print(f"  {'결제총액 + 배송비':<40} {gross:>15,.0f}")
-print(f"  {'환불':<40} {sum_refund:>15,.0f}")
+print(f"  {'환불 (주문 중복제거)':<40} {sum_refund:>15,.0f}")
 print(f"  {'쿠폰 적용':<40} {sum_coupon:>15,.0f}")
 print(f"  {'앱 상품 할인':<40} {sum_app_discount:>15,.0f}")
-print(f"  {'(결제총액+배송비-환불-쿠폰-앱 할인)':<40} {net:>15,.0f}")
+print(f"  {'최종 매출':<40} {net_revenue:>15,.0f}")
+print(f"")
+print(f"  ※ 환불/쿠폰/앱할인은 매출과 이익 모두에서 차감해야 합니다.")
+print(f"  ※ 정산시트 기입 시: 매출액(Y열)에 차감 전 금액, 하단 환불/쿠폰/앱할인 행에")
+print(f"    매출(P열)과 이익(T열) 모두 마이너스 값을 넣어주세요.")
 
 # 미매핑 상품
 if unmapped:
