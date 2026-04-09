@@ -1245,6 +1245,191 @@ def api_order_analysis():
     })
 
 
+# ── 옵시디언 재고 일일 보고서 생성 ──
+OBSIDIAN_STOCK_DIR = r"C:\Users\info\Documents\비코어랩\01. Becorelab AI Agent Team\📦 Stock & Order"
+
+@app.route("/api/inventory-report-obsidian", methods=["POST", "GET"])
+def api_inventory_report_obsidian():
+    """재고 일일 보고서를 옵시디언 볼트에 마크다운으로 저장"""
+    import math
+
+    target_date = request.args.get("date", datetime.now().strftime("%Y-%m-%d"))
+    lead = int(request.args.get("lead", 30))
+    safety = int(request.args.get("safety", 30))
+    window = int(request.args.get("window", 90))
+    reorder_days = lead + safety
+
+    cache = load_cache()
+    if cache is None:
+        return jsonify({"status": "error", "message": "캐시 데이터 없음"}), 204
+
+    inventory = cache.get("inventory", {})
+    orders = cache.get("orders", [])
+    cache_ts = cache.get("timestamp", "")
+
+    # 발주 데이터
+    purchases_list = []
+    moq_override = {}
+    if _firestore_ok:
+        try:
+            doc = fdb.db().collection("logistics").document("purchases").get()
+            if doc.exists:
+                d = doc.to_dict()
+                purchases_list = d.get("purchases", [])
+                moq_override = d.get("moq", {})
+        except Exception:
+            pass
+
+    # 일별 출고량 계산
+    daily_sales = {}  # code → {date → qty}
+    for o in orders:
+        code = o.get("code", "")
+        dt = o.get("date", "")
+        if code and dt:
+            daily_sales.setdefault(code, {})
+            daily_sales[code][dt] = daily_sales[code].get(dt, 0) + o.get("qty", 0)
+
+    # 전일 날짜 계산
+    yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+
+    # 품목별 계산
+    results = []
+    for p in PRODUCTS_LIST:
+        code = p["code"]
+        name = p["name"]
+        moq_val = moq_override.get(code, p["moq"])
+
+        total_sold = sum(daily_sales.get(code, {}).values())
+        daily_avg = total_sold / window if window > 0 else 0
+        yesterday_qty = daily_sales.get(code, {}).get(yesterday, 0)
+
+        stock_info = inventory.get(code, {})
+        current_stock = stock_info.get("stock") if stock_info else None
+
+        pending = [x for x in purchases_list if x.get("code") == code and x.get("status") == "pending"]
+        pending_qty = sum(x.get("qty", 0) for x in pending)
+
+        reorder_point = reorder_days * daily_avg
+        days_to_stockout = None
+        status = "unknown"
+
+        if current_stock is not None:
+            if daily_avg == 0:
+                days_to_stockout = 999
+                status = "ok"
+            else:
+                days_to_stockout = current_stock / daily_avg
+                days_to_reorder = (current_stock - reorder_point) / daily_avg
+                if days_to_reorder <= 0:
+                    status = "warning" if pending_qty > 0 else "urgent"
+                elif days_to_reorder <= 30:
+                    status = "warning"
+                else:
+                    status = "ok"
+
+        recommend_qty = max(moq_val, math.ceil(30 * daily_avg)) if daily_avg > 0 else moq_val
+
+        results.append({
+            "code": code, "name": name,
+            "current_stock": current_stock,
+            "yesterday_qty": yesterday_qty,
+            "daily_avg": round(daily_avg, 1),
+            "days_to_stockout": round(days_to_stockout, 1) if days_to_stockout is not None else None,
+            "status": status,
+            "recommend_qty": recommend_qty,
+            "moq": moq_val,
+            "pending_qty": pending_qty,
+        })
+
+    # 상태별 분류
+    urgent = [r for r in results if r["status"] == "urgent"]
+    warning = [r for r in results if r["status"] == "warning"]
+    ok_items = [r for r in results if r["status"] == "ok"]
+
+    # 요일
+    days_kr = ["월", "화", "수", "목", "금", "토", "일"]
+    try:
+        day_name = days_kr[datetime.strptime(target_date, "%Y-%m-%d").weekday()]
+    except Exception:
+        day_name = ""
+
+    # 마크다운 생성
+    lines = []
+    lines.append(f"# 📦 재고 일일 보고서 — {target_date} ({day_name})")
+    lines.append("")
+    lines.append(f"> 데이터 수집: {cache_ts[:16] if cache_ts else '알 수 없음'} | 분석 기간: {window}일 | 리드타임: {lead}일 + 안전재고: {safety}일")
+    lines.append("")
+
+    # 현황 요약
+    lines.append("## 현황 요약")
+    lines.append("")
+    lines.append(f"| 🔴 즉시 발주 | 🟡 30일 내 발주 | 🟢 재고 양호 |")
+    lines.append(f"|:---:|:---:|:---:|")
+    lines.append(f"| **{len(urgent)}개** | **{len(warning)}개** | **{len(ok_items)}개** |")
+    lines.append("")
+
+    # 발주 필요 품목
+    if urgent or warning:
+        lines.append("## ⚠️ 발주 필요 품목")
+        lines.append("")
+        for r in urgent:
+            pend = f" *(발주 진행중 {r['pending_qty']:,}개)*" if r['pending_qty'] > 0 else ""
+            lines.append(f"- 🔴 **{r['name']}** — 재고 {r['current_stock']:,}개, "
+                         f"잔여 {r['days_to_stockout']:.0f}일, "
+                         f"권장 발주 {r['recommend_qty']:,}개{pend}")
+        for r in warning:
+            pend = f" *(발주 진행중 {r['pending_qty']:,}개)*" if r['pending_qty'] > 0 else ""
+            lines.append(f"- 🟡 **{r['name']}** — 재고 {r['current_stock']:,}개, "
+                         f"잔여 {r['days_to_stockout']:.0f}일{pend}")
+        lines.append("")
+
+    # 전체 품목 현황
+    lines.append("## 전체 품목 현황")
+    lines.append("")
+    lines.append("| 상품명 | 현재고 | 전일출고 | 일평균 | 잔여일수 | 상태 |")
+    lines.append("|--------|-------:|-------:|------:|--------:|:----:|")
+
+    status_emoji = {"urgent": "🔴", "warning": "🟡", "ok": "🟢", "unknown": "⚪"}
+    sorted_results = sorted(results, key=lambda r: (
+        {"urgent": 0, "warning": 1, "ok": 2, "unknown": 3}.get(r["status"], 3),
+        r.get("days_to_stockout") or 999
+    ))
+
+    for r in sorted_results:
+        stock = f"{r['current_stock']:,}" if r['current_stock'] is not None else "-"
+        yq = f"{r['yesterday_qty']:,}" if r['yesterday_qty'] else "-"
+        avg = f"{r['daily_avg']:.1f}" if r['daily_avg'] > 0 else "-"
+        dts = f"{r['days_to_stockout']:.0f}일" if r['days_to_stockout'] is not None and r['days_to_stockout'] < 999 else "충분"
+        emoji = status_emoji.get(r["status"], "⚪")
+        lines.append(f"| {r['name']} | {stock} | {yq} | {avg} | {dts} | {emoji} |")
+
+    lines.append("")
+    lines.append("---")
+    lines.append(f"*자동 생성 by iLBiA 물류 시스템*")
+
+    md_content = "\n".join(lines)
+
+    # 파일 저장
+    os.makedirs(OBSIDIAN_STOCK_DIR, exist_ok=True)
+    filename = f"{target_date} 재고 일일 보고서.md"
+    filepath = os.path.join(OBSIDIAN_STOCK_DIR, filename)
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(md_content)
+
+    log.info(f"옵시디언 재고 보고서 저장: {filepath}")
+
+    fmt = request.args.get("format", "")
+    if fmt == "text":
+        return md_content, 200, {"Content-Type": "text/plain; charset=utf-8"}
+
+    return jsonify({
+        "status": "ok",
+        "file": filepath,
+        "summary": {"urgent": len(urgent), "warning": len(warning), "ok": len(ok_items)},
+        "message": f"재고 보고서 저장 완료: {filename}",
+    })
+
+
 if __name__ == "__main__":
     from waitress import serve
 
