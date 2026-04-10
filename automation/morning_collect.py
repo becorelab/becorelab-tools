@@ -53,6 +53,20 @@ def check_http(url, timeout=5):
         return False
 
 
+def check_socket(url, timeout=2):
+    """포트 LISTENING 상태만 체크 (SSE 등 long-polling 엔드포인트용)"""
+    import socket
+    from urllib.parse import urlparse
+    try:
+        parsed = urlparse(url)
+        host = parsed.hostname or "127.0.0.1"
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except Exception:
+        return False
+
+
 def check_process(keyword):
     try:
         result = subprocess.run(
@@ -98,7 +112,11 @@ def step1_health_check():
         name = svc["name"]
 
         if svc.get("url"):
-            alive = check_http(svc["url"] + svc.get("health_path", "/"))
+            # SSE 엔드포인트는 long-polling이라 HTTP GET이 timeout됨 → socket 체크
+            if "/sse" in svc.get("health_path", ""):
+                alive = check_socket(svc["url"])
+            else:
+                alive = check_http(svc["url"] + svc.get("health_path", "/"))
         else:
             alive = check_process(svc["process_keyword"])
 
@@ -119,20 +137,35 @@ def step1_health_check():
             ok = start_service(name, svc["start_cmd"], svc["cwd"])
             results[key] = "restarted" if ok else "failed"
 
-    # 재시작한 서비스 있으면 30초 대기 후 재확인
+    # 재시작한 서비스 있으면 60초까지 5초마다 재확인 (점진적 재시도)
     restarted = [k for k, v in results.items() if v == "restarted"]
     if restarted:
-        log.info("  30초 대기 후 재확인...")
-        time.sleep(30)
-        for key in restarted:
-            svc = SERVICES[key]
-            if svc.get("url"):
-                alive = check_http(svc["url"] + svc.get("health_path", "/"))
-            else:
-                alive = check_process(svc["process_keyword"])
-            if not alive:
-                results[key] = "failed"
-                log.error(f"  {svc['name']} 재시작 실패!")
+        log.info("  부팅 대기 후 재확인 (최대 60초)...")
+        max_wait = 60
+        elapsed = 0
+        pending = list(restarted)
+        while pending and elapsed < max_wait:
+            time.sleep(5)
+            elapsed += 5
+            still_dead = []
+            for key in pending:
+                svc = SERVICES[key]
+                if svc.get("url"):
+                    if "/sse" in svc.get("health_path", ""):
+                        alive = check_socket(svc["url"])
+                    else:
+                        alive = check_http(svc["url"] + svc.get("health_path", "/"))
+                else:
+                    alive = check_process(svc["process_keyword"])
+                if alive:
+                    log.info(f"  {svc['name']}: 재시작 성공 ({elapsed}초)")
+                else:
+                    still_dead.append(key)
+            pending = still_dead
+
+        for key in pending:
+            results[key] = "failed"
+            log.error(f"  {SERVICES[key]['name']} 재시작 실패! ({max_wait}초 초과)")
 
     return results
 

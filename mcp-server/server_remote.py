@@ -14,7 +14,7 @@ import httpx
 from mcp.server.fastmcp import FastMCP
 
 from config import LOGISTICS_BASE, SOURCING_BASE, TIMEOUT
-from apps import logistics, sourcing, goldbox, naver_searchad, image_gen, meta_ads
+from apps import logistics, sourcing, goldbox, naver_searchad, image_gen, meta_ads, obsidian
 
 mcp = FastMCP(
     "becorelab",
@@ -44,6 +44,14 @@ mcp = FastMCP(
 ### 🖼️ 이미지 생성 (becorelab_generate_*)
 ### 🎁 골드박스 (becorelab_goldbox_*)
 
+### 📝 옵시디언 볼트 (becorelab_obsidian_*)
+- becorelab_obsidian_list_files - 폴더 안 파일 목록
+- becorelab_obsidian_read_file - 파일 읽기
+- becorelab_obsidian_write_file - 파일 쓰기 (덮어쓰기)
+- becorelab_obsidian_append_file - 파일에 내용 추가
+- becorelab_obsidian_search - 키워드 검색
+- becorelab_obsidian_recent_files - 최근 수정 파일
+
 ## 사용 팁
 - 검색 키워드로 'becorelab'을 사용하면 모든 도구가 잡힙니다
 - '모닝 브리핑', '오늘 현황' 요청 → becorelab_logistics_morning_briefing
@@ -59,27 +67,42 @@ goldbox.register(mcp, client, SOURCING_BASE)
 naver_searchad.register(mcp, client)
 image_gen.register(mcp, client)
 meta_ads.register(mcp, client)
+obsidian.register(mcp, client)  # 옵시디언 볼트 (모바일에서도 접근 가능)
 
-# 모든 도구 이름에 'becorelab_' prefix 추가 (claude.ai 검색 최적화)
-# 옛 이름도 함께 등록 (두리 캐시 호환성)
-import copy
+# Remote MCP는 핵심 도구만 노출 (모바일/원격 사용 최적화)
+# 자주 쓰지 않는 deprecated 도구 제외
+ALLOWED_TOOLS = {
+    # 물류/매출 (5)
+    "logistics_morning_briefing", "logistics_daily_report",
+    "logistics_sales_daily", "logistics_sales_monthly", "logistics_inventory_report",
+    # 메타 광고 (4)
+    "meta_ad_accounts", "meta_ad_campaigns", "meta_ad_insights", "meta_ad_insights_all",
+    # 소싱 (5)
+    "sourcing_opportunities", "sourcing_scans", "sourcing_scan_detail",
+    "sourcing_scan_and_wait", "sourcing_detail_analysis",
+    # 옵시디언 (6)
+    "obsidian_list_files", "obsidian_read_file", "obsidian_write_file",
+    "obsidian_append_file", "obsidian_search", "obsidian_recent_files",
+    # 네이버 광고 (3)
+    "naver_ad_campaigns", "naver_ad_stats_campaign", "naver_ad_keyword_tool",
+    # 이미지 생성 (2)
+    "generate_image", "generate_banner",
+    # 골드박스 (1)
+    "goldbox_top3",
+}
+
+# 모든 도구 이름에 'becorelab_' prefix 추가 + 화이트리스트 필터링
 PREFIX = "becorelab_"
 old_tools = dict(mcp._tool_manager._tools)
-new_tools = {}
+mcp._tool_manager._tools = {}
 for old_name, tool in old_tools.items():
-    if old_name.startswith(PREFIX):
-        new_tools[old_name] = tool
+    if old_name not in ALLOWED_TOOLS:
         continue
     new_name = f"{PREFIX}{old_name}"
-    # 새 이름 (검색용)
-    new_tool = copy.copy(tool)
-    new_tool.name = new_name
-    new_tools[new_name] = new_tool
-    # 옛 이름 (호환용) - 두리 캐시가 갱신될 때까지
-    new_tools[old_name] = tool
+    tool.name = new_name
+    mcp._tool_manager._tools[new_name] = tool
 
-mcp._tool_manager._tools = new_tools
-print(f"[becorelab] {len(new_tools)} tools registered (both prefixed and original names)")
+print(f"[becorelab] {len(mcp._tool_manager._tools)} tools registered (filtered, with '{PREFIX}' prefix)")
 
 if __name__ == "__main__":
     app = mcp.sse_app()
