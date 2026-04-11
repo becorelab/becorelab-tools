@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>🔬 심리스 팬티 검증 토론 — 2026-04-11</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0e14; --bg2: #12151e; --card: #181c28; --border: #2a2f40; --border2: #3a4055;
+  --text: #f0f2f7; --text2: #9ba3b8; --text3: #6b7285;
+  --orange: #ff6b2b; --orange2: #ff8b55; --green: #22c55e; --red: #ef4444; --yellow: #eab308; --blue: #3b82f6; --purple: #a855f7;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Pretendard Variable", Pretendard, -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; font-size: 15px; padding: 40px 20px 80px; }
+.container { max-width: 1100px; margin: 0 auto; }
+.hero { background: linear-gradient(135deg, var(--card) 0%, var(--bg2) 100%); border: 1px solid var(--border); border-radius: 20px; padding: 48px 40px; margin-bottom: 32px; position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; top: -50%; right: -30%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%); }
+.hero-label { display: inline-block; color: var(--purple); font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+.hero h1 { font-size: 36px; font-weight: 800; margin-bottom: 16px; line-height: 1.2; }
+.hero-meta { display: flex; flex-wrap: wrap; gap: 20px; color: var(--text2); font-size: 14px; margin-top: 24px; }
+section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px 36px; margin-bottom: 24px; }
+h2 { font-size: 24px; font-weight: 700; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: 10px; }
+h2::before { content: ""; display: inline-block; width: 5px; height: 24px; background: var(--orange); border-radius: 3px; }
+h3 { font-size: 18px; font-weight: 700; margin: 20px 0 12px; color: var(--orange2); }
+h4 { font-size: 16px; font-weight: 700; margin: 16px 0 8px; }
+p { margin-bottom: 12px; color: var(--text); }
+.muted { color: var(--text2); }
+.tbl { width: 100%; border-collapse: collapse; margin: 12px 0 20px; background: var(--bg2); border-radius: 12px; overflow: hidden; }
+.tbl th { background: var(--bg); color: var(--text2); text-align: center; padding: 14px 12px; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border); }
+.tbl th:first-child, .tbl td:first-child { text-align: left; padding-left: 20px; }
+.tbl td { text-align: center; padding: 14px 12px; border-bottom: 1px solid var(--border); font-weight: 500; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl .hl { color: var(--orange); font-weight: 800; font-size: 16px; }
+.tbl .win { background: rgba(34, 197, 94, 0.12); }
+.tbl .lose { background: rgba(239, 68, 68, 0.08); }
+.tbl .change { color: var(--green); font-weight: 700; }
+.issues { display: grid; gap: 14px; margin: 20px 0; }
+.issue { background: var(--bg2); border-left: 4px solid var(--orange); border-radius: 10px; padding: 18px 22px; }
+.issue.critical { border-left-color: var(--red); }
+.issue.win { border-left-color: var(--green); }
+.issue.info { border-left-color: var(--blue); }
+.issue.warning { border-left-color: var(--yellow); }
+.issue-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--orange); margin-bottom: 6px; }
+.issue.critical .issue-label { color: var(--red); }
+.issue.win .issue-label { color: var(--green); }
+.issue.info .issue-label { color: var(--blue); }
+.issue.warning .issue-label { color: var(--yellow); }
+.issue h4 { margin: 0 0 8px; font-size: 15px; }
+.variables { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+.var-item { background: var(--bg2); border-left: 3px solid var(--orange); padding: 10px 14px; border-radius: 8px; font-size: 13px; }
+.var-num { color: var(--orange); font-weight: 700; margin-right: 6px; }
+.verdict { background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(168, 85, 247, 0.02)); border: 2px solid var(--purple); border-radius: 16px; padding: 32px 36px; margin: 20px 0; }
+.verdict h3 { color: var(--purple); font-size: 22px; margin-bottom: 12px; }
+.vs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+.vs-col { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+.vs-col.left { border-left: 4px solid var(--red); }
+.vs-col.right { border-left: 4px solid var(--green); }
+.vs-col h4 { margin-bottom: 12px; }
+.vs-col ul { list-style: none; padding: 0; }
+.vs-col li { padding: 6px 0; font-size: 13px; color: var(--text2); border-bottom: 1px dashed var(--border); }
+.vs-col li:last-child { border-bottom: none; }
+.tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-right: 6px; }
+.tag-purple { background: rgba(168, 85, 247, 0.2); color: var(--purple); }
+footer { text-align: center; color: var(--text3); margin-top: 48px; font-size: 13px; }
+@media (max-width: 768px) { .vs, .variables { grid-template-columns: 1fr; } .hero { padding: 32px 24px; } .hero h1 { font-size: 26px; } section { padding: 24px 22px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+  <div class="hero-label">멀티에이전트 검증 토론 · 2nd Report</div>
+  <h1>🔬 심리스 팬티 — 대표님 검증 토론</h1>
+  <p class="muted" style="font-size:16px; max-width:750px;">대표님이 실제로 시장조사까지 마친 후보를 대상으로, 멀티에이전트 토론이 대표님 직관과 얼마나 일치하는지 블라인드 검증한 결과입니다.</p>
+  <div class="hero-meta">
+    <span>📅 2026-04-11</span>
+    <span>🎯 scan 255 심리스 팬티</span>
+    <span>🦊🐱🦋🐻 4명 + 🐣 조율</span>
+    <span>🔁 블라인드 모드</span>
+  </div>
+</div>
+
+<section>
+  <h2>📊 Round 1 — 만장일치 비추</h2>
+  <p>4명이 데이터만 보고 독립 평가. 결과: <b>만장일치 비추</b> (평균 3.5/10).</p>
+  <table class="tbl">
+    <thead><tr><th>에이전트</th><th>점수</th><th>핵심 주장</th></tr></thead>
+    <tbody>
+      <tr><td>🦊 모리 (시장)</td><td class="hl">4/10</td><td>"자리는 있지만 신규가 못 올라온 시장" (신제품률 17.5%)</td></tr>
+      <tr><td>🐱 키노 (수익물류)</td><td class="hl">3/10</td><td>"1매 단가 1,400원 치킨게임. 마진 40% 절대 불가"</td></tr>
+      <tr><td>🦋 픽시 (리스크)</td><td class="hl">4/10</td><td>"사이즈/인증/PL/공정 4중 리스크"</td></tr>
+      <tr><td>🐻 보리 (자연유입)</td><td class="hl">3/10</td><td>"리뷰·사이즈·위생·브랜드 4중 락인"</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>🔬 카테고리 특수 변수 — 자력 발견 15개</h2>
+  <p>4명이 힌트 없이 의류·위생용품 카테고리의 특수 변수를 발견한 결과입니다. <b>검증의 핵심 포인트</b>.</p>
+  <div class="variables">
+    <div class="var-item"><span class="var-num">1.</span>사이즈 × 컬러 SKU 폭증 (M~3XL × 5색 = 30 SKU)</div>
+    <div class="var-item"><span class="var-num">2.</span>위생용품 반품 = 사실상 폐기</div>
+    <div class="var-item"><span class="var-num">3.</span>1매당 1,400원 치킨게임 (꿀쥬 12p)</div>
+    <div class="var-item"><span class="var-num">4.</span>신제품률 17.5% 해석 논쟁</div>
+    <div class="var-item"><span class="var-num">5.</span>리뷰 골리앗 (8,312/9,096/8,976)</div>
+    <div class="var-item"><span class="var-num">6.</span>자율안전확인/KATRI/FITI 인증 ⚠️</div>
+    <div class="var-item"><span class="var-num">7.</span>표시광고법 (기능성 문구 제재)</div>
+    <div class="var-item"><span class="var-num">8.</span>PL 보험 필수 ⚠️</div>
+    <div class="var-item"><span class="var-num">9.</span>란제리 모델 비용 200~500만원 ❌</div>
+    <div class="var-item"><span class="var-num">10.</span>3D 니팅/본딩 공장 풀 좁음</div>
+    <div class="var-item"><span class="var-num">11.</span>리뷰 침묵 효과 (속옷 리뷰 작성률 ↓)</div>
+    <div class="var-item"><span class="var-num">12.</span>사이즈 신뢰 락인 (재구매 기존 브랜드)</div>
+    <div class="var-item"><span class="var-num">13.</span>주니어 KC / 생리팬티 의약외품 구분</div>
+    <div class="var-item"><span class="var-num">14.</span>매출 균등성 85 함정 해석 논쟁</div>
+    <div class="var-item"><span class="var-num">15.</span>iLBiA 브랜드 톤 충돌 ❌</div>
+  </div>
+  <p class="muted" style="font-size:13px;">⚠️ = 재검토 필요 / ❌ = 대표님 검증 결과 잘못된 지적</p>
+</section>
+
+<section>
+  <h2>🔥 Round 2 — 오히려 더 하향</h2>
+  <table class="tbl">
+    <thead><tr><th>에이전트</th><th>R1</th><th>R2</th><th>변화</th></tr></thead>
+    <tbody>
+      <tr><td>🦊 모리</td><td>4</td><td>2</td><td class="change">↓ 조건부 시나리오 철회</td></tr>
+      <tr><td>🐱 키노</td><td>3</td><td>3</td><td>유지</td></tr>
+      <tr><td>🦋 픽시</td><td>4</td><td>3</td><td class="change">↓ 좁은 타겟이 리스크 집중</td></tr>
+      <tr><td>🐻 보리</td><td>3</td><td>3</td><td>유지</td></tr>
+      <tr class="lose"><td>평균</td><td>3.5</td><td class="hl">2.75</td><td class="change">↓ 만장일치 드롭 권장</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>👤 대표님 실제 진행 상황 공개</h2>
+  <table class="tbl">
+    <thead><tr><th>항목</th><th>실제 진행</th></tr></thead>
+    <tbody>
+      <tr><td>브랜드</td><td><span class="tag tag-purple">오모모</span> (iLBiA 아님)</td></tr>
+      <tr><td>MOQ</td><td>3,000개</td></tr>
+      <tr><td>알리바바 단가</td><td class="hl">0.4 USD / 매 (약 560원)</td></tr>
+      <tr><td>구성</td><td>6매 세트</td></tr>
+      <tr><td>판매가 목표</td><td>1만원 중후반 (15,000~17,000원)</td></tr>
+      <tr><td>사이즈</td><td>MOQ 내 자율 배분</td></tr>
+      <tr><td>핵심 재질</td><td>나일론 + 스판덱스 혼방, <b>라이너 100% 면 필수</b></td></tr>
+      <tr><td>라벨 인쇄</td><td>영문 or 국문 (중국어 X)</td></tr>
+      <tr><td>상세페이지/이미지</td><td>AI 이미지 생성 (나노바나나) + 일비아 경험 차별화</td></tr>
+      <tr><td>전략</td><td>오모모 테스트 → 성공 시 별도 브랜드화 + 확장</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>⚖️ 비교 — 우리 토론 vs 대표님 실제</h2>
+  <div class="vs">
+    <div class="vs-col left">
+      <h4 style="color: var(--red);">❌ 우리가 틀렸던 것</h4>
+      <ul>
+        <li><b>1688 원가 추정</b>: 800~1,200원/매 → 실제 560원 (우리 추정 2배 과대)</li>
+        <li><b>란제리 모델비 200~500만원</b>: AI 이미지 시대 반영 못함</li>
+        <li><b>iLBiA 브랜드 톤 충돌</b>: 오모모 브랜드 존재 자체를 놓침</li>
+        <li><b>후발주자 진입 불가</b>: 실행 역량 차별화 관점 부재</li>
+        <li><b>확장 플랫폼 관점</b>: 단품 ROI만 봄. 카테고리 확장 전략 고려 안 함</li>
+        <li><b>MOQ 시나리오</b>: 500~1000만 가정. 3000+ 대량 발주 단가 하락 놓침</li>
+      </ul>
+    </div>
+    <div class="vs-col right">
+      <h4 style="color: var(--green);">✅ 우리 주장 유효</h4>
+      <ul>
+        <li><b>민감성 피부 저자극 소재</b>(픽시): 대표님 "라이너 100% 면" 사양과 일치</li>
+        <li><b>세트 가격 함정 경고</b>(키노): 6매 15,000원 = 1매 2,500원 가성비 포지션</li>
+        <li><b>리뷰 골리앗 경고</b>(보리): 초기 리뷰 확보 전략 필요 (여전히 유효)</li>
+        <li><b>다구성 가격 환산</b>(키노): 표시가 평균 18,690원 = 5매 세트 확인</li>
+        <li><b>카테고리 특수 변수 15개 자력 발견</b>: 검증 프로세스의 핵심 성과</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>💰 마진 재계산 (실제 견적 반영)</h2>
+  <p>6매 세트 판매가 15,000원 가정:</p>
+  <table class="tbl">
+    <thead><tr><th>항목</th><th>수치</th></tr></thead>
+    <tbody>
+      <tr><td>판매가</td><td class="hl">15,000원</td></tr>
+      <tr><td>쿠팡 수수료 (약 10%)</td><td>-1,500원</td></tr>
+      <tr><td>배송비 (의류 박스)</td><td>-2,500원</td></tr>
+      <tr><td>포장/부자재 (6매)</td><td>-1,500원</td></tr>
+      <tr><td>제품 원가 (0.4 USD × 6 + CIF)</td><td>-4,000원</td></tr>
+      <tr class="win"><td>순이익</td><td class="hl">5,500원</td></tr>
+      <tr class="win"><td>마진율</td><td class="hl">약 36~38%</td></tr>
+    </tbody>
+  </table>
+  <p class="muted" style="font-size:13px;">→ 키노의 "마진 40% 절대 불가" 결론 <b>파산</b>. 1만원 중후반대면 달성 가능.</p>
+</section>
+
+<section>
+  <h2>📊 재평가 (실제 수치 반영)</h2>
+  <table class="tbl">
+    <thead><tr><th>에이전트</th><th>R2 원점수</th><th>재평가</th><th>변화 이유</th></tr></thead>
+    <tbody>
+      <tr><td>🦊 모리</td><td>2</td><td class="hl">6</td><td>플랫폼 전략 + 차별화 실행 가능</td></tr>
+      <tr><td>🐱 키노</td><td>3</td><td class="hl">7</td><td>원가 560원 확정, 마진 36~38% 달성</td></tr>
+      <tr><td>🦋 픽시</td><td>3</td><td class="hl">6</td><td>모델비 삭제, 라이너 면 차별화 성공</td></tr>
+      <tr><td>🐻 보리</td><td>3</td><td class="hl">5</td><td>오모모 + AI 이미지 톤 해결, 리뷰 벽 여전</td></tr>
+      <tr class="win"><td>평균</td><td>2.75</td><td class="hl">6.0</td><td>조건부 → <b>진행 권장</b> 구간</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <div class="verdict">
+    <h3>🎓 검증 결과 — 4:1 대표님 승</h3>
+    <p>우리 토론은 <b>강력 비추(2.75/10)</b>로 결론 냈지만, 대표님 실제 데이터를 반영하면 <b>진행 권장(6.0/10)</b>으로 뒤집힘.</p>
+    <p><b>우리 토론의 가장 큰 한계</b>: 브랜드 컨텍스트(오모모), MOQ에 따른 원가 하락, AI 이미지 혁명, 실행 역량 차별화, 플랫폼 확장 관점 — 다섯 가지 모두 놓침.</p>
+    <p><b>우리 토론의 가치</b>: 그럼에도 카테고리 특수 변수 15개를 힌트 없이 자력으로 발견. 특히 민감성 피부 저자극 소재(라이너 면 100%) 방향 예측은 대표님 사양과 일치.</p>
+  </div>
+</section>
+
+<section>
+  <h2>⚠️ 재확인 대기 — 인증 의무 여부</h2>
+  <div class="issues">
+    <div class="issue warning">
+      <div class="issue-label">🦋 픽시 주장 검증 필요</div>
+      <h4>KATRI/FITI는 "시험 기관"이지 "인증 기관"이 아님</h4>
+      <p>픽시가 "KATRI/FITI 인증 의무"라고 했지만, 정확히는 <b>한국의류시험연구원(KATRI)</b>과 <b>FITI시험연구원</b>은 시험 받는 곳. 성인 속옷은 일반적으로 <b>KC 자율안전확인 대상 아님</b>(어린이 속옷만 강제). 실제로는 <b>섬유 품질표시 의무</b>(혼용률/제조국/취급법)만 필수일 가능성.</p>
+      <p class="muted" style="font-size:13px;">→ 대표님이 "영문/국문 라벨 인쇄" 강조하신 게 정확히 품질표시 의무 충족 방향. 대표님 법령 확인 후 업데이트 예정.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>🛠 프로세스 개선 액션 (6가지)</h2>
+  <div class="issues">
+    <div class="issue info">
+      <div class="issue-label">1. 브랜드 컨텍스트</div>
+      <h4>iLBiA + 오모모 양쪽 다 평가 전제로 명시</h4>
+      <p>briefing 만들 때 반드시 "두 브랜드 컨텍스트 중 어느 쪽이 적합한가"를 에이전트들이 평가하도록 프롬프트에 포함.</p>
+    </div>
+    <div class="issue info">
+      <div class="issue-label">2. MOQ 시나리오 다변화</div>
+      <h4>500 / 1000 / 3000 / 5000 각각 단가 추정</h4>
+      <p>MOQ가 커질수록 단가 50% 하락 가능. 실제 견적 없이 시뮬레이션만으로는 원가를 정확히 예측 불가.</p>
+    </div>
+    <div class="issue info">
+      <div class="issue-label">3. AI 이미지 시대 반영</div>
+      <h4>모델/촬영비 기본 0원 가정</h4>
+      <p>2025년 나노바나나/미드저니/플럭스 시대. 이 비용은 대부분의 카테고리에서 삭제.</p>
+    </div>
+    <div class="issue info">
+      <div class="issue-label">4. 확장 플랫폼 관점</div>
+      <h4>"이 SKU가 카테고리 진입 발판인가?" 평가축 추가</h4>
+      <p>단품 ROI만 보지 말고, 카테고리 플랫폼으로서의 확장 가능성 별도 평가.</p>
+    </div>
+    <div class="issue info">
+      <div class="issue-label">5. 인증 정보 정확도</div>
+      <h4>시험 기관 vs 인증 기관 구분</h4>
+      <p>한국 법령(전안법, 자율안전확인, 품질표시 의무) 정확히 조사 후 제시하도록 프롬프트에 명시.</p>
+    </div>
+    <div class="issue info">
+      <div class="issue-label">6. 실행 역량 가점</div>
+      <h4>디자인·상세페이지·브랜드 경험 차별화 가능성 평가</h4>
+      <p>실행 역량이 데이터 장벽을 뚫을 수 있는지 별도 평가.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>🏆 대표님 승리 포인트</h2>
+  <div class="issues">
+    <div class="issue win">
+      <div class="issue-label">대표님 판단 근거</div>
+      <h4>중위권 탄탄 + 세부 키워드 시장 + 확장성 + 오모모 + 차별화 실행</h4>
+      <p><b>1. 중위권 탄탄 가설</b>: 생필품 카테고리 특성. 매출 균등성 85는 "함정"이 아니라 "정상 분포".</p>
+      <p><b>2. 세부 키워드 시장</b>: 팬티 > 여성 > 심리스 > 노라인 4단계 세부화. 상위 대카테고리보다 진입 장벽 낮음.</p>
+      <p><b>3. 확장성</b>: 심리스 팬티 → 모달팬티 → 심리스브라 → 남성팬티 플랫폼.</p>
+      <p><b>4. 오모모 브랜드</b>: 테스트 → 성공 시 별도 브랜드화.</p>
+      <p><b>5. 차별화 실행</b>: 일비아 경험의 상세페이지/디자인 + AI 이미지 + 라이너 100% 면 재질.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Generated by 비코어랩 멀티에이전트 팀 · 🐣 하치 (조율) · 🦊 모리 · 🐱 키노 · 🦋 픽시 · 🐻 보리</p>
+  <p style="margin-top:8px;">Verification Report · 2026-04-11 · 대표님 블라인드 검증 · 4:1 대표님 승</p>
+</footer>
+
+</div>
+</body>
+</html>

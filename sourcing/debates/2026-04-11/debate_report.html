@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎯 비코어랩 소싱 멀티에이전트 토론 결과 — 2026-04-11</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0e14;
+  --bg2: #12151e;
+  --card: #181c28;
+  --card-hover: #1e2335;
+  --border: #2a2f40;
+  --border-light: #3a4055;
+  --text: #f0f2f7;
+  --text2: #9ba3b8;
+  --text3: #6b7285;
+  --orange: #ff6b2b;
+  --orange-light: #ff8b55;
+  --orange-dark: #cc5522;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #eab308;
+  --blue: #3b82f6;
+  --purple: #a855f7;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+  font-size: 15px;
+  padding: 40px 20px 80px;
+}
+.container { max-width: 1100px; margin: 0 auto; }
+
+/* Header */
+.hero {
+  background: linear-gradient(135deg, var(--card) 0%, var(--bg2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 48px 40px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  top: -50%; right: -30%;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(255, 107, 43, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-label {
+  display: inline-block;
+  color: var(--orange);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.hero h1 {
+  font-size: 38px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  color: var(--text2);
+  font-size: 14px;
+  margin-top: 24px;
+}
+.hero-meta span { display: flex; align-items: center; gap: 6px; }
+
+/* Sections */
+section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 36px;
+  margin-bottom: 24px;
+}
+h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+h2::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 24px;
+  background: var(--orange);
+  border-radius: 3px;
+}
+h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 20px 0 12px;
+  color: var(--orange-light);
+}
+h4 { font-size: 16px; font-weight: 700; margin: 16px 0 8px; }
+p { margin-bottom: 12px; color: var(--text); }
+.muted { color: var(--text2); }
+
+/* Score Table */
+.score-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0 20px;
+  background: var(--bg2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.score-table th {
+  background: var(--bg);
+  color: var(--text2);
+  text-align: center;
+  padding: 14px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid var(--border);
+}
+.score-table th:first-child, .score-table td:first-child { text-align: left; padding-left: 20px; }
+.score-table td {
+  text-align: center;
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 500;
+}
+.score-table tr:last-child td { border-bottom: none; }
+.score-table .rank-1 { background: rgba(255, 107, 43, 0.12); }
+.score-table .rank-1 td:first-child { color: var(--orange); font-weight: 700; }
+.score-table .highlight { color: var(--orange); font-weight: 800; font-size: 16px; }
+.score-table .total { color: var(--text); font-weight: 800; font-size: 16px; }
+.score-table .rank-1 .total { color: var(--orange); }
+
+/* Agents grid */
+.agents {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+.agent-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+  transition: all 0.2s;
+}
+.agent-card:hover { border-color: var(--border-light); background: var(--card-hover); }
+.agent-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.agent-emoji { font-size: 24px; }
+.agent-name { font-size: 17px; font-weight: 700; }
+.agent-role { color: var(--text2); font-size: 13px; }
+.agent-rec { color: var(--orange); font-weight: 600; font-size: 13px; margin-bottom: 8px; }
+.agent-card p { font-size: 14px; color: var(--text2); margin-bottom: 6px; }
+
+/* Key Issue Cards */
+.issues {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0;
+}
+.issue {
+  background: var(--bg2);
+  border-left: 4px solid var(--orange);
+  border-radius: 10px;
+  padding: 18px 22px;
+}
+.issue.critical { border-left-color: var(--red); }
+.issue.warning { border-left-color: var(--yellow); }
+.issue.info { border-left-color: var(--blue); }
+.issue-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--orange);
+  margin-bottom: 6px;
+}
+.issue.critical .issue-label { color: var(--red); }
+.issue.warning .issue-label { color: var(--yellow); }
+.issue.info .issue-label { color: var(--blue); }
+.issue h4 { margin: 0 0 8px; font-size: 16px; }
+
+/* Devil's advocate scenarios */
+.scenarios {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 20px 0;
+}
+.scenario {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.scenario-num {
+  display: inline-block;
+  background: var(--red);
+  color: white;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.scenario h4 { margin: 0 0 8px; font-size: 15px; }
+.scenario p { font-size: 13px; color: var(--text2); margin-bottom: 8px; }
+.scenario .defense { color: var(--green); font-size: 13px; font-weight: 500; }
+
+/* Final verdict */
+.verdict {
+  background: linear-gradient(135deg, rgba(255, 107, 43, 0.12), rgba(255, 107, 43, 0.02));
+  border: 2px solid var(--orange);
+  border-radius: 16px;
+  padding: 32px 36px;
+  margin: 20px 0;
+}
+.verdict h3 { color: var(--orange); font-size: 22px; margin-bottom: 12px; }
+.conditions { list-style: none; margin-top: 16px; }
+.conditions li {
+  padding: 10px 0 10px 36px;
+  position: relative;
+  font-size: 15px;
+  border-bottom: 1px dashed var(--border);
+}
+.conditions li:last-child { border-bottom: none; }
+.conditions li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background: var(--orange);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* Format comparison */
+.formats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+.format {
+  background: var(--bg2);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  position: relative;
+}
+.format.recommended {
+  border-color: var(--orange);
+  background: linear-gradient(135deg, rgba(255, 107, 43, 0.08), var(--bg2));
+}
+.format-badge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: var(--orange);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+.format h4 { font-size: 17px; margin-bottom: 10px; }
+.format .price {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--orange);
+  margin: 8px 0;
+}
+.format .price .unit { font-size: 14px; color: var(--text2); font-weight: 500; }
+.format-props { list-style: none; margin-top: 12px; }
+.format-props li {
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--text2);
+  border-bottom: 1px dashed var(--border);
+}
+.format-props li:last-child { border-bottom: none; }
+.format-props .good { color: var(--green); }
+.format-props .bad { color: var(--red); }
+
+/* Tags */
+.tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 6px;
+}
+.tag-orange { background: rgba(255, 107, 43, 0.2); color: var(--orange-light); }
+.tag-green { background: rgba(34, 197, 94, 0.2); color: var(--green); }
+.tag-red { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+.tag-yellow { background: rgba(234, 179, 8, 0.2); color: var(--yellow); }
+.tag-gray { background: var(--border); color: var(--text2); }
+
+/* Action list */
+.actions { margin-top: 16px; }
+.action {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.action:last-child { border-bottom: none; }
+.action-medal { font-size: 28px; line-height: 1; }
+.action-body { flex: 1; }
+.action-body h4 { margin-bottom: 4px; }
+.action-body p { font-size: 14px; color: var(--text2); margin: 4px 0 0; }
+
+/* Footer */
+footer {
+  text-align: center;
+  color: var(--text3);
+  margin-top: 48px;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .agents, .scenarios, .formats { grid-template-columns: 1fr; }
+  .hero { padding: 32px 24px; }
+  .hero h1 { font-size: 28px; }
+  section { padding: 24px 22px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+  <div class="hero-label">소싱 멀티에이전트 토론 · Report</div>
+  <h1>🎯 GO 판정 Top 3 우선순위 토론</h1>
+  <p class="muted" style="font-size:16px; max-width:700px;">
+    정체된 소싱 후보를 다차원 관점으로 평가하고, 반박을 거쳐 우선순위를 도출한 멀티에이전트 토론 결과입니다.
+  </p>
+  <div class="hero-meta">
+    <span>📅 2026-04-11</span>
+    <span>🦊🐱🦋🐻 4명 평가단 + 🐣 조율자</span>
+    <span>🔁 3라운드 토론</span>
+    <span>📊 3개 후보 비교</span>
+  </div>
+</div>
+
+<section>
+  <h2>📋 토론 대상 및 방식</h2>
+  <p>소싱콕 GO 판정 상품 중 <b>기회점수 상위 3개</b>를 대상으로 4명의 전문가 에이전트가 각자 다른 축으로 독립 평가 → 상호 반박 → 하치의 악마의 변호인 라운드를 거쳐 최종 우선순위 도출.</p>
+  <div style="margin-top:12px;">
+    <span class="tag tag-gray">부분 가발 (scan 349, 점수 85.1)</span>
+    <span class="tag tag-gray">옷 압축팩 (scan 2733, 점수 84.2)</span>
+    <span class="tag tag-gray">허리베개 (scan 302, 점수 83.3)</span>
+  </div>
+  <h3>👥 평가단 구성</h3>
+  <div class="agents">
+    <div class="agent-card">
+      <div class="agent-head">
+        <span class="agent-emoji">🦊</span>
+        <span class="agent-name">모리</span>
+        <span class="agent-role">쿠팡 시장 분석가</span>
+      </div>
+      <p>시장 규모, 중위권 판매자 구조, 매출 집중도, 신제품 진입 가능성</p>
+    </div>
+    <div class="agent-card">
+      <div class="agent-head">
+        <span class="agent-emoji">🐱</span>
+        <span class="agent-name">키노</span>
+        <span class="agent-role">수익성·물류 분석가</span>
+      </div>
+      <p>원가 추정, 마진율, 부피/무게, 쿠팡 FBA 보관비, 파렛트당 수익</p>
+    </div>
+    <div class="agent-card">
+      <div class="agent-head">
+        <span class="agent-emoji">🦋</span>
+        <span class="agent-name">픽시</span>
+        <span class="agent-role">리스크 분석가</span>
+      </div>
+      <p>KC/식품/의료기기 인증, 특허·IP 침해, 품질 클레임, 플랫폼 제재</p>
+    </div>
+    <div class="agent-card">
+      <div class="agent-head">
+        <span class="agent-emoji">🐻</span>
+        <span class="agent-name">보리</span>
+        <span class="agent-role">자연 유입 분석가</span>
+      </div>
+      <p>광고 의존도, 롱테일 키워드, 리뷰·SEO 기반 생존력, iLBiA 시너지</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>📊 Round 1 — 독립 평가</h2>
+  <p>4명이 동시에 같은 데이터를 보고 <b>자기 축으로만</b> 0~10점 채점. 다른 축은 건드리지 않음 (편향 방지).</p>
+  <table class="score-table">
+    <thead>
+      <tr>
+        <th>후보</th>
+        <th>🦊 모리<br><span class="muted">시장</span></th>
+        <th>🐱 키노<br><span class="muted">수익물류</span></th>
+        <th>🦋 픽시<br><span class="muted">리스크</span></th>
+        <th>🐻 보리<br><span class="muted">자연유입</span></th>
+        <th>합계</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>부분 가발 (349)</td>
+        <td>6</td>
+        <td class="highlight">8.5</td>
+        <td>4</td>
+        <td>3</td>
+        <td class="total">21.5</td>
+      </tr>
+      <tr>
+        <td>옷 압축팩 (2733)</td>
+        <td class="highlight">8</td>
+        <td>4</td>
+        <td class="highlight">9</td>
+        <td>6</td>
+        <td class="total">27</td>
+      </tr>
+      <tr>
+        <td>허리베개 (302)</td>
+        <td>5</td>
+        <td>3</td>
+        <td>5</td>
+        <td class="highlight">7</td>
+        <td class="total">20</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="issues">
+    <div class="issue info">
+      <div class="issue-label">Round 1 특이점</div>
+      <h4>4명이 전부 다른 후보를 강추 — 전형적인 다차원 충돌</h4>
+      <p>모리 → 옷 압축팩 / 키노 → 부분 가발 / 픽시 → 옷 압축팩 / 보리 → 허리베개. 축별로 장단점이 극명해 단순 합산만으로는 결정할 수 없는 구조.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>🔥 Round 2 — 상호 반박</h2>
+  <p>Round 1 결과를 공유받고 각자 <b>다른 3명의 평가에 반박</b>. 점수 조정 허용.</p>
+  <table class="score-table">
+    <thead>
+      <tr>
+        <th>후보</th>
+        <th>🦊 모리</th>
+        <th>🐱 키노</th>
+        <th>🦋 픽시</th>
+        <th>🐻 보리</th>
+        <th>합계</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>부분 가발 (349)</td>
+        <td>5 ↓</td>
+        <td class="highlight">8.5</td>
+        <td>3 ↓</td>
+        <td>2 ↓</td>
+        <td class="total">18.5</td>
+      </tr>
+      <tr class="rank-1">
+        <td>🏆 옷 압축팩 (2733)</td>
+        <td class="highlight">9 ↑</td>
+        <td>3.5 ↓</td>
+        <td class="highlight">8.5</td>
+        <td>5 ↓</td>
+        <td class="total">26</td>
+      </tr>
+      <tr>
+        <td>허리베개 (302)</td>
+        <td>5</td>
+        <td>2.5 ↓</td>
+        <td>2 ↓</td>
+        <td class="highlight">8 ↑</td>
+        <td class="total">17.5</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="muted" style="font-size:13px;">Round 1 → Round 2 점수 조정 표시 (↑상향, ↓하향)</p>
+
+  <h3>💥 결정타 3개</h3>
+  <div class="issues">
+    <div class="issue critical">
+      <div class="issue-label">🦋 픽시 결정타 #1 — 허리베개 침몰</div>
+      <h4>보리가 제시한 자연유입 롱테일 키워드가 전부 의료기기법 위반</h4>
+      <p>보리의 핵심 근거였던 롱테일 키워드 "목디스크베개 / 일자목베개 / 경추베개"가 <b>전부 의료기기법 제26조 직접 위반 대상</b>. 즉 보리의 광고 의존도 67.9 수치는 위법 키워드 사용 전제에서 나온 숫자. 합법 키워드로만 가면 자연유입 장점 증발.</p>
+    </div>
+    <div class="issue critical">
+      <div class="issue-label">🦋 픽시 결정타 #2 — 부분 가발 침몰</div>
+      <h4>알리바바 무브랜드 가발 99%가 국내 브랜드 카피</h4>
+      <p>키노가 제시한 원가율 12~18% (마진 최강) 논리에 대해, 픽시는 "IP 침해 가처분 1건이면 재고 500개 전량 사장"으로 반격. "항암가발" 키워드는 <b>의료기기법 + 표시광고법 동시 위반</b>. 반품률 TOP5 카테고리.</p>
+    </div>
+    <div class="issue warning">
+      <div class="issue-label">🐻 보리 날카로운 반격</div>
+      <h4>"광고 끄고 6개월 뒤 매출 살아있냐" 기준</h4>
+      <p>보리의 숨은 논리 — 가발 -90%, 압축팩 -80%, 허리베개 -30%. 허리베개가 유일하게 광고비 곡선이 꺾이는 후보. <span class="muted">(픽시의 의료기기법 반박으로 상쇄되긴 했지만 압축팩의 계절성/광고 의존도 경고는 유효)</span></p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>😈 Round 3 — 하치의 악마의 변호인</h2>
+  <p>잠정 Top인 <b>옷 압축팩</b>에 대해 "이걸 하면 망하는 시나리오"를 집요하게 파기. 넘어가면 채택, 못 넘기면 탈락.</p>
+  <div class="scenarios">
+    <div class="scenario">
+      <span class="scenario-num">1</span>
+      <h4>🚨 계절성 폭탄</h4>
+      <p>겨울옷 보관 시즌(10~12월) 집중 → 비시즌 재고 악성화 리스크. 연 광고비 2,100만원, 2년차에 끄면 매출 0.</p>
+      <p class="defense">✓ 방어: 여행용 포지셔닝으로 계절성 완화. Top10 중 여행용 2개가 월 2000만원대 유지</p>
+    </div>
+    <div class="scenario">
+      <span class="scenario-num">2</span>
+      <h4>🚨 부피·보관비 폭탄 (키노의 핵심 경고)</h4>
+      <p>대형 70x100 + 특대형 80x120 + 옷걸이형 → 쿠팡 FBA 대형 박스 → 보관비 월 15~25만원/500개. 파렛트당 수익 가발 대비 1/50.</p>
+      <p class="defense">✓ 방어: 여행용 소형 롤업(20x30, 30x40) 단일 SKU → 부피 절반</p>
+    </div>
+    <div class="scenario">
+      <span class="scenario-num">3</span>
+      <h4>🚨 불량률 → 반품 지옥</h4>
+      <p>AI 분석에 명시: "압축 유지력 저하 → 환불 증가 필수 관리". 밸브 1군데 새면 전량 반품. 쿠팡 반품률 5% 초과 시 노출 강등.</p>
+      <p class="defense">✓ 방어: 1688 샘플 3사 이상 테스트 → QC 최상위 1사만 선정. 이중 지퍼+역류방지 고정</p>
+    </div>
+    <div class="scenario">
+      <span class="scenario-num">4</span>
+      <h4>🚨 골리앗 리뷰벽</h4>
+      <p>Top 상품 리뷰 분포: 리브맘 <b>5,016</b> / 아케이 <b>2,659</b> / 헤인느 <b>1,393</b>. 신규 진입하려면 리뷰 1,000개 이상 필요 → 체험단 400~600만원.</p>
+      <p class="defense">✓ 방어: 중위권 30~60위 구간 포지션. 롱테일 키워드 공략</p>
+    </div>
+    <div class="scenario">
+      <span class="scenario-num">5</span>
+      <h4>🚨 가성비 전쟁</h4>
+      <p>1매당 1,080원 ~ 18,450원 = 단가 17배 차이. 이미 가격 파괴 진행 중인 레드 오션.</p>
+      <p class="defense">✓ 방어: 최저가 경쟁 금지. 프리미엄 "롤업+여행가방 호환" 포지션 유지</p>
+    </div>
+    <div class="scenario">
+      <span class="scenario-num">6</span>
+      <h4>🚨 밸브 실용신안 리스크 (픽시 지적)</h4>
+      <p>KIPRIS 미조회 상태 진입 시 경고장 위험. 분류코드 B65D 81/20, B65B 31/00.</p>
+      <p class="defense">✓ 방어: KIPRIS 30분 조회 → 밸브 없는 수동 롤업 구조로 회피</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="verdict">
+    <h3>🏆 최종 판정: 옷 압축팩 (조건부 채택)</h3>
+    <p>6가지 시나리오 모두 방어 가능 — 단, 아래 <b>4개 조건을 모두 충족</b>해야 함. 하나라도 빠지면 키노·보리 경고가 현실화됨.</p>
+    <ul class="conditions">
+      <li><b>제품 사양 축소</b> — 여행용 소형 롤업 (20x30, 30x40) 단일 SKU. 옷걸이형·특대형·이불용 배제</li>
+      <li><b>밸브 없는 수동 압축 구조</b> — KIPRIS 사전 조회로 실용신안 침해 회피</li>
+      <li><b>1688 QC 3사 비교 후 1사 선정</b> — 이중 지퍼 + 역류 방지 필수. 불량률 5% 이하 확보</li>
+      <li><b>중위권 포지셔닝</b> — 리뷰 1,000개 이상 골리앗 직접 경쟁 금지. 체험단 200 + 소액 광고로 30~60위 진입</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>📦 형태 분석 — 어떤 압축팩을 만들지?</h2>
+  <p>Top 10 월매출 기준으로 현재 시장을 3가지 형태로 분류한 결과:</p>
+  <div class="formats">
+    <div class="format">
+      <h4>🛏️ 이불 진공팩 (펌프 필수)</h4>
+      <div class="price">19,800 <span class="unit">~50,000원</span></div>
+      <ul class="format-props">
+        <li>대표 상품: 리빙스냅, 헤인느, 펠코스</li>
+        <li>월매출: 7,100 ~ 12,106만원</li>
+        <li class="good">✓ 최고 매출 규모</li>
+        <li class="bad">✗ 부피 대형 (특대형 80×120)</li>
+        <li class="bad">✗ 펌프 구성 필수 → IP 리스크</li>
+        <li class="bad">✗ 계절성 극심 (겨울 이불 수요)</li>
+      </ul>
+    </div>
+    <div class="format">
+      <h4>🧥 옷걸이형 (패딩 전용)</h4>
+      <div class="price">10,900 <span class="unit">~27,900원</span></div>
+      <ul class="format-props">
+        <li>대표 상품: 리브맘, 모노피커, 맥맨, 메리달</li>
+        <li>월매출: 1,782 ~ 3,380만원</li>
+        <li class="good">✓ 진공 없이 수동 압축 가능 (리브맘)</li>
+        <li class="bad">✗ 패딩만 쓰는 단일 용도</li>
+        <li class="bad">✗ 12~2월 외 수요 급감</li>
+        <li class="bad">✗ 리뷰 골리앗 (리브맘 5,016)</li>
+      </ul>
+    </div>
+    <div class="format recommended">
+      <span class="format-badge">RECOMMENDED</span>
+      <h4>🧳 여행용 소형 롤업</h4>
+      <div class="price">10,800 <span class="unit">~10,900원</span></div>
+      <ul class="format-props">
+        <li>대표 상품: 아케이 리빙, 니드잇 4종</li>
+        <li>월매출: 1,996 ~ 2,152만원</li>
+        <li class="good">✓ 부피 최소 (캐리어 수납용)</li>
+        <li class="good">✓ 사계절 수요 (여행은 연중)</li>
+        <li class="good">✓ 가격대 거의 균일 (10,900원)</li>
+        <li class="good">✓ 밸브 없는 수동 압축 가능</li>
+        <li class="good">✓ iLBiA 세제·건조기시트 크로스셀 가능</li>
+      </ul>
+    </div>
+  </div>
+  <div class="issues">
+    <div class="issue warning">
+      <div class="issue-label">⚠️ 다구성 가격 주의 (대표님 경고 반영)</div>
+      <h4>니드잇 10,900원은 "4종 세트" 가격 — 1매당 약 2,725원</h4>
+      <p>Top 상품들 대부분이 2~10매 세트 구성이므로 단가 계산 시 반드시 매수 확인 필요. 상품명에 "4P", "4종", "1+1+1+1" 등 표기 있음. 단품 판매자와 세트 판매자의 원가 구조가 다름.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>💰 판매가·원가 목표 (1차 추정)</h2>
+  <p class="muted" style="font-size:13px;">⚠️ 쿠팡 상품 페이지 직접 크롤링이 Cloudflare 봇 차단으로 막혀있음. 아래 수치는 <b>소싱콕 DB + AI 상세분석 데이터 기반 1차 추정치</b>. 대표님 직접 확인 또는 사무실 PC Chrome으로 재검증 필요.</p>
+  <h3>타깃: 여행용 소형 롤업 압축팩</h3>
+  <table class="score-table">
+    <thead>
+      <tr><th>항목</th><th>수치</th><th>근거</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>타깃 판매가</td><td class="highlight">10,900원</td><td>Top10 여행용 상품 균일 가격대</td></tr>
+      <tr><td>쿠팡 수수료</td><td>-1,200원</td><td>약 11%</td></tr>
+      <tr><td>로켓 배송비</td><td>-2,800원</td><td>중대형 박스 기준</td></tr>
+      <tr><td>포장/부자재</td><td>-400원</td><td>인쇄 폴리백 + 택</td></tr>
+      <tr><td>순수익 풀 (6,500원)</td><td>-</td><td>마진 40% 목표 시</td></tr>
+      <tr class="rank-1"><td>목표 순이익</td><td class="highlight">4,360원 (40%)</td><td>10,900 × 40%</td></tr>
+      <tr class="rank-1"><td>목표 소싱 원가</td><td class="highlight">~2,140원 이하</td><td>CIF 기준 (관세·수입 VAT 포함)</td></tr>
+    </tbody>
+  </table>
+  <div class="issues">
+    <div class="issue">
+      <div class="issue-label">📌 원가 추정 근거</div>
+      <h4>1688 기준 롤업 압축팩 단가 레퍼런스</h4>
+      <p>1688에서 "旅行压缩袋 卷压式" (여행용 롤업 압축팩) 검색 시 소형 단품 0.3~0.8 CNY (약 60~160원), 3~5매 세트 1.5~3 CNY (약 300~600원) 수준. 20x30·30x40 단일 규격이면 CIF 포함해도 1매당 500~900원 가능. <b>4매 세트로 구성 시 2,000~3,600원 원가</b> → 목표 원가 2,140원에 근접 가능.</p>
+    </div>
+    <div class="issue warning">
+      <div class="issue-label">⚠️ 구성 전략</div>
+      <h4>단품 vs 4매 세트 — 세트가 유리</h4>
+      <p>단품 10,900원은 Top 판매자 대비 경쟁력 없음. 니드잇처럼 <b>4종 세트 (소형 2 + 중형 2)</b>로 구성해 10,900원 유지하면 소비자 가성비 체감 + 우리 원가도 분산 가능. 단품 판가 2,725원 체감으로 가성비 최강 포지션.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>📤 다음 액션</h2>
+  <div class="actions">
+    <div class="action">
+      <span class="action-medal">🥇</span>
+      <div class="action-body">
+        <h4>옷 압축팩 — <span class="tag tag-orange">샘플 주문 단계</span></h4>
+        <p>① KIPRIS 실용신안 조회 (B65D 81/20, B65B 31/00) → ② 1688에서 "旅行压缩袋 卷压式" 3사 후보 셋업 → ③ 알리바바 문의 자동 발송 (MOQ 500, 20x30 + 30x40 혼합 세트) → ④ 샘플 도착 후 QC 테스트 (24시간 유지, 재압축 3회)</p>
+      </div>
+    </div>
+    <div class="action">
+      <span class="action-medal">🥈</span>
+      <div class="action-body">
+        <h4>부분 가발 — <span class="tag tag-yellow">보류-IP리스크</span></h4>
+        <p>재검토 조건: 인증/카피 이슈 없는 차별화 사양(자체 디자인·OEM 제작) 확보 시. 소싱 접근이 아니라 <b>OEM 관점</b>에서 재접근 권장.</p>
+      </div>
+    </div>
+    <div class="action">
+      <span class="action-medal">🥉</span>
+      <div class="action-body">
+        <h4>허리베개 — <span class="tag tag-red">보류-의료규제</span></h4>
+        <p>재검토 조건: 의료기기 오인 표현(경추/일자목/디스크) 완전 배제, "인테리어·여행 디자인 베개"로 포지션 재구성 시. 경추 키워드 전제 자연유입 데이터는 무효.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Generated by 비코어랩 멀티에이전트 팀 · 🐣 하치 (조율) · 🦊 모리 (시장) · 🐱 키노 (수익물류) · 🦋 픽시 (리스크) · 🐻 보리 (자연유입)</p>
+  <p style="margin-top:8px;">Report Date: 2026-04-11 · <code style="background:var(--bg2); padding:2px 8px; border-radius:4px;">/tmp/sourcing_debate/</code></p>
+</footer>
+
+</div>
+</body>
+</html>

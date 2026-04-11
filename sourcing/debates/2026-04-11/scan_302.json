@@ -1,0 +1,3362 @@
+{
+  "keywords": [
+    {
+      "ad_weight": 0,
+      "click_count": 138000,
+      "click_rate": 0.69,
+      "keyword": "\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 138000
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 56510,
+      "click_rate": 0.49,
+      "keyword": "\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 56510
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 51880,
+      "click_rate": 2.225,
+      "keyword": "\uacbd\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 51880
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 35830,
+      "click_rate": 0.7,
+      "keyword": "\uba3c\uc791\uadc0",
+      "scan_id": 302,
+      "search_volume": 35830
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 34060,
+      "click_rate": 0.095,
+      "keyword": "\ubc30\uac8c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 34060
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 28370,
+      "click_rate": 1.085,
+      "keyword": "\ubc29\uc11d",
+      "scan_id": 302,
+      "search_volume": 28370
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 26630,
+      "click_rate": 0.855,
+      "keyword": "\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 26630
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 23920,
+      "click_rate": 0.515,
+      "keyword": "\ub18d\ub2f4\uacf0",
+      "scan_id": 302,
+      "search_volume": 23920
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 23100,
+      "click_rate": 1.01,
+      "keyword": "\uc606\uc7a0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 23100
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 21750,
+      "click_rate": 1.175,
+      "keyword": "\ubaa9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 21750
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 11880,
+      "click_rate": 2.385,
+      "keyword": "\ud5c8\ub9ac\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 11880
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 11050,
+      "click_rate": 2.12,
+      "keyword": "\uba54\ubaa8\ub9ac\ud3fc\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 11050
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 10160,
+      "click_rate": 3.2,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 10160
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 10030,
+      "click_rate": 3.59,
+      "keyword": "\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 10030
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 9720,
+      "click_rate": 2.58,
+      "keyword": "\uc77c\uc790\ubaa9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 9720
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 9650,
+      "click_rate": 0.23500000000000001,
+      "keyword": "\ubaa9\ud1b5\uc99d",
+      "scan_id": 302,
+      "search_volume": 9650
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 9570,
+      "click_rate": 2.2350000000000003,
+      "keyword": "\ub0ae\uc740\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 9570
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 9120,
+      "click_rate": 2.575,
+      "keyword": "\ub77c\ud14d\uc2a4\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 9120
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 8550,
+      "click_rate": 2.5549999999999997,
+      "keyword": "\uba54\ubc00\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 8550
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 7680,
+      "click_rate": 3.33,
+      "keyword": "\uc784\uc0b0\ubd80\ubc14\ub514\ud544\ub85c\uc6b0",
+      "scan_id": 302,
+      "search_volume": 7680
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 7480,
+      "click_rate": 2.155,
+      "keyword": "\uac70\ubd81\ubaa9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 7480
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 6810,
+      "click_rate": 0.9299999999999999,
+      "keyword": "\ud5c8\ub9ac\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 6810
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 5950,
+      "click_rate": 1.77,
+      "keyword": "\uacbd\ucd94\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 5950
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 5930,
+      "click_rate": 2.17,
+      "keyword": "\uc758\uc790\ub4f1\ubc1b\uc774",
+      "scan_id": 302,
+      "search_volume": 5930
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 5800,
+      "click_rate": 2.8200000000000003,
+      "keyword": "\ud638\ud154\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 5800
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 4990,
+      "click_rate": 0.795,
+      "keyword": "\uce58\uc774\uce74\uc640\uc778\ud615",
+      "scan_id": 302,
+      "search_volume": 4990
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 4890,
+      "click_rate": 1.525,
+      "keyword": "\ubc14\ub514\ud544\ub85c\uc6b0\uc778\ud615",
+      "scan_id": 302,
+      "search_volume": 4890
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 4570,
+      "click_rate": 1.255,
+      "keyword": "\uba54\ubaa8\ub9ac\ud3fc",
+      "scan_id": 302,
+      "search_volume": 4570
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 4500,
+      "click_rate": 4.175,
+      "keyword": "\uc606\uc73c\ub85c\uc790\ub294\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 4500
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 4480,
+      "click_rate": 0.215,
+      "keyword": "\ubc30\uac1c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 4480
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 4150,
+      "click_rate": 1.6,
+      "keyword": "\uc8fd\ubd80\uc778",
+      "scan_id": 302,
+      "search_volume": 4150
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 3970,
+      "click_rate": 2.285,
+      "keyword": "\uc219\uba74\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 3970
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 3720,
+      "click_rate": 2.395,
+      "keyword": "\uc790\ub3d9\ucc28\ud5c8\ub9ac\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 3720
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 3710,
+      "click_rate": 1.7650000000000001,
+      "keyword": "\ub2e4\ub9ac\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 3710
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 3700,
+      "click_rate": 0.16999999999999998,
+      "keyword": "\ub4b7\ubaa9\ubed0\uadfc",
+      "scan_id": 302,
+      "search_volume": 3700
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 3360,
+      "click_rate": 1.715,
+      "keyword": "\uc758\uc790\ub4f1\ubc1b\uc774\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 3360
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 3340,
+      "click_rate": 3.7,
+      "keyword": "\uacbd\ucd94\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 3340
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 3240,
+      "click_rate": 2.375,
+      "keyword": "\ucf54\uace8\uc774\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 3240
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 3170,
+      "click_rate": 2.17,
+      "keyword": "\uc758\uc790\ud5c8\ub9ac\ubc1b\uce68\ub300",
+      "scan_id": 302,
+      "search_volume": 3170
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 3100,
+      "click_rate": 2.185,
+      "keyword": "\uac70\ubd81\ubaa9\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 3100
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 2930,
+      "click_rate": 2.3449999999999998,
+      "keyword": "\uacbd\ucd94\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 2930
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 2850,
+      "click_rate": 0.43999999999999995,
+      "keyword": "\uc77c\uc790\ubaa9\ud1b5\uc99d",
+      "scan_id": 302,
+      "search_volume": 2850
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 2630,
+      "click_rate": 1.185,
+      "keyword": "\ubb34\ub98e\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 2630
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 2630,
+      "click_rate": 2.785,
+      "keyword": "\uc218\uba74\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 2630
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 2550,
+      "click_rate": 0.915,
+      "keyword": "\ucea0\ud551\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 2550
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 2450,
+      "click_rate": 0.6950000000000001,
+      "keyword": "\ubcf4\ud638",
+      "scan_id": 302,
+      "search_volume": 2450
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 2330,
+      "click_rate": 0.86,
+      "keyword": "\ub4f1\ubc1b\uc774",
+      "scan_id": 302,
+      "search_volume": 2330
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 2310,
+      "click_rate": 2.64,
+      "keyword": "\uad6c\uc2a4\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 2310
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 2100,
+      "click_rate": 0.685,
+      "keyword": "\ucf54\uc2a4\ud2b8\ucf54\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 2100
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1960,
+      "click_rate": 0.1,
+      "keyword": "\uc5b4\uae68\uacb0\ub9bc",
+      "scan_id": 302,
+      "search_volume": 1960
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1900,
+      "click_rate": 2.01,
+      "keyword": "\ub0ae\uc740\uacbd\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1900
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1900,
+      "click_rate": 2.145,
+      "keyword": "\uc694\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1900
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1800,
+      "click_rate": 3.545,
+      "keyword": "\uae30\ub2a5\uc131\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1800
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1790,
+      "click_rate": 1.965,
+      "keyword": "\ub192\uc740\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1790
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1770,
+      "click_rate": 1.47,
+      "keyword": "\ud5c8\ub9ac\ubc1b\uce68\ub300",
+      "scan_id": 302,
+      "search_volume": 1770
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1710,
+      "click_rate": 1.325,
+      "keyword": "\uba3c\uc791\uadc0\uc778\ud615",
+      "scan_id": 302,
+      "search_volume": 1710
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1690,
+      "click_rate": 1.23,
+      "keyword": "\ubc1c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1690
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1660,
+      "click_rate": 2.8,
+      "keyword": "\uc54c\ub808\ub974\ub9dd\ubca0\uac1c\ucee4\ubc84",
+      "scan_id": 302,
+      "search_volume": 1660
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1640,
+      "click_rate": 1.225,
+      "keyword": "\uc77c\uc790\ubaa9\uad50\uc815\uae30",
+      "scan_id": 302,
+      "search_volume": 1640
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1610,
+      "click_rate": 3.12,
+      "keyword": "\uafc0\uc7a0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1610
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1580,
+      "click_rate": 4.7,
+      "keyword": "\ubaa9\ub9c8\uc0ac\uc9c0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1580
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1530,
+      "click_rate": 1.7449999999999999,
+      "keyword": "\uacbd\ucd94\ubaa9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1530
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1450,
+      "click_rate": 4.3100000000000005,
+      "keyword": "\ubaa9\ud3b8\ud55c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1450
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1440,
+      "click_rate": 2.81,
+      "keyword": "\ubc30\uac8c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 1440
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1400,
+      "click_rate": 1.8849999999999998,
+      "keyword": "\ub2e4\ub9ac\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 1400
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1360,
+      "click_rate": 2.23,
+      "keyword": "\ubca0\uac8c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 1360
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1360,
+      "click_rate": 3.805,
+      "keyword": "\ub9c8\uc0ac\uc9c0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1360
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1340,
+      "click_rate": 1.775,
+      "keyword": "\ubaa9\uc8fc\ub984\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1340
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1310,
+      "click_rate": 2.64,
+      "keyword": "\ucc28\ub7c9\ud5c8\ub9ac\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 1310
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1250,
+      "click_rate": 3.73,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 1250
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1180,
+      "click_rate": 2.1,
+      "keyword": "\ube68\uc544\uc4f0\ub294\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1180
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1140,
+      "click_rate": 1.615,
+      "keyword": "\ud5c8\ub9ac\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 1140
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1100,
+      "click_rate": 1.33,
+      "keyword": "\ubc1c\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 1100
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1090,
+      "click_rate": 2.44,
+      "keyword": "\ub2e4\ub9ac\ubc1b\uce68\ub300",
+      "scan_id": 302,
+      "search_volume": 1090
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1080,
+      "click_rate": 2.8099999999999996,
+      "keyword": "\uacbd\ucd94\ubc30\uac8c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 1080
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1070,
+      "click_rate": 1.135,
+      "keyword": "\ud070\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1070
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1050,
+      "click_rate": 3.19,
+      "keyword": "\ud3b8\ud55c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 1050
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1040,
+      "click_rate": 2.1950000000000003,
+      "keyword": "\ub0ae\uc740\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 1040
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 1000,
+      "click_rate": 1.5750000000000002,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 1000
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 970,
+      "click_rate": 3.385,
+      "keyword": "\ubca0\uac1c\ub9c8\uc0ac\uc9c0\uae30",
+      "scan_id": 302,
+      "search_volume": 970
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 970,
+      "click_rate": 2.9499999999999997,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 970
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 930,
+      "click_rate": 1.005,
+      "keyword": "\uc5ec\ud589\uc6a9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 930
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 920,
+      "click_rate": 2.45,
+      "keyword": "\uc19c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 920
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 920,
+      "click_rate": 2.225,
+      "keyword": "\ub77c\ud14d\uc2a4\uacbd\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 920
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 900,
+      "click_rate": 0.925,
+      "keyword": "\ubca0\uac1c\ub192\uc774",
+      "scan_id": 302,
+      "search_volume": 900
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 900,
+      "click_rate": 1.45,
+      "keyword": "\uba54\ubaa8\ub9ac\ud3fc\uacbd\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 900
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 860,
+      "click_rate": 3.4699999999999998,
+      "keyword": "\ub0ae\uc740\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 860
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 860,
+      "click_rate": 2.85,
+      "keyword": "\ubc30\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 860
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 860,
+      "click_rate": 1.455,
+      "keyword": "\uc7a0\uc194\uc194\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 860
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 840,
+      "click_rate": 0.35,
+      "keyword": "\ubca0\uac1c\uc0ac\uc774\uc988",
+      "scan_id": 302,
+      "search_volume": 840
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 830,
+      "click_rate": 1.205,
+      "keyword": "\uce90\ub9ad\ud130\ubc14\ub514\ud544\ub85c\uc6b0",
+      "scan_id": 302,
+      "search_volume": 830
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 830,
+      "click_rate": 1.835,
+      "keyword": "\uc0ac\ubb34\uc2e4\uc758\uc790\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 830
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 810,
+      "click_rate": 0.8500000000000001,
+      "keyword": "\uc694\ucd94\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 810
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 760,
+      "click_rate": 1.4249999999999998,
+      "keyword": "\ub2e4\ub9ac\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 760
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 750,
+      "click_rate": 4.13,
+      "keyword": "\ubaa9\uc774\ud3b8\ud55c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 750
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 720,
+      "click_rate": 2.0549999999999997,
+      "keyword": "\uc77c\uc790\ubaa9\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 720
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 710,
+      "click_rate": 2.5500000000000003,
+      "keyword": "\uc77c\uc790\ubaa9\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 710
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 700,
+      "click_rate": 2.4299999999999997,
+      "keyword": "\uc5b4\uae68\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 700
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 680,
+      "click_rate": 3.495,
+      "keyword": "\uba3c\uc791\uadc0\uad7f\uc988",
+      "scan_id": 302,
+      "search_volume": 680
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 680,
+      "click_rate": 4.125,
+      "keyword": "\uc548\ub9c8\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 680
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 650,
+      "click_rate": 4.475,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\uc5d0\uc88b\uc740\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 650
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 640,
+      "click_rate": 10.785,
+      "keyword": "\ubbf8\ub2c8\uba40\ub8f8",
+      "scan_id": 302,
+      "search_volume": 640
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 640,
+      "click_rate": 1.845,
+      "keyword": "\ud5c8\ub9ac\ub4f1\ubc1b\uc774\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 640
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 630,
+      "click_rate": 1.7,
+      "keyword": "\ub0ae\uc740\ubca0\uac1c\uc19c",
+      "scan_id": 302,
+      "search_volume": 630
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 630,
+      "click_rate": 1.45,
+      "keyword": "\uba54\ubaa8\ub9ac\ud3fc\ubaa9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 630
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 630,
+      "click_rate": 0.875,
+      "keyword": "\uc0bc\uac01\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 630
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 620,
+      "click_rate": 1.0250000000000001,
+      "keyword": "\ud5c8\ub9ac\ub514\uc2a4\ud06c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 620
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 620,
+      "click_rate": 4.25,
+      "keyword": "\uacbd\ucd94\ub9c8\uc0ac\uc9c0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 620
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 620,
+      "click_rate": 2.9450000000000003,
+      "keyword": "\ub0ae\uc740\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 620
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 610,
+      "click_rate": 7.779999999999999,
+      "keyword": "\ub9de\ucda4\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 610
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 590,
+      "click_rate": 4.21,
+      "keyword": "\ud504\ub9ac\ubbf8\uc5c4\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 590
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 590,
+      "click_rate": 7.33,
+      "keyword": "\ubaa9\uc548\ub9c8\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 590
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 560,
+      "click_rate": 1.445,
+      "keyword": "\ud5c8\ub9ac\ubc1b\uce68\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 560
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 530,
+      "click_rate": 1.365,
+      "keyword": "\ub2e8\ub2e8\ud55c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 530
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 490,
+      "click_rate": 2.44,
+      "keyword": "\uc0ac\ubb34\uc2e4\uc758\uc790\ub4f1\ubc1b\uc774\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 490
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 480,
+      "click_rate": 1.195,
+      "keyword": "\ucc99\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 480
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 470,
+      "click_rate": 2.0,
+      "keyword": "\uacbd\ucd94\ubaa9\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 470
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 470,
+      "click_rate": 2.4699999999999998,
+      "keyword": "\ub192\uc774\uc870\uc808\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 470
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 470,
+      "click_rate": 2.1,
+      "keyword": "\ubca0\uac1c\ube0c\ub79c\ub4dc",
+      "scan_id": 302,
+      "search_volume": 470
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 460,
+      "click_rate": 0.36,
+      "keyword": "\uc2b9\ubaa8\uadfc\uad00\ub9ac",
+      "scan_id": 302,
+      "search_volume": 460
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 460,
+      "click_rate": 2.96,
+      "keyword": "\uc6b4\uc804\ud5c8\ub9ac\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 460
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 430,
+      "click_rate": 0.0,
+      "keyword": "\uc77c\uc790\ubaa9\ub514\uc2a4\ud06c",
+      "scan_id": 302,
+      "search_volume": 430
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 430,
+      "click_rate": 2.335,
+      "keyword": "\uac70\ubd81\ubaa9\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 430
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 410,
+      "click_rate": 1.6099999999999999,
+      "keyword": "C\ucee4\ube0c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 410
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 410,
+      "click_rate": 1.96,
+      "keyword": "\uacbd\ucd94\ubc30\uac1c",
+      "scan_id": 302,
+      "search_volume": 410
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 410,
+      "click_rate": 1.51,
+      "keyword": "\uc5edC\uc790\ubaa9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 410
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 400,
+      "click_rate": 0.9299999999999999,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\uacbd\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 400
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 390,
+      "click_rate": 0.25,
+      "keyword": "\uace7\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 390
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 380,
+      "click_rate": 2.19,
+      "keyword": "\uae30\ub2a5\uc131\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 380
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 370,
+      "click_rate": 2.175,
+      "keyword": "\ub2e4\ub9ac\uc62c\ub9ac\uace0\uc790\uae30",
+      "scan_id": 302,
+      "search_volume": 370
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 370,
+      "click_rate": 2.9699999999999998,
+      "keyword": "\uc5ed\ub958\ubc29\uc9c0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 370
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 360,
+      "click_rate": 1.48,
+      "keyword": "\uc0ac\ubb34\uc2e4\ub4f1\ubc1b\uc774\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 360
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 340,
+      "click_rate": 3.6950000000000003,
+      "keyword": "\ubf51\uae30\uc778\ud615",
+      "scan_id": 302,
+      "search_volume": 340
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 340,
+      "click_rate": 3.4050000000000002,
+      "keyword": "\ud5c8\ub9ac\ub514\uc2a4\ud06c\ub2e4\ub9ac\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 340
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 340,
+      "click_rate": 4.23,
+      "keyword": "\uc606\uc73c\ub85c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 340
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 330,
+      "click_rate": 1.8599999999999999,
+      "keyword": "\ub2e4\ub9ac\uc62c\ub9ac\ub294\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 330
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 330,
+      "click_rate": 1.3599999999999999,
+      "keyword": "\ubc1c\ubc1b\uce68\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 330
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 320,
+      "click_rate": 3.8499999999999996,
+      "keyword": "\uc7a0\uc798\uc624\ub294\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 320
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 320,
+      "click_rate": 1.27,
+      "keyword": "\uc778\ud615\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 320
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 320,
+      "click_rate": 0.8150000000000001,
+      "keyword": "\uc61b\ub0a0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 320
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 310,
+      "click_rate": 2.48,
+      "keyword": "\uc694\ucd94\ubc1b\uce68\ub300",
+      "scan_id": 302,
+      "search_volume": 310
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 310,
+      "click_rate": 3.49,
+      "keyword": "\uae30\ub2a5\uc131\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 310
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 310,
+      "click_rate": 3.055,
+      "keyword": "\ubaa9\uc5d0\uc88b\uc740\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 310
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 310,
+      "click_rate": 1.555,
+      "keyword": "\uba54\ubaa8\ub9ac\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 310
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 310,
+      "click_rate": 1.635,
+      "keyword": "\uad7f\uc7a0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 310
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 310,
+      "click_rate": 3.02,
+      "keyword": "\ubc14\ub978\uc790\uc138\ubc29\uc11d",
+      "scan_id": 302,
+      "search_volume": 310
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 300,
+      "click_rate": 2.075,
+      "keyword": "\ubc1c\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 300
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 300,
+      "click_rate": 3.17,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\uc548\ub9c8\uae30",
+      "scan_id": 302,
+      "search_volume": 300
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 300,
+      "click_rate": 1.075,
+      "keyword": "\ub192\uc740\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 300
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 290,
+      "click_rate": 0.06,
+      "keyword": "\ubb34\uc9c0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 290
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 290,
+      "click_rate": 2.265,
+      "keyword": "\ud5c8\ub9ac\ub4f1\ubc1b\uc774",
+      "scan_id": 302,
+      "search_volume": 290
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 290,
+      "click_rate": 1.5,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\ubca0\uac1c\ub192\uc774",
+      "scan_id": 302,
+      "search_volume": 290
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 280,
+      "click_rate": 2.315,
+      "keyword": "\uc219\uba74\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 280
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 280,
+      "click_rate": 3.855,
+      "keyword": "\ud3b8\uc548\ud55c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 280
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 280,
+      "click_rate": 1.1099999999999999,
+      "keyword": "\uc218\uba74\uc790\uc138\uad50\uc815",
+      "scan_id": 302,
+      "search_volume": 280
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 280,
+      "click_rate": 2.95,
+      "keyword": "\uc77c\uc790\ubaa9\uacbd\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 280
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 270,
+      "click_rate": 1.49,
+      "keyword": "\uc694\ucd94\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 270
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 260,
+      "click_rate": 1.7,
+      "keyword": "\ubaa9\uc8fc\ub984\ubc29\uc9c0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 260
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 250,
+      "click_rate": 2.1500000000000004,
+      "keyword": "\uc790\ub3d9\ucc28\ub4f1\ubc1b\uc774",
+      "scan_id": 302,
+      "search_volume": 250
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 250,
+      "click_rate": 2.335,
+      "keyword": "\uc218\uba74\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 250
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 250,
+      "click_rate": 1.2349999999999999,
+      "keyword": "\ub0ae\uc740\ub77c\ud14d\uc2a4\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 250
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 240,
+      "click_rate": 0.885,
+      "keyword": "\uc758\uc790\ud5c8\ub9ac\ubc1b\uce68",
+      "scan_id": 302,
+      "search_volume": 240
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 240,
+      "click_rate": 0.865,
+      "keyword": "\uc19c\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 240
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 240,
+      "click_rate": 1.7950000000000002,
+      "keyword": "\ubaa9\ud1b5\uc99d\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 240
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 240,
+      "click_rate": 4.35,
+      "keyword": "\uc5ec\ud589\uc6a9\ubaa9\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 240
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 240,
+      "click_rate": 3.755,
+      "keyword": "\uae30\ub2a5\uc131\uacbd\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 240
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 230,
+      "click_rate": 1.74,
+      "keyword": "\ucfe0\uc158\uc548\ub9c8\uae30",
+      "scan_id": 302,
+      "search_volume": 230
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 230,
+      "click_rate": 3.81,
+      "keyword": "\ud5c8\ub9ac\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 230
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 230,
+      "click_rate": 0.345,
+      "keyword": "\ubc30\uac1c",
+      "scan_id": 302,
+      "search_volume": 230
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 220,
+      "click_rate": 3.33,
+      "keyword": "\uc790\ub3d9\ucc28\ud5c8\ub9ac\ubc1b\uce68\ub300",
+      "scan_id": 302,
+      "search_volume": 220
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 210,
+      "click_rate": 0.7649999999999999,
+      "keyword": "\uac70\ubd81\ubaa9\uad50\uc815\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 210
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 200,
+      "click_rate": 4.755,
+      "keyword": "\ud3b8\ud55c\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 200
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 200,
+      "click_rate": 5.49,
+      "keyword": "\uac74\uac15\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 200
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 200,
+      "click_rate": 2.0300000000000002,
+      "keyword": "\uc5b4\uae68\ud1b5\uc99d\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 200
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 200,
+      "click_rate": 2.51,
+      "keyword": "\ub514\uc2a4\ud06c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 200
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 190,
+      "click_rate": 2.93,
+      "keyword": "\ub9c8\uc0ac\uc9c0\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 190
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 190,
+      "click_rate": 0.735,
+      "keyword": "\ubb34\uc911\ub825\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 190
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 180,
+      "click_rate": 0.9299999999999999,
+      "keyword": "\uc804\ud1b5\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 180
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 180,
+      "click_rate": 0.46,
+      "keyword": "\ubca0\uac1c\ud30c\ub294\uacf3",
+      "scan_id": 302,
+      "search_volume": 180
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 180,
+      "click_rate": 1.8399999999999999,
+      "keyword": "\uc606\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 180
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 180,
+      "click_rate": 1.055,
+      "keyword": "\ud734\ub300\uc6a9\ubaa9\ub9c8\uc0ac\uc9c0\uae30",
+      "scan_id": 302,
+      "search_volume": 180
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 180,
+      "click_rate": 5.17,
+      "keyword": "\ubaa9\ud3b8\ud55c\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 180
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 170,
+      "click_rate": 2.135,
+      "keyword": "\ub098\ucf54\uc790\uc694",
+      "scan_id": 302,
+      "search_volume": 170
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 170,
+      "click_rate": 4.47,
+      "keyword": "\ud3b8\ud55c\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 170
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 170,
+      "click_rate": 1.83,
+      "keyword": "\ubc1c\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 170
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 170,
+      "click_rate": 7.67,
+      "keyword": "\ub9de\ucda4\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 170
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 170,
+      "click_rate": 4.45,
+      "keyword": "\ub9c8\uc0ac\uc9c0\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 170
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 160,
+      "click_rate": 2.35,
+      "keyword": "\uc628\uc5f4\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 160
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 160,
+      "click_rate": 0.685,
+      "keyword": "\ub0ae\uc740\ubaa9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 160
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 160,
+      "click_rate": 2.205,
+      "keyword": "\uc218\uba74\ubb34\ud638\ud761\uc99d\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 160
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 150,
+      "click_rate": 0.435,
+      "keyword": "\uac70\ubd81\ubaa9\uacbd\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 150
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 150,
+      "click_rate": 1.385,
+      "keyword": "\ubd88\uba74\uc99d\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 150
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 150,
+      "click_rate": 6.3149999999999995,
+      "keyword": "\ub192\uc740\uacbd\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 150
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 150,
+      "click_rate": 0.97,
+      "keyword": "\ubaa9\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 150
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 150,
+      "click_rate": 2.205,
+      "keyword": "\uc2b9\ubaa8\uadfc\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 150
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 140,
+      "click_rate": 1.03,
+      "keyword": "\uc790\uc138\uad50\uc815\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 140
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 140,
+      "click_rate": 2.195,
+      "keyword": "\ucc28\ub7c9\uc6a9\ub4f1\ubc1b\uc774\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 140
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 140,
+      "click_rate": 2.015,
+      "keyword": "\ub2e4\ub9ac\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 140
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 140,
+      "click_rate": 2.59,
+      "keyword": "\ubaa9\uc5b4\uae68\uc548\ub9c8\uae30\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 140
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 130,
+      "click_rate": 1.9499999999999997,
+      "keyword": "\ud544\ub85c\uc6b0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 130
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 130,
+      "click_rate": 0.62,
+      "keyword": "\uce68\ub300\ubc1c\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 130
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 130,
+      "click_rate": 1.205,
+      "keyword": "\ubc30\uac8c\ube0c\ub79c\ub4dc",
+      "scan_id": 302,
+      "search_volume": 130
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 130,
+      "click_rate": 1.28,
+      "keyword": "\uc138\ud0c1\uac00\ub2a5\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 130
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 130,
+      "click_rate": 1.285,
+      "keyword": "\uc5b4\uae68\ubaa9\ub9c8\uc0ac\uc9c0",
+      "scan_id": 302,
+      "search_volume": 130
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 130,
+      "click_rate": 2.975,
+      "keyword": "\ubbf8\ub2c8\uba40\ub8f8\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 130
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 130,
+      "click_rate": 2.26,
+      "keyword": "\uc778\uc0dd\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 130
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 130,
+      "click_rate": 5.89,
+      "keyword": "\ub77c\ud14d\uc2a4\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 130
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 130,
+      "click_rate": 4.78,
+      "keyword": "\ubca0\uac1c\uc548\ub9c8\uae30",
+      "scan_id": 302,
+      "search_volume": 130
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 130,
+      "click_rate": 3.3649999999999998,
+      "keyword": "\ubaa9\uc548\uc544\ud508\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 130
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 130,
+      "click_rate": 3.8200000000000003,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\uae30\ub2a5\uc131\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 130
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 120,
+      "click_rate": 2.6950000000000003,
+      "keyword": "\ubc30\uac8c\ub9c8\uc0ac\uc9c0\uae30",
+      "scan_id": 302,
+      "search_volume": 120
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 120,
+      "click_rate": 5.66,
+      "keyword": "\ub2e4\ub9ac\ubc1b\uce68\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 120
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 120,
+      "click_rate": 4.56,
+      "keyword": "\uacbd\ucd94\ubaa9\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 120
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 120,
+      "click_rate": 0.51,
+      "keyword": "\uc640\uc774\ub4dc\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 120
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 120,
+      "click_rate": 3.12,
+      "keyword": "\uc885\uc544\ub9ac\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 120
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 120,
+      "click_rate": 3.045,
+      "keyword": "\uc218\uba74\ubca0\uac1c\ucd94\ucc9c",
+      "scan_id": 302,
+      "search_volume": 120
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 120,
+      "click_rate": 1.155,
+      "keyword": "\ubaa9\uacac\uc778\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 120
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 120,
+      "click_rate": 3.4749999999999996,
+      "keyword": "\ubca0\uac1c\ub9c8\uc0ac\uc9c0",
+      "scan_id": 302,
+      "search_volume": 120
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 110,
+      "click_rate": 1.2850000000000001,
+      "keyword": "\uc8fc\ub984\ubc29\uc9c0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 110
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 110,
+      "click_rate": 2.95,
+      "keyword": "\uc778\uccb4\uacf5\ud559\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 110
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 110,
+      "click_rate": 3.95,
+      "keyword": "\uac8c\ub974\ub9c8\ub284\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 110
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 110,
+      "click_rate": 0.375,
+      "keyword": "\uad50\uc815\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 110
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 110,
+      "click_rate": 2.39,
+      "keyword": "\uc77c\uc790\ubaa9\uad50\uc815\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 110
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 110,
+      "click_rate": 3.04,
+      "keyword": "\uc5b4\uae68\ud3b8\ud55c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 110
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 100,
+      "click_rate": 2.18,
+      "keyword": "\uc2a4\ub204\ud53c\uc120\ubb3c",
+      "scan_id": 302,
+      "search_volume": 100
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 100,
+      "click_rate": 2.01,
+      "keyword": "\uc88b\uc740\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 100
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 100,
+      "click_rate": 2.19,
+      "keyword": "\ubcd1\uc6d0\uc6a9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 100
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 90,
+      "click_rate": 0.725,
+      "keyword": "\uacbd\ucd94\ud615\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 90
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 90,
+      "click_rate": 3.23,
+      "keyword": "\uc0ac\ubb34\uc6a9\uc758\uc790\ub4f1\ubc1b\uc774",
+      "scan_id": 302,
+      "search_volume": 90
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 90,
+      "click_rate": 0.32,
+      "keyword": "\ud5c8\ub9ac\ud1b5\uc99d\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 90
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 90,
+      "click_rate": 0.605,
+      "keyword": "\uc784\uc0b0\ubd80\ub2e4\ub9ac\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 90
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 90,
+      "click_rate": 2.54,
+      "keyword": "\ubaa9\uad50\uc815\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 90
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 90,
+      "click_rate": 1.74,
+      "keyword": "\ucfe0\uc158\ub9c8\uc0ac\uc9c0\uae30",
+      "scan_id": 302,
+      "search_volume": 90
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 90,
+      "click_rate": 4.415,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\uc6a9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 90
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 80,
+      "click_rate": 4.775,
+      "keyword": "\uc606\uc73c\ub85c\ub204\uc6cc\uc790\ub294\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 80
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 80,
+      "click_rate": 1.13,
+      "keyword": "\uc624\uac00\ub2c9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 80
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 80,
+      "click_rate": 1.565,
+      "keyword": "\uc218\uba74\ud638\ud761\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 80
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 80,
+      "click_rate": 0.69,
+      "keyword": "\ud5c8\ub9ac\ud1b5\uc99d\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 80
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 80,
+      "click_rate": 2.35,
+      "keyword": "\ubc14\ub978\uc790\uc138\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 80
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 80,
+      "click_rate": 3.905,
+      "keyword": "\uafc0\uc7a0\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 80
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 80,
+      "click_rate": 0.0,
+      "keyword": "\uc815\ud615\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 80
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 1.8050000000000002,
+      "keyword": "\uba38\ub9ac\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 6.890000000000001,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\ud658\uc790\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 14.81,
+      "keyword": "MINIMALROOM",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 0.955,
+      "keyword": "\uc0ac\ubb34\uc6a9\uc758\uc790\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 4.025,
+      "keyword": "\uc548\ub9c8\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 2.8,
+      "keyword": "\ubaa9\uc548\uc544\ud508\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 5.625,
+      "keyword": "\uc548\ub9c8\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 3.98,
+      "keyword": "\ub4b7\ubaa9\uc548\ub9c8\uae30",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 3.925,
+      "keyword": "\ub9de\ucda4\ud615\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 3.305,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\uc88b\uc740\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 2.46,
+      "keyword": "\ubaa9\uacbd\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 2.79,
+      "keyword": "\uce90\ub9ad\ud130\uc18c\ud488",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 1.78,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\ub0ae\uc740\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 70,
+      "click_rate": 3.4099999999999997,
+      "keyword": "\uc77c\uc790\ubaa9\uc5d0\uc88b\uc740\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 70
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 0.29,
+      "keyword": "\uc548\ub9c8\ubaa9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 2.025,
+      "keyword": "\uc758\uc790\ud5c8\ub9ac\ub4f1\ubc1b\uc774",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 9.835,
+      "keyword": "\ubaa9\uc8fc\ub984\uc608\ubc29\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 1.145,
+      "keyword": "\uc606\uc73c\ub85c\ub215\ub294\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 1.12,
+      "keyword": "\uc218\uba74\ubaa9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 1.125,
+      "keyword": "\uc7a0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 3.1550000000000002,
+      "keyword": "\uacbd\ucd94\ub77c\ud14d\uc2a4\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 1.57,
+      "keyword": "\uacbd\ucd94\ubca0\uac1c\uba54\ubaa8\ub9ac\ud3fc",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 3.435,
+      "keyword": "\ud2b9\ud5c8\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 2.59,
+      "keyword": "\ud5c8\ub9ac\uc5d0\uc88b\uc740\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 0.895,
+      "keyword": "\uc218\uba74\ub2e4\ub9ac\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 2.865,
+      "keyword": "\uc7a0\uc798\uc624\ub294\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 0.25,
+      "keyword": "\uacbd\ucd94\uacac\uc778\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 60,
+      "click_rate": 3.96,
+      "keyword": "\uacbd\ucd94\uc6a9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 60
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 1.22,
+      "keyword": "\uacbd\ucd94\ubca0\uac1c\ube0c\ub79c\ub4dc",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 1.215,
+      "keyword": "\uc2a4\ud2b8\ub808\uce6d\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 4.984999999999999,
+      "keyword": "\ud3b8\uc548\ud55c\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 0.0,
+      "keyword": "\uacbd\ucd94\uba54\ubaa8\ub9ac\ud3fc",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 6.37,
+      "keyword": "\uac74\uac15\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 3.535,
+      "keyword": "\uac70\ubd81\ubaa9\ubaa9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 4.78,
+      "keyword": "\uc88b\uc740\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 3.4050000000000002,
+      "keyword": "\ubc30\uac8c\ub9c8\uc0ac\uc9c0",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 0.0,
+      "keyword": "\uc218\uba74\uc704\ub85c",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 3.53,
+      "keyword": "\ub514\uc2a4\ud06c\ubaa9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 2.59,
+      "keyword": "\ucc99\ucd94\uad50\uc815\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 0.915,
+      "keyword": "\uae30\ub2a5\uc131\ubca0\uac1c\ucee4\ubc84",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 5.29,
+      "keyword": "\ud3b8\uc548\ud55c\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 0.0,
+      "keyword": "\ubca0\uac1c\ube44\uad50",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 4.17,
+      "keyword": "\uc77c\uc790\ubaa9\ubaa9\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 0.49,
+      "keyword": "\uce90\ub9ad\ud130\uc778\uae30\uc21c\uc704",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 50,
+      "click_rate": 0.885,
+      "keyword": "\uc0bc\uac01\uae40\ubc25\uc778\ud615",
+      "scan_id": 302,
+      "search_volume": 50
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 40,
+      "click_rate": 0.45,
+      "keyword": "\uad6d\ubbfc\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 40
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 40,
+      "click_rate": 0.0,
+      "keyword": "\ucc45\uc0c1\uc758\uc790\ub4f1\ubc1b\uc774",
+      "scan_id": 302,
+      "search_volume": 40
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 40,
+      "click_rate": 2.19,
+      "keyword": "\uacbd\ucd94\uad50\uc815\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 40
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 40,
+      "click_rate": 0.0,
+      "keyword": "\uac70\ubd81\ubaa9\ubca0\uac1c\ub0b4\ub3c8\ub0b4\uc0b0",
+      "scan_id": 302,
+      "search_volume": 40
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 40,
+      "click_rate": 2.02,
+      "keyword": "\ubaa9\uac74\uac15\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 40
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 40,
+      "click_rate": 4.865,
+      "keyword": "\ubaa9\ud3b8\ud55c\uacbd\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 40
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 40,
+      "click_rate": 4.0,
+      "keyword": "\ub2e4\ub9ac\ubd80\uc885\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 40
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 40,
+      "click_rate": 5.06,
+      "keyword": "\ub2e4\ub9ac\ubd93\uae30\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 40
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 1.565,
+      "keyword": "\uacbd\ucd94\ubcf4\ud638\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 0.0,
+      "keyword": "\ub2e4\ub9ac\ubca0\uac1c\ud5c8\ub9ac",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 5.82,
+      "keyword": "\ub2e4\ub9ac\ud544\ub85c\uc6b0",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 0.0,
+      "keyword": "\ubca0\uac1c\uc120\ubb3c",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 1.365,
+      "keyword": "\ucd94\ucc9c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 3.035,
+      "keyword": "\uc0bc\uac01\uae40\ubc25\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 0.57,
+      "keyword": "\ubaa9\uad50\uc815\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 0.0,
+      "keyword": "\ubcd1\uc6d0\uc6a9\ub2e4\ub9ac\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 5.77,
+      "keyword": "\ubaa9\uc774\ud3b8\uc548\ud55c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 7.744999999999999,
+      "keyword": "\uc219\uba74\uc5d0\uc88b\uc740\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 1.015,
+      "keyword": "\ubc14\ub978\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 0.42,
+      "keyword": "\uc790\uc138\uad50\uc815\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 3.4749999999999996,
+      "keyword": "\uc88b\uc740\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 30,
+      "click_rate": 0.0,
+      "keyword": "\ubcbc\uac8c",
+      "scan_id": 302,
+      "search_volume": 30
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.0,
+      "keyword": "\uc2ac\ub9ac\ud551\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 2.385,
+      "keyword": "\ub9de\ucda4\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.0,
+      "keyword": "\ubca0\uac8c\uc885\ub958",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.0,
+      "keyword": "\ud5c8\ub9ac\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 6.25,
+      "keyword": "\ucc99\ucd94\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.0,
+      "keyword": "\uac74\uac15\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.0,
+      "keyword": "\ud734\ub300\uc6a9\ubaa9\ub9c8\uc0ac\uc9c0",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.0,
+      "keyword": "\ubaa9\ud3b8\uc548\uacbd\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 2.13,
+      "keyword": "\uc0ac\ubb34\uc6a9\ub4f1\ubc1b\uc774",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.0,
+      "keyword": "\uc720\uc988\uc0bc\uac01\ub4f1\ucfe0\uc158",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.61,
+      "keyword": "\uc218\uba74\uc5d0\uc88b\uc740\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.81,
+      "keyword": "POE\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.0,
+      "keyword": "\ubaa9\uc774\ud3b8\ud55c\uacbd\ucd94\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 5.28,
+      "keyword": "\ubaa9\ub514\uc2a4\ud06c\uce58\ub8cc\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 4.445,
+      "keyword": "\uc758\uc0ac\ucd94\ucc9c\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.0,
+      "keyword": "\ub77c\ud14d\uc2a4\uacbd\ucd94\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 6.25,
+      "keyword": "\uc7a0\uc798\uc624\ub294\ubca0\uac8c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 2.045,
+      "keyword": "\ubaa9\ud3b8\ud55c\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.0,
+      "keyword": "\ubc14\ub978\uc218\uba74\uafc0\uc7a0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.0,
+      "keyword": "\uc2ac\ub9ac\ud551\ud544\ub85c\uc6b0",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 0.705,
+      "keyword": "\uc778\uc2a4\ud0c0\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 1.565,
+      "keyword": "\ubd88\uba74\uc99d\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 20
+    },
+    {
+      "ad_weight": 0,
+      "click_count": 20,
+      "click_rate": 11.27,
+      "keyword": "\ubaa9\uc548\ub9c8\ubc30\uac8c",
+      "scan_id": 302,
+      "search_volume": 20
+    }
+  ],
+  "products": [
+    {
+      "brand": "\ub2e5\ud130\uc13c\uc2a4",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 11555,
+      "conversion_rate": 9.4,
+      "manufacturer": "\ub2e5\ud130\uc13c\uc2a4",
+      "page_views": 11555,
+      "price": 13270,
+      "product_name": "\ub2e5\ud130\uc13c\uc2a4 \ub192\uc774\uc870\uc808 \ud5c8\ub9ac\ubca0\uac1c",
+      "product_url": "https://www.coupang.com/vp/products/8953750443?itemId=26193505602&vendorItemId=93247250027",
+      "ranking": 1,
+      "revenue_monthly": 14397950,
+      "review_count": 484,
+      "sales_monthly": 1085,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ube0c\ub79c\ub4dc\uc5c6\uc74c",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 8862,
+      "conversion_rate": 8.9,
+      "manufacturer": "21C\uc81c\ub108\ub7f4\uc0f5 OEM",
+      "page_views": 8862,
+      "price": 17000,
+      "product_name": "\uc0dd\ud65c\ucf55 \ud504\ub9ac\ubbf8\uc5c4 \uc218\uba74 \ud5c8\ub9ac\ubca0\uac1c \uce68\ub300\ud5c8\ub9ac\ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/8130856657?itemId=23090229340&vendorItemId=90123663003",
+      "ranking": 2,
+      "revenue_monthly": 13379000,
+      "review_count": 644,
+      "sales_monthly": 787,
+      "scan_id": 302
+    },
+    {
+      "brand": "\uc62c\uace7",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uce68\uad6c>\ubca0\uac1c/\ubca0\uac1c\uc19c>\uacbd\ucd94\ubca0\uac1c",
+      "category_code": "78067",
+      "click_count": 31618,
+      "conversion_rate": 0.9,
+      "manufacturer": "\uc62c\uace7(OLGOT) \ud611\ub825\uc0ac",
+      "page_views": 31618,
+      "price": 200000,
+      "product_name": "\uc62c\uace7 \ubca8\ud2b8\ud615 \ud5c8\ub9ac\ubca0\uac1c \ud3b8\uc548\ud55c \uc218\uba74 \ub514\uc2a4\ud06c \ub0ae\uc740 \uc694\ucd94\ubca0\uac1c",
+      "product_url": "https://www.coupang.com/vp/products/9349898151?itemId=27858288104&vendorItemId=94188326149",
+      "ranking": 3,
+      "revenue_monthly": 55000000,
+      "review_count": 113,
+      "sales_monthly": 275,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ud788\uc5b4\ub85c\uc778\ub77c\uc774\ud504",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uce68\uad6c>\ubca0\uac1c/\ubca0\uac1c\uc19c>\uc77c\ubc18\ubca0\uac1c",
+      "category_code": "78066",
+      "click_count": 5322,
+      "conversion_rate": 5,
+      "manufacturer": "\ud788\uc5b4\ub85c\uc778\ub77c\uc774\ud504",
+      "page_views": 5322,
+      "price": 25900,
+      "product_name": "\ud788\uc5b4\ub85c\uc778\ub77c\uc774\ud504 \ud5c8\ub9ac\ubca0\uac1c \ud5c8\ub9ac\uc804\uc6a9\ubca0\uac1c",
+      "product_url": "https://www.coupang.com/vp/products/7637922917?itemId=20286324285&vendorItemId=87372706954",
+      "ranking": 4,
+      "revenue_monthly": 6889400,
+      "review_count": 204,
+      "sales_monthly": 266,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ub77c\ubaa8\ub178",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uce68\uad6c>\ubca0\uac1c/\ubca0\uac1c\uc19c>\uacbd\ucd94\ubca0\uac1c",
+      "category_code": "78067",
+      "click_count": 9023,
+      "conversion_rate": 5.8,
+      "manufacturer": "\ub77c\ubaa8\ub178 \ud611\ub825\uc0ac",
+      "page_views": 9023,
+      "price": 40000,
+      "product_name": "\ub77c\ubaa8\ub178 \ub9b4\ub9ac\ud504\ud54f \ub0ae\uc740 \uc218\uba74 \ud5c8\ub9ac\ubca0\uac1c \uc694\ucd94 \ud5c8\ub9ac\ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/9252506213?itemId=27367780895&vendorItemId=94340450353",
+      "ranking": 5,
+      "revenue_monthly": 20880000,
+      "review_count": 415,
+      "sales_monthly": 522,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ud5c8\uc26c\ubca0\uac1c",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uce68\uad6c>\ubca0\uac1c/\ubca0\uac1c\uc19c>\uc77c\ubc18\ubca0\uac1c",
+      "category_code": "78066",
+      "click_count": 14141,
+      "conversion_rate": 5.2,
+      "manufacturer": "\ucf00\uc774\uc5d8\ud2b8\ub808\uc774\ub529",
+      "page_views": 14141,
+      "price": 29800,
+      "product_name": "\ud5c8\ub9ac\uac00 \uc26c\ub294 \uc2dc\uac04 \ud5c8\uc26c \ubca0\uac1c",
+      "product_url": "https://www.coupang.com/vp/products/6069952497?itemId=11201723038&vendorItemId=78479421445",
+      "ranking": 6,
+      "revenue_monthly": 21992400,
+      "review_count": 2088,
+      "sales_monthly": 738,
+      "scan_id": 302
+    },
+    {
+      "brand": "\uc2a4\ud0e0\ubc14\uc774\ubbf8\ubca0\uac1c",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uce68\uad6c>\ubca0\uac1c/\ubca0\uac1c\uc19c>\uacbd\ucd94\ubca0\uac1c",
+      "category_code": "78067",
+      "click_count": 20078,
+      "conversion_rate": 5.4,
+      "manufacturer": "\uc2a4\ud0e0\ubc14\uc774\ubbf8 \ucc28\uc774\ub098",
+      "page_views": 20078,
+      "price": 39800,
+      "product_name": "\uc2a4\ud0e0\ubc14\uc774\ubbf8 \ud5c8\ub9ac\ubca0\uac1c",
+      "product_url": "https://www.coupang.com/vp/products/6860314237?itemId=16375817767&vendorItemId=84652627080",
+      "ranking": 7,
+      "revenue_monthly": 43023800,
+      "review_count": 4854,
+      "sales_monthly": 1081,
+      "scan_id": 302
+    },
+    {
+      "brand": "\uad7f\ub77c\uc774\ud504\uc219\uba74\ubca0\uac1c",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 2492,
+      "conversion_rate": 5.5,
+      "manufacturer": "\uad7f\ub77c\uc774\ud504\ud611\ub825\uc0ac",
+      "page_views": 2492,
+      "price": 14600,
+      "product_name": "\uad7f\ub77c\uc774\ud504\uc219\uba74\ubca0\uac1c \uba54\ubaa8\ub9ac\ud3fc \ud5c8\ub9ac \ub4f1\ubc1b\uc774 \ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/8866432430?itemId=25859182865&vendorItemId=92845510884",
+      "ranking": 8,
+      "revenue_monthly": 2000200,
+      "review_count": 291,
+      "sales_monthly": 137,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ub8e8\ubbf8\uc5d0\ub974",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uce68\uad6c>\ubca0\uac1c/\ubca0\uac1c\uc19c>\uacbd\ucd94\ubca0\uac1c",
+      "category_code": "78067",
+      "click_count": 3845,
+      "conversion_rate": 7.1,
+      "manufacturer": "\ub8e8\ubbf8\uc5d0\ub974 \ud611\ub825\uc0ac",
+      "page_views": 3845,
+      "price": 15800,
+      "product_name": "\ub8e8\ubbf8\uc5d0\ub974 \ud5c8\ub9ac\ubca0\uac8c \ubc14\ub978\uc790\uc138 \uc218\uba74 \uc694\ucd94\ubca0\uac8c \ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/9006365412?itemId=26396775170&vendorItemId=93373036885",
+      "ranking": 9,
+      "revenue_monthly": 4329200,
+      "review_count": 136,
+      "sales_monthly": 274,
+      "scan_id": 302
+    },
+    {
+      "brand": "\uad7f\ucf54\uc5b4",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uce68\uad6c>\ubca0\uac1c/\ubca0\uac1c\uc19c>\uc77c\ubc18\ubca0\uac1c",
+      "category_code": "78066",
+      "click_count": 8328,
+      "conversion_rate": 5.8,
+      "manufacturer": "\uad7f\ucf54\uc5b4 OEM",
+      "page_views": 8328,
+      "price": 41720,
+      "product_name": "\uad7f\ucf54\uc5b4 \uc815\uc131 \ud5c8\ub9ac\ubca0\uac1c C\ucee4\ube0c \ud68c\ubcf5\ubca0\uac1c",
+      "product_url": "https://www.coupang.com/vp/products/7263551990?itemId=18506951310&vendorItemId=92062506635",
+      "ranking": 10,
+      "revenue_monthly": 19983880,
+      "review_count": 145,
+      "sales_monthly": 479,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ub9c8\uba54",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 54806,
+      "conversion_rate": 9.2,
+      "manufacturer": "\uc81c\uc774\ud2b8\ub808\uc774\ub4dc\ucef4\ud37c\ub2c8",
+      "page_views": 54806,
+      "price": 10600,
+      "product_name": "\ub9c8\uba54 \ubc14\ub978\uc790\uc138 \uba54\ubaa8\ub9ac\ud3fc \ub4f1\ubc1b\uc774\ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/2378521821?itemId=4146476712&vendorItemId=72130376559",
+      "ranking": 11,
+      "revenue_monthly": 53159000,
+      "review_count": 5568,
+      "sales_monthly": 5015,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ube0c\ub79c\ub4dc\uc5c6\uc74c",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uce68\uad6c>\ubca0\uac1c/\ubca0\uac1c\uc19c>\uacbd\ucd94\ubca0\uac1c",
+      "category_code": "78067",
+      "click_count": 1221,
+      "conversion_rate": 7,
+      "manufacturer": "Sgirl",
+      "page_views": 1221,
+      "price": 14980,
+      "product_name": "Sgirl \ud3b8\uc548\ud55c \uba54\ubaa8\ub9ac\ud3fc \ud5c8\ub9ac\ubca0\uac1c \ub2e4\uc6a9\ub3c4 \ub514\uc2a4\ud06c \uae30\ub2a5\uc131 \ud5c8\ub9ac\ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/8250465493?itemId=23751699190&vendorItemId=90783456160",
+      "ranking": 12,
+      "revenue_monthly": 1288280,
+      "review_count": 236,
+      "sales_monthly": 86,
+      "scan_id": 302
+    },
+    {
+      "brand": "\uadf8\ub9ac\uc5d0\ud2f0",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uce68\uad6c>\ubca0\uac1c/\ubca0\uac1c\uc19c>\uacbd\ucd94\ubca0\uac1c",
+      "category_code": "78067",
+      "click_count": 3759,
+      "conversion_rate": 5.6,
+      "manufacturer": "\uadf8\ub9ac\uc5d0\ud2f0 \ud611\ub825\uc0ac",
+      "page_views": 3759,
+      "price": 15000,
+      "product_name": "\uadf8\ub9ac\uc5d0\ud2f0 \uc694\ucd94 \ub514\uc2a4\ud06c \uba54\ubaa8\ub9ac\ud3fc \ud5c8\ub9ac \ubca0\uac1c",
+      "product_url": "https://www.coupang.com/vp/products/8302245943?itemId=23951837310&vendorItemId=91051859354",
+      "ranking": 13,
+      "revenue_monthly": 3180000,
+      "review_count": 58,
+      "sales_monthly": 212,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ube0c\ub79c\ub4dc\uc5c6\uc74c",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 4620,
+      "conversion_rate": 5,
+      "manufacturer": "\ud558\uc601\uc774\ub124",
+      "page_views": 4620,
+      "price": 28600,
+      "product_name": "\ud3b8\uc548\ud558\uace0 \ub0ae\uc740 \ubc14\ub978 \ud5c8\ub9ac \ubca0\uac1c \ubcf8\ud488 + \ucee4\ubc84 1\uac1c \ucd94\uac00 \uc138\ud2b8",
+      "product_url": "https://www.coupang.com/vp/products/6809414906?itemId=24595165175&vendorItemId=91606868879",
+      "ranking": 14,
+      "revenue_monthly": 6549400,
+      "review_count": 706,
+      "sales_monthly": 229,
+      "scan_id": 302
+    },
+    {
+      "brand": "\uc528\uac00\ub4dc",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uc218\uc120/\uc218\uc608\ub3c4\uad6c>\uac00\uc8fd\uacf5\uc608\uc6a9\ud488>\uac00\uc8fd\uacf5\uc608DIY\ud328\ud0a4\uc9c0>\uae30\ud0c0",
+      "category_code": "109076",
+      "click_count": 4303,
+      "conversion_rate": 3.6,
+      "manufacturer": "(\uc8fc)\ub4dc\ub85c\ube0c\ub85c\uc2a4",
+      "page_views": 4303,
+      "price": 59000,
+      "product_name": "\uc528\uac00\ub4dc \ub8f8\ubc14 \ud5c8\ub9ac\ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/6708195099?itemId=15563083433&vendorItemId=3395621189",
+      "ranking": 15,
+      "revenue_monthly": 9086000,
+      "review_count": 431,
+      "sales_monthly": 154,
+      "scan_id": 302
+    },
+    {
+      "brand": "\uc560\ub2c8\ub098\ub77c",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 3439,
+      "conversion_rate": 6.3,
+      "manufacturer": "\uc560\ub2c8\ub098\ub77c",
+      "page_views": 3439,
+      "price": 10300,
+      "product_name": "\uc560\ub2c8\ub098\ub77c \ud5ec\ub85c\ucf13 \uc5d0\uc5b4\ub9e4\uc26c \ud5c8\ub9ac\ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/3421580?itemId=16099716&vendorItemId=3024103596",
+      "ranking": 16,
+      "revenue_monthly": 2214500,
+      "review_count": 1524,
+      "sales_monthly": 215,
+      "scan_id": 302
+    },
+    {
+      "brand": "JcOuni",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 647,
+      "conversion_rate": 4.3,
+      "manufacturer": "JcOuni",
+      "page_views": 647,
+      "price": 16750,
+      "product_name": "M\uc790\ud615 \uace0\ubc00\ub3c4 \uba54\ubaa8\ub9ac\ud3fc \ud5c8\ub9ac\ubca0\uac1c \uc694\ucd94\ucfe0\uc158 \ud5c8\ub9ac\ud1b5\uc99d\uc644\ud654 \uc790\uc138\uad50\uc815 \ub9c8\uc57d \ud5c8\ub9ac\ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/9228844200?itemId=27279309239&vendorItemId=95031671040",
+      "ranking": 17,
+      "revenue_monthly": 469000,
+      "review_count": 63,
+      "sales_monthly": 28,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ube0c\ub79c\ub4dc\uc5c6\uc74c",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uce68\uad6c>\ubca0\uac1c/\ubca0\uac1c\uc19c>\uc77c\ubc18\ubca0\uac1c",
+      "category_code": "78066",
+      "click_count": 2496,
+      "conversion_rate": 3.4,
+      "manufacturer": "\ud53d\uc11c",
+      "page_views": 2496,
+      "price": 49000,
+      "product_name": "\ud53d\uc11c \ucc28\ucf5c\ub77c\ud14d\uc2a4 \ud5c8\ub9ac\ubca0\uac1c",
+      "product_url": "https://www.coupang.com/vp/products/7648287927?itemId=20342976341&vendorItemId=87350569033",
+      "ranking": 18,
+      "revenue_monthly": 4214000,
+      "review_count": 443,
+      "sales_monthly": 86,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ube0c\ub79c\ub4dc\uc5c6\uc74c",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uce68\uad6c>\ubca0\uac1c/\ubca0\uac1c\uc19c>\uc77c\ubc18\ubca0\uac1c",
+      "category_code": "78066",
+      "click_count": 389,
+      "conversion_rate": 8,
+      "manufacturer": "100\uc2a4\ud1a0\uc5b4 \ud611\ub825\uc5c5\uccb4",
+      "page_views": 389,
+      "price": 39900,
+      "product_name": "\uc77c\uc0c1\uace1\uc120 \ud5c8\ub9ac\ubca0\uac1c \uba54\ubaa8\ub9ac\ud3fc \uc218\uba74 \uc694\ucd94 \ucc99\ucd94 \ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/8204298490?itemId=23528196832&vendorItemId=90554517190",
+      "ranking": 19,
+      "revenue_monthly": 1236900,
+      "review_count": 33,
+      "sales_monthly": 31,
+      "scan_id": 302
+    },
+    {
+      "brand": "",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 2153,
+      "conversion_rate": 5.3,
+      "manufacturer": "Jeernare",
+      "page_views": 2153,
+      "price": 22900,
+      "product_name": "Jeernare \uc218\uba74 \ud5c8\ub9ac\ubca0\uac1c \uce68\ub300\ud5c8\ub9ac\uc9c0\uc9c0 \uc694\ucd94\ubca0\uac1c \uba54\ubaa8\ub9ac\ud3fc \ud5c8\ub9ac \ubc1b\uce68",
+      "product_url": "https://www.coupang.com/vp/products/8771831823?itemId=25516175262&vendorItemId=92508089421",
+      "ranking": 20,
+      "revenue_monthly": 2633500,
+      "review_count": 99,
+      "sales_monthly": 115,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ud544\ubaa8\uc5b4",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 6202,
+      "conversion_rate": 5.9,
+      "manufacturer": "\ud544\ubaa8\uc5b4 \ud611\ub825\uc0ac",
+      "page_views": 6202,
+      "price": 14000,
+      "product_name": "\uc5d0\uc5b4\ub9b4\ub9ac \ud504\ub9ac\ubbf8\uc5c4 \ud3b8\uc548\ud55c \ubc14\ub978\uc790\uc138 \uc0ac\ubb34\uc2e4 \ub4f1\ubc1b\uc774 \ud5c8\ub9ac \ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/9328644035?itemId=27655356754&vendorItemId=94617791618",
+      "ranking": 21,
+      "revenue_monthly": 5082000,
+      "review_count": 89,
+      "sales_monthly": 363,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ubc14\ub514\uc5f0\uad6c\uc18c",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 2295,
+      "conversion_rate": 4.4,
+      "manufacturer": "\uc81c\uc774\uc5d4\uc528",
+      "page_views": 2295,
+      "price": 29300,
+      "product_name": "\ubc14\ub514\uc5f0\uad6c\uc18c \ud5c8\ub9ac\ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/4965274767?itemId=6582361407&vendorItemId=73876332809",
+      "ranking": 22,
+      "revenue_monthly": 2988600,
+      "review_count": 228,
+      "sales_monthly": 102,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ub354\uc388",
+      "category": "\uc790\ub3d9\ucc28\uc6a9\ud488>\ub9e4\ud2b8/\uc2dc\ud2b8/\ucfe0\uc158>\ucc28\ub7c9\uc6a9\ucfe0\uc158>\ud5c8\ub9ac/\ub4f1\ubc1b\uc774\ucfe0\uc158",
+      "category_code": "78799",
+      "click_count": 1717,
+      "conversion_rate": 9.7,
+      "manufacturer": "\uc720\ud589\ucf54\ub9ac\uc544",
+      "page_views": 1717,
+      "price": 8800,
+      "product_name": "\ub354\uc388 \ud734\ub300\uc6a9 \uc5ec\ud589\uc6a9 \uc5d0\uc5b4 \ud38c\ud504 \ud5c8\ub9ac \ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/9039824641?itemId=26552870086&vendorItemId=93526714282",
+      "ranking": 23,
+      "revenue_monthly": 1460800,
+      "review_count": 31,
+      "sales_monthly": 166,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ube0c\ub79c\ub4dc\uc5c6\uc74c",
+      "category": "\uc0dd\ud65c\uc6a9\ud488>\uc758\ub8cc/\uac04\ud638\uc6a9\ud488>\uac00\uc815\uc758\ub8cc\uc6a9\ud488>\uae30\ud0c0\uac00\uc815\uc758\ub8cc\uc6a9\ud488",
+      "category_code": "64097",
+      "click_count": 3046,
+      "conversion_rate": 5.5,
+      "manufacturer": "\uc0bc\uc778\ub77c\uc774\ud504\ub86c",
+      "page_views": 3046,
+      "price": 28000,
+      "product_name": "\uc790\uc138\ubcc0\ud658\uc6a9\uad6c MPG 05 \uc695\ucc3d\ubc29\uc9c0 \ucfe0\uc158 \ud658\uc790 \ub4f1\ubc1b\uc774",
+      "product_url": "https://www.coupang.com/vp/products/6599339672?itemId=14922561645&vendorItemId=94889423700",
+      "ranking": 24,
+      "revenue_monthly": 4704000,
+      "review_count": 51,
+      "sales_monthly": 168,
+      "scan_id": 302
+    },
+    {
+      "brand": "\uc544\ud2b8\uc870\uc774",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 2112,
+      "conversion_rate": 5,
+      "manufacturer": "\uc8fc\uc2dd\ud68c\uc0ac \uc790\uace0\ub4f1",
+      "page_views": 2112,
+      "price": 8690,
+      "product_name": "\uc544\ud2b8\uc870\uc774 \uac15\uc544\uc9c0 \ud5c8\ub9ac \ub4f1\ubc1b\uc774 \ucfe0\uc158 \uc2dc\ubc14",
+      "product_url": "https://www.coupang.com/vp/products/9039130662?itemId=26519474620&vendorItemId=93493864440",
+      "ranking": 25,
+      "revenue_monthly": 921140,
+      "review_count": 22,
+      "sales_monthly": 106,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ube44\ub77c\uc6b4\ub4dc",
+      "category": "\uc790\ub3d9\ucc28\uc6a9\ud488>\ub9e4\ud2b8/\uc2dc\ud2b8/\ucfe0\uc158>\ucc28\ub7c9\uc6a9\ucfe0\uc158>\ud5c8\ub9ac/\ub4f1\ubc1b\uc774\ucfe0\uc158",
+      "category_code": "78799",
+      "click_count": 53469,
+      "conversion_rate": 1.1,
+      "manufacturer": "\ube44\ub77c\uc6b4\ub4dc \ud611\ub825\uc5c5\uccb4",
+      "page_views": 53469,
+      "price": 20000,
+      "product_name": "\ube44\ub77c\uc6b4\ub4dc \ucc28\ub7c9\uc6a9 \ud5c8\ub9ac\ucfe0\uc158 TPE \uba54\uc26c \ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/8941057239?itemId=26146583763&vendorItemId=93126674928",
+      "ranking": 26,
+      "revenue_monthly": 12280000,
+      "review_count": 253,
+      "sales_monthly": 614,
+      "scan_id": 302
+    },
+    {
+      "brand": "\uc544\ub77c\ud648",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 3745,
+      "conversion_rate": 5.7,
+      "manufacturer": "\ud55c\uc815\uc8fc\uc2dd\ud68c\uc0ac",
+      "page_views": 3745,
+      "price": 27800,
+      "product_name": "\uc544\ub77c\ud648 \ucf54\uc5b4\ubc31 \ub4f1\ubc1b\uc774 \ucfe0\uc158 \uc0ac\ubb34\uc2e4 \uc758\uc790 \ud5c8\ub9ac\ubc1b\uce68 \ubca8\ud2b8\ud615",
+      "product_url": "https://www.coupang.com/vp/products/2145431636?itemId=20571073554&vendorItemId=71628481259",
+      "ranking": 27,
+      "revenue_monthly": 5977000,
+      "review_count": 774,
+      "sales_monthly": 215,
+      "scan_id": 302
+    },
+    {
+      "brand": "CLUBUNI",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 6434,
+      "conversion_rate": 8.8,
+      "manufacturer": "CLUBUNI \ud611\ub825\uc0ac",
+      "page_views": 6434,
+      "price": 9900,
+      "product_name": "CLUBUNI \ud734\ub300\uc6a9 \uc5d0\uc5b4 \ud5c8\ub9ac\ucfe0\uc158 \uae30\ub0b4\uc6a9",
+      "product_url": "https://www.coupang.com/vp/products/7950841962?itemId=21944003861&vendorItemId=92285823128",
+      "ranking": 28,
+      "revenue_monthly": 5623200,
+      "review_count": 115,
+      "sales_monthly": 568,
+      "scan_id": 302
+    },
+    {
+      "brand": "\uc218\uba74\uacf5\ud559\uc18c",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uce68\uad6c>\ubca0\uac1c/\ubca0\uac1c\uc19c>\uc77c\ubc18\ubca0\uac1c",
+      "category_code": "78066",
+      "click_count": 11981,
+      "conversion_rate": 4.7,
+      "manufacturer": "\uc218\uba74\uacf5\ud559\uc18c \ud611\ub825\uc0ac",
+      "page_views": 11981,
+      "price": 39800,
+      "product_name": "(\uc0c1\uccb4\uc138\uc6b0\ub294 \ubca0\uac1c) \ud5c8\ub9ac\ucfe0\uc158 \uc5ed\ub958\ubc29\uc9c0 \uc5ed\ub958\ubca0\uac1c \uc2dd\ub3c4\uc5fc \ubca0\uac1c \uc790\uc138\uad50\uc815 \uc694\ucd94 \ud5c8\ub9ac \uc5ed\ub958 \ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/9058019939?itemId=26611042751&vendorItemId=93585334012",
+      "ranking": 29,
+      "revenue_monthly": 22646200,
+      "review_count": 290,
+      "sales_monthly": 569,
+      "scan_id": 302
+    },
+    {
+      "brand": "HULULU",
+      "category": "\uac00\uc804/\ub514\uc9c0\ud138>\uc774\ubbf8\uc6a9\uac74\uac15\uac00\uc804>\uc548\ub9c8\uae30/\uac74\uac15/\uc774\ubbf8\uc6a9\uac00\uc804>\uc548\ub9c8/\ucc1c\uc9c8\uae30>\ub9c8\uc0ac\uc9c0\uae30>\uc548\ub9c8\ucfe0\uc158",
+      "category_code": "63817",
+      "click_count": 9182,
+      "conversion_rate": 3.1,
+      "manufacturer": "\uc9c0\ud3c9\uc120 \uc8fc\uc2dd\ud68c\uc0ac",
+      "page_views": 9182,
+      "price": 45800,
+      "product_name": "HULULU \ubb34\uc120 \ud5c8\ub9ac \uc548\ub9c8\uae30 \ud5c8\ub9ac\ubca0\uac1c \ub4f1 \uc5b4\uae68 \ubc30 \uc885\uc544\ub9ac \ub2e4\uc6a9\ub3c4 \uc548\ub9c8\uae30",
+      "product_url": "https://www.coupang.com/vp/products/8688364592?itemId=25224858688&vendorItemId=92221150139",
+      "ranking": 30,
+      "revenue_monthly": 13098800,
+      "review_count": 320,
+      "sales_monthly": 286,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ube0c\ub79c\ub4dc\uc5c6\uc74c",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ucfe0\uc158\ucee4\ubc84",
+      "category_code": "78102",
+      "click_count": 391,
+      "conversion_rate": 5.9,
+      "manufacturer": "\uc0c1\uc138\ud398\uc774\uc9c0 \ucc38\uc870",
+      "page_views": 391,
+      "price": 29500,
+      "product_name": "\ucfe8\ub9c1 \ubca0\uac1c \ud5c8\ub9ac\ubc1b\uce68\ub300 \ud14c\ub9b4\ub80c \uc544\uc774\uc2a4 \ud5c8\ub9ac \ub2e4\uae30\ub2a5 \ub4f1\ucfe0\uc158,\ube14\ub8e8 \uc6e8\uc77c \ucfe8 \uc544\uc774\uc2a4 \ube48 \ubbf8\ub514\uc5c4 \uc0ac\uc774\uc988",
+      "product_url": "https://www.coupang.com/vp/products/8806316817?itemId=25648575683&vendorItemId=94271435452",
+      "ranking": 31,
+      "revenue_monthly": 678500,
+      "review_count": 2,
+      "sales_monthly": 23,
+      "scan_id": 302
+    },
+    {
+      "brand": "Helloleiboo",
+      "category": "\uc790\ub3d9\ucc28\uc6a9\ud488>\ub9e4\ud2b8/\uc2dc\ud2b8/\ucfe0\uc158>\ucc28\ub7c9\uc6a9\ucfe0\uc158>\ud5c8\ub9ac/\ub4f1\ubc1b\uc774\ucfe0\uc158",
+      "category_code": "78799",
+      "click_count": 5550,
+      "conversion_rate": 4.4,
+      "manufacturer": "Helloleiboo",
+      "page_views": 5550,
+      "price": 23900,
+      "product_name": "Helloleiboo \uc790\ub3d9\ucc28 \uc694\ucd94 \ucfe0\uc158 \uba54\ubaa8\ub9ac \ud3fc \uc694\ucd94 \uc9c0\uc9c0\ub300 \uc790\ub3d9\ucc28 \ub4f1\ubc1b\uc774 \ucfe0\uc158 \uc0ac\ubb34\uc2e4 \uc694\ucd94 \ucfe0\uc158 \uc790\ub3d9\ucc28 \ub4f1\ubc1b\uc774 \ucfe0\uc158 \uc694\ucd94 \ubca0\uac1c",
+      "product_url": "https://www.coupang.com/vp/products/9099444879?itemId=26966077582&vendorItemId=93935019066",
+      "ranking": 32,
+      "revenue_monthly": 5807700,
+      "review_count": 44,
+      "sales_monthly": 243,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ube0c\ub79c\ub4dc\uc5c6\uc74c",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\uce68\uad6c>\ubca0\uac1c/\ubca0\uac1c\uc19c>\uc77c\ubc18\ubca0\uac1c",
+      "category_code": "78066",
+      "click_count": 3404,
+      "conversion_rate": 7.6,
+      "manufacturer": "cclife",
+      "page_views": 3404,
+      "price": 47900,
+      "product_name": "\uc528\uc528\ub77c\uc774\ud504 \ub2e4\ub9ac\ubca0\uac1c \ub4f1\ucfe0\uc158 27cm \uba54\ubaa8\ub9ac\uc19c 1\uac1c",
+      "product_url": "https://www.coupang.com/vp/products/8139691932?itemId=23128975619&vendorItemId=92326144876",
+      "ranking": 33,
+      "revenue_monthly": 12406100,
+      "review_count": 361,
+      "sales_monthly": 259,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ud5c8\ub9ac\ucfe0\uc158",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 2873,
+      "conversion_rate": 3.2,
+      "manufacturer": "(\uc8fc)\uc5d0\ud53d\ucef4\ud37c\ub2c8",
+      "page_views": 2873,
+      "price": 26800,
+      "product_name": "\uc0ac\ubb34\uc2e4 \ud5c8\ub9ac \uc758\uc790 \ucfe0\uc158 \uc790\uc138\uad50\uc815 \ucc45\uc0c1 \ubc30\ucfe0\uc158 \ud5c8\ub9ac\ub514\uc2a4\ud06c \uc694\ucd94 \uc804\ub9cc\ucfe0\uc158 \ub4f1\ubc1b\uc774 \ubca0\uac1c \ubc14\ub978\uc790\uc138 \ubc30\ubc1b\uc774 \ub0ae\uc7a0 \ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/8676965541?itemId=25190098745&vendorItemId=92213275501",
+      "ranking": 34,
+      "revenue_monthly": 2438800,
+      "review_count": 51,
+      "sales_monthly": 91,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ub9c8\ubca8\uc778\ud648",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 2473,
+      "conversion_rate": 4.9,
+      "manufacturer": "\uc8fc\uc2dd\ud68c\uc0ac \ub514\ubaa8\uc5b4",
+      "page_views": 2473,
+      "price": 12900,
+      "product_name": "\ub9c8\ubca8\uc778\ud648 \uc0ac\ubb34\uc2e4 \uc758\uc790 \uce68\ub300 \ucc28\ub7c9 \ud5c8\ub9ac \ub4f1 \uba54\ubaa8\ub9ac\ud3fc \ubc1b\uce68 \ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/8404984516?itemId=24298288793&vendorItemId=91314294007",
+      "ranking": 35,
+      "revenue_monthly": 1573800,
+      "review_count": 82,
+      "sales_monthly": 122,
+      "scan_id": 302
+    },
+    {
+      "brand": "",
+      "category": "\uc790\ub3d9\ucc28\uc6a9\ud488>\ub9e4\ud2b8/\uc2dc\ud2b8/\ucfe0\uc158>\ucc28\ub7c9\uc6a9\ucfe0\uc158>\ud5c8\ub9ac/\ub4f1\ubc1b\uc774\ucfe0\uc158",
+      "category_code": "78799",
+      "click_count": 2070,
+      "conversion_rate": 6.2,
+      "manufacturer": "\uc0e4\uba3c\ud658\uacbd\ubcf4\ud638 \uacfc\ud559\uae30\uc220 \uc720\ud55c\ud68c\uc0ac",
+      "page_views": 2070,
+      "price": 59200,
+      "product_name": "\uc870\uc808 \uac00\ub2a5 \uc790\ub3d9\ucc28 \ud5c8\ub9ac\ucfe0\uc158 \uc0ac\ubb34\uc2e4 \uc758\uc790 \ubc14\ub978\uc790\uc138 \ucd08\uace0\ubc00\ub3c4 \uba54\ubaa8\ub9ac\ud3fc \uc0ac\ubb34\uc2e4 \ucc28\ub7c9\uc6a9 \ub4f1\ubc1b\uc774\ucfe0\uc158 \ucc28\ub7c9\uc6a9 \ub4f1\ubc1b\uc774 \uc2dc\ud2b8",
+      "product_url": "https://www.coupang.com/vp/products/8814662349?itemId=25682338944&vendorItemId=92671655769",
+      "ranking": 36,
+      "revenue_monthly": 7577600,
+      "review_count": 102,
+      "sales_monthly": 128,
+      "scan_id": 302
+    },
+    {
+      "brand": "NIRA",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 981,
+      "conversion_rate": 4.8,
+      "manufacturer": "NIRA",
+      "page_views": 981,
+      "price": 9400,
+      "product_name": "\uc0ac\ubb34\uc2e4 \uacf5\ubd80\ubc29 \uc790\ub3d9\ucc28 \uc758\uc790 \ud5c8\ub9ac \uc694\ucd94 \uc0ac\uacc4\uc808\uc6a9 \ub4f1\ubc1b\uc774 \uba54\ubaa8\ub9ac\ud3fc \ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/9254572939?itemId=27087326342&vendorItemId=94055562411",
+      "ranking": 37,
+      "revenue_monthly": 441800,
+      "review_count": 19,
+      "sales_monthly": 47,
+      "scan_id": 302
+    },
+    {
+      "brand": "Pogeuni",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 3855,
+      "conversion_rate": 6.4,
+      "manufacturer": "\uc720\ud55c\ud68c\uc0ac \uc724\ud391\ud2b8\ub808\uc774\ub4dc",
+      "page_views": 3855,
+      "price": 17900,
+      "product_name": "Pogeuni \ud3b8\uc548\ud55c \ucf54\ub974\ub374 \ud5c8\ub9ac \ucfe0\uc158 \uc0ac\ubb34\uc2e4 \uc758\uc790 \ud5c8\ub9ac \uc9c0\ud0f1 \ub4f1\ubc1b\uc774 \ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/9019076587?itemId=26442814358&vendorItemId=93418394633",
+      "ranking": 38,
+      "revenue_monthly": 4421300,
+      "review_count": 77,
+      "sales_monthly": 247,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ubca0\ub124\ud3fc",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 1238,
+      "conversion_rate": 3.5,
+      "manufacturer": "(\uc8fc)\uc544\uc774\uc5d0\uc774\uce58\ud30c\ud2b8\ub108\uc2a4",
+      "page_views": 1238,
+      "price": 39000,
+      "product_name": "\ubca0\ub124\ud3fc \ud5c8\ub9ac\uc5c5 \ub4f1\ucfe0\uc158",
+      "product_url": "https://www.coupang.com/vp/products/4656348551?itemId=16537281171&vendorItemId=83724054375",
+      "ranking": 39,
+      "revenue_monthly": 1677000,
+      "review_count": 178,
+      "sales_monthly": 43,
+      "scan_id": 302
+    },
+    {
+      "brand": "\ud0b9\ub9ac\uce58",
+      "category": "\uac00\uad6c/\ud648\ub370\ucf54>\ucfe0\uc158/\ubc29\uc11d>\ucfe0\uc158>\ub4f1\ucfe0\uc158/\ud5c8\ub9ac\ucfe0\uc158",
+      "category_code": "78108",
+      "click_count": 16472,
+      "conversion_rate": 0.3,
+      "manufacturer": "\ud0b9\ub9ac\uce58 \ud611\ub825\uc0ac",
+      "page_views": 16472,
+      "price": 32900,
+      "product_name": "\ud0b9\ub9ac\uce58 \uc0bc\uac01 \ub4f1\ubc1b\uc774\ucfe0\uc158 \uce68\ub300 \ub4f1\ucfe0\uc158 \ud5c8\ub9ac\ucfe0\uc158 \uc18c\ud615 \ub300\ud615",
+      "product_url": "https://www.coupang.com/vp/products/7867910032?itemId=21485721575&vendorItemId=88539822907",
+      "ranking": 40,
+      "revenue_monthly": 1809500,
+      "review_count": 52,
+      "sales_monthly": 55,
+      "scan_id": 302
+    }
+  ],
+  "scan": {
+    "ad_dependency": 67.9,
+    "category": "\uac00\uad6c/\uc778\ud14c\ub9ac\uc5b4>\ubca0\uac1c>\uacc4\uc808\ubca0\uac1c",
+    "id": 302,
+    "keyword": "\ud5c8\ub9ac\ubca0\uac1c",
+    "new_product_rate": 37.5,
+    "opportunity_score": 83.3,
+    "recommended_keyword": "\uacbd\ucd94\ubca0\uac1c",
+    "revenue_concentration": 37.8,
+    "revenue_equality": 62.5,
+    "scan_type": "wing",
+    "scanned_at": "2026-03-18 20:12:25",
+    "status": "go",
+    "top10_avg_price": 32484,
+    "top10_avg_revenue": 18054032,
+    "top10_avg_sales": 638,
+    "updated_at": "2026-04-01 12:22:20"
+  },
+  "success": true,
+  "variants": [
+    {
+      "competition_level": "",
+      "original_keyword": "\ud5c8\ub9ac\ubca0\uac1c",
+      "scan_id": 302,
+      "search_volume": 0,
+      "variant_keyword": "\ud5c8\ub9ac \ubca0\uac1c"
+    }
+  ]
+}
