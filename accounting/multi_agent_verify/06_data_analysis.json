@@ -1,0 +1,1791 @@
+{
+  "agent": "doori_data_analysis",
+  "found": true,
+  "period": "2025-01 ~ 2026-02 (14 months)",
+  "member_id_column_used": "수령인 휴대전화 (phone digits)",
+  "sku_top": {
+    "by_revenue": [
+      {
+        "name": "하트식세기 6개+틴케이스+집게",
+        "revenue": 68664120.0,
+        "profit": 46106077.0,
+        "cost": 22558043.0,
+        "qty": 1132,
+        "margin_rate": 0.6715
+      },
+      {
+        "name": "하트식세기",
+        "revenue": 44379020.0,
+        "profit": 31302968.0,
+        "cost": 13076052.0,
+        "qty": 4380,
+        "margin_rate": 0.7054
+      },
+      {
+        "name": "하트식세기 3개+집게",
+        "revenue": 42191110.0,
+        "profit": 28171324.0,
+        "cost": 14019786.0,
+        "qty": 1476,
+        "margin_rate": 0.6677
+      },
+      {
+        "name": "하트식세기패키지",
+        "revenue": 23908610.0,
+        "profit": 15061720.0,
+        "cost": 8846890.0,
+        "qty": 641,
+        "margin_rate": 0.63
+      },
+      {
+        "name": "하트식세기 4개",
+        "revenue": 19467320.0,
+        "profit": 13998067.0,
+        "cost": 5469253.0,
+        "qty": 458,
+        "margin_rate": 0.7191
+      },
+      {
+        "name": "하트식세기 2개",
+        "revenue": 15542680.0,
+        "profit": 11590010.0,
+        "cost": 3952670.0,
+        "qty": 662,
+        "margin_rate": 0.7457
+      },
+      {
+        "name": "건조기시트 2개",
+        "revenue": 14348170.0,
+        "profit": 7358647.0,
+        "cost": 6989523.0,
+        "qty": 808,
+        "margin_rate": 0.5129
+      },
+      {
+        "name": "건조기시트",
+        "revenue": 14212349.0,
+        "profit": 6241005.0,
+        "cost": 7971344.0,
+        "qty": 1843,
+        "margin_rate": 0.4391
+      },
+      {
+        "name": "하트식세기 3개",
+        "revenue": 12124070.0,
+        "profit": 9078962.0,
+        "cost": 3045108.0,
+        "qty": 340,
+        "margin_rate": 0.7488
+      },
+      {
+        "name": "캡슐세제 2개",
+        "revenue": 9334410.0,
+        "profit": 5427826.0,
+        "cost": 3906584.0,
+        "qty": 515,
+        "margin_rate": 0.5815
+      },
+      {
+        "name": "캡슐세제",
+        "revenue": 7353969.0,
+        "profit": 4589018.0,
+        "cost": 2764951.0,
+        "qty": 729,
+        "margin_rate": 0.624
+      },
+      {
+        "name": "섬유탈취제 400",
+        "revenue": 6835190.0,
+        "profit": 4471790.0,
+        "cost": 2363399.0,
+        "qty": 785,
+        "margin_rate": 0.6542
+      },
+      {
+        "name": "하트식세기 4개+샘플",
+        "revenue": 6029560.0,
+        "profit": 3919434.0,
+        "cost": 2110126.0,
+        "qty": 166,
+        "margin_rate": 0.65
+      },
+      {
+        "name": "하트식세기 3개+틴케이스+집게",
+        "revenue": 5556410.0,
+        "profit": 3943614.0,
+        "cost": 1612796.0,
+        "qty": 147,
+        "margin_rate": 0.7097
+      },
+      {
+        "name": "이염방지시트 2개",
+        "revenue": 5484730.0,
+        "profit": 2735005.0,
+        "cost": 2749725.0,
+        "qty": 505,
+        "margin_rate": 0.4987
+      },
+      {
+        "name": "캡슐세제 4개",
+        "revenue": 4589925.0,
+        "profit": 2784552.0,
+        "cost": 1805373.0,
+        "qty": 119,
+        "margin_rate": 0.6067
+      },
+      {
+        "name": "캡슐세제 3개+건조기시트 3개+얼룩제거제 350 1개+얼룩제거제 100 1개",
+        "revenue": 3837000.0,
+        "profit": 1592917.0,
+        "cost": 2244083.0,
+        "qty": 75,
+        "margin_rate": 0.4151
+      },
+      {
+        "name": "하트식세기 3개+샘플",
+        "revenue": 3690690.0,
+        "profit": 2601356.0,
+        "cost": 1089334.0,
+        "qty": 112,
+        "margin_rate": 0.7048
+      },
+      {
+        "name": "캡슐세제 2개+건조기시트 2개+이염방지시트 2개+얼룩제거제 100 1개",
+        "revenue": 3672740.0,
+        "profit": 3672740.0,
+        "cost": 0.0,
+        "qty": 73,
+        "margin_rate": 1.0
+      },
+      {
+        "name": "얼룩제거제 350",
+        "revenue": 3539402.0,
+        "profit": 2290326.0,
+        "cost": 1249076.0,
+        "qty": 377,
+        "margin_rate": 0.6471
+      },
+      {
+        "name": "하트식세기 3개+집게+틴케이스",
+        "revenue": 3202710.0,
+        "profit": 3202710.0,
+        "cost": 0.0,
+        "qty": 84,
+        "margin_rate": 1.0
+      },
+      {
+        "name": "하트식세기2개+틴케이스+집게",
+        "revenue": 3057000.0,
+        "profit": 1715352.0,
+        "cost": 1341648.0,
+        "qty": 168,
+        "margin_rate": 0.5611
+      },
+      {
+        "name": "하트식세기패키지+샘플",
+        "revenue": 2767980.0,
+        "profit": 1365295.0,
+        "cost": 1402685.0,
+        "qty": 96,
+        "margin_rate": 0.4932
+      },
+      {
+        "name": "하트식세기 6개+틴케이스+집게+섬유탈취제 100",
+        "revenue": 2738360.0,
+        "profit": 1742906.0,
+        "cost": 995454.0,
+        "qty": 46,
+        "margin_rate": 0.6365
+      },
+      {
+        "name": "캡슐세제2개+건조기시트2개+이염방지시트2개+얼룩제거제100",
+        "revenue": 2673700.0,
+        "profit": 1261091.0,
+        "cost": 1412609.0,
+        "qty": 53,
+        "margin_rate": 0.4717
+      },
+      {
+        "name": "건조기시트+샘플",
+        "revenue": 2621220.0,
+        "profit": 1260260.0,
+        "cost": 1360960.0,
+        "qty": 273,
+        "margin_rate": 0.4808
+      },
+      {
+        "name": "하트식세기 2개+샘플",
+        "revenue": 2459830.0,
+        "profit": 1684638.0,
+        "cost": 775192.0,
+        "qty": 115,
+        "margin_rate": 0.6849
+      },
+      {
+        "name": "이염방지시트",
+        "revenue": 2339510.0,
+        "profit": 1070825.0,
+        "cost": 1268685.0,
+        "qty": 466,
+        "margin_rate": 0.4577
+      },
+      {
+        "name": "캡슐세제 2개+건조기시트 1개",
+        "revenue": 2221580.0,
+        "profit": 1547786.0,
+        "cost": 673794.0,
+        "qty": 83,
+        "margin_rate": 0.6967
+      },
+      {
+        "name": "하트틴케이스",
+        "revenue": 2166660.0,
+        "profit": 458096.0,
+        "cost": 1708564.0,
+        "qty": 1160,
+        "margin_rate": 0.2114
+      }
+    ],
+    "by_profit": [
+      {
+        "name": "하트식세기 6개+틴케이스+집게",
+        "revenue": 68664120.0,
+        "profit": 46106077.0,
+        "cost": 22558043.0,
+        "qty": 1132,
+        "margin_rate": 0.6715
+      },
+      {
+        "name": "하트식세기",
+        "revenue": 44379020.0,
+        "profit": 31302968.0,
+        "cost": 13076052.0,
+        "qty": 4380,
+        "margin_rate": 0.7054
+      },
+      {
+        "name": "하트식세기 3개+집게",
+        "revenue": 42191110.0,
+        "profit": 28171324.0,
+        "cost": 14019786.0,
+        "qty": 1476,
+        "margin_rate": 0.6677
+      },
+      {
+        "name": "하트식세기패키지",
+        "revenue": 23908610.0,
+        "profit": 15061720.0,
+        "cost": 8846890.0,
+        "qty": 641,
+        "margin_rate": 0.63
+      },
+      {
+        "name": "하트식세기 4개",
+        "revenue": 19467320.0,
+        "profit": 13998067.0,
+        "cost": 5469253.0,
+        "qty": 458,
+        "margin_rate": 0.7191
+      },
+      {
+        "name": "하트식세기 2개",
+        "revenue": 15542680.0,
+        "profit": 11590010.0,
+        "cost": 3952670.0,
+        "qty": 662,
+        "margin_rate": 0.7457
+      },
+      {
+        "name": "하트식세기 3개",
+        "revenue": 12124070.0,
+        "profit": 9078962.0,
+        "cost": 3045108.0,
+        "qty": 340,
+        "margin_rate": 0.7488
+      },
+      {
+        "name": "건조기시트 2개",
+        "revenue": 14348170.0,
+        "profit": 7358647.0,
+        "cost": 6989523.0,
+        "qty": 808,
+        "margin_rate": 0.5129
+      },
+      {
+        "name": "건조기시트",
+        "revenue": 14212349.0,
+        "profit": 6241005.0,
+        "cost": 7971344.0,
+        "qty": 1843,
+        "margin_rate": 0.4391
+      },
+      {
+        "name": "캡슐세제 2개",
+        "revenue": 9334410.0,
+        "profit": 5427826.0,
+        "cost": 3906584.0,
+        "qty": 515,
+        "margin_rate": 0.5815
+      },
+      {
+        "name": "캡슐세제",
+        "revenue": 7353969.0,
+        "profit": 4589018.0,
+        "cost": 2764951.0,
+        "qty": 729,
+        "margin_rate": 0.624
+      },
+      {
+        "name": "섬유탈취제 400",
+        "revenue": 6835190.0,
+        "profit": 4471790.0,
+        "cost": 2363399.0,
+        "qty": 785,
+        "margin_rate": 0.6542
+      },
+      {
+        "name": "하트식세기 3개+틴케이스+집게",
+        "revenue": 5556410.0,
+        "profit": 3943614.0,
+        "cost": 1612796.0,
+        "qty": 147,
+        "margin_rate": 0.7097
+      },
+      {
+        "name": "하트식세기 4개+샘플",
+        "revenue": 6029560.0,
+        "profit": 3919434.0,
+        "cost": 2110126.0,
+        "qty": 166,
+        "margin_rate": 0.65
+      },
+      {
+        "name": "캡슐세제 2개+건조기시트 2개+이염방지시트 2개+얼룩제거제 100 1개",
+        "revenue": 3672740.0,
+        "profit": 3672740.0,
+        "cost": 0.0,
+        "qty": 73,
+        "margin_rate": 1.0
+      },
+      {
+        "name": "하트식세기 3개+집게+틴케이스",
+        "revenue": 3202710.0,
+        "profit": 3202710.0,
+        "cost": 0.0,
+        "qty": 84,
+        "margin_rate": 1.0
+      },
+      {
+        "name": "캡슐세제 4개",
+        "revenue": 4589925.0,
+        "profit": 2784552.0,
+        "cost": 1805373.0,
+        "qty": 119,
+        "margin_rate": 0.6067
+      },
+      {
+        "name": "이염방지시트 2개",
+        "revenue": 5484730.0,
+        "profit": 2735005.0,
+        "cost": 2749725.0,
+        "qty": 505,
+        "margin_rate": 0.4987
+      },
+      {
+        "name": "하트식세기 3개+샘플",
+        "revenue": 3690690.0,
+        "profit": 2601356.0,
+        "cost": 1089334.0,
+        "qty": 112,
+        "margin_rate": 0.7048
+      },
+      {
+        "name": "얼룩제거제 350",
+        "revenue": 3539402.0,
+        "profit": 2290326.0,
+        "cost": 1249076.0,
+        "qty": 377,
+        "margin_rate": 0.6471
+      },
+      {
+        "name": "하트식세기 6개+틴케이스+집게+섬유탈취제 100",
+        "revenue": 2738360.0,
+        "profit": 1742906.0,
+        "cost": 995454.0,
+        "qty": 46,
+        "margin_rate": 0.6365
+      },
+      {
+        "name": "하트식세기2개+틴케이스+집게",
+        "revenue": 3057000.0,
+        "profit": 1715352.0,
+        "cost": 1341648.0,
+        "qty": 168,
+        "margin_rate": 0.5611
+      },
+      {
+        "name": "하트식세기 2개+샘플",
+        "revenue": 2459830.0,
+        "profit": 1684638.0,
+        "cost": 775192.0,
+        "qty": 115,
+        "margin_rate": 0.6849
+      },
+      {
+        "name": "캡슐세제 3개+건조기시트 3개+얼룩제거제 350 1개+얼룩제거제 100 1개",
+        "revenue": 3837000.0,
+        "profit": 1592917.0,
+        "cost": 2244083.0,
+        "qty": 75,
+        "margin_rate": 0.4151
+      },
+      {
+        "name": "섬유탈취제 400 3개+섬유탈취제 100 1개",
+        "revenue": 1566200.0,
+        "profit": 1566200.0,
+        "cost": 0.0,
+        "qty": 57,
+        "margin_rate": 1.0
+      },
+      {
+        "name": "캡슐세제 2개+건조기시트 1개",
+        "revenue": 2221580.0,
+        "profit": 1547786.0,
+        "cost": 673794.0,
+        "qty": 83,
+        "margin_rate": 0.6967
+      },
+      {
+        "name": "하트식세기패키지+샘플",
+        "revenue": 2767980.0,
+        "profit": 1365295.0,
+        "cost": 1402685.0,
+        "qty": 96,
+        "margin_rate": 0.4932
+      },
+      {
+        "name": "섬유탈취제 400 2개",
+        "revenue": 1969810.0,
+        "profit": 1331542.0,
+        "cost": 638268.0,
+        "qty": 106,
+        "margin_rate": 0.676
+      },
+      {
+        "name": "하트식세기+샘플",
+        "revenue": 2067320.0,
+        "profit": 1327506.0,
+        "cost": 739814.0,
+        "qty": 197,
+        "margin_rate": 0.6421
+      },
+      {
+        "name": "캡슐세제2개+건조기시트2개+이염방지시트2개+얼룩제거제100",
+        "revenue": 2673700.0,
+        "profit": 1261091.0,
+        "cost": 1412609.0,
+        "qty": 53,
+        "margin_rate": 0.4717
+      }
+    ],
+    "by_margin_rate_top": [
+      {
+        "name": "건조기시트 27개",
+        "revenue": 1040900.0,
+        "profit": 1040900.0,
+        "cost": 0.0,
+        "qty": 162,
+        "margin_rate": 1.0
+      },
+      {
+        "name": "하트식세기 3개+집게+틴케이스",
+        "revenue": 3202710.0,
+        "profit": 3202710.0,
+        "cost": 0.0,
+        "qty": 84,
+        "margin_rate": 1.0
+      },
+      {
+        "name": "캡슐세제 2개+건조기시트 2개+이염방지시트 2개+얼룩제거제 100 1개",
+        "revenue": 3672740.0,
+        "profit": 3672740.0,
+        "cost": 0.0,
+        "qty": 73,
+        "margin_rate": 1.0
+      },
+      {
+        "name": "섬유탈취제 400 3개+섬유탈취제 100 1개",
+        "revenue": 1566200.0,
+        "profit": 1566200.0,
+        "cost": 0.0,
+        "qty": 57,
+        "margin_rate": 1.0
+      },
+      {
+        "name": "하트식세기 3개",
+        "revenue": 12124070.0,
+        "profit": 9078962.0,
+        "cost": 3045108.0,
+        "qty": 340,
+        "margin_rate": 0.7488
+      },
+      {
+        "name": "하트식세기 2개",
+        "revenue": 15542680.0,
+        "profit": 11590010.0,
+        "cost": 3952670.0,
+        "qty": 662,
+        "margin_rate": 0.7457
+      },
+      {
+        "name": "하트식세기 4개",
+        "revenue": 19467320.0,
+        "profit": 13998067.0,
+        "cost": 5469253.0,
+        "qty": 458,
+        "margin_rate": 0.7191
+      },
+      {
+        "name": "하트식세기 3개+틴케이스+집게",
+        "revenue": 5556410.0,
+        "profit": 3943614.0,
+        "cost": 1612796.0,
+        "qty": 147,
+        "margin_rate": 0.7097
+      },
+      {
+        "name": "하트식세기",
+        "revenue": 44379020.0,
+        "profit": 31302968.0,
+        "cost": 13076052.0,
+        "qty": 4380,
+        "margin_rate": 0.7054
+      },
+      {
+        "name": "하트식세기 3개+샘플",
+        "revenue": 3690690.0,
+        "profit": 2601356.0,
+        "cost": 1089334.0,
+        "qty": 112,
+        "margin_rate": 0.7048
+      },
+      {
+        "name": "캡슐세제 2개+건조기시트 1개",
+        "revenue": 2221580.0,
+        "profit": 1547786.0,
+        "cost": 673794.0,
+        "qty": 83,
+        "margin_rate": 0.6967
+      },
+      {
+        "name": "집게",
+        "revenue": 1037050.0,
+        "profit": 717635.0,
+        "cost": 319415.0,
+        "qty": 589,
+        "margin_rate": 0.692
+      },
+      {
+        "name": "하트식세기 2개+샘플",
+        "revenue": 2459830.0,
+        "profit": 1684638.0,
+        "cost": 775192.0,
+        "qty": 115,
+        "margin_rate": 0.6849
+      },
+      {
+        "name": "섬유탈취제 400 2개",
+        "revenue": 1969810.0,
+        "profit": 1331542.0,
+        "cost": 638268.0,
+        "qty": 106,
+        "margin_rate": 0.676
+      },
+      {
+        "name": "하트식세기 6개+틴케이스+집게",
+        "revenue": 68664120.0,
+        "profit": 46106077.0,
+        "cost": 22558043.0,
+        "qty": 1132,
+        "margin_rate": 0.6715
+      },
+      {
+        "name": "하트식세기 3개+집게",
+        "revenue": 42191110.0,
+        "profit": 28171324.0,
+        "cost": 14019786.0,
+        "qty": 1476,
+        "margin_rate": 0.6677
+      },
+      {
+        "name": "섬유탈취제 400",
+        "revenue": 6835190.0,
+        "profit": 4471790.0,
+        "cost": 2363399.0,
+        "qty": 785,
+        "margin_rate": 0.6542
+      },
+      {
+        "name": "캡슐세제 3개",
+        "revenue": 1893810.0,
+        "profit": 1233863.0,
+        "cost": 659947.0,
+        "qty": 58,
+        "margin_rate": 0.6515
+      },
+      {
+        "name": "하트식세기 4개+샘플",
+        "revenue": 6029560.0,
+        "profit": 3919434.0,
+        "cost": 2110126.0,
+        "qty": 166,
+        "margin_rate": 0.65
+      },
+      {
+        "name": "얼룩제거제 350",
+        "revenue": 3539402.0,
+        "profit": 2290326.0,
+        "cost": 1249076.0,
+        "qty": 377,
+        "margin_rate": 0.6471
+      },
+      {
+        "name": "하트식세기+샘플",
+        "revenue": 2067320.0,
+        "profit": 1327506.0,
+        "cost": 739814.0,
+        "qty": 197,
+        "margin_rate": 0.6421
+      },
+      {
+        "name": "하트식세기패키지",
+        "revenue": 23908610.0,
+        "profit": 15061720.0,
+        "cost": 8846890.0,
+        "qty": 641,
+        "margin_rate": 0.63
+      },
+      {
+        "name": "캡슐세제",
+        "revenue": 7353969.0,
+        "profit": 4589018.0,
+        "cost": 2764951.0,
+        "qty": 729,
+        "margin_rate": 0.624
+      },
+      {
+        "name": "하트집게",
+        "revenue": 708110.0,
+        "profit": 438439.0,
+        "cost": 269671.0,
+        "qty": 497,
+        "margin_rate": 0.6192
+      },
+      {
+        "name": "캡슐세제 4개",
+        "revenue": 4589925.0,
+        "profit": 2784552.0,
+        "cost": 1805373.0,
+        "qty": 119,
+        "margin_rate": 0.6067
+      },
+      {
+        "name": "캡슐세제 2개",
+        "revenue": 9334410.0,
+        "profit": 5427826.0,
+        "cost": 3906584.0,
+        "qty": 515,
+        "margin_rate": 0.5815
+      },
+      {
+        "name": "건조기시트 4개",
+        "revenue": 2094210.0,
+        "profit": 1177268.0,
+        "cost": 916942.0,
+        "qty": 53,
+        "margin_rate": 0.5622
+      },
+      {
+        "name": "하트식세기2개+틴케이스+집게",
+        "revenue": 3057000.0,
+        "profit": 1715352.0,
+        "cost": 1341648.0,
+        "qty": 168,
+        "margin_rate": 0.5611
+      },
+      {
+        "name": "하트식세기 2개+틴케이스+집게",
+        "revenue": 1266400.0,
+        "profit": 707380.0,
+        "cost": 559020.0,
+        "qty": 70,
+        "margin_rate": 0.5586
+      },
+      {
+        "name": "건조기시트 2개",
+        "revenue": 14348170.0,
+        "profit": 7358647.0,
+        "cost": 6989523.0,
+        "qty": 808,
+        "margin_rate": 0.5129
+      }
+    ],
+    "by_margin_rate_bottom": [
+      {
+        "name": "수세미",
+        "revenue": 37117.0,
+        "profit": -1717328.0,
+        "cost": 1754445.0,
+        "qty": 1050,
+        "margin_rate": -46.268
+      },
+      {
+        "name": "틴케이스",
+        "revenue": 269750.0,
+        "profit": -226002.0,
+        "cost": 495752.0,
+        "qty": 321,
+        "margin_rate": -0.8378
+      },
+      {
+        "name": "얼룩제거제 100",
+        "revenue": 255020.0,
+        "profit": -204481.0,
+        "cost": 459501.0,
+        "qty": 244,
+        "margin_rate": -0.8018
+      },
+      {
+        "name": "다목적세정제",
+        "revenue": 157610.0,
+        "profit": -59319.0,
+        "cost": 216929.0,
+        "qty": 72,
+        "margin_rate": -0.3764
+      },
+      {
+        "name": "슈즈렉",
+        "revenue": 59510.0,
+        "profit": -22176.0,
+        "cost": 81686.0,
+        "qty": 94,
+        "margin_rate": -0.3726
+      },
+      {
+        "name": "세제보관함",
+        "revenue": 142180.0,
+        "profit": 15797.0,
+        "cost": 126383.0,
+        "qty": 78,
+        "margin_rate": 0.1111
+      },
+      {
+        "name": "얼룩제거제 100 2개",
+        "revenue": 371260.0,
+        "profit": 54882.0,
+        "cost": 316378.0,
+        "qty": 84,
+        "margin_rate": 0.1478
+      },
+      {
+        "name": "하트틴케이스",
+        "revenue": 2166660.0,
+        "profit": 458096.0,
+        "cost": 1708564.0,
+        "qty": 1160,
+        "margin_rate": 0.2114
+      },
+      {
+        "name": "섬유탈취제 100",
+        "revenue": 1429960.0,
+        "profit": 320130.0,
+        "cost": 1109830.0,
+        "qty": 648,
+        "margin_rate": 0.2239
+      },
+      {
+        "name": "캡슐세제 3개+건조기시트 3개+얼룩제거제 350 1개+얼룩제거제 100 1개",
+        "revenue": 3837000.0,
+        "profit": 1592917.0,
+        "cost": 2244083.0,
+        "qty": 75,
+        "margin_rate": 0.4151
+      },
+      {
+        "name": "건조기시트",
+        "revenue": 14212349.0,
+        "profit": 6241005.0,
+        "cost": 7971344.0,
+        "qty": 1843,
+        "margin_rate": 0.4391
+      },
+      {
+        "name": "이염방지시트",
+        "revenue": 2339510.0,
+        "profit": 1070825.0,
+        "cost": 1268685.0,
+        "qty": 466,
+        "margin_rate": 0.4577
+      },
+      {
+        "name": "하트식세기2개+틴케이스+집게+수세미",
+        "revenue": 1881500.0,
+        "profit": 886839.0,
+        "cost": 994661.0,
+        "qty": 103,
+        "margin_rate": 0.4713
+      },
+      {
+        "name": "캡슐세제2개+건조기시트2개+이염방지시트2개+얼룩제거제100",
+        "revenue": 2673700.0,
+        "profit": 1261091.0,
+        "cost": 1412609.0,
+        "qty": 53,
+        "margin_rate": 0.4717
+      },
+      {
+        "name": "건조기시트+샘플",
+        "revenue": 2621220.0,
+        "profit": 1260260.0,
+        "cost": 1360960.0,
+        "qty": 273,
+        "margin_rate": 0.4808
+      },
+      {
+        "name": "하트식세기패키지+샘플",
+        "revenue": 2767980.0,
+        "profit": 1365295.0,
+        "cost": 1402685.0,
+        "qty": 96,
+        "margin_rate": 0.4932
+      },
+      {
+        "name": "이염방지시트 2개",
+        "revenue": 5484730.0,
+        "profit": 2735005.0,
+        "cost": 2749725.0,
+        "qty": 505,
+        "margin_rate": 0.4987
+      },
+      {
+        "name": "건조기시트 2개",
+        "revenue": 14348170.0,
+        "profit": 7358647.0,
+        "cost": 6989523.0,
+        "qty": 808,
+        "margin_rate": 0.5129
+      },
+      {
+        "name": "하트식세기 2개+틴케이스+집게",
+        "revenue": 1266400.0,
+        "profit": 707380.0,
+        "cost": 559020.0,
+        "qty": 70,
+        "margin_rate": 0.5586
+      },
+      {
+        "name": "하트식세기2개+틴케이스+집게",
+        "revenue": 3057000.0,
+        "profit": 1715352.0,
+        "cost": 1341648.0,
+        "qty": 168,
+        "margin_rate": 0.5611
+      },
+      {
+        "name": "건조기시트 4개",
+        "revenue": 2094210.0,
+        "profit": 1177268.0,
+        "cost": 916942.0,
+        "qty": 53,
+        "margin_rate": 0.5622
+      },
+      {
+        "name": "캡슐세제 2개",
+        "revenue": 9334410.0,
+        "profit": 5427826.0,
+        "cost": 3906584.0,
+        "qty": 515,
+        "margin_rate": 0.5815
+      },
+      {
+        "name": "캡슐세제 4개",
+        "revenue": 4589925.0,
+        "profit": 2784552.0,
+        "cost": 1805373.0,
+        "qty": 119,
+        "margin_rate": 0.6067
+      },
+      {
+        "name": "하트집게",
+        "revenue": 708110.0,
+        "profit": 438439.0,
+        "cost": 269671.0,
+        "qty": 497,
+        "margin_rate": 0.6192
+      },
+      {
+        "name": "캡슐세제",
+        "revenue": 7353969.0,
+        "profit": 4589018.0,
+        "cost": 2764951.0,
+        "qty": 729,
+        "margin_rate": 0.624
+      },
+      {
+        "name": "하트식세기패키지",
+        "revenue": 23908610.0,
+        "profit": 15061720.0,
+        "cost": 8846890.0,
+        "qty": 641,
+        "margin_rate": 0.63
+      },
+      {
+        "name": "하트식세기+샘플",
+        "revenue": 2067320.0,
+        "profit": 1327506.0,
+        "cost": 739814.0,
+        "qty": 197,
+        "margin_rate": 0.6421
+      },
+      {
+        "name": "얼룩제거제 350",
+        "revenue": 3539402.0,
+        "profit": 2290326.0,
+        "cost": 1249076.0,
+        "qty": 377,
+        "margin_rate": 0.6471
+      },
+      {
+        "name": "하트식세기 4개+샘플",
+        "revenue": 6029560.0,
+        "profit": 3919434.0,
+        "cost": 2110126.0,
+        "qty": 166,
+        "margin_rate": 0.65
+      },
+      {
+        "name": "캡슐세제 3개",
+        "revenue": 1893810.0,
+        "profit": 1233863.0,
+        "cost": 659947.0,
+        "qty": 58,
+        "margin_rate": 0.6515
+      }
+    ],
+    "qty_threshold_margin": 50
+  },
+  "category": {
+    "monthly": {
+      "2025-01": {
+        "식기세척기": {
+          "revenue": 11976750.0,
+          "profit": 7638340.0,
+          "qty": 467,
+          "margin_rate": 0.6378
+        },
+        "기타": {
+          "revenue": 612230.0,
+          "profit": 192082.0,
+          "qty": 304,
+          "margin_rate": 0.3137
+        },
+        "캡슐세제": {
+          "revenue": 3475190.0,
+          "profit": 2051163.0,
+          "qty": 155,
+          "margin_rate": 0.5902
+        },
+        "얼룩제거제": {
+          "revenue": -198080.0,
+          "profit": -590560.0,
+          "qty": 138,
+          "margin_rate": 0.0
+        },
+        "건조기시트": {
+          "revenue": 1455440.0,
+          "profit": 759364.0,
+          "qty": 114,
+          "margin_rate": 0.5217
+        },
+        "이염방지": {
+          "revenue": 385590.0,
+          "profit": 230408.0,
+          "qty": 31,
+          "margin_rate": 0.5975
+        }
+      },
+      "2025-02": {
+        "기타": {
+          "revenue": 165240.0,
+          "profit": -193425.0,
+          "qty": 222,
+          "margin_rate": -1.1706
+        },
+        "식기세척기": {
+          "revenue": 8656250.0,
+          "profit": 5680547.0,
+          "qty": 381,
+          "margin_rate": 0.6562
+        },
+        "건조기시트": {
+          "revenue": 1901510.0,
+          "profit": 896145.0,
+          "qty": 206,
+          "margin_rate": 0.4713
+        },
+        "얼룩제거제": {
+          "revenue": 104800.0,
+          "profit": -74386.0,
+          "qty": 70,
+          "margin_rate": -0.7098
+        },
+        "이염방지": {
+          "revenue": 232500.0,
+          "profit": 82762.0,
+          "qty": 39,
+          "margin_rate": 0.356
+        },
+        "캡슐세제": {
+          "revenue": 771560.0,
+          "profit": 457343.0,
+          "qty": 41,
+          "margin_rate": 0.5928
+        }
+      },
+      "2025-03": {
+        "식기세척기": {
+          "revenue": 8843700.0,
+          "profit": 6264431.0,
+          "qty": 530,
+          "margin_rate": 0.7083
+        },
+        "기타": {
+          "revenue": 589220.0,
+          "profit": 164327.0,
+          "qty": 272,
+          "margin_rate": 0.2789
+        },
+        "건조기시트": {
+          "revenue": 2584890.0,
+          "profit": 1427408.0,
+          "qty": 225,
+          "margin_rate": 0.5522
+        },
+        "캡슐세제": {
+          "revenue": 1404870.0,
+          "profit": 969527.0,
+          "qty": 56,
+          "margin_rate": 0.6901
+        },
+        "얼룩제거제": {
+          "revenue": 226625.0,
+          "profit": 23723.0,
+          "qty": 71,
+          "margin_rate": 0.1047
+        },
+        "이염방지": {
+          "revenue": 270090.0,
+          "profit": 163912.0,
+          "qty": 30,
+          "margin_rate": 0.6069
+        }
+      },
+      "2025-04": {
+        "기타": {
+          "revenue": 582270.0,
+          "profit": 242.0,
+          "qty": 360,
+          "margin_rate": 0.0004
+        },
+        "식기세척기": {
+          "revenue": 11933120.0,
+          "profit": 9380347.0,
+          "qty": 704,
+          "margin_rate": 0.7861
+        },
+        "이염방지": {
+          "revenue": 278000.0,
+          "profit": 188158.0,
+          "qty": 20,
+          "margin_rate": 0.6768
+        },
+        "건조기시트": {
+          "revenue": 1218030.0,
+          "profit": 698597.0,
+          "qty": 114,
+          "margin_rate": 0.5735
+        },
+        "캡슐세제": {
+          "revenue": 931170.0,
+          "profit": 592649.0,
+          "qty": 41,
+          "margin_rate": 0.6365
+        },
+        "얼룩제거제": {
+          "revenue": 499200.0,
+          "profit": 279693.0,
+          "qty": 67,
+          "margin_rate": 0.5603
+        }
+      },
+      "2025-05": {
+        "식기세척기": {
+          "revenue": 18757190.0,
+          "profit": 12521062.0,
+          "qty": 982,
+          "margin_rate": 0.6675
+        },
+        "기타": {
+          "revenue": 232850.0,
+          "profit": -263964.0,
+          "qty": 353,
+          "margin_rate": -1.1336
+        },
+        "건조기시트": {
+          "revenue": 7603020.0,
+          "profit": 3703268.0,
+          "qty": 478,
+          "margin_rate": 0.4871
+        },
+        "캡슐세제": {
+          "revenue": 2607700.0,
+          "profit": 1623875.0,
+          "qty": 226,
+          "margin_rate": 0.6227
+        },
+        "얼룩제거제": {
+          "revenue": 443000.0,
+          "profit": 190713.0,
+          "qty": 84,
+          "margin_rate": 0.4305
+        },
+        "이염방지": {
+          "revenue": 2084380.0,
+          "profit": 998102.0,
+          "qty": 365,
+          "margin_rate": 0.4788
+        }
+      },
+      "2025-06": {
+        "캡슐세제": {
+          "revenue": 1116015.0,
+          "profit": 710071.0,
+          "qty": 77,
+          "margin_rate": 0.6363
+        },
+        "식기세척기": {
+          "revenue": 11215180.0,
+          "profit": 7931809.0,
+          "qty": 520,
+          "margin_rate": 0.7072
+        },
+        "기타": {
+          "revenue": 264500.0,
+          "profit": -50925.0,
+          "qty": 229,
+          "margin_rate": -0.1925
+        },
+        "이염방지": {
+          "revenue": 313500.0,
+          "profit": 201878.0,
+          "qty": 25,
+          "margin_rate": 0.6439
+        },
+        "건조기시트": {
+          "revenue": 1813150.0,
+          "profit": 292646.0,
+          "qty": 272,
+          "margin_rate": 0.1614
+        },
+        "얼룩제거제": {
+          "revenue": 239620.0,
+          "profit": 172450.0,
+          "qty": 20,
+          "margin_rate": 0.7197
+        }
+      },
+      "2025-07": {
+        "식기세척기": {
+          "revenue": 13179980.0,
+          "profit": 9139117.0,
+          "qty": 712,
+          "margin_rate": 0.6934
+        },
+        "기타": {
+          "revenue": 271695.0,
+          "profit": -67735.0,
+          "qty": 262,
+          "margin_rate": -0.2493
+        },
+        "얼룩제거제": {
+          "revenue": 128200.0,
+          "profit": 58693.0,
+          "qty": 24,
+          "margin_rate": 0.4578
+        },
+        "건조기시트": {
+          "revenue": 879810.0,
+          "profit": 424010.0,
+          "qty": 103,
+          "margin_rate": 0.4819
+        },
+        "이염방지": {
+          "revenue": 269590.0,
+          "profit": 57235.0,
+          "qty": 32,
+          "margin_rate": 0.2123
+        },
+        "캡슐세제": {
+          "revenue": 541790.0,
+          "profit": 268708.0,
+          "qty": 38,
+          "margin_rate": 0.496
+        },
+        "섬유탈취제": {
+          "revenue": 435010.0,
+          "profit": -100302.0,
+          "qty": 177,
+          "margin_rate": -0.2306
+        }
+      },
+      "2025-08": {
+        "기타": {
+          "revenue": 562840.0,
+          "profit": 232194.0,
+          "qty": 220,
+          "margin_rate": 0.4125
+        },
+        "식기세척기": {
+          "revenue": 20345155.0,
+          "profit": 13568029.0,
+          "qty": 1168,
+          "margin_rate": 0.6669
+        },
+        "얼룩제거제": {
+          "revenue": 114340.0,
+          "profit": -107253.0,
+          "qty": 99,
+          "margin_rate": -0.938
+        },
+        "섬유탈취제": {
+          "revenue": 2853680.0,
+          "profit": 1843615.0,
+          "qty": 259,
+          "margin_rate": 0.646
+        },
+        "캡슐세제": {
+          "revenue": 389670.0,
+          "profit": 226580.0,
+          "qty": 27,
+          "margin_rate": 0.5815
+        },
+        "건조기시트": {
+          "revenue": 1340360.0,
+          "profit": 406042.0,
+          "qty": 177,
+          "margin_rate": 0.3029
+        },
+        "이염방지": {
+          "revenue": 325760.0,
+          "profit": 195080.0,
+          "qty": 16,
+          "margin_rate": 0.5988
+        }
+      },
+      "2025-09": {
+        "식기세척기": {
+          "revenue": 16509300.0,
+          "profit": 10730149.0,
+          "qty": 881,
+          "margin_rate": 0.6499
+        },
+        "기타": {
+          "revenue": 316470.0,
+          "profit": 15427.0,
+          "qty": 221,
+          "margin_rate": 0.0487
+        },
+        "섬유탈취제": {
+          "revenue": 2087970.0,
+          "profit": 1490462.0,
+          "qty": 119,
+          "margin_rate": 0.7138
+        },
+        "얼룩제거제": {
+          "revenue": 136670.0,
+          "profit": -74176.0,
+          "qty": 43,
+          "margin_rate": -0.5427
+        },
+        "캡슐세제": {
+          "revenue": 529400.0,
+          "profit": 502850.0,
+          "qty": 29,
+          "margin_rate": 0.9498
+        },
+        "이염방지": {
+          "revenue": 610500.0,
+          "profit": 340972.0,
+          "qty": 39,
+          "margin_rate": 0.5585
+        },
+        "건조기시트": {
+          "revenue": 1059990.0,
+          "profit": 549027.0,
+          "qty": 99,
+          "margin_rate": 0.518
+        }
+      },
+      "2025-10": {
+        "식기세척기": {
+          "revenue": 22917900.0,
+          "profit": 15182920.0,
+          "qty": 1262,
+          "margin_rate": 0.6625
+        },
+        "기타": {
+          "revenue": 772280.0,
+          "profit": 91397.0,
+          "qty": 389,
+          "margin_rate": 0.1183
+        },
+        "얼룩제거제": {
+          "revenue": 606480.0,
+          "profit": 399187.0,
+          "qty": 57,
+          "margin_rate": 0.6582
+        },
+        "섬유탈취제": {
+          "revenue": 2723060.0,
+          "profit": 2058396.0,
+          "qty": 283,
+          "margin_rate": 0.7559
+        },
+        "건조기시트": {
+          "revenue": 13168550.0,
+          "profit": 8706981.0,
+          "qty": 732,
+          "margin_rate": 0.6612
+        },
+        "이염방지": {
+          "revenue": 3165385.0,
+          "profit": 1346755.0,
+          "qty": 328,
+          "margin_rate": 0.4255
+        },
+        "캡슐세제": {
+          "revenue": 4042580.0,
+          "profit": 2335820.0,
+          "qty": 222,
+          "margin_rate": 0.5778
+        }
+      },
+      "2025-11": {
+        "기타": {
+          "revenue": 538270.0,
+          "profit": 128021.0,
+          "qty": 371,
+          "margin_rate": 0.2378
+        },
+        "얼룩제거제": {
+          "revenue": 1024180.0,
+          "profit": 707303.0,
+          "qty": 95,
+          "margin_rate": 0.6906
+        },
+        "식기세척기": {
+          "revenue": 20922410.0,
+          "profit": 14087789.0,
+          "qty": 1280,
+          "margin_rate": 0.6733
+        },
+        "섬유탈취제": {
+          "revenue": 3847150.0,
+          "profit": 2984248.0,
+          "qty": 305,
+          "margin_rate": 0.7757
+        },
+        "건조기시트": {
+          "revenue": 4096628.0,
+          "profit": 2146552.0,
+          "qty": 410,
+          "margin_rate": 0.524
+        },
+        "이염방지": {
+          "revenue": 371200.0,
+          "profit": 202405.0,
+          "qty": 51,
+          "margin_rate": 0.5453
+        },
+        "캡슐세제": {
+          "revenue": 2347000.0,
+          "profit": 1440521.0,
+          "qty": 206,
+          "margin_rate": 0.6138
+        }
+      },
+      "2025-12": {
+        "식기세척기": {
+          "revenue": 27956120.0,
+          "profit": 18598149.0,
+          "qty": 1501,
+          "margin_rate": 0.6653
+        },
+        "기타": {
+          "revenue": 583500.0,
+          "profit": 199130.0,
+          "qty": 335,
+          "margin_rate": 0.3413
+        },
+        "건조기시트": {
+          "revenue": 3284734.0,
+          "profit": 1705741.0,
+          "qty": 261,
+          "margin_rate": 0.5193
+        },
+        "이염방지": {
+          "revenue": 265800.0,
+          "profit": 159622.0,
+          "qty": 22,
+          "margin_rate": 0.6005
+        },
+        "캡슐세제": {
+          "revenue": 1371000.0,
+          "profit": 845624.0,
+          "qty": 72,
+          "margin_rate": 0.6168
+        },
+        "얼룩제거제": {
+          "revenue": 689830.0,
+          "profit": 486053.0,
+          "qty": 65,
+          "margin_rate": 0.7046
+        },
+        "섬유탈취제": {
+          "revenue": 696580.0,
+          "profit": 406126.0,
+          "qty": 135,
+          "margin_rate": 0.583
+        }
+      },
+      "2026-01": {
+        "식기세척기": {
+          "revenue": 37008680.0,
+          "profit": 24532091.0,
+          "qty": 1940,
+          "margin_rate": 0.6629
+        },
+        "기타": {
+          "revenue": 541967.0,
+          "profit": 1902.0,
+          "qty": 397,
+          "margin_rate": 0.0035
+        },
+        "얼룩제거제": {
+          "revenue": 1511912.0,
+          "profit": 1164524.0,
+          "qty": 111,
+          "margin_rate": 0.7702
+        },
+        "건조기시트": {
+          "revenue": 2442150.0,
+          "profit": 1788699.0,
+          "qty": 195,
+          "margin_rate": 0.7324
+        },
+        "캡슐세제": {
+          "revenue": 1273420.0,
+          "profit": 760829.0,
+          "qty": 60,
+          "margin_rate": 0.5975
+        },
+        "섬유탈취제": {
+          "revenue": 2542590.0,
+          "profit": 2022294.0,
+          "qty": 285,
+          "margin_rate": 0.7954
+        }
+      },
+      "2026-02": {
+        "기타": {
+          "revenue": 252590.0,
+          "profit": -366381.0,
+          "qty": 386,
+          "margin_rate": -1.4505
+        },
+        "식기세척기": {
+          "revenue": 30857590.0,
+          "profit": 20207656.0,
+          "qty": 1670,
+          "margin_rate": 0.6549
+        },
+        "캡슐세제": {
+          "revenue": 5048229.0,
+          "profit": 2809577.0,
+          "qty": 294,
+          "margin_rate": 0.5565
+        },
+        "건조기시트": {
+          "revenue": 10746401.0,
+          "profit": 5544215.0,
+          "qty": 493,
+          "margin_rate": 0.5159
+        },
+        "얼룩제거제": {
+          "revenue": 916100.0,
+          "profit": 588203.0,
+          "qty": 153,
+          "margin_rate": 0.6421
+        },
+        "섬유탈취제": {
+          "revenue": 3585820.0,
+          "profit": 2835214.0,
+          "qty": 411,
+          "margin_rate": 0.7907
+        }
+      }
+    },
+    "totals": {
+      "식기세척기": {
+        "revenue": 261079325.0,
+        "profit": 175462434.0,
+        "qty": 13998,
+        "margin_rate": 0.6721,
+        "share": 0.686
+      },
+      "건조기시트": {
+        "revenue": 53594663.0,
+        "profit": 29048696.0,
+        "qty": 3879,
+        "margin_rate": 0.542,
+        "share": 0.1408
+      },
+      "캡슐세제": {
+        "revenue": 25849594.0,
+        "profit": 15595138.0,
+        "qty": 1544,
+        "margin_rate": 0.6033,
+        "share": 0.0679
+      },
+      "섬유탈취제": {
+        "revenue": 18771860.0,
+        "profit": 13540054.0,
+        "qty": 1974,
+        "margin_rate": 0.7213,
+        "share": 0.0493
+      },
+      "이염방지": {
+        "revenue": 8572295.0,
+        "profit": 4167290.0,
+        "qty": 998,
+        "margin_rate": 0.4861,
+        "share": 0.0225
+      },
+      "얼룩제거제": {
+        "revenue": 6442877.0,
+        "profit": 3224168.0,
+        "qty": 1097,
+        "margin_rate": 0.5004,
+        "share": 0.0169
+      },
+      "기타": {
+        "revenue": 6285922.0,
+        "profit": 82292.0,
+        "qty": 4321,
+        "margin_rate": 0.0131,
+        "share": 0.0165
+      }
+    }
+  },
+  "member": {
+    "id_column_used": "수령인 휴대전화",
+    "total_unique": 9984,
+    "new_only_count": 9150,
+    "repeat_2plus_count": 834,
+    "repeat_5plus_count": 51,
+    "repeat_rate": 0.0835,
+    "vip_rate": 0.0051,
+    "guest_orders": 1,
+    "guest_revenue": 35800.0,
+    "member_total_revenue": 380560736.0,
+    "repeat_revenue_total": 40476595.0,
+    "vip_revenue": 7120935.0,
+    "vip_revenue_share": 0.0187,
+    "monthly": {
+      "2025-01": {
+        "new_revenue": 17271980.0,
+        "repeat_revenue": 435140.0,
+        "new_orders": 526,
+        "repeat_orders": 11,
+        "repeat_share": 0.0246
+      },
+      "2025-02": {
+        "new_revenue": 11625380.0,
+        "repeat_revenue": 206480.0,
+        "new_orders": 331,
+        "repeat_orders": 43,
+        "repeat_share": 0.0175
+      },
+      "2025-03": {
+        "new_revenue": 12874485.0,
+        "repeat_revenue": 1044910.0,
+        "new_orders": 353,
+        "repeat_orders": 19,
+        "repeat_share": 0.0751
+      },
+      "2025-04": {
+        "new_revenue": 14303670.0,
+        "repeat_revenue": 1138120.0,
+        "new_orders": 459,
+        "repeat_orders": 28,
+        "repeat_share": 0.0737
+      },
+      "2025-05": {
+        "new_revenue": 29574160.0,
+        "repeat_revenue": 2153980.0,
+        "new_orders": 783,
+        "repeat_orders": 69,
+        "repeat_share": 0.0679
+      },
+      "2025-06": {
+        "new_revenue": 13252470.0,
+        "repeat_revenue": 1709495.0,
+        "new_orders": 373,
+        "repeat_orders": 94,
+        "repeat_share": 0.1143
+      },
+      "2025-07": {
+        "new_revenue": 13933970.0,
+        "repeat_revenue": 1772105.0,
+        "new_orders": 432,
+        "repeat_orders": 100,
+        "repeat_share": 0.1128
+      },
+      "2025-08": {
+        "new_revenue": 23763195.0,
+        "repeat_revenue": 2168610.0,
+        "new_orders": 761,
+        "repeat_orders": 84,
+        "repeat_share": 0.0836
+      },
+      "2025-09": {
+        "new_revenue": 19617200.0,
+        "repeat_revenue": 1633100.0,
+        "new_orders": 593,
+        "repeat_orders": 85,
+        "repeat_share": 0.0769
+      },
+      "2025-10": {
+        "new_revenue": 41801590.0,
+        "repeat_revenue": 5558845.0,
+        "new_orders": 1093,
+        "repeat_orders": 137,
+        "repeat_share": 0.1174
+      },
+      "2025-11": {
+        "new_revenue": 26246870.0,
+        "repeat_revenue": 6899968.0,
+        "new_orders": 802,
+        "repeat_orders": 158,
+        "repeat_share": 0.2082
+      },
+      "2025-12": {
+        "new_revenue": 30402450.0,
+        "repeat_revenue": 4445114.0,
+        "new_orders": 902,
+        "repeat_orders": 128,
+        "repeat_share": 0.1276
+      },
+      "2026-01": {
+        "new_revenue": 41728741.0,
+        "repeat_revenue": 3591978.0,
+        "new_orders": 1294,
+        "repeat_orders": 78,
+        "repeat_share": 0.0793
+      },
+      "2026-02": {
+        "new_revenue": 43687980.0,
+        "repeat_revenue": 7718750.0,
+        "new_orders": 1282,
+        "repeat_orders": 191,
+        "repeat_share": 0.1502
+      }
+    },
+    "repeat_interval_distribution": {
+      "1주 이내": 83,
+      "1주-1개월": 246,
+      "1-3개월": 352,
+      "3-6개월": 369,
+      "6개월+": 149
+    }
+  },
+  "price_band": {
+    "bands": {
+      "<1만": {
+        "orders": 2059,
+        "revenue": 18071060.0,
+        "profit": 10796643.0,
+        "margin_rate": 0.5975,
+        "share": 0.0472,
+        "avg_order": 8777.0
+      },
+      "1-2만": {
+        "orders": 1448,
+        "revenue": 23731940.0,
+        "profit": 15692827.0,
+        "margin_rate": 0.6613,
+        "share": 0.062,
+        "avg_order": 16389.0
+      },
+      "2-3만": {
+        "orders": 1832,
+        "revenue": 50593045.0,
+        "profit": 33923020.0,
+        "margin_rate": 0.6705,
+        "share": 0.1323,
+        "avg_order": 27616.0
+      },
+      "3-5만": {
+        "orders": 2585,
+        "revenue": 98313130.0,
+        "profit": 64395899.0,
+        "margin_rate": 0.655,
+        "share": 0.257,
+        "avg_order": 38032.0
+      },
+      "5-10만": {
+        "orders": 2918,
+        "revenue": 175619312.0,
+        "profit": 112009698.0,
+        "margin_rate": 0.6378,
+        "share": 0.4591,
+        "avg_order": 60185.0
+      },
+      "10만+": {
+        "orders": 109,
+        "revenue": 16188464.0,
+        "profit": 9060224.0,
+        "margin_rate": 0.5597,
+        "share": 0.0423,
+        "avg_order": 148518.0
+      }
+    },
+    "aov_monthly": {
+      "2025-01": 32974.0,
+      "2025-02": 31636.0,
+      "2025-03": 37418.0,
+      "2025-04": 31708.0,
+      "2025-05": 37240.0,
+      "2025-06": 32038.0,
+      "2025-07": 29523.0,
+      "2025-08": 30689.0,
+      "2025-09": 31343.0,
+      "2025-10": 38502.0,
+      "2025-11": 34528.0,
+      "2025-12": 33833.0,
+      "2026-01": 33033.0,
+      "2026-02": 34899.0
+    }
+  },
+  "issues": []
+}
