@@ -39,6 +39,21 @@ sourcing/analyzer/.env
 # Firebase 서비스 계정 키 (절대 커밋 금지)
 *-firebase-adminsdk-*.json
 
+# 텔레그램/디스코드 봇 (토큰 하드코딩 — 절대 커밋 금지)
+pixie-bot/
+lena-bot/
+discord-bots/config.py
+discord-bots/group_chats.json
+discord-bots/*.log
+
+# 봇 공유 데이터 (로컬 전용)
+data/
+
+# Node modules
+**/node_modules/
+accounting/package-lock.json
+accounting/package.json
+
 # Python
 __pycache__/
 *.pyc
