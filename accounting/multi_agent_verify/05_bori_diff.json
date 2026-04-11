@@ -1,0 +1,978 @@
+{
+  "agent": "bori",
+  "method": "3-way diff between mori/kino/pixie",
+  "part_a_mori_vs_kino": {
+    "all_zero": true,
+    "max_abs_diff": 0,
+    "rows": [
+      {
+        "month": "2025-01",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0,
+          "app_discount": 0.0,
+          "extra_discount": 0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      },
+      {
+        "month": "2025-02",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0,
+          "app_discount": 0.0,
+          "extra_discount": 0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      },
+      {
+        "month": "2025-03",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0,
+          "app_discount": 0.0,
+          "extra_discount": 0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      },
+      {
+        "month": "2025-04",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0,
+          "app_discount": 0.0,
+          "extra_discount": 0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      },
+      {
+        "month": "2025-05",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0,
+          "app_discount": 0.0,
+          "extra_discount": 0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      },
+      {
+        "month": "2025-06",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0.0,
+          "app_discount": 0.0,
+          "extra_discount": 0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      },
+      {
+        "month": "2025-07",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0.0,
+          "app_discount": 0.0,
+          "extra_discount": 0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      },
+      {
+        "month": "2025-08",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0.0,
+          "app_discount": 0.0,
+          "extra_discount": 0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      },
+      {
+        "month": "2025-09",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0.0,
+          "app_discount": 0.0,
+          "extra_discount": 0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      },
+      {
+        "month": "2025-10",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0.0,
+          "app_discount": 0.0,
+          "extra_discount": 0.0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      },
+      {
+        "month": "2025-11",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0.0,
+          "app_discount": 0.0,
+          "extra_discount": 0.0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      },
+      {
+        "month": "2025-12",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0.0,
+          "app_discount": 0.0,
+          "extra_discount": 0.0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      },
+      {
+        "month": "2026-01",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0.0,
+          "app_discount": 0.0,
+          "extra_discount": 0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      },
+      {
+        "month": "2026-02",
+        "diffs": {
+          "gross": 0.0,
+          "coupon": 0.0,
+          "point": 0.0,
+          "rank_discount": 0.0,
+          "app_discount": 0.0,
+          "extra_discount": 0.0,
+          "shipping": 0.0,
+          "net_revenue": 0.0,
+          "cost": 0.0,
+          "profit": 0.0
+        }
+      }
+    ]
+  },
+  "part_b_mori_vs_pixie": [
+    {
+      "month": "2025-01",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 17707120.0,
+      "pixie_revenue": 19064020.0,
+      "rev_diff": -1356900.0,
+      "rev_diff_rate": -0.0711759639362527,
+      "mori_profit": 10280796.7,
+      "pixie_profit": 8941749.897,
+      "prof_diff": 1339046.8029999994,
+      "prof_diff_rate": 0.1497522094024634
+    },
+    {
+      "month": "2025-02",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 11831860.0,
+      "pixie_revenue": 12625760.0,
+      "rev_diff": -793900.0,
+      "rev_diff_rate": -0.06287938310248255,
+      "mori_profit": 6848986.5,
+      "pixie_profit": 6266007.2809999995,
+      "prof_diff": 582979.2190000005,
+      "prof_diff_rate": 0.09303838837974701
+    },
+    {
+      "month": "2025-03",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 13919395.0,
+      "pixie_revenue": 13921110.0,
+      "rev_diff": -1715.0,
+      "rev_diff_rate": -0.00012319419931312948,
+      "mori_profit": 9013330.1,
+      "pixie_profit": 8740050.834,
+      "prof_diff": 273279.2659999989,
+      "prof_diff_rate": 0.03126746871275679
+    },
+    {
+      "month": "2025-04",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 15441790.0,
+      "pixie_revenue": 16761660.0,
+      "rev_diff": -1319870.0,
+      "rev_diff_rate": -0.07874339415069868,
+      "mori_profit": 11139685.01,
+      "pixie_profit": 11582443.391999997,
+      "prof_diff": -442758.3819999974,
+      "prof_diff_rate": -0.03822668214427113
+    },
+    {
+      "month": "2025-05",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 31728140.0,
+      "pixie_revenue": 34722290.0,
+      "rev_diff": -2994150.0,
+      "rev_diff_rate": -0.08623135167640153,
+      "mori_profit": 18773057.31,
+      "pixie_profit": 20332954.119999994,
+      "prof_diff": -1559896.809999995,
+      "prof_diff_rate": -0.07671766732929584
+    },
+    {
+      "month": "2025-06",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 14961965.0,
+      "pixie_revenue": 15863075.0,
+      "rev_diff": -901110.0,
+      "rev_diff_rate": -0.0568055058681876,
+      "mori_profit": 9257928.3,
+      "pixie_profit": 10191062.418999998,
+      "prof_diff": -933134.1189999972,
+      "prof_diff_rate": -0.09156396856723023
+    },
+    {
+      "month": "2025-07",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 15706075.0,
+      "pixie_revenue": 16793275.0,
+      "rev_diff": -1087200.0,
+      "rev_diff_rate": -0.06474020106262775,
+      "mori_profit": 9779726.04,
+      "pixie_profit": 11122468.508,
+      "prof_diff": -1342742.4680000003,
+      "prof_diff_rate": -0.12072342277563772
+    },
+    {
+      "month": "2025-08",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 25931805.0,
+      "pixie_revenue": 29395065.0,
+      "rev_diff": -3463260.0,
+      "rev_diff_rate": -0.11781773573217137,
+      "mori_profit": 16364286.75,
+      "pixie_profit": 18137513.204,
+      "prof_diff": -1773226.454,
+      "prof_diff_rate": -0.09776568783469926
+    },
+    {
+      "month": "2025-09",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 21250300.0,
+      "pixie_revenue": 22810400.0,
+      "rev_diff": -1560100.0,
+      "rev_diff_rate": -0.06839424122330165,
+      "mori_profit": 13554711.57,
+      "pixie_profit": 15932371.771000002,
+      "prof_diff": -2377660.2010000013,
+      "prof_diff_rate": -0.149234541797964
+    },
+    {
+      "month": "2025-10",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 47396235.0,
+      "pixie_revenue": 50019020.0,
+      "rev_diff": -2622785.0,
+      "rev_diff_rate": -0.05243575343939166,
+      "mori_profit": 30121455.93,
+      "pixie_profit": 29190844.855999995,
+      "prof_diff": 930611.0740000047,
+      "prof_diff_rate": 0.03188023774545612
+    },
+    {
+      "month": "2025-11",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 33146838.0,
+      "pixie_revenue": 35131280.0,
+      "rev_diff": -1984442.0,
+      "rev_diff_rate": -0.05648647017700465,
+      "mori_profit": 21696839.1,
+      "pixie_profit": 21353395.358,
+      "prof_diff": 343443.7420000024,
+      "prof_diff_rate": 0.016083800081532797
+    },
+    {
+      "month": "2025-12",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 34847564.0,
+      "pixie_revenue": 36570170.0,
+      "rev_diff": -1722606.0,
+      "rev_diff_rate": -0.04710412885693449,
+      "mori_profit": 22400445.07,
+      "pixie_profit": 22478520.255000003,
+      "prof_diff": -78075.18500000238,
+      "prof_diff_rate": -0.003473324049550626
+    },
+    {
+      "month": "2026-01",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 45320719.0,
+      "pixie_revenue": 46711892.0,
+      "rev_diff": -1391173.0,
+      "rev_diff_rate": -0.029781987850117483,
+      "mori_profit": 30270339.67,
+      "pixie_profit": 30987398.270000003,
+      "prof_diff": -717058.6000000015,
+      "prof_diff_rate": -0.023140329296190424
+    },
+    {
+      "month": "2026-02",
+      "pixie_source": "channel_sheet_pre_ad",
+      "mori_revenue": 51406730.0,
+      "pixie_revenue": 54277870.0,
+      "rev_diff": -2871140.0,
+      "rev_diff_rate": -0.05289706467847762,
+      "mori_profit": 31618484.74,
+      "pixie_profit": 35480964.658,
+      "prof_diff": -3862479.9180000015,
+      "prof_diff_rate": -0.1088606230194228
+    }
+  ],
+  "part_c_closest_candidate": {
+    "rows": [
+      {
+        "month": "2025-01",
+        "pixie_revenue": 19064020.0,
+        "candidates": {
+          "A_gross": 20907500.0,
+          "B_gross_coupon": 19772160.0,
+          "C_gross_coupon_refund": 19772160.0,
+          "D_gross_coupon_refund_point": 18883770.0,
+          "E_net_revenue": 17707120.0,
+          "F_net_revenue_with_ship": 19003120.0,
+          "alt_gross_minus_coupon_point_app": 17707120.0
+        },
+        "closest": "F_net_revenue_with_ship",
+        "closest_abs_diff": 60900.0,
+        "closest_diff_rate": 0.0031944993763120266,
+        "alt_gmcpa_diff": -1356900.0,
+        "alt_gmcpa_diff_rate": -0.0711759639362527
+      },
+      {
+        "month": "2025-02",
+        "pixie_revenue": 12625760.0,
+        "candidates": {
+          "A_gross": 14907100.0,
+          "B_gross_coupon": 14215560.0,
+          "C_gross_coupon_refund": 14215560.0,
+          "D_gross_coupon_refund_point": 12595660.0,
+          "E_net_revenue": 11831860.0,
+          "F_net_revenue_with_ship": 12605860.0,
+          "alt_gross_minus_coupon_point_app": 11831860.0
+        },
+        "closest": "F_net_revenue_with_ship",
+        "closest_abs_diff": 19900.0,
+        "closest_diff_rate": 0.001576142743090317,
+        "alt_gmcpa_diff": -793900.0,
+        "alt_gmcpa_diff_rate": -0.06287938310248255
+      },
+      {
+        "month": "2025-03",
+        "pixie_revenue": 13921110.0,
+        "candidates": {
+          "A_gross": 15715100.0,
+          "B_gross_coupon": 14980880.0,
+          "C_gross_coupon_refund": 14980880.0,
+          "D_gross_coupon_refund_point": 14686385.0,
+          "E_net_revenue": 13919395.0,
+          "F_net_revenue_with_ship": 14813395.0,
+          "alt_gross_minus_coupon_point_app": 13919395.0
+        },
+        "closest": "E_net_revenue",
+        "closest_abs_diff": 1715.0,
+        "closest_diff_rate": 0.00012319419931312948,
+        "alt_gmcpa_diff": -1715.0,
+        "alt_gmcpa_diff_rate": -0.00012319419931312948
+      },
+      {
+        "month": "2025-04",
+        "pixie_revenue": 16761660.0,
+        "candidates": {
+          "A_gross": 17567800.0,
+          "B_gross_coupon": 16598780.0,
+          "C_gross_coupon_refund": 16598780.0,
+          "D_gross_coupon_refund_point": 16408500.0,
+          "E_net_revenue": 15441790.0,
+          "F_net_revenue_with_ship": 16551790.0,
+          "alt_gross_minus_coupon_point_app": 15441790.0
+        },
+        "closest": "B_gross_coupon",
+        "closest_abs_diff": 162880.0,
+        "closest_diff_rate": 0.009717414623611266,
+        "alt_gmcpa_diff": -1319870.0,
+        "alt_gmcpa_diff_rate": -0.07874339415069868
+      },
+      {
+        "month": "2025-05",
+        "pixie_revenue": 34722290.0,
+        "candidates": {
+          "A_gross": 35793800.0,
+          "B_gross_coupon": 34497800.0,
+          "C_gross_coupon_refund": 34497800.0,
+          "D_gross_coupon_refund_point": 32948590.0,
+          "E_net_revenue": 31728140.0,
+          "F_net_revenue_with_ship": 33609140.0,
+          "alt_gross_minus_coupon_point_app": 31728140.0
+        },
+        "closest": "B_gross_coupon",
+        "closest_abs_diff": 224490.0,
+        "closest_diff_rate": 0.006465299379735611,
+        "alt_gmcpa_diff": -2994150.0,
+        "alt_gmcpa_diff_rate": -0.08623135167640153
+      },
+      {
+        "month": "2025-06",
+        "pixie_revenue": 15863075.0,
+        "candidates": {
+          "A_gross": 17222000.0,
+          "B_gross_coupon": 16554985.0,
+          "C_gross_coupon_refund": 16554985.0,
+          "D_gross_coupon_refund_point": 15594965.0,
+          "E_net_revenue": 14961965.0,
+          "F_net_revenue_with_ship": 15888965.0,
+          "alt_gross_minus_coupon_point_app": 14988915.0
+        },
+        "closest": "F_net_revenue_with_ship",
+        "closest_abs_diff": 25890.0,
+        "closest_diff_rate": 0.0016320921385040417,
+        "alt_gmcpa_diff": -874160.0,
+        "alt_gmcpa_diff_rate": -0.05510659188083017
+      },
+      {
+        "month": "2025-07",
+        "pixie_revenue": 16793275.0,
+        "candidates": {
+          "A_gross": 18965800.0,
+          "B_gross_coupon": 18082585.0,
+          "C_gross_coupon_refund": 18082585.0,
+          "D_gross_coupon_refund_point": 17551255.0,
+          "E_net_revenue": 15706075.0,
+          "F_net_revenue_with_ship": 16687075.0,
+          "alt_gross_minus_coupon_point_app": 16818275.0
+        },
+        "closest": "F_net_revenue_with_ship",
+        "closest_abs_diff": 106200.0,
+        "closest_diff_rate": 0.006323960037574565,
+        "alt_gmcpa_diff": 25000.0,
+        "alt_gmcpa_diff_rate": 0.001488691157621131
+      },
+      {
+        "month": "2025-08",
+        "pixie_revenue": 29395065.0,
+        "candidates": {
+          "A_gross": 30129800.0,
+          "B_gross_coupon": 28953615.0,
+          "C_gross_coupon_refund": 28953615.0,
+          "D_gross_coupon_refund_point": 27588945.0,
+          "E_net_revenue": 25931805.0,
+          "F_net_revenue_with_ship": 27749805.0,
+          "alt_gross_minus_coupon_point_app": 26459205.0
+        },
+        "closest": "B_gross_coupon",
+        "closest_abs_diff": 441450.0,
+        "closest_diff_rate": 0.01501782697197642,
+        "alt_gmcpa_diff": -2935860.0,
+        "alt_gmcpa_diff_rate": -0.09987594856483563
+      },
+      {
+        "month": "2025-09",
+        "pixie_revenue": 22810400.0,
+        "candidates": {
+          "A_gross": 24584200.0,
+          "B_gross_coupon": 23638940.0,
+          "C_gross_coupon_refund": 23638940.0,
+          "D_gross_coupon_refund_point": 22070090.0,
+          "E_net_revenue": 21250300.0,
+          "F_net_revenue_with_ship": 22813300.0,
+          "alt_gross_minus_coupon_point_app": 21274100.0
+        },
+        "closest": "F_net_revenue_with_ship",
+        "closest_abs_diff": 2900.0,
+        "closest_diff_rate": 0.00012713499105671097,
+        "alt_gmcpa_diff": -1536300.0,
+        "alt_gmcpa_diff_rate": -0.06735085750359485
+      },
+      {
+        "month": "2025-10",
+        "pixie_revenue": 50019020.0,
+        "candidates": {
+          "A_gross": 68280000.0,
+          "B_gross_coupon": 67152015.0,
+          "C_gross_coupon_refund": 67152015.0,
+          "D_gross_coupon_refund_point": 67016705.0,
+          "E_net_revenue": 47396235.0,
+          "F_net_revenue_with_ship": 49643235.0,
+          "alt_gross_minus_coupon_point_app": 65399085.0
+        },
+        "closest": "F_net_revenue_with_ship",
+        "closest_abs_diff": 375785.0,
+        "closest_diff_rate": 0.007512842114859508,
+        "alt_gmcpa_diff": 15380065.0,
+        "alt_gmcpa_diff_rate": 0.3074843329597421
+      },
+      {
+        "month": "2025-11",
+        "pixie_revenue": 35131280.0,
+        "candidates": {
+          "A_gross": 50286500.0,
+          "B_gross_coupon": 49627620.0,
+          "C_gross_coupon_refund": 49627620.0,
+          "D_gross_coupon_refund_point": 49526878.0,
+          "E_net_revenue": 33146838.0,
+          "F_net_revenue_with_ship": 35174838.0,
+          "alt_gross_minus_coupon_point_app": 48532338.0
+        },
+        "closest": "F_net_revenue_with_ship",
+        "closest_abs_diff": 43558.0,
+        "closest_diff_rate": 0.001239863733971549,
+        "alt_gmcpa_diff": 13401058.0,
+        "alt_gmcpa_diff_rate": 0.3814565822822283
+      },
+      {
+        "month": "2025-12",
+        "pixie_revenue": 36570170.0,
+        "candidates": {
+          "A_gross": 37285700.0,
+          "B_gross_coupon": 36248250.0,
+          "C_gross_coupon_refund": 36248250.0,
+          "D_gross_coupon_refund_point": 36079744.0,
+          "E_net_revenue": 34847564.0,
+          "F_net_revenue_with_ship": 36839564.0,
+          "alt_gross_minus_coupon_point_app": 35114864.0
+        },
+        "closest": "F_net_revenue_with_ship",
+        "closest_abs_diff": 269394.0,
+        "closest_diff_rate": 0.007366495698543376,
+        "alt_gmcpa_diff": -1455306.0,
+        "alt_gmcpa_diff_rate": -0.03979489294143287
+      },
+      {
+        "month": "2026-01",
+        "pixie_revenue": 46711892.0,
+        "candidates": {
+          "A_gross": 48511300.0,
+          "B_gross_coupon": 47048247.0,
+          "C_gross_coupon_refund": 47048247.0,
+          "D_gross_coupon_refund_point": 47013149.0,
+          "E_net_revenue": 45320719.0,
+          "F_net_revenue_with_ship": 48299719.0,
+          "alt_gross_minus_coupon_point_app": 45390619.0
+        },
+        "closest": "D_gross_coupon_refund_point",
+        "closest_abs_diff": 301257.0,
+        "closest_diff_rate": 0.006449257075692845,
+        "alt_gmcpa_diff": -1321273.0,
+        "alt_gmcpa_diff_rate": -0.02828558089661622
+      },
+      {
+        "month": "2026-02",
+        "pixie_revenue": 54277870.0,
+        "candidates": {
+          "A_gross": 56986200.0,
+          "B_gross_coupon": 55469970.0,
+          "C_gross_coupon_refund": 55469970.0,
+          "D_gross_coupon_refund_point": 54451250.0,
+          "E_net_revenue": 51406730.0,
+          "F_net_revenue_with_ship": 54346730.0,
+          "alt_gross_minus_coupon_point_app": 52722830.0
+        },
+        "closest": "F_net_revenue_with_ship",
+        "closest_abs_diff": 68860.0,
+        "closest_diff_rate": 0.00126865700514777,
+        "alt_gmcpa_diff": -1555040.0,
+        "alt_gmcpa_diff_rate": -0.028649613553368987
+      }
+    ],
+    "counter": {
+      "A": 0,
+      "B": 3,
+      "C": 0,
+      "D": 1,
+      "E": 1,
+      "F": 9
+    }
+  },
+  "part_d_no_cost_simulation": {
+    "margin_assumption": 0.3,
+    "total_profit_reduction": 11858840.0,
+    "rows": [
+      {
+        "month": "2025-01",
+        "no_cost_count": 17,
+        "no_cost_value": 336100.0,
+        "original_profit": 10280796.7,
+        "simulated_cost_adjustment": 235269.99999999997,
+        "adjusted_profit": 10045526.7,
+        "profit_reduction_rate": 0.022884413228402813
+      },
+      {
+        "month": "2025-02",
+        "no_cost_count": 12,
+        "no_cost_value": 362300.0,
+        "original_profit": 6848986.5,
+        "simulated_cost_adjustment": 253609.99999999997,
+        "adjusted_profit": 6595376.5,
+        "profit_reduction_rate": 0.03702883631030664
+      },
+      {
+        "month": "2025-03",
+        "no_cost_count": 16,
+        "no_cost_value": 249800.0,
+        "original_profit": 9013330.1,
+        "simulated_cost_adjustment": 174860.0,
+        "adjusted_profit": 8838470.1,
+        "profit_reduction_rate": 0.019400154888369173
+      },
+      {
+        "month": "2025-04",
+        "no_cost_count": 84,
+        "no_cost_value": 3367500.0,
+        "original_profit": 11139685.01,
+        "simulated_cost_adjustment": 2357250.0,
+        "adjusted_profit": 8782435.01,
+        "profit_reduction_rate": 0.21160831728041832
+      },
+      {
+        "month": "2025-05",
+        "no_cost_count": 7,
+        "no_cost_value": 185300.0,
+        "original_profit": 18773057.31,
+        "simulated_cost_adjustment": 129709.99999999999,
+        "adjusted_profit": 18643347.31,
+        "profit_reduction_rate": 0.00690937005401386
+      },
+      {
+        "month": "2025-06",
+        "no_cost_count": 0,
+        "no_cost_value": 0,
+        "original_profit": 9257928.3,
+        "simulated_cost_adjustment": 0.0,
+        "adjusted_profit": 9257928.3,
+        "profit_reduction_rate": 0.0
+      },
+      {
+        "month": "2025-07",
+        "no_cost_count": 0,
+        "no_cost_value": 0,
+        "original_profit": 9779726.04,
+        "simulated_cost_adjustment": 0.0,
+        "adjusted_profit": 9779726.04,
+        "profit_reduction_rate": 0.0
+      },
+      {
+        "month": "2025-08",
+        "no_cost_count": 0,
+        "no_cost_value": 0,
+        "original_profit": 16364286.75,
+        "simulated_cost_adjustment": 0.0,
+        "adjusted_profit": 16364286.75,
+        "profit_reduction_rate": 0.0
+      },
+      {
+        "month": "2025-09",
+        "no_cost_count": 11,
+        "no_cost_value": 581700.0,
+        "original_profit": 13554711.57,
+        "simulated_cost_adjustment": 407190.0,
+        "adjusted_profit": 13147521.57,
+        "profit_reduction_rate": 0.030040476914404753
+      },
+      {
+        "month": "2025-10",
+        "no_cost_count": 127,
+        "no_cost_value": 4633300.0,
+        "original_profit": 30121455.93,
+        "simulated_cost_adjustment": 3243310.0,
+        "adjusted_profit": 26878145.93,
+        "profit_reduction_rate": 0.10767441014595074
+      },
+      {
+        "month": "2025-11",
+        "no_cost_count": 143,
+        "no_cost_value": 960800.0,
+        "original_profit": 21696839.1,
+        "simulated_cost_adjustment": 672560.0,
+        "adjusted_profit": 21024279.1,
+        "profit_reduction_rate": 0.030998063676473498
+      },
+      {
+        "month": "2025-12",
+        "no_cost_count": 82,
+        "no_cost_value": 704400.0,
+        "original_profit": 22400445.07,
+        "simulated_cost_adjustment": 493079.99999999994,
+        "adjusted_profit": 21907365.07,
+        "profit_reduction_rate": 0.022012062638003645
+      },
+      {
+        "month": "2026-01",
+        "no_cost_count": 101,
+        "no_cost_value": 2560000.0,
+        "original_profit": 30270339.67,
+        "simulated_cost_adjustment": 1792000.0,
+        "adjusted_profit": 28478339.67,
+        "profit_reduction_rate": 0.059199864274268314
+      },
+      {
+        "month": "2026-02",
+        "no_cost_count": 152,
+        "no_cost_value": 3000000.0,
+        "original_profit": 31618484.74,
+        "simulated_cost_adjustment": 2100000.0,
+        "adjusted_profit": 29518484.74,
+        "profit_reduction_rate": 0.06641684499647532
+      }
+    ]
+  },
+  "part_e_classification": {
+    "basis_net_revenue": {
+      "match_1pct": [
+        "2025-03"
+      ],
+      "warn_1_5pct": [
+        "2025-12",
+        "2026-01"
+      ],
+      "mismatch_5pct": [
+        "2025-01",
+        "2025-02",
+        "2025-04",
+        "2025-05",
+        "2025-06",
+        "2025-07",
+        "2025-08",
+        "2025-09",
+        "2025-10",
+        "2025-11",
+        "2026-02"
+      ]
+    },
+    "basis_net_revenue_with_ship": {
+      "match_1pct": [
+        "2025-01",
+        "2025-02",
+        "2025-06",
+        "2025-07",
+        "2025-09",
+        "2025-10",
+        "2025-11",
+        "2025-12",
+        "2026-02"
+      ],
+      "warn_1_5pct": [
+        "2025-04",
+        "2025-05",
+        "2026-01"
+      ],
+      "mismatch_5pct": [
+        "2025-03",
+        "2025-08"
+      ],
+      "rows": [
+        {
+          "month": "2025-01",
+          "mori_net_with_ship": 19003120.0,
+          "pixie_revenue": 19064020.0,
+          "diff": -60900.0,
+          "rate": -0.0031944993763120266
+        },
+        {
+          "month": "2025-02",
+          "mori_net_with_ship": 12605860.0,
+          "pixie_revenue": 12625760.0,
+          "diff": -19900.0,
+          "rate": -0.001576142743090317
+        },
+        {
+          "month": "2025-03",
+          "mori_net_with_ship": 14813395.0,
+          "pixie_revenue": 13921110.0,
+          "diff": 892285.0,
+          "rate": 0.06409582281872638
+        },
+        {
+          "month": "2025-04",
+          "mori_net_with_ship": 16551790.0,
+          "pixie_revenue": 16761660.0,
+          "diff": -209870.0,
+          "rate": -0.012520836241756485
+        },
+        {
+          "month": "2025-05",
+          "mori_net_with_ship": 33609140.0,
+          "pixie_revenue": 34722290.0,
+          "diff": -1113150.0,
+          "rate": -0.032058657421500714
+        },
+        {
+          "month": "2025-06",
+          "mori_net_with_ship": 15888965.0,
+          "pixie_revenue": 15863075.0,
+          "diff": 25890.0,
+          "rate": 0.0016320921385040417
+        },
+        {
+          "month": "2025-07",
+          "mori_net_with_ship": 16687075.0,
+          "pixie_revenue": 16793275.0,
+          "diff": -106200.0,
+          "rate": -0.006323960037574565
+        },
+        {
+          "month": "2025-08",
+          "mori_net_with_ship": 27749805.0,
+          "pixie_revenue": 29395065.0,
+          "diff": -1645260.0,
+          "rate": -0.05597061955807888
+        },
+        {
+          "month": "2025-09",
+          "mori_net_with_ship": 22813300.0,
+          "pixie_revenue": 22810400.0,
+          "diff": 2900.0,
+          "rate": 0.00012713499105671097
+        },
+        {
+          "month": "2025-10",
+          "mori_net_with_ship": 49643235.0,
+          "pixie_revenue": 50019020.0,
+          "diff": -375785.0,
+          "rate": -0.007512842114859508
+        },
+        {
+          "month": "2025-11",
+          "mori_net_with_ship": 35174838.0,
+          "pixie_revenue": 35131280.0,
+          "diff": 43558.0,
+          "rate": 0.001239863733971549
+        },
+        {
+          "month": "2025-12",
+          "mori_net_with_ship": 36839564.0,
+          "pixie_revenue": 36570170.0,
+          "diff": 269394.0,
+          "rate": 0.007366495698543376
+        },
+        {
+          "month": "2026-01",
+          "mori_net_with_ship": 48299719.0,
+          "pixie_revenue": 46711892.0,
+          "diff": 1587827.0,
+          "rate": 0.03399192222828397
+        },
+        {
+          "month": "2026-02",
+          "mori_net_with_ship": 54346730.0,
+          "pixie_revenue": 54277870.0,
+          "diff": 68860.0,
+          "rate": 0.00126865700514777
+        }
+      ]
+    }
+  },
+  "part_f_hypotheses": {
+    "hypotheses": [
+      {
+        "id": "H1",
+        "statement": "픽시 매출 = 모리 net_revenue (모든 차감 적용, 배송비 제외)",
+        "hits": 1,
+        "hit_rate": 0.07142857142857142
+      },
+      {
+        "id": "H2",
+        "statement": "픽시 매출 = 모리 gross - coupon (쿠폰만 차감)",
+        "hits": 3,
+        "hit_rate": 0.21428571428571427
+      },
+      {
+        "id": "H3",
+        "statement": "픽시 매출 = 모리 gross (차감 전)",
+        "hits": 0,
+        "hit_rate": 0.0
+      },
+      {
+        "id": "H4",
+        "statement": "픽시 매출 = 모리 net_revenue + shipping (배송비 포함)",
+        "hits": 9,
+        "hit_rate": 0.6428571428571429
+      },
+      {
+        "id": "H5",
+        "statement": "픽시 매출 = 모리 gross - coupon - refund - point (등급/앱/기타 제외)",
+        "hits": 1,
+        "hit_rate": 0.07142857142857142
+      },
+      {
+        "id": "H6",
+        "statement": "픽시 매출 = 모리 gross - coupon - refund (포인트/등급/앱 제외)",
+        "hits": 0,
+        "hit_rate": 0.0
+      }
+    ],
+    "best": {
+      "id": "H4",
+      "statement": "픽시 매출 = 모리 net_revenue + shipping (배송비 포함)",
+      "hits": 9,
+      "hit_rate": 0.6428571428571429
+    }
+  }
+}

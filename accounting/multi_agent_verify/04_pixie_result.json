@@ -1,0 +1,834 @@
+{
+  "agent": "pixie",
+  "method": "extract from manual settlement sheets",
+  "months": {
+    "2025-01": {
+      "source_file": "2025. 01 온라인 매출정산_0210_원가 수정.xlsx",
+      "month_idx": 1,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 19064020.0,
+        "cafe24_profit": 8941749.897,
+        "cafe24_margin_rate": 0.4690380044187952,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "L",
+          "이익합계": "M",
+          "month_header_col": "F"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "1월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 19064020.0,
+        "cafe24_profit": 8941749.897,
+        "cafe24_margin_rate": 0.4690380044187952,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "C",
+          "이익": "D",
+          "이익률": "E"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "1월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "found": false,
+        "note": "시트 없음"
+      }
+    },
+    "2025-02": {
+      "source_file": "2025. 02 온라인 매출정산.xlsx",
+      "month_idx": 2,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 12625760.0,
+        "cafe24_profit": 6266007.2809999995,
+        "cafe24_margin_rate": 0.49628753286930843,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "T",
+          "이익합계": "U",
+          "month_header_col": "N"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "2월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 12625760.0,
+        "cafe24_profit": 6266007.2809999995,
+        "cafe24_margin_rate": 0.49628753286930843,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "F",
+          "이익": "G",
+          "이익률": "H"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "2월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "found": false,
+        "note": "시트 없음"
+      }
+    },
+    "2025-03": {
+      "source_file": "2025. 03 온라인 매출정산_수정.xlsx",
+      "month_idx": 3,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 13921110.0,
+        "cafe24_profit": 8740050.834,
+        "cafe24_margin_rate": 0.6278271512831951,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "AE",
+          "이익합계": "AF",
+          "month_header_col": "X"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "03월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 13921110.0,
+        "cafe24_profit": 8740050.834,
+        "cafe24_margin_rate": 0.6278271512831951,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "I",
+          "이익": "J",
+          "이익률": "K"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "3월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "cafe24_revenue": 13921110.0,
+        "cafe24_profit": -2335500.466,
+        "cafe24_ad_cost": 10068683.0,
+        "cafe24_margin_rate": -0.16776682793254274,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "K",
+          "이익": "L",
+          "광고비": "M",
+          "이익률": "N"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "3월",
+          "row13_revenue": "매출"
+        }
+      }
+    },
+    "2025-04": {
+      "source_file": "2025. 04 온라인 매출정산.xlsx",
+      "month_idx": 4,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 16761660.0,
+        "cafe24_profit": 11582443.391999997,
+        "cafe24_margin_rate": 0.6910081335619501,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "AN",
+          "이익합계": "AO",
+          "month_header_col": "AG"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "04월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 16761660.0,
+        "cafe24_profit": 11582443.391999997,
+        "cafe24_margin_rate": 0.6910081335619501,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "L",
+          "이익": "M",
+          "이익률": "N"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "4월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "cafe24_revenue": 16761660.0,
+        "cafe24_profit": 2194136.991999997,
+        "cafe24_ad_cost": 8534824.0,
+        "cafe24_margin_rate": 0.13090212974132615,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "O",
+          "이익": "P",
+          "광고비": "Q",
+          "이익률": "R"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "4월",
+          "row13_revenue": "매출"
+        }
+      }
+    },
+    "2025-05": {
+      "source_file": "2025. 05 온라인 매출정산.xlsx",
+      "month_idx": 5,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 34722290.0,
+        "cafe24_profit": 20332954.119999994,
+        "cafe24_margin_rate": 0.5855879355883495,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "AW",
+          "이익합계": "AX",
+          "month_header_col": "AP"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "05월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 34722290.0,
+        "cafe24_profit": 20332954.119999994,
+        "cafe24_margin_rate": 0.5855879355883495,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "O",
+          "이익": "P",
+          "이익률": "Q"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "5월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "cafe24_revenue": 34722290.0,
+        "cafe24_profit": 3280280.9199999906,
+        "cafe24_ad_cost": 15502430.181818182,
+        "cafe24_margin_rate": 0.09447190608683904,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "S",
+          "이익": "T",
+          "광고비": "U",
+          "이익률": "V"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "5월",
+          "row13_revenue": "매출"
+        }
+      }
+    },
+    "2025-06": {
+      "source_file": "2025. 06 온라인 매출정산.xlsx",
+      "month_idx": 6,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 15863075.0,
+        "cafe24_profit": 10191062.418999998,
+        "cafe24_margin_rate": 0.6424392760546109,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "BF",
+          "이익합계": "BG",
+          "month_header_col": "AY"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "06월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 15863075.0,
+        "cafe24_profit": 10191062.418999998,
+        "cafe24_margin_rate": 0.6424392760546109,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "R",
+          "이익": "S",
+          "이익률": "T"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "6월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "cafe24_revenue": 15863075.0,
+        "cafe24_profit": 510083.5289999973,
+        "cafe24_ad_cost": 8800889.9,
+        "cafe24_margin_rate": 0.03215540045041691,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "W",
+          "이익": "X",
+          "광고비": "Y",
+          "이익률": "Z"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "6월",
+          "row13_revenue": "매출"
+        }
+      }
+    },
+    "2025-07": {
+      "source_file": "2025. 07 온라인 매출정산_광고비 적용 완료.xlsx",
+      "month_idx": 7,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 16793275.0,
+        "cafe24_profit": 11122468.508,
+        "cafe24_margin_rate": 0.6623168207511637,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "BO",
+          "이익합계": "BP",
+          "month_header_col": "BH"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "07월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 16793275.0,
+        "cafe24_profit": 11122468.508,
+        "cafe24_margin_rate": 0.6623168207511637,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "U",
+          "이익": "V",
+          "이익률": "W"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "7월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "cafe24_revenue": 16793275.0,
+        "cafe24_profit": 318868.00799999945,
+        "cafe24_ad_cost": 9821455.0,
+        "cafe24_margin_rate": 0.01898783935831453,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "AA",
+          "이익": "AB",
+          "광고비": "AC",
+          "이익률": "AD"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "7월",
+          "row13_revenue": "매출"
+        }
+      }
+    },
+    "2025-08": {
+      "source_file": "2025. 08 온라인 매출정산.xlsx",
+      "month_idx": 8,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 29395065.0,
+        "cafe24_profit": 18137513.204,
+        "cafe24_margin_rate": 0.6170257900093093,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "BX",
+          "이익합계": "BY",
+          "month_header_col": "BQ"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "08월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 29395065.0,
+        "cafe24_profit": 18137513.204,
+        "cafe24_margin_rate": 0.6170257900093093,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "X",
+          "이익": "Y",
+          "이익률": "Z"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "8월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "cafe24_revenue": 29395065.0,
+        "cafe24_profit": 2465311.6039999984,
+        "cafe24_ad_cost": 14247456.0,
+        "cafe24_margin_rate": 0.08386821406926634,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "AE",
+          "이익": "AF",
+          "광고비": "AG",
+          "이익률": "AH"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "8월",
+          "row13_revenue": "매출"
+        }
+      }
+    },
+    "2025-09": {
+      "source_file": "2025. 09 온라인 매출정산.xlsx",
+      "month_idx": 9,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 24069400.0,
+        "cafe24_profit": 16457661.771000002,
+        "cafe24_margin_rate": 0.683758704870084,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "CG",
+          "이익합계": "CH",
+          "month_header_col": "BZ"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "09월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 22810400.0,
+        "cafe24_profit": 15932371.771000002,
+        "cafe24_margin_rate": 0.6984696353856137,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "AA",
+          "이익": "AB",
+          "이익률": "AC"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "9월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "cafe24_revenue": 22810400.0,
+        "cafe24_profit": 2158106.871000001,
+        "cafe24_ad_cost": 12522059.0,
+        "cafe24_margin_rate": 0.09461065439448678,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "AI",
+          "이익": "AJ",
+          "광고비": "AK",
+          "이익률": "AL"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "9월",
+          "row13_revenue": "매출"
+        }
+      }
+    },
+    "2025-10": {
+      "source_file": "2025. 10 온라인 매출정산.xlsx",
+      "month_idx": 10,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 50182820.0,
+        "cafe24_profit": 29267309.455999993,
+        "cafe24_margin_rate": 0.5832137264506059,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "CP",
+          "이익합계": "CQ",
+          "month_header_col": "CI"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "10월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 50019020.0,
+        "cafe24_profit": 29190844.855999995,
+        "cafe24_margin_rate": 0.5835948976209449,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "AD",
+          "이익": "AE",
+          "이익률": "AF"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "10월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "cafe24_revenue": 50019020.0,
+        "cafe24_profit": 9276063.755999994,
+        "cafe24_ad_cost": 18104346.454545453,
+        "cafe24_margin_rate": 0.18545072966243628,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "AM",
+          "이익": "AN",
+          "광고비": "AO",
+          "이익률": "AP"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "10월",
+          "row13_revenue": "매출"
+        }
+      }
+    },
+    "2025-11": {
+      "source_file": "2025. 11 온라인 매출정산.xlsx",
+      "month_idx": 11,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 35444180.0,
+        "cafe24_profit": 21440500.957999997,
+        "cafe24_margin_rate": 0.6049089288565851,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "CY",
+          "이익합계": "CZ",
+          "month_header_col": "CR"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "11월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 35131280.0,
+        "cafe24_profit": 21353395.358,
+        "cafe24_margin_rate": 0.6078171748367837,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "AG",
+          "이익": "AH",
+          "이익률": "AI"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "11월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "cafe24_revenue": 35131280.0,
+        "cafe24_profit": 4047879.657999996,
+        "cafe24_ad_cost": 15732287.0,
+        "cafe24_margin_rate": 0.11522152503410055,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "AQ",
+          "이익": "AR",
+          "광고비": "AS",
+          "이익률": "AT"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "11월",
+          "row13_revenue": "매출"
+        }
+      }
+    },
+    "2025-12": {
+      "source_file": "2025. 12 온라인 매출정산_자사몰 수정.xlsx",
+      "month_idx": 12,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 36844610.0,
+        "cafe24_profit": 22931427.955000002,
+        "cafe24_margin_rate": 0.6223821599685816,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "DH",
+          "이익합계": "DI",
+          "month_header_col": "DA"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "12월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 36570170.0,
+        "cafe24_profit": 22478520.255000003,
+        "cafe24_margin_rate": 0.6146681914522137,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "AJ",
+          "이익": "AK",
+          "이익률": "AL"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "12월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "cafe24_revenue": 36570170.0,
+        "cafe24_profit": 3120291.2550000027,
+        "cafe24_ad_cost": 17598390.0,
+        "cafe24_margin_rate": 0.08532340032873795,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "AU",
+          "이익": "AV",
+          "광고비": "AW",
+          "이익률": "AX"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "12월",
+          "row13_revenue": "매출"
+        }
+      }
+    },
+    "2026-01": {
+      "source_file": "2026. 01 온라인 매출정산.xlsx",
+      "month_idx": 1,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 46711892.0,
+        "cafe24_profit": 30987398.270000003,
+        "cafe24_margin_rate": 0.6633727931636767,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "M",
+          "이익합계": "N",
+          "month_header_col": "F"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "1월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 46711892.0,
+        "cafe24_profit": 30987398.270000003,
+        "cafe24_margin_rate": 0.6633727931636767,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "C",
+          "이익": "D",
+          "이익률": "E"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "1월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "cafe24_revenue": 46711892.0,
+        "cafe24_profit": 6715973.07,
+        "cafe24_ad_cost": 22064932.0,
+        "cafe24_margin_rate": 0.14377437484227787,
+        "found": true,
+        "raw_row": 11,
+        "raw_columns": {
+          "매출": "C",
+          "이익": "D",
+          "광고비": "E",
+          "이익률": "F"
+        },
+        "note": null,
+        "header_check": {
+          "row9": "1월",
+          "row10_revenue": "매출"
+        }
+      }
+    },
+    "2026-02": {
+      "source_file": "2026. 02 온라인 매출정산.xlsx",
+      "month_idx": 2,
+      "monthly_sheet": {
+        "sheet_name": "월별 온라인 매출정산",
+        "cafe24_revenue": 58802170.0,
+        "cafe24_profit": 37491364.158,
+        "cafe24_margin_rate": 0.6375847040678941,
+        "found": true,
+        "raw_row": 10,
+        "raw_columns": {
+          "매출금액": "V",
+          "이익합계": "W",
+          "month_header_col": "O"
+        },
+        "note": null,
+        "header_check": {
+          "row6_month": "2월",
+          "row7_rev_sum": "매출금액",
+          "row7_prof_sum": "이익합계"
+        }
+      },
+      "channel_sheet_pre_ad": {
+        "sheet_name": "채널별 매출 이익",
+        "cafe24_revenue": 54277870.0,
+        "cafe24_profit": 35480964.658,
+        "cafe24_margin_rate": 0.6536911757591077,
+        "found": true,
+        "raw_row": 14,
+        "raw_columns": {
+          "매출": "F",
+          "이익": "G",
+          "이익률": "H"
+        },
+        "note": null,
+        "header_check": {
+          "row12": "2월",
+          "row13_revenue": "매출"
+        }
+      },
+      "channel_sheet_post_ad": {
+        "sheet_name": "채널별 매출 이익 (광고비적용)",
+        "cafe24_revenue": 54277870.0,
+        "cafe24_profit": 10683890.157999996,
+        "cafe24_ad_cost": 22542795.0,
+        "cafe24_margin_rate": 0.19683694584920144,
+        "found": true,
+        "raw_row": 11,
+        "raw_columns": {
+          "매출": "G",
+          "이익": "H",
+          "광고비": "I",
+          "이익률": "J"
+        },
+        "note": null,
+        "header_check": {
+          "row9": "2월",
+          "row10_revenue": "매출"
+        }
+      }
+    }
+  },
+  "issues": [
+    "2025-01: 채널별 매출 이익 (광고비적용) 시트 없음",
+    "2025-02: 채널별 매출 이익 (광고비적용) 시트 없음"
+  ]
+}
