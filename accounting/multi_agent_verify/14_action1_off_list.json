@@ -1,0 +1,136 @@
+{
+  "generated_at": "2026-04-12T05:58:21.653650",
+  "source": "opsidian 14-month meta ad data",
+  "off_recommended": [
+    {
+      "name": "241115 Website Traffic Campaign",
+      "total_spend": 6570024,
+      "avg_roas": 0.03,
+      "total_conversions": 8,
+      "active_days": 300,
+      "reason": "ROAS < 1.5 with spend >= 100K"
+    },
+    {
+      "name": "250808 Conversion Campaign (섬유탈취제) 10%",
+      "total_spend": 2708260,
+      "avg_roas": 1.34,
+      "total_conversions": 148,
+      "active_days": 31,
+      "reason": "ROAS < 1.5 with spend >= 100K"
+    },
+    {
+      "name": "251223 ASC (얼룩제거제)",
+      "total_spend": 1893027,
+      "avg_roas": 1.08,
+      "total_conversions": 74,
+      "active_days": 20,
+      "reason": "ROAS < 1.5 with spend >= 100K"
+    },
+    {
+      "name": "250317 Conversion Campaign (건조기)",
+      "total_spend": 1875757,
+      "avg_roas": 0.9,
+      "total_conversions": 43,
+      "active_days": 14,
+      "reason": "ROAS < 1.5 with spend >= 100K"
+    },
+    {
+      "name": "250221 Conversion Campaign (건조기)",
+      "total_spend": 1073067,
+      "avg_roas": 0.94,
+      "total_conversions": 27,
+      "active_days": 12,
+      "reason": "ROAS < 1.5 with spend >= 100K"
+    },
+    {
+      "name": "250925 ASC (섬유탈취제)",
+      "total_spend": 864714,
+      "avg_roas": 1.1,
+      "total_conversions": 26,
+      "active_days": 13,
+      "reason": "ROAS < 1.5 with spend >= 100K"
+    },
+    {
+      "name": "260406 ASC (식세기2)",
+      "total_spend": 860217,
+      "avg_roas": 1.21,
+      "total_conversions": 31,
+      "active_days": 5,
+      "reason": "ROAS < 1.5 with spend >= 100K"
+    },
+    {
+      "name": "250211 Conversion Campaign (캡슐세제)",
+      "total_spend": 576904,
+      "avg_roas": 0.3,
+      "total_conversions": 6,
+      "active_days": 7,
+      "reason": "ROAS < 1.5 with spend >= 100K"
+    }
+  ],
+  "category_efficiency": [
+    [
+      "건조기시트",
+      {
+        "spend": 3377731,
+        "conversions": 74,
+        "avg_roas": 0.8,
+        "share": 0.0177
+      }
+    ],
+    [
+      "얼룩제거제",
+      {
+        "spend": 1871068,
+        "conversions": 68,
+        "avg_roas": 1.0,
+        "share": 0.0098
+      }
+    ],
+    [
+      "캡슐세제",
+      {
+        "spend": 3804999,
+        "conversions": 124,
+        "avg_roas": 1.24,
+        "share": 0.0199
+      }
+    ],
+    [
+      "기타",
+      {
+        "spend": 1116894,
+        "conversions": 34,
+        "avg_roas": 1.24,
+        "share": 0.0058
+      }
+    ],
+    [
+      "섬유탈취제",
+      {
+        "spend": 14328046,
+        "conversions": 747,
+        "avg_roas": 1.46,
+        "share": 0.0749
+      }
+    ],
+    [
+      "식세기",
+      {
+        "spend": 159037078,
+        "conversions": 7935,
+        "avg_roas": 1.84,
+        "share": 0.8314
+      }
+    ],
+    [
+      "식세기리타겟",
+      {
+        "spend": 7755068,
+        "conversions": 562,
+        "avg_roas": 2.57,
+        "share": 0.0405
+      }
+    ]
+  ],
+  "total_off_spend": 16421970
+}
