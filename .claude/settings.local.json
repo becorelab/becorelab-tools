@@ -33,7 +33,8 @@
       "Bash(node -e \"const d = new Date\\(1774986015878\\); console.log\\(''토큰 만료:'', d.toISOString\\(\\)\\)\")",
       "Bash(claude --version)",
       "Bash(npx @anthropic-ai/claude-code --version)",
-      "Bash(claude auth:*)"
+      "Bash(claude auth:*)",
+      "mcp__a662cc04-b6cd-4e55-b84e-1ebb0d322a75__becorelab_obsidian_read_file"
     ]
   }
 }
