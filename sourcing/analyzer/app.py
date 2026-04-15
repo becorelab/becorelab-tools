@@ -135,6 +135,13 @@ def _run_scan_api(scan_id: int, keyword: str):
     _scan_progress[scan_id] = {'step': 2, 'total': 3, 'message': '상품 데이터 수집 중...'}
     products = []
     try:
+        # 쿠팡윙 세션 확인: 풀렸으면 재로그인 (새벽 크론과 동일한 패턴)
+        wing_status = get_wing_status()
+        if not wing_status.get('wing_ok'):
+            print('[SCAN-API] 쿠팡윙 세션 풀림 → 자동 재로그인 시도')
+            _scan_progress[scan_id] = {'step': 2, 'total': 3, 'message': '쿠팡윙 재로그인 중...'}
+            wing_ensure_login()
+
         products = wing_search(keyword)
         for p in products:
             fdb.add_product(scan_id, {
