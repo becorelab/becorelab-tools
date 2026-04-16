@@ -228,9 +228,13 @@ def alibaba_check_inbox(unread_only: bool = False, limit: int = 20) -> dict:
 def _find_conversation_item(pw_page, supplier_name: str):
     """message.alibaba.com 루트에서 업체명 포함된 대화 아이템 찾기 (부분일치, 대소문자 무시)"""
     needle = supplier_name.lower().strip()
-    # buyer 메시지함의 대화 리스트는 보통 li 혹은 [role=listitem] 구조
+    # 2026-04 알리바바 인박스 UI 변경 대응 — li/listitem 외에도 div/a 전반 탐색
     candidates = pw_page.query_selector_all(
-        'li, [role="listitem"], [class*="conversation"], [class*="conv-item"], [class*="thread"]'
+        'li, [role="listitem"], [role="button"], '
+        '[class*="conversation"], [class*="conv-item"], [class*="thread"], '
+        '[class*="session"], [class*="chat-item"], [class*="message-item"], '
+        '[class*="item"], a[href*="msgsend"], a[href*="message"], '
+        'div[data-spm*="session"], div[data-spm*="conv"]'
     )
     best = None
     for item in candidates:
@@ -239,7 +243,7 @@ def _find_conversation_item(pw_page, supplier_name: str):
             if not text or len(text) > 2000:
                 continue
             if needle in text:
-                # 가장 작은(정확한) 매칭 우선
+                # 가장 작은(정확한) 매칭 우선 = 행 단위 hit
                 if best is None or len(text) < len(best[1]):
                     best = (item, text)
         except Exception:
