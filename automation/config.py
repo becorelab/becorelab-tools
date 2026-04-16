@@ -81,6 +81,8 @@ LOG_FILE = os.path.join(DATA_DIR, "morning_collect.log")
 # 옵시디언 볼트 경로
 OBSIDIAN_VAULT = r"C:\Users\info\Documents\비코어랩"
 OBSIDIAN_AD_DIR = os.path.join(OBSIDIAN_VAULT, "01. Becorelab AI Agent Team", "2️⃣ Areas", "📢 Ad Performance")
+OBSIDIAN_SALES_DIR = os.path.join(OBSIDIAN_VAULT, "01. Becorelab AI Agent Team", "2️⃣ Areas", "📊 Sales Report", "일일")
+OBSIDIAN_STOCK_DIR = os.path.join(OBSIDIAN_VAULT, "01. Becorelab AI Agent Team", "2️⃣ Areas", "📦 Stock & Order")
 
 
 def yesterday_str():

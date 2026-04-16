@@ -19,6 +19,9 @@ from config import (
     META_API_VERSION,
     OBSIDIAN_AD_DIR,
 )
+from dashboard_updater import update_dashboard
+
+AD_DASHBOARD = os.path.join(OBSIDIAN_AD_DIR, "📢 Ad Performance.md")
 
 BASE_URL = f"https://graph.facebook.com/{META_API_VERSION}"
 
@@ -407,10 +410,25 @@ def run_backfill(start_date, end_date):
     return results
 
 
+def refresh_ad_dashboard():
+    try:
+        updated, last_date, count = update_dashboard(
+            AD_DASHBOARD, OBSIDIAN_AD_DIR, limit=7, recurse=True, status_label="정상 운영 중"
+        )
+        if updated:
+            print(f"📢 광고 대시보드 갱신: 최근 {count}건, 마지막 {last_date or '없음'}")
+        else:
+            print("📢 광고 대시보드 마커 없음 — 스킵")
+    except Exception as e:
+        print(f"📢 광고 대시보드 갱신 오류: {e}")
+
+
 def run_yesterday():
     """어제 보고서 생성 (매일 자동 실행용)"""
     yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-    return run_single(yesterday)
+    path = run_single(yesterday)
+    refresh_ad_dashboard()
+    return path
 
 
 if __name__ == "__main__":
@@ -428,9 +446,11 @@ if __name__ == "__main__":
         results = run_backfill(args.backfill[0], args.backfill[1])
         ok = sum(1 for r in results if r["status"] == "ok")
         print(f"\n완료: {ok}/{len(results)}건 성공")
+        refresh_ad_dashboard()
     elif args.date:
         path = run_single(args.date)
         print(f"✅ 저장: {path}")
+        refresh_ad_dashboard()
     elif args.yesterday:
         path = run_yesterday()
         print(f"✅ 저장: {path}")
