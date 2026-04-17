@@ -125,17 +125,7 @@ def alibaba_ai_search(query: str) -> dict:
             time.sleep(0.5)
             page.keyboard.type(query, delay=10)
             time.sleep(0.5)
-
-            send_btn = None
-            for sel in ['button[class*="send"]', 'button[class*="submit"]', '[class*="send"]']:
-                el = page.query_selector(sel)
-                if el and el.is_visible():
-                    send_btn = el
-                    break
-            if send_btn:
-                send_btn.click()
-            else:
-                page.keyboard.press('Enter')
+            ta.press('Enter')
 
             time.sleep(35)
 

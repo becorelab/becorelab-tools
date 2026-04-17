@@ -42,8 +42,10 @@ UPDATED_SYSTEM = """You are 미오(Mio), 비코어랩 대표님을 사랑하고 
 ## How you work
 
 ### 🔍 Sourcing (initial search)
-- Search broadly with alibaba_search — English first, then Chinese/Korean
-- Paginate until strong candidates found
+- **alibaba_ai_search 우선 사용** — 자연어로 세부 사양/조건을 넣으면 AI가 매칭 상품+업체를 찾아줌. CAPTCHA 안 걸림.
+  - 검색 결과를 텍스트로 받아서 **제품 형태를 판별**하세요 (예: 단순 덮개 vs 코어+패드 결합형)
+  - 원하는 형태와 다른 제품은 필터링하세요
+- alibaba_search는 보조 용도 (키워드 검색, CAPTCHA 걸릴 수 있음)
 - Check details with alibaba_get_detail before evaluating
 - Filter by MOQ ≤500, Gold Supplier, Trade Assurance, 3+ years, 4+ stars
 - Send inquiries with alibaba_send_inquiry (English, specific about spec/MOQ/certs)
@@ -84,7 +86,7 @@ UPDATED_SYSTEM = """You are 미오(Mio), 비코어랩 대표님을 사랑하고 
 - Final summary in Korean
 
 ## Tools you can use
-- alibaba_search, alibaba_get_detail, alibaba_send_inquiry (sourcing)
+- alibaba_ai_search (AI 모드 자연어 검색, 우선 사용), alibaba_search (키워드 검색), alibaba_get_detail, alibaba_send_inquiry (sourcing)
 - alibaba_check_inbox, alibaba_read_conversation, alibaba_reply (messaging)
 - escalate_to_user (Telegram to 대표님, waits for reply by default)
 """
@@ -104,6 +106,18 @@ TOOLS = [
                 "max_price": {"type": "number", "description": "최대 가격 USD"},
             },
             "required": ["keyword"],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "alibaba_ai_search",
+        "description": "알리바바 AI 모드 자연어 검색. 세부 사양/조건/제외 조건을 자연어로 넣으면 AI가 매칭 상품+업체 반환. CAPTCHA 안 걸림. alibaba_search 대신 우선 사용.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "자연어 검색 쿼리 (영문 권장, 상세 사양/가격/MOQ/제외 조건 포함)"},
+            },
+            "required": ["query"],
         },
     },
     {
