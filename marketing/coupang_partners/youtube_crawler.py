@@ -98,8 +98,22 @@ def enrich_channels(channel_ids: list[str]) -> list[dict]:
     return results
 
 
+COUPANG_PARTNERS_PATTERNS = [
+    "link.coupang.com",
+    "coupa.ng",
+    "coupang.com",
+    "쿠팡파트너스",
+    "쿠팡 파트너스",
+]
+
+
+def _has_coupang_partners(text: str) -> bool:
+    text_lower = text.lower()
+    return any(p in text_lower for p in COUPANG_PARTNERS_PATTERNS)
+
+
 def recent_uploads(uploads_playlist_id: str, max_results: int = 5) -> list[dict]:
-    """업로드 플레이리스트의 최근 영상. 제목·조회수·업로드일."""
+    """업로드 플레이리스트의 최근 영상. 제목·조회수·업로드일·description."""
     if not uploads_playlist_id:
         return []
     yt = _yt()
@@ -123,6 +137,7 @@ def recent_uploads(uploads_playlist_id: str, max_results: int = 5) -> list[dict]
     for v in stats_resp.get("items", []):
         snip = v.get("snippet") or {}
         stats = v.get("statistics") or {}
+        desc = snip.get("description") or ""
         out.append({
             "video_id": v.get("id"),
             "title": snip.get("title"),
@@ -131,6 +146,8 @@ def recent_uploads(uploads_playlist_id: str, max_results: int = 5) -> list[dict]
             "like_count": int(stats.get("likeCount", 0)),
             "comment_count": int(stats.get("commentCount", 0)),
             "url": f"https://www.youtube.com/watch?v={v.get('id')}",
+            "description": desc[:1000],
+            "has_coupang_link": _has_coupang_partners(desc),
         })
     return out
 
@@ -170,7 +187,7 @@ def is_in_tier(channel: dict) -> bool:
 
 
 def enrich_full(channel_id: str) -> dict:
-    """단일 채널 전체 수집 (stats + recent videos + contact email)."""
+    """단일 채널 전체 수집 (stats + recent videos + contact email + 쿠팡 파트너스 여부)."""
     base_list = enrich_channels([channel_id])
     if not base_list:
         raise ValueError(f"채널 조회 실패: {channel_id}")
@@ -179,8 +196,69 @@ def enrich_full(channel_id: str) -> dict:
     ch["contact_email"] = _find_contact_email(ch.get("description") or "")
     ch["is_in_tier"] = is_in_tier(ch)
     ch["is_fresh"] = is_fresh_channel(ch)
+    ch["has_coupang_partners"] = any(
+        v.get("has_coupang_link") for v in ch.get("recent_videos", [])
+    )
+    if not ch["contact_email"]:
+        for v in ch.get("recent_videos", []):
+            email = _find_contact_email(v.get("description") or "")
+            if email:
+                ch["contact_email"] = email
+                break
     ch["fetched_at"] = datetime.now(timezone.utc).isoformat()
     return ch
+
+
+def search_coupang_partners_channels(keyword: str, max_pages: int = 3,
+                                     region: str = "KR", lang: str = "ko") -> list[dict]:
+    """키워드 검색 → 영상 description에 쿠팡 파트너스 링크 있는 채널만 반환.
+    이미 쿠팡 파트너스 하고 있는 유튜버 = 제안 수락률 높음 + 이메일 있을 확률 높음."""
+    yt = _yt()
+    found: dict[str, dict] = {}
+    page_token = None
+    for _ in range(max_pages):
+        req = yt.search().list(
+            q=keyword,
+            part="snippet",
+            type="video",
+            maxResults=50,
+            order="relevance",
+            regionCode=region,
+            relevanceLanguage=lang,
+            pageToken=page_token,
+        )
+        resp = req.execute()
+        video_ids = []
+        vid_channel_map = {}
+        for item in resp.get("items", []):
+            vid = (item.get("id") or {}).get("videoId")
+            cid = (item.get("snippet") or {}).get("channelId")
+            if vid and cid and cid not in found:
+                video_ids.append(vid)
+                vid_channel_map[vid] = cid
+
+        for i in range(0, len(video_ids), 50):
+            batch = video_ids[i:i + 50]
+            vresp = yt.videos().list(
+                id=",".join(batch),
+                part="snippet",
+            ).execute()
+            for v in vresp.get("items", []):
+                desc = (v.get("snippet") or {}).get("description") or ""
+                vid = v.get("id")
+                cid = vid_channel_map.get(vid)
+                if cid and _has_coupang_partners(desc):
+                    email = _find_contact_email(desc)
+                    found[cid] = {
+                        "channel_id": cid,
+                        "sample_video_id": vid,
+                        "sample_description": desc[:500],
+                        "contact_email_from_video": email,
+                    }
+        page_token = resp.get("nextPageToken")
+        if not page_token:
+            break
+    return list(found.values())
 
 
 if __name__ == "__main__":
