@@ -64,3 +64,8 @@ __pycache__/
 
 # 레나 런처 (봇 토큰 하드코딩 — 절대 커밋 금지)
 Channel_lena/run_lena.bat
+
+# 채널 PID 파일 (런타임 전용)
+Channel_*/doori.pid
+Channel_*/lena.pid
+Channel_*/*.pid
