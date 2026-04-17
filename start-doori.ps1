@@ -2,6 +2,7 @@
 Write-Host "=== 두리 시작 준비 ===" -ForegroundColor Cyan
 
 # 1. 기존 두리 관련 프로세스 정리 (하치 제외)
+chcp 65001 > $null
 $mainClaude = Get-Process claude -ErrorAction SilentlyContinue | Sort-Object WorkingSet64 -Descending | Select-Object -First 1
 Get-Process claude -ErrorAction SilentlyContinue | Where-Object { $_.Id -ne $mainClaude.Id } | Stop-Process -Force -ErrorAction SilentlyContinue
 Get-Process bun -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
@@ -23,5 +24,5 @@ try {
 }
 
 # 4. 두리 시작
-Set-Location "C:\Users\info\ClaudeAITeam\Channel_doori"
+Set-Location "C:\Users\info\claudeaiteam"
 & "C:\Users\info\AppData\Roaming\npm\claude.cmd" --channels "plugin:telegram@claude-plugins-official" --dangerously-skip-permissions --model opus

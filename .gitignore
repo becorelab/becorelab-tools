@@ -58,3 +58,9 @@ accounting/package.json
 __pycache__/
 *.pyc
 *.pyo
+
+# Claude Code 로컬 설정 (봇 토큰 등 민감 정보 포함 — 절대 커밋 금지)
+**/.claude/settings.local.json
+
+# 레나 런처 (봇 토큰 하드코딩 — 절대 커밋 금지)
+Channel_lena/run_lena.bat

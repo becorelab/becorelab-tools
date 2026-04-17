@@ -24,15 +24,28 @@ CDP_URL = f"http://localhost:{CHROME_PORT}"
 
 @contextmanager
 def _cdp_page():
-    """실제 Chrome CDP에 붙어서 새 탭 열기 → 봇 감지 우회"""
+    """Chrome CDP에 붙어서 백그라운드 탭 재사용 (포커스 안 뺏김)"""
     with sync_playwright() as p:
         browser = p.chromium.connect_over_cdp(CDP_URL)
         ctx = browser.contexts[0] if browser.contexts else browser.new_context()
-        pw_page = ctx.new_page()
+        pages = ctx.pages
+        reused = False
+        if pages:
+            for pg in pages:
+                if 'alibaba' in (pg.url or ''):
+                    pw_page = pg
+                    reused = True
+                    break
+            else:
+                pw_page = pages[-1]
+                reused = True
+        if not reused:
+            pw_page = ctx.new_page()
         try:
             yield pw_page
         finally:
-            pw_page.close()
+            if not reused:
+                pw_page.close()
 
 
 # ── 툴 1: 알리바바 키워드 검색 ─────────────────────────────────
