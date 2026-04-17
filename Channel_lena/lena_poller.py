@@ -155,6 +155,12 @@ def within_cooldown(state: dict, now: datetime, excerpt_head: str) -> bool:
 def main():
     log("=== 레나 폴러 시작 ===")
 
+    now = datetime.now()
+    if is_quiet_hours(now):
+        log(f"야간 시간대({QUIET_START_HOUR}~{QUIET_END_HOUR}시) — 폴링 스킵")
+        log("=== 레나 폴러 종료 ===")
+        return 0
+
     if not cdp_health_check():
         msg = "⚠️ Chrome CDP(포트 9222)가 응답하지 않아요. 알리바바 폴링 불가."
         log(msg)
