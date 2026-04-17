@@ -3,7 +3,7 @@
   <name>두리 텔레그램 채널</name>
   <description>iLBiA 두리 Claude Code 텔레그램 채널 (자동재시작)</description>
   <executable>node</executable>
-  <arguments>"C:\Users\info\AppData\Roaming\npm\node_modules\@anthropic-ai\claude-code\cli.js" --channels "plugin:telegram@claude-plugins-official" --dangerously-skip-permissions --model sonnet</arguments>
+  <arguments>"C:\Users\info\AppData\Roaming\npm\node_modules\@anthropic-ai\claude-code\cli.js" --channels "plugin:telegram@claude-plugins-official" --dangerously-skip-permissions --model opus</arguments>
   <workingdirectory>C:\Users\info\ClaudeAITeam\Channel_doori</workingdirectory>
   <env name="PATH" value="C:\Users\info\.bun\bin;%PATH%"/>
   <logmode>rotate</logmode>

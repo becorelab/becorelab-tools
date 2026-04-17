@@ -23,6 +23,6 @@ try {
     Write-Host "텔레그램 체크 실패, 그래도 시작합니다..." -ForegroundColor Yellow
 }
 
-# 4. 두리 시작
-Set-Location "C:\Users\info\claudeaiteam"
+# 4. 두리 시작 (전용 폴더에서 실행 — 하치 인격 분리)
+Set-Location "C:\Users\info\ClaudeAITeam\Channel_doori"
 & "C:\Users\info\AppData\Roaming\npm\claude.cmd" --channels "plugin:telegram@claude-plugins-official" --dangerously-skip-permissions --model opus
