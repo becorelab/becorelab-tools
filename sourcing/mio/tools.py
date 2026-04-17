@@ -52,134 +52,149 @@ def _cdp_page():
 def alibaba_search(keyword: str, page: int = 1, max_moq: int = None,
                    min_price: float = None, max_price: float = None) -> dict:
     """
-    알리바바에서 키워드 검색 후 상품 목록 반환
-    미오가 키워드/페이지/필터를 직접 결정
+    알리바바 키워드 검색 → URL 목록 + 페이지 raw text 반환
+    알리바바 SPA 구조 변경에 강하도록 텍스트 파싱은 미오 LLM에 위임
     """
-    results = []
     with _cdp_page() as pw_page:
         try:
             url = f"https://www.alibaba.com/trade/search?SearchText={keyword}&page={page}"
             pw_page.goto(url, wait_until='domcontentloaded', timeout=30000)
-            time.sleep(3)
+            time.sleep(5)
 
-            # product-detail 링크를 가진 카드 컨테이너 탐색
+            # URL 목록 추출 (product-detail 링크)
             cards = pw_page.query_selector_all('a[href*="product-detail"]')
-            if not cards:
-                cards = pw_page.query_selector_all('.list-no-v2-outter, [class*="offer-list"] > li, div[data-aplus-ae]')
-
-            # product-detail 링크 방식: 각 카드가 이미 링크
-            seen_urls = set()
-            for card in cards[:40]:
-                try:
-                    href = card.get_attribute('href') or ''
-                    if not href:
-                        continue
-                    if not href.startswith('http'):
-                        href = 'https:' + href
-                    # 중복 URL 제거
-                    base_url = href.split('?')[0]
-                    if base_url in seen_urls:
-                        continue
-                    seen_urls.add(base_url)
-
-                    # 카드 텍스트는 부모 컨테이너에서
-                    parent = card.evaluate_handle('el => el.closest("li, article, [class*=card], [class*=item], [class*=offer]") || el.parentElement')
-                    text = parent.as_element().inner_text() if parent.as_element() else card.inner_text()
-
-                    # 가격 파싱
-                    price_match = re.search(
-                        r'(?:US\s*)?\$\s*([\d,]+\.?\d*)\s*[-–]\s*(?:US\s*)?\$?\s*([\d,]+\.?\d*)'
-                        r'|(?:US\s*)?\$\s*([\d,]+\.?\d+)',
-                        text, re.IGNORECASE
-                    )
-                    price_min = price_max = None
-                    if price_match:
-                        if price_match.group(1):
-                            price_min = float(price_match.group(1).replace(',', ''))
-                            price_max = float(price_match.group(2).replace(',', ''))
-                        elif price_match.group(3):
-                            price_min = price_max = float(price_match.group(3).replace(',', ''))
-
-                    # MOQ 파싱
-                    moq_val = None
-                    moq_match = re.search(r'(\d[\d,]*)\s*(?:pieces|pcs|sets|pairs|units)', text, re.IGNORECASE)
-                    if moq_match:
-                        moq_val = int(moq_match.group(1).replace(',', ''))
-
-                    # 필터 적용
-                    if max_moq and moq_val and moq_val > max_moq:
-                        continue
-                    if min_price and price_min and price_min < min_price:
-                        continue
-                    if max_price and price_max and price_max > max_price:
-                        continue
-
-                    # 제목 파싱
-                    title = ''
-                    for line in text.split('\n'):
-                        line = line.strip()
-                        if len(line) > 15 and '$' not in line and '₩' not in line:
-                            title = line
-                            break
-
-                    # Gold Supplier 여부
-                    is_gold = 'gold supplier' in text.lower() or 'verified' in text.lower()
-
-                    results.append({
-                        'title': title[:100],
-                        'url': href,
-                        'price_min': price_min,
-                        'price_max': price_max,
-                        'moq': moq_val,
-                        'is_gold_supplier': is_gold,
-                    })
-                except Exception:
+            seen = set()
+            product_urls = []
+            for card in cards:
+                href = card.get_attribute('href') or ''
+                if not href:
                     continue
+                if not href.startswith('http'):
+                    href = 'https:' + href
+                base = href.split('?')[0]
+                if base not in seen:
+                    seen.add(base)
+                    product_urls.append(href)
 
+            body_text = pw_page.inner_text('body')
+
+            filter_hint = []
+            if max_moq:
+                filter_hint.append(f"MOQ ≤ {max_moq}")
+            if min_price:
+                filter_hint.append(f"가격 ≥ ${min_price}")
+            if max_price:
+                filter_hint.append(f"가격 ≤ ${max_price}")
+
+            return {
+                'keyword': keyword,
+                'page': page,
+                'product_urls': product_urls[:30],
+                'url_count': len(product_urls),
+                'filter_hint': ', '.join(filter_hint) if filter_hint else None,
+                'note': '아래 raw_text에서 상품별 제목/가격/MOQ/업체명/평점/판매량을 파싱하세요. '
+                        'product_urls와 텍스트 순서가 대응됩니다. '
+                        'filter_hint 조건에 맞는 상품만 선별하세요.',
+                'raw_text': body_text[:8000],
+            }
         except Exception as e:
-            return {'error': str(e), 'results': []}
+            return {'error': str(e)}
 
-    return {
-        'keyword': keyword,
-        'page': page,
-        'total_found': len(results),
-        'results': results
-    }
+
+# ── 툴 1.5: 알리바바 AI 모드 검색 ─────────────────────────────
+def alibaba_ai_search(query: str) -> dict:
+    """
+    알리바바 AI 모드(aimode.alibaba.com)로 자연어 검색
+    세부 사양/조건을 자연어로 넣으면 AI가 매칭 업체+상품 반환
+    일반 검색과 달리 CAPTCHA 안 걸림
+    """
+    with sync_playwright() as p:
+        browser = p.chromium.connect_over_cdp(CDP_URL)
+        ctx = browser.contexts[0] if browser.contexts else browser.new_context()
+        page = ctx.new_page()
+        try:
+            page.goto('https://aimode.alibaba.com/',
+                      wait_until='domcontentloaded', timeout=30000)
+            time.sleep(5)
+
+            ta = page.query_selector('textarea')
+            if not ta:
+                return {'error': 'AI 모드 입력창을 찾지 못함'}
+
+            ta.click()
+            time.sleep(0.5)
+            page.keyboard.type(query, delay=10)
+            time.sleep(0.5)
+
+            send_btn = None
+            for sel in ['button[class*="send"]', 'button[class*="submit"]', '[class*="send"]']:
+                el = page.query_selector(sel)
+                if el and el.is_visible():
+                    send_btn = el
+                    break
+            if send_btn:
+                send_btn.click()
+            else:
+                page.keyboard.press('Enter')
+
+            time.sleep(35)
+
+            body_text = page.inner_text('body')
+            # AI 모드 상단 UI 텍스트 스킵 — 상품 결과 부분만 추출
+            markers = ['요구 사항 일치', '요구사항 일치', 'requirement', 'Requirement']
+            for marker in markers:
+                idx = body_text.find(marker)
+                if idx > 0:
+                    body_text = body_text[max(0, idx - 200):]
+                    break
+
+            links = page.query_selector_all('a[href*="alibaba.com"]')
+            product_urls = []
+            seen = set()
+            for a in links:
+                href = a.get_attribute('href') or ''
+                if 'product-detail' in href:
+                    base = href.split('?')[0]
+                    if base not in seen:
+                        seen.add(base)
+                        if not href.startswith('http'):
+                            href = 'https:' + href
+                        product_urls.append(href)
+
+            return {
+                'success': True,
+                'query': query,
+                'product_urls': product_urls[:30],
+                'url_count': len(product_urls),
+                'note': 'AI 모드 검색 결과입니다. raw_text에서 상품별 제목/가격/MOQ/업체/매칭점수를 파싱하세요. '
+                        '제품 형태를 텍스트 설명으로 판별하여 요청과 정확히 일치하는 것만 선별하세요.',
+                'raw_text': body_text[:6000],
+            }
+        except Exception as e:
+            return {'error': str(e)}
+        finally:
+            page.close()
 
 
 # ── 툴 2: 상품 상세페이지 파싱 ─────────────────────────────────
 def alibaba_get_detail(product_url: str) -> dict:
     """
-    상품 상세페이지 HTML 전체를 Claude가 자연어로 파싱
-    소재, MOQ, 인증, 중국어 스펙 모두 처리
+    상품 상세페이지 전체 텍스트 반환 → 미오 LLM이 자연어로 파싱
+    소재, MOQ, 인증, 중국어 스펙 모두 처리 가능
     """
     with _cdp_page() as pw_page:
         try:
             pw_page.goto(product_url, wait_until='domcontentloaded', timeout=30000)
-            time.sleep(3)
-
-            sections = {}
-            title_el = pw_page.query_selector('h1')
-            sections['title'] = title_el.inner_text() if title_el else ''
-
-            price_el = pw_page.query_selector('[class*="price"], [class*="Price"]')
-            sections['price'] = price_el.inner_text() if price_el else ''
-
-            spec_texts = []
-            for el in pw_page.query_selector_all('table, [class*="detail"], [class*="spec"], [class*="attribute"]'):
-                t = el.inner_text().strip()
-                if t and len(t) > 10:
-                    spec_texts.append(t[:500])
-            sections['specs'] = '\n'.join(spec_texts[:5])
-
-            supplier_el = pw_page.query_selector('[class*="supplier"], [class*="company"]')
-            sections['supplier'] = supplier_el.inner_text()[:300] if supplier_el else ''
+            time.sleep(5)
 
             body_text = pw_page.inner_text('body')
-            sections['full_text'] = body_text[:3000]
 
-            return {'url': product_url, 'data': sections}
-
+            return {
+                'url': product_url,
+                'note': '아래 raw_text에서 제목/가격/MOQ/소재/인증/사이즈/공급업체 정보를 파싱하세요. '
+                        '중국어 스펙도 포함될 수 있습니다.',
+                'raw_text': body_text[:6000],
+            }
         except Exception as e:
             return {'error': str(e), 'url': product_url}
 
@@ -404,6 +419,8 @@ def dispatch_tool(tool_name: str, tool_input: dict) -> str:
     try:
         if tool_name == 'alibaba_search':
             result = alibaba_search(**tool_input)
+        elif tool_name == 'alibaba_ai_search':
+            result = alibaba_ai_search(**tool_input)
         elif tool_name == 'alibaba_get_detail':
             result = alibaba_get_detail(**tool_input)
         elif tool_name == 'alibaba_send_inquiry':
