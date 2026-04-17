@@ -116,34 +116,22 @@ def classify_reply(reply_body: str) -> dict:
         return {"category": "question", "confidence": 0.0, "summary": text[:100]}
 
 
-def _notify_telegram(message: str):
-    """텔레그램 알림 전송."""
+DOORI_TOKEN = "8621050278:AAE56VUp5v7X9TDrK27ykX_POsYNqDvwO6U"
+DOORI_CHAT_ID = "8708718261"
+
+
+def _notify_doori(message: str):
+    """두리 봇으로 대표님께 텔레그램 알림 전송."""
     import requests
-    env_path = os.path.join(_DIR, "..", "..", "Channel_lena", ".env")
-    token, chat_id = None, None
-    try:
-        with open(env_path, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith("TELEGRAM_BOT_TOKEN="):
-                    token = line.split("=", 1)[1].strip()
-                elif line.startswith("CHAT_ID="):
-                    chat_id = line.split("=", 1)[1].strip()
-    except FileNotFoundError:
-        print("[WARN] 텔레그램 .env 없음")
-        return False
-    if not token or not chat_id:
-        print("[WARN] 텔레그램 토큰/chat_id 없음")
-        return False
     try:
         resp = requests.post(
-            f"https://api.telegram.org/bot{token}/sendMessage",
-            json={"chat_id": chat_id, "text": message, "parse_mode": "HTML"},
+            f"https://api.telegram.org/bot{DOORI_TOKEN}/sendMessage",
+            json={"chat_id": DOORI_CHAT_ID, "text": message, "parse_mode": "HTML"},
             timeout=10,
         )
         return resp.ok
     except Exception as e:
-        print(f"[WARN] 텔레그램 전송 실패: {e}")
+        print(f"[WARN] 두리 텔레그램 전송 실패: {e}")
         return False
 
 
@@ -184,7 +172,7 @@ def process_replies() -> dict:
     except Exception:
         unseen = fetch_unseen()
 
-    stats = {"total": 0, "auto_replied": 0, "escalated": 0, "skipped": 0}
+    stats = {"total": 0, "notified": 0, "skipped": 0}
 
     for mail in unseen:
         msg_id = mail.get("message_id", "")
@@ -213,65 +201,31 @@ def process_replies() -> dict:
         print(f"   분류: {category} (확신도: {confidence})")
         print(f"   요약: {summary}")
 
-        original_subject = sender_info.get("subject", subject)
-        original_msg_id = sender_info.get("message_id", "")
+        # 카테고리별 이모지/라벨
+        labels = {
+            "interested":   ("📩", "관심 있음"),
+            "ask_fee":      ("💰", "원고료/조건 문의"),
+            "send_address": ("📦", "주소 보내옴"),
+            "decline":      ("🙅", "거절"),
+            "auto_reply":   ("🤖", "자동응답"),
+            "question":     ("❓", "기타 문의"),
+        }
+        emoji, label = labels.get(category, ("📬", category))
 
-        if category in ("interested", "ask_fee", "send_address") and confidence >= 0.7:
-            tpl = REPLY_TEMPLATES[category]
-            reply_subject = tpl["subject"].format(original_subject=original_subject)
-            reply_body = tpl["body"].format(name=youtuber_name)
-
-            try:
-                send_result = send_mail(
-                    to=from_addr,
-                    subject=reply_subject,
-                    body_ko=reply_body,
-                    in_reply_to=mail.get("message_id"),
-                    references=[original_msg_id] if original_msg_id else None,
-                )
-                print(f"   ✅ 자동 답장 완료!")
-                stats["auto_replied"] += 1
-
-                _notify_telegram(
-                    f"📬 유튜버 회신 + 자동 답장 완료!\n\n"
-                    f"채널: {youtuber_name}\n"
-                    f"분류: {category}\n"
-                    f"요약: {summary}\n\n"
-                    f"자동 답장 발송 완료 ✅"
-                )
-            except Exception as e:
-                print(f"   ❌ 답장 실패: {e}")
-                _notify_telegram(
-                    f"⚠️ 유튜버 회신 답장 실패!\n\n"
-                    f"채널: {youtuber_name}\n"
-                    f"오류: {str(e)[:200]}\n\n"
-                    f"수동 확인 필요합니다."
-                )
-                stats["escalated"] += 1
-        else:
-            stats["escalated"] += 1
-            if category == "decline":
-                _notify_telegram(
-                    f"📭 유튜버 거절 회신\n\n"
-                    f"채널: {youtuber_name}\n"
-                    f"요약: {summary}\n\n"
-                    f"추가 연락은 하지 않겠습니다."
-                )
-            elif category == "auto_reply":
-                _notify_telegram(
-                    f"📨 자동응답 수신\n\n"
-                    f"채널: {youtuber_name}\n"
-                    f"내용: {body[:200]}"
-                )
-            else:
-                _notify_telegram(
-                    f"🔔 유튜버 회신 — 대표님 확인 필요!\n\n"
-                    f"채널: {youtuber_name}\n"
-                    f"분류: {category} (확신도: {confidence})\n"
-                    f"요약: {summary}\n\n"
-                    f"내용:\n{body[:300]}\n\n"
-                    f"네이버웍스 메일함에서 직접 답장해주세요."
-                )
+        # 두리를 통해 대표님께 알림 — 답장 여부는 대표님이 결정
+        msg = (
+            f"{emoji} <b>유튜버 회신 도착!</b>\n\n"
+            f"<b>채널:</b> {youtuber_name}\n"
+            f"<b>이메일:</b> {from_addr}\n"
+            f"<b>분류:</b> {label} (확신도 {int(confidence*100)}%)\n"
+            f"<b>요약:</b> {summary}\n\n"
+            f"<b>원문:</b>\n{body[:400]}"
+            + ("…" if len(body) > 400 else "")
+            + f"\n\n네이버웍스에서 직접 답장해 주세요 🙏"
+        )
+        _notify_doori(msg)
+        stats["notified"] += 1
+        print(f"   ✅ 두리로 알림 전송 완료")
 
         processed.add(msg_id)
 
@@ -280,8 +234,7 @@ def process_replies() -> dict:
     print(f"\n{'='*50}")
     print(f"[REPLY] 처리 완료")
     print(f"  수신: {stats['total']}건")
-    print(f"  자동 답장: {stats['auto_replied']}건")
-    print(f"  에스컬레이션: {stats['escalated']}건")
+    print(f"  두리 알림: {stats['notified']}건")
     print(f"  이미 처리됨: {stats['skipped']}건")
 
     return stats

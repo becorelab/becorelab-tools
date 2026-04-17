@@ -75,7 +75,7 @@ def _get_candidate_sheet():
 def sheet_get_existing_channel_ids() -> set:
     """시트에 이미 등록된 channel_id 집합."""
     ws = _get_candidate_sheet()
-    col_values = ws.col_values(1)  # A열 = channel_id
+    col_values = ws.col_values(12)  # L열(12번째) = channel_id
     return set(col_values[1:])  # 헤더 제외
 
 
@@ -89,65 +89,68 @@ def sheet_append_candidates(candidates: list[dict]):
     for c in candidates:
         channel_url = f"https://www.youtube.com/channel/{c['channel_id']}"
         screen = c.get("screen", {})
+        last_upload = c.get("last_upload_date", "")[:10] if c.get("last_upload_date") else ""
+        # 실제 시트 컬럼: A=채널명 B=채널URL C=구독자수 D=카테고리 E=최근영상일
+        #                 F=추천제품 G=선정이유 H=이메일 I=상태 J=승인 K=메모 L=channel_id M=발견일 N=개인화훅
         rows.append([
-            c.get("channel_id", ""),
-            c.get("title", ""),
-            c.get("subscriber_count", 0),
-            ", ".join(screen.get("matched_products", [])) or c.get("category", ""),
-            c.get("contact_email", ""),
-            channel_url,
-            screen.get("rationale", ""),
-            ", ".join(screen.get("matched_products", [])),
-            screen.get("match_score", 0),
-            "",  # 승인 — 대표님이 수동 입력
-            "screened",
-            "",  # 발송일
-            "",  # message_id
-            "",  # 비고
-            now_str,
+            c.get("title", ""),                                      # A 채널명
+            channel_url,                                             # B 채널URL
+            c.get("subscriber_count", 0),                            # C 구독자수
+            c.get("category", ""),                                   # D 카테고리
+            last_upload,                                             # E 최근영상일
+            ", ".join(screen.get("matched_products", [])),           # F 추천제품
+            screen.get("rationale", ""),                             # G 선정이유
+            c.get("contact_email", ""),                              # H 이메일
+            "screened",                                              # I 상태
+            "",                                                      # J 승인 — 대표님이 수동 입력
+            "",                                                      # K 메모
+            c.get("channel_id", ""),                                 # L channel_id
+            now_str,                                                 # M 발견일
+            screen.get("personal_hook", ""),                         # N 개인화훅
         ])
     ws.append_rows(rows, value_input_option="USER_ENTERED")
 
 
 def sheet_get_approved_unsent() -> list[dict]:
-    """승인(J열=idx9)됐지만 아직 미발송(L열=idx11 != contacted)인 행 반환.
-    시트 칼럼: A=번호 B=채널명 C=구독자 D=카테고리 E=추천제품 F=선정이유
-               G=채널URL H=이메일 I=쿠팡파트너스 J=승인 K=메모 L=상태 M=발송일 N=Message-ID"""
+    """승인(J열=idx9)됐지만 아직 미발송(I열=idx8 != contacted)인 행 반환.
+    실제 시트 칼럼: A(0)=채널명 B(1)=채널URL C(2)=구독자수 D(3)=카테고리 E(4)=최근영상일
+                   F(5)=추천제품 G(6)=선정이유 H(7)=이메일 I(8)=상태 J(9)=승인
+                   K(10)=메모 L(11)=channel_id M(12)=발견일"""
     ws = _get_candidate_sheet()
     all_rows = ws.get_all_values()
     if len(all_rows) <= 1:
         return []
     results = []
     for i, row in enumerate(all_rows[1:], start=2):
-        if len(row) < 10 or not row[1]:
+        if len(row) < 9 or not row[0]:
             continue
         approval = (row[9] if len(row) > 9 else "").strip()
-        status = (row[11] if len(row) > 11 else "").strip()
+        status = (row[8] if len(row) > 8 else "").strip()
         if approval in ("승인", "approved") and status not in ("contacted", "replied", "sample_sent", "uploaded"):
             results.append({
                 "row_number": i,
-                "channel_id": row[0] if row[0] else "",
-                "name": row[1],
+                "channel_id": row[11] if len(row) > 11 else "",
+                "name": row[0],
                 "subscriber_count": row[2],
                 "category": row[3],
                 "email": row[7],
-                "channel_url": row[6],
+                "channel_url": row[1],
+                "personal_hook": row[13] if len(row) > 13 else "",
             })
     return results
 
 
 def sheet_update_sent(row_number: int, message_id: str, sent_date: str):
-    """발송 완료 후 시트 업데이트: L열=상태, M열=발송일, N열=Message-ID."""
+    """발송 완료 후 시트 업데이트: I열=상태, K열=메모(발송일+msg_id)."""
     ws = _get_candidate_sheet()
-    ws.update(values=[["contacted"]], range_name=f"L{row_number}")
-    ws.update(values=[[sent_date]], range_name=f"M{row_number}")
-    ws.update(values=[[message_id]], range_name=f"N{row_number}")
+    ws.update(values=[["contacted"]], range_name=f"I{row_number}")
+    ws.update(values=[[f"발송완료 {sent_date}"]], range_name=f"K{row_number}")
 
 
 def sheet_update_replied(row_number: int):
-    """답장 수신 시 상태 업데이트 (L열)."""
+    """답장 수신 시 상태 업데이트 (I열)."""
     ws = _get_candidate_sheet()
-    ws.update(values=[["replied"]], range_name=f"L{row_number}")
+    ws.update(values=[["replied"]], range_name=f"I{row_number}")
 
 
 def sheet_get_status_counts() -> dict:
@@ -156,16 +159,16 @@ def sheet_get_status_counts() -> dict:
     all_rows = ws.get_all_values()
     counts = {}
     for row in all_rows[1:]:
-        if len(row) < 12 or not row[1]:
+        if len(row) < 9 or not row[0]:
             continue
-        status = (row[11] or "screened").strip()
+        status = (row[8] or "screened").strip()  # I열(idx8) = 상태
         counts[status] = counts.get(status, 0) + 1
     # 승인 컬럼도 집계
     approval_counts = {}
     for row in all_rows[1:]:
         if len(row) < 10 or not row[0]:
             continue
-        approval = (row[9] or "미검토").strip()
+        approval = (row[9] or "미검토").strip()  # J열(idx9) = 승인
         approval_counts[approval] = approval_counts.get(approval, 0) + 1
     return {"status": counts, "approval": approval_counts}
 
@@ -181,68 +184,72 @@ KEYWORDS = [
 
 
 # ── 메일 템플릿 ──────────────────────────────────────────────────
+# 쿠팡 파트너스 연결 상품 링크 (캡슐 표백제)
+_CAPSULE_URL = "https://www.coupang.com/vp/products/9454938820"
+
+# 공통 브랜드 소개 블록 (3개 템플릿 동일)
+_BRAND_INTRO = (
+    "저희는 패밀리케어 브랜드 iLBiA(일비아)예요.\n"
+    "건조기 시트로 시작해서 지금은 식기세척기 세제, 캡슐 세제까지 라인업을 넓혀왔어요.\n"
+    "저희 브랜드와 전체 제품 라인업은 자사몰 www.ilbia.co.kr 에서 확인하실 수 있어요."
+)
+
+_OFFER_BLOCK = (
+    "기본 협업 범위는 영상 1편 + 설명란에 쿠팡 파트너스 링크 1개예요.\n"
+    "제품 풀세트(건조기 시트, 캡슐 표백제, 식기세척기 세제, 얼룩 제거제)는 기본으로 보내드리고,\n"
+    "원고료나 쿠팡 파트너스 수수료 등 세부 조건은 {name}님 채널 상황에 맞춰 편하게 협의드려요."
+)
+
+_CTA_BLOCK = (
+    "관심 있으시면 이번 주 내로 편하게 답장 주세요.\n"
+    "받으실 주소만 알려주시면 바로 발송 시작할게요.\n\n"
+    "감사합니다.\n\n"
+    "비코어랩 마케팅팀\n"
+    "www.ilbia.co.kr"
+)
+
 TEMPLATES = {
     "A": {
-        "subject": "{name}님, 구독자분들이 댓글로 물어볼 제품이에요",
-        "body": """{name}님 안녕하세요!
-쿠팡 건조기 시트 리뷰 7,000개, 패밀리케어 브랜드 iLBiA(일비아)입니다.
-
-{name}님 채널 영상 잘 봤어요.
-댓글에 세탁 꿀팁 물어보시는 분들이 많으시던데,
-저희가 이번에 새로 출시한 '캡슐 표백제'가
-딱 그 주제로 영상 하나 나올 수 있는 제품이에요.
-
-세탁조에 캡슐 하나 넣기만 하면 끝이라 사용법도 간단하고,
-산소계 표백 성분이라 색상 옷도 안전해요.
-비포/애프터가 확실해서 시청자 반응 좋을 것 같아요.
-
-이 외에도 건조기 시트, 식기세척기 세제, 얼룩 제거제 등
-iLBiA 제품 풀세트(5~7만원 상당)를 보내드릴게요.
-
-한번 써보시겠어요?
-제품 제공 또는 원고료 등 조건은 편하게 맞춰드릴게요.
-
-비코어랩 마케팅팀""",
+        "subject": "{name}님, 살림 채널에 어울릴 신제품 제안드려요",
+        "body": (
+            "{name}님 안녕하세요, 비코어랩 마케팅팀이에요.\n\n"
+            + _BRAND_INTRO + "\n\n"
+            "{name}님 채널 꾸준히 보고 있는데, 실제로 써본 후 추천하시는 톤이 저희 제품과 잘 맞을 것 같아 연락드려요.{personal_hook}\n\n"
+            "최근에 새로 출시한 '캡슐 표백제'를 소개드리고 싶어요.\n"
+            "▶ 쿠팡 상품 페이지: " + _CAPSULE_URL + "\n\n"
+            "세탁조에 캡슐 하나 넣으면 표백과 세정이 동시에 되는 제품이에요. "
+            "산소계 성분이라 색상 옷에도 써도 되고, 비포/애프터 차이가 뚜렷해서 살림 콘텐츠로 풀어내기 좋아요.\n\n"
+            + _OFFER_BLOCK + "\n\n"
+            + _CTA_BLOCK
+        ),
     },
     "B": {
-        "subject": "{name}님 안녕하세요, 영상 소재 하나 제안드려도 될까요?",
-        "body": """{name}님 안녕하세요!
-쿠팡 건조기 시트 리뷰 7,000개, 패밀리케어 브랜드 iLBiA입니다.
-
-{name}님 영상 보면서 "이 분한테 저희 신제품 보내드리면
-진짜 리얼한 후기가 나오겠다" 싶었어요.
-
-아이 있는 집은 세탁이 전쟁이잖아요.
-이번에 새로 나온 '캡슐 표백제'가 세탁조에 하나 넣기만 하면 되는 거라
-아기 옷 얼룩, 침구류 세탁에 딱이에요.
-산소계 성분이라 아기 옷에도 안심이고, 비포/애프터 찍으시면 조회수 터질 소재예요.
-
-캡슐 표백제 외에도 건조기 시트, 얼룩 제거제 등
-iLBiA 제품 풀세트(5~7만원 상당)를 보내드릴게요.
-
-마음에 안 드시면 영상 안 만드셔도 되고요.
-제품 제공 또는 원고료 등 조건은 편하게 맞춰드릴게요.
-
-비코어랩 마케팅팀""",
+        "subject": "{name}님, 아기 옷 세탁 주제로 신제품 제안드려요",
+        "body": (
+            "{name}님 안녕하세요, 비코어랩 마케팅팀이에요.\n\n"
+            + _BRAND_INTRO + "\n\n"
+            "{name}님 채널 꾸준히 보고 있는데, 육아하는 집 관점에서 제품을 꼼꼼히 고르시는 스타일이 저희 브랜드 철학과 잘 맞아서 연락드려요.{personal_hook}\n\n"
+            "최근에 새로 출시한 '캡슐 표백제'를 소개드리고 싶어요.\n"
+            "▶ 쿠팡 상품 페이지: " + _CAPSULE_URL + "\n\n"
+            "세탁조에 캡슐 하나 넣으면 표백과 세정이 동시에 되는 제품이에요. "
+            "산소계 표백 성분이라 아기 옷에도 안심하고 쓰실 수 있고, 침구류 얼룩이나 이염 잡는 데 효과가 확실해요.\n\n"
+            + _OFFER_BLOCK + "\n\n"
+            + _CTA_BLOCK
+        ),
     },
     "C": {
-        "subject": "{name}님, 신제품 캡슐 표백제 첫 리뷰어 되실래요?",
-        "body": """{name}님 안녕하세요!
-쿠팡 건조기 시트 리뷰 7,000개, 패밀리케어 브랜드 iLBiA입니다.
-
-{name}님이 추천하시는 것들 보면 진짜 써보고 고르신 게 느껴져서
-저희 신제품 첫 리뷰를 {name}님한테 맡기고 싶었어요.
-
-이번에 새로 출시한 '캡슐 표백제'인데,
-세탁조에 캡슐 하나 넣으면 표백 + 세정이 한번에 되는 제품이에요.
-산소계 성분이라 색상 옷도 OK, 아직 리뷰 영상이 거의 없어서 선점 효과도 있을 거예요.
-
-캡슐 표백제 외에도 건조기 시트, 식기세척기 세제, 얼룩 제거제 등
-iLBiA 제품 풀세트(5~7만원 상당)를 함께 보내드릴게요.
-
-제품 제공 또는 원고료 등 조건은 따로 상의해요.
-
-비코어랩 마케팅팀""",
+        "subject": "{name}님, 새로 출시한 제품 하나 보내드리고 싶어요",
+        "body": (
+            "{name}님 안녕하세요, 비코어랩 마케팅팀이에요.\n\n"
+            + _BRAND_INTRO + "\n\n"
+            "{name}님이 직접 써보고 솔직하게 리뷰하시는 스타일이 저희 제품과 잘 맞을 것 같아 연락드려요.{personal_hook}\n\n"
+            "최근에 새로 출시한 '캡슐 표백제'를 소개드리고 싶어요.\n"
+            "▶ 쿠팡 상품 페이지: " + _CAPSULE_URL + "\n\n"
+            "세탁조에 캡슐 하나 넣으면 표백과 세정이 동시에 되는 제품이에요. "
+            "산소계 성분이라 색상 옷에도 안전하게 쓸 수 있고, 아직 유튜브에 리뷰 영상이 많지 않아서 선점 효과도 기대할 만해요.\n\n"
+            + _OFFER_BLOCK + "\n\n"
+            + _CTA_BLOCK
+        ),
     },
 }
 
@@ -390,7 +397,9 @@ def cmd_send():
         ttype = _pick_template_type(c.get("category", ""))
         tpl = TEMPLATES[ttype]
         subject = f"{PARTNERS_SUBJECT_PREFIX} {tpl['subject'].format(name=name)}"
-        body = tpl["body"].format(name=name)
+        hook = c.get("personal_hook", "") or ""
+        hook_with_space = " " + hook if hook else ""
+        body = tpl["body"].format(name=name, personal_hook=hook_with_space)
 
         print(f"\n[MAIL] {name} ({email}) — Type {ttype}")
         try:

@@ -28,7 +28,7 @@ Omomo (아이디어 유통 브랜드):
 
 
 SCREENER_PROMPT = """너는 비코어랩(iLBiA/Omomo) 쿠팡 파트너스 유튜버 1차 스크리닝 담당이야.
-아래 채널 데이터를 보고 협업 적합도를 평가해.
+아래 채널 데이터를 보고 협업 적합도 평가 + 개인화 인사 문장을 생성해줘.
 
 ## 제품 카탈로그
 {catalog}
@@ -40,11 +40,20 @@ SCREENER_PROMPT = """너는 비코어랩(iLBiA/Omomo) 쿠팡 파트너스 유튜
 4. 제품 카탈로그 중 자연스럽게 매칭되는 게 있는가?
 5. 경쟁 브랜드(타사 세제) 광고 이력 의심되는가?
 
+## 개인화 훅(personal_hook) 생성 규칙
+- 최근 영상 중 가장 인상적/관련성 높은 영상 제목 하나를 구체적으로 언급
+- 형식 예시: "특히 최근 올리신 '○○○' 영상 재밌게 봤어요." / "'○○○' 영상 보면서 실제 쓰는 입장에서 잘 정리하신다 싶었어요."
+- 영상 제목은 그대로 인용 (줄여서 요점만 가능, 하지만 원문 느낌 유지)
+- 한국어 1문장, 아첨·과장 금지, 담백하게
+- 제품 카탈로그와 연관 있는 영상 우선 선택
+- 적절한 영상이 없으면 "" (빈 문자열) 반환
+
 ## 출력 (반드시 JSON만)
 {{
   "match_score": 0~10 정수,
   "matched_products": ["제품명1", "제품명2"],
   "rationale": "한국어 1~2문장",
+  "personal_hook": "위 규칙대로 생성한 한 문장 또는 빈 문자열",
   "verdict": "approved" | "rejected" | "maybe",
   "red_flags": ["있으면 이슈 목록"]
 }}
@@ -110,6 +119,7 @@ def screen_channel(channel: dict, model: str = "claude-haiku-4-5-20251001") -> d
     parsed.setdefault("verdict", "maybe")
     parsed.setdefault("match_score", 0)
     parsed.setdefault("rationale", "")
+    parsed.setdefault("personal_hook", "")
     parsed["model"] = model
     return parsed
 
