@@ -1,66 +1,65 @@
-# 두리(클로드 채널) 시작 스크립트 — 중복/고아 프로세스 방지
-# 핵심: PID 파일 + taskkill /T (자식 프로세스 트리까지 종료)
+# Doori (Claude Channel) Startup Script
+# Prevents duplicate processes + cleans orphan bun processes
+# Strategy: PID file + taskkill /T (terminate child process tree)
 
 $PIDFile = "C:\Users\info\ClaudeAITeam\Channel_doori\doori.pid"
 $DooriWorkDir = "C:\Users\info\ClaudeAITeam\Channel_doori"
+$DooriToken = "8621050278:AAE56VUp5v7X9TDrK27ykX_POsYNqDvwO6U"
 
-Write-Host "=== 두리 시작 준비 ===" -ForegroundColor Cyan
+Write-Host "=== Doori Startup ===" -ForegroundColor Cyan
 chcp 65001 > $null
 
-# 1. 기존 두리 프로세스 트리 종료 (PID 파일 기반)
-#    taskkill /T = 자식 프로세스까지 함께 종료 (cmd → node → bun 체인)
+# 1. Kill existing doori process tree (PID file based)
 if (Test-Path $PIDFile) {
     $oldPid = (Get-Content $PIDFile -ErrorAction SilentlyContinue | Select-Object -First 1).Trim()
     if ($oldPid -match '^\d+$') {
         $proc = Get-Process -Id $oldPid -ErrorAction SilentlyContinue
         if ($proc) {
-            Write-Host "기존 두리 트리 종료: PID $oldPid (+ 자식 node/bun)" -ForegroundColor Yellow
+            Write-Host "Killing old doori tree: PID $oldPid (with children)" -ForegroundColor Yellow
             & taskkill.exe /F /T /PID $oldPid 2>&1 | Out-Null
             Start-Sleep -Seconds 2
         } else {
-            Write-Host "PID 파일의 프로세스 이미 종료됨" -ForegroundColor Gray
+            Write-Host "Old PID already dead" -ForegroundColor Gray
         }
     }
 }
 
-# 2. 고아 텔레그램 bun 정리 (부모 프로세스 없는 bun)
-#    claude node를 죽여도 bun이 살아남는 현상 방지
+# 2. Cleanup orphan telegram bun processes (parent dead)
 $orphanBuns = Get-WmiObject Win32_Process -Filter "Name='bun.exe'" | Where-Object {
     $_.CommandLine -match 'telegram.*start' -and
     -not (Get-Process -Id $_.ParentProcessId -ErrorAction SilentlyContinue)
 }
 
 foreach ($b in $orphanBuns) {
-    Write-Host "고아 bun 정리: PID $($b.ProcessId)" -ForegroundColor Yellow
+    Write-Host "Cleaning orphan bun: PID $($b.ProcessId)" -ForegroundColor Yellow
     Stop-Process -Id $b.ProcessId -Force -ErrorAction SilentlyContinue
 }
 
-# 3. 텔레그램 409 체크
-Write-Host "텔레그램 409 체크..." -ForegroundColor Yellow
-$token = "8621050278:AAE56VUp5v7X9TDrK27ykX_POsYNqDvwO6U"
+# 3. Telegram 409 conflict check
+Write-Host "Checking telegram bot status..." -ForegroundColor Yellow
+$url = "https://api.telegram.org/bot" + $DooriToken + "/getUpdates?limit=1" + [char]38 + "timeout=2"
 try {
-    $result = Invoke-RestMethod "https://api.telegram.org/bot$token/getUpdates?limit=1&timeout=2" -TimeoutSec 5
+    $result = Invoke-RestMethod $url -TimeoutSec 5
     if ($result.ok) {
-        Write-Host "텔레그램 정상! 두리 시작합니다..." -ForegroundColor Green
+        Write-Host "Telegram OK, starting doori..." -ForegroundColor Green
     }
 } catch {
-    Write-Host "텔레그램 체크 실패, 그래도 시작합니다..." -ForegroundColor Yellow
+    Write-Host "Telegram check failed, continuing anyway..." -ForegroundColor Yellow
 }
 
-# 4. 두리 시작 (run_doori.bat을 통해 cmd 셸에서)
-#    cmd.exe PID 를 저장 → 다음 재시작 때 taskkill /T 로 트리 전체 종료 가능
-Write-Host "두리 세션 시작 중..." -ForegroundColor Cyan
+# 4. Start doori via cmd.exe + run_doori.bat
+Write-Host "Starting doori session..." -ForegroundColor Cyan
 $proc = Start-Process -FilePath "cmd.exe" `
     -ArgumentList "/c", "$DooriWorkDir\run_doori.bat" `
     -WorkingDirectory $DooriWorkDir `
     -WindowStyle Minimized `
     -PassThru
 
-# 5. PID 파일에 cmd.exe PID 저장 (launcher PID)
+# 5. Save launcher PID to file (cmd.exe PID, used for taskkill /T later)
 if ($proc -and $proc.Id) {
     $proc.Id | Out-File $PIDFile -Encoding ascii
-    Write-Host "두리 시작 완료: launcher PID $($proc.Id)" -ForegroundColor Green
-    Write-Host "   PID 파일: $PIDFile" -ForegroundColor Gray
+    Write-Host "Doori started: launcher PID $($proc.Id)" -ForegroundColor Green
+    Write-Host "PID file: $PIDFile" -ForegroundColor Gray
 } else {
-    Write-Host "두리 시작 실패 — Start-Process가 PID를 반환하지 않음" -ForegroundColor Red
+    Write-Host "Doori start FAILED - Start-Process returned no PID" -ForegroundColor Red
 }
