@@ -1,5 +1,5 @@
 """
-미오 에이전트 업데이트 — 신규 툴 4개 추가 + system prompt 보완
+미오 에이전트 업데이트
 실행: python update_agent.py
 """
 import os
@@ -86,8 +86,27 @@ UPDATED_SYSTEM = """You are 미오(Mio), 비코어랩 대표님을 사랑하고 
 - Final summary in Korean
 
 ## Tools you can use
-- alibaba_ai_search (AI 모드 자연어 검색, 우선 사용), alibaba_search (키워드 검색), alibaba_get_detail, alibaba_send_inquiry (sourcing)
-- alibaba_check_inbox, alibaba_read_conversation, alibaba_reply (messaging)
+
+### Alibaba (알리바바)
+- alibaba_ai_search (AI 모드 자연어 검색, 우선 사용), alibaba_search (키워드 검색), alibaba_get_detail, alibaba_send_inquiry
+- alibaba_check_inbox, alibaba_read_conversation, alibaba_reply
+
+### 1688 (중국 도매)
+- search_1688 (Elimapi API 키워드 검색), find_1688_detail (상품 상세 SKU/가격), search_1688_by_image (이미지 유사 검색)
+- message_1688_check_inbox (메시지함), message_1688_read_conversation (대화 읽기), message_1688_reply (답장)
+- message_1688_send_inquiry (상품 페이지에서 새 문의 발송)
+
+### 쿠팡 시장 분석
+- coupang_search_top (키워드 상위 상품 URL 수집)
+- coupang_get_detail (상품 상세 raw text)
+- coupang_get_detail_structured (가격/리뷰/별점/특징/옵션 구조화 추출)
+- coupang_analyze_top_products (키워드 상위 N개 일괄 구조화 분석 → 자연어 보고서 데이터)
+
+### 소싱박스 연동
+- sourcing_box_get_opportunities (GO 판정 기회상품 목록)
+- sourcing_box_detail_analysis (스캔 ID로 상세분석 조회)
+
+### 에스컬레이션
 - escalate_to_user (Telegram to 대표님, waits for reply by default)
 """
 
@@ -196,6 +215,173 @@ TOOLS = [
             "required": ["subject", "reason"],
         },
     },
+    # ── 1688 API (Elimapi) ───────────────────────────────────
+    {
+        "type": "custom",
+        "name": "search_1688",
+        "description": "1688 키워드 검색 (Elimapi API). 판매량/가격/재구매율 포함. sort: sales/price_low/price_high/retention.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "keyword": {"type": "string", "description": "검색 키워드 (중국어 또는 영문)"},
+                "page": {"type": "integer", "description": "페이지 번호", "default": 1},
+                "sort": {"type": "string", "description": "정렬: sales/price_low/price_high/retention", "default": "sales"},
+                "size": {"type": "integer", "description": "결과 수", "default": 20},
+            },
+            "required": ["keyword"],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "find_1688_detail",
+        "description": "1688 상품 상세 조회 (SKU/가격/판매량/리뷰/재고). product_id: 1688 상품 ID.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "product_id": {"type": "string", "description": "1688 상품 ID (예: 987266748920)"},
+            },
+            "required": ["product_id"],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "search_1688_by_image",
+        "description": "1688 이미지 유사 상품 검색. 동일 형태 제품 소싱 시 사용.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "img_url": {"type": "string", "description": "1688/알리바바 상품 이미지 URL"},
+                "page": {"type": "integer", "default": 1},
+                "size": {"type": "integer", "default": 20},
+            },
+            "required": ["img_url"],
+        },
+    },
+    # ── 1688 메시지 ─────────────────────────────────────────
+    {
+        "type": "custom",
+        "name": "message_1688_check_inbox",
+        "description": "1688 웹 메신저(message.1688.com) 대화 목록 조회. Chrome에 1688 로그인 세션 필요.",
+        "input_schema": {"type": "object", "properties": {}},
+    },
+    {
+        "type": "custom",
+        "name": "message_1688_read_conversation",
+        "description": "1688 메시지함에서 특정 업체 대화 전체 읽기.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "supplier_name": {"type": "string", "description": "업체명 키워드 (부분 일치)"},
+            },
+            "required": ["supplier_name"],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "message_1688_reply",
+        "description": "1688 메시지함에서 특정 업체 대화에 답장 발송.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "supplier_name": {"type": "string", "description": "업체명 키워드"},
+                "message": {"type": "string", "description": "중국어 또는 영문 메시지"},
+            },
+            "required": ["supplier_name", "message"],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "message_1688_send_inquiry",
+        "description": "1688 상품 페이지에서 联系供应商 버튼으로 새 문의 발송. 왕왕 앱 아닌 웹 채팅 경로 시도.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "product_url": {"type": "string", "description": "1688 상품 URL"},
+                "message": {"type": "string", "description": "중국어 문의 메시지"},
+            },
+            "required": ["product_url", "message"],
+        },
+    },
+    # ── 쿠팡 ────────────────────────────────────────────────
+    {
+        "type": "custom",
+        "name": "coupang_search_top",
+        "description": "쿠팡 키워드 검색 → 상위 상품 URL + 기본 정보 수집. 대표님 Chrome CDP 사용 (봇 탐지 우회).",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "keyword": {"type": "string", "description": "쿠팡 검색 키워드"},
+                "max_products": {"type": "integer", "description": "최대 상품 수 (기본 15)", "default": 15},
+            },
+            "required": ["keyword"],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "coupang_get_detail",
+        "description": "쿠팡 상품 상세페이지 raw text 반환. 제목/가격/리뷰/설명 포함.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "product_url": {"type": "string", "description": "쿠팡 상품 URL"},
+            },
+            "required": ["product_url"],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "coupang_get_detail_structured",
+        "description": "쿠팡 상품 상세페이지 → 구조화 데이터 반환 (가격/리뷰/별점/특징/옵션/배송타입). 자연어 보고서 작성에 활용.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "product_url": {"type": "string", "description": "쿠팡 상품 URL"},
+            },
+            "required": ["product_url"],
+        },
+    },
+    {
+        "type": "custom",
+        "name": "coupang_analyze_top_products",
+        "description": (
+            "쿠팡 키워드 상위 N개 상품 일괄 구조화 분석. "
+            "특징/형태/가격/리뷰를 수집해서 반환 → 미오가 자연어 보고서로 합성. "
+            "대표님이 '잘 팔리는 제품 형태 분석해줘' 요청 시 사용."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "keyword": {"type": "string", "description": "쿠팡 검색 키워드"},
+                "top_n": {"type": "integer", "description": "분석할 상위 상품 수 (기본 5)", "default": 5},
+            },
+            "required": ["keyword"],
+        },
+    },
+    # ── 소싱박스 ─────────────────────────────────────────────
+    {
+        "type": "custom",
+        "name": "sourcing_box_get_opportunities",
+        "description": "소싱박스에서 GO 판정 기회상품 목록 조회. keyword 지정 시 필터링.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "keyword": {"type": "string", "description": "필터 키워드 (선택)"},
+                "limit": {"type": "integer", "description": "최대 조회 수", "default": 20},
+            },
+        },
+    },
+    {
+        "type": "custom",
+        "name": "sourcing_box_detail_analysis",
+        "description": "소싱박스 스캔 ID로 상세분석 조회 (쿠팡 상위 상품 공통점/소구점/가격대).",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "scan_id": {"type": "string", "description": "소싱박스 스캔 ID"},
+            },
+            "required": ["scan_id"],
+        },
+    },
 ]
 
 
@@ -206,7 +392,7 @@ def main():
     agent = client.beta.agents.retrieve(AGENT_ID)
     print(f"   현재 버전: {agent.version}\n")
 
-    print("🔄 에이전트 업데이트 중 (신규 툴 4개 추가 + 프롬프트 보완)...")
+    print(f"🔄 에이전트 업데이트 중 (툴 {len(TOOLS)}개)...")
     updated = client.beta.agents.update(
         AGENT_ID,
         version=agent.version,

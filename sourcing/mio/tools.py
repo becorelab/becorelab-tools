@@ -638,6 +638,428 @@ def sourcing_box_detail_analysis(scan_id: str) -> dict:
         return {'error': str(e)}
 
 
+# ── 툴 15: 쿠팡 상품 구조화 분석 ─────────────────────────────
+def coupang_get_detail_structured(product_url: str) -> dict:
+    """
+    쿠팡 상품 상세페이지 → 구조화 데이터 반환
+    가격/리뷰/별점/특징/옵션/배송타입을 추출 → 미오가 자연어 보고서 작성에 활용
+    """
+    with sync_playwright() as p:
+        browser = p.chromium.connect_over_cdp(CDP_URL)
+        ctx = browser.contexts[0] if browser.contexts else browser.new_context()
+        page = ctx.new_page()
+        try:
+            page.goto(product_url, wait_until='domcontentloaded', timeout=30000)
+            time.sleep(4)
+
+            data = page.evaluate("""() => {
+                const getText = sel => {
+                    const el = document.querySelector(sel);
+                    return el ? el.innerText.trim() : null;
+                };
+                const getAll = sel => Array.from(document.querySelectorAll(sel))
+                    .map(e => e.innerText.trim()).filter(Boolean);
+
+                // 제목
+                const title = getText('h2.prod-buy-header__title')
+                    || getText('[class*="prod-buy-header__title"]')
+                    || getText('h1') || document.title;
+
+                // 가격 (쿠팡 클래스명 유동적이라 텍스트로도 보조)
+                const priceEl = document.querySelector(
+                    '.prod-price [class*="price-value"], .price-value, '
+                    + '[class*="prod-price"] strong, [class*="final-price"]'
+                );
+                const priceText = priceEl ? priceEl.innerText.trim() : null;
+
+                // 별점
+                const ratingEl = document.querySelector(
+                    '[class*="rating-star-rating"], [class*="star-rating-score"], '
+                    + '[class*="ratingScore"], .ratingScore'
+                );
+                const rating = ratingEl ? ratingEl.innerText.trim() : null;
+
+                // 리뷰 수
+                const reviewEl = document.querySelector(
+                    '[class*="rating-total-count"], .rating-total-count, '
+                    + '[class*="reviewCount"], [class*="review-count"]'
+                );
+                const reviewCount = reviewEl ? reviewEl.innerText.trim() : null;
+
+                // 로켓배송 여부
+                const isRocket = !!document.querySelector(
+                    '[class*="rocket"], [alt*="로켓"], [src*="rocket"], '
+                    + '[class*="rocketbadge"], [class*="rocket-badge"]'
+                );
+
+                // 상품 속성 테이블 (소재, 사이즈 등)
+                const attrRows = getAll('.prod-attr-list li, .prod-info-table tr, [class*="attr-list"] li');
+
+                // 옵션 목록
+                const options = getAll('[class*="prod-option"] button, [class*="option"] .name-value');
+
+                // 상품 주요 특징 (불릿 포인트)
+                const highlights = getAll(
+                    '.product-item-list li, [class*="item-list"] li, '
+                    + '[class*="prod-description"] li, [class*="detail"] li'
+                );
+
+                // 판매자명
+                const seller = getText('[class*="seller-name"], [class*="sellerName"], a[href*="store"]');
+
+                return {
+                    title, price: priceText, rating, review_count: reviewCount,
+                    is_rocket: isRocket, seller,
+                    attributes: attrRows.slice(0, 15),
+                    options: options.slice(0, 10),
+                    highlights: highlights.slice(0, 10),
+                };
+            }""")
+
+            # body text로 가격/리뷰 보조 추출 (셀렉터 실패 대비)
+            body_text = page.inner_text('body')
+
+            if not data.get('price'):
+                price_m = re.search(r'[\d,]{4,}원', body_text)
+                if price_m:
+                    data['price'] = price_m.group()
+
+            if not data.get('review_count'):
+                review_m = re.search(r'([\d,]+)\s*(?:개|건|명)?\s*(?:리뷰|후기|평가)', body_text)
+                if review_m:
+                    data['review_count'] = review_m.group(1)
+
+            if not data.get('rating'):
+                rating_m = re.search(r'(\d\.\d)\s*(?:점|/\s*5)', body_text)
+                if rating_m:
+                    data['rating'] = rating_m.group(1)
+
+            # 상세 설명 이미지 alt 텍스트 (이미지 기반 상세페이지 힌트)
+            img_alts = page.evaluate("""() =>
+                Array.from(document.querySelectorAll('.prod-description img, [class*="detail"] img, #prod-description img'))
+                    .map(i => i.alt || i.title || '').filter(Boolean).slice(0, 10)
+            """)
+
+            return {
+                'success': True,
+                'url': product_url,
+                **data,
+                'description_img_alts': img_alts,
+                'body_preview': body_text[:2000],
+                'note': '구조화 데이터입니다. 미오가 특징/형태/가격/리뷰를 자연어로 종합해주세요.',
+            }
+        except Exception as e:
+            return {'error': str(e), 'url': product_url}
+        finally:
+            page.close()
+
+
+# ── 툴 16: 쿠팡 상위 상품 일괄 분석 ─────────────────────────
+def coupang_analyze_top_products(keyword: str, top_n: int = 5) -> dict:
+    """
+    쿠팡 키워드 검색 → 상위 N개 상세페이지 구조화 분석 → 자연어 보고서용 데이터 반환
+    특징/형태/가격/리뷰를 한 번에 수집 (미오가 보고서로 합성)
+    """
+    # 1) 상위 URL 수집
+    search_result = coupang_search_top(keyword, max_products=top_n + 5)
+    if search_result.get('error'):
+        return search_result
+
+    urls = search_result.get('product_urls', [])[:top_n]
+    if not urls:
+        return {'error': f'"{keyword}" 검색 결과 없음'}
+
+    # 2) 각 상품 구조화 분석
+    products = []
+    for i, url in enumerate(urls, 1):
+        print(f"  [{i}/{len(urls)}] 상세 분석 중: {url[:60]}")
+        detail = coupang_get_detail_structured(url)
+        detail['rank'] = i
+        products.append(detail)
+        time.sleep(1)
+
+    return {
+        'success': True,
+        'keyword': keyword,
+        'count': len(products),
+        'products': products,
+        'note': (
+            '상위 상품 구조화 데이터입니다. 미오는 다음 항목으로 자연어 보고서를 작성해주세요:\n'
+            '1) 공통 특징 및 형태 (소재/크기/디자인 패턴)\n'
+            '2) 가격대 분포 (최저~최고, 평균)\n'
+            '3) 리뷰/별점 현황\n'
+            '4) 주요 소구점 (하이라이트/속성에서 반복 등장하는 키워드)\n'
+            '5) 차별화 포인트 (1등 vs 나머지 차이점)'
+        ),
+    }
+
+
+# ── 툴 17: 1688 메시지함 체크 ────────────────────────────────
+def message_1688_check_inbox() -> dict:
+    """
+    1688 웹 메신저(message.1688.com) 접속 → 대화 목록 반환
+    Chrome에 1688 로그인 세션이 있어야 동작
+    """
+    with _cdp_page() as pw_page:
+        try:
+            pw_page.goto('https://message.1688.com/',
+                         wait_until='domcontentloaded', timeout=30000)
+            time.sleep(5)
+
+            full_text = pw_page.inner_text('body')
+            if len(full_text.strip()) < 50:
+                return {'error': '1688 메시지함 로딩 실패 또는 로그인 필요',
+                        'hint': 'Chrome에서 1688.com 로그인 후 재시도하세요 (start_chrome_debug.bat)',
+                        'page_text': full_text[:500]}
+
+            # 링크에서 대화방 URL 수집
+            conv_links = pw_page.evaluate("""() =>
+                Array.from(document.querySelectorAll('a[href*="1688"]'))
+                    .map(a => ({text: a.innerText.trim(), href: a.href}))
+                    .filter(a => a.text && a.text.length < 100)
+                    .slice(0, 20)
+            """)
+
+            return {
+                'success': True,
+                'url': pw_page.url,
+                'conversation_links': conv_links,
+                'note': '원문 텍스트를 반환합니다. 업체명/최근 메시지/시간을 파싱해 대화 목록으로 정리하세요.',
+                'raw_text': full_text[:5000],
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
+
+def _find_1688_conversation(pw_page, supplier_name: str):
+    """1688 메시지함에서 업체명으로 대화 아이템 탐색"""
+    needle = supplier_name.lower().strip()
+    candidates = pw_page.query_selector_all(
+        'li, [role="listitem"], [role="button"], '
+        '[class*="conversation"], [class*="session"], '
+        '[class*="chat-item"], [class*="message-item"], '
+        '[class*="contact-item"], div[class*="item"]'
+    )
+    best = None
+    for item in candidates:
+        try:
+            text = (item.inner_text() or '').lower()
+            if not text or len(text) > 2000:
+                continue
+            if needle in text:
+                if best is None or len(text) < len(best[1]):
+                    best = (item, text)
+        except Exception:
+            continue
+    return best[0] if best else None
+
+
+# ── 툴 18: 1688 특정 대화 읽기 ───────────────────────────────
+def message_1688_read_conversation(supplier_name: str) -> dict:
+    """
+    1688 메시지함에서 특정 업체 대화 클릭 → 전체 내용 반환
+    supplier_name: 업체명 또는 담당자명 키워드 (부분일치)
+    """
+    with _cdp_page() as pw_page:
+        try:
+            pw_page.goto('https://message.1688.com/',
+                         wait_until='domcontentloaded', timeout=30000)
+            time.sleep(5)
+
+            target = _find_1688_conversation(pw_page, supplier_name)
+            if not target:
+                return {'error': f'"{supplier_name}" 일치 대화 없음',
+                        'hint': 'message_1688_check_inbox로 실제 업체명을 먼저 확인하세요'}
+
+            target.click()
+            time.sleep(4)
+
+            full_text = pw_page.inner_text('body')
+            return {
+                'success': True,
+                'supplier': supplier_name,
+                'url': pw_page.url,
+                'note': '대화창 전체 텍스트입니다. 메시지 순서대로 파싱해 정리하세요.',
+                'raw_text': full_text[:6000],
+            }
+        except Exception as e:
+            return {'error': str(e)}
+
+
+# ── 툴 19: 1688 답장 발송 ────────────────────────────────────
+def message_1688_reply(supplier_name: str, message: str) -> dict:
+    """
+    1688 메시지함에서 특정 업체 대화 열고 답장 발송
+    supplier_name: 업체명 키워드 (부분일치)
+    """
+    with _cdp_page() as pw_page:
+        try:
+            pw_page.goto('https://message.1688.com/',
+                         wait_until='domcontentloaded', timeout=30000)
+            time.sleep(5)
+
+            target = _find_1688_conversation(pw_page, supplier_name)
+            if not target:
+                return {'success': False, 'error': f'"{supplier_name}" 대화 없음',
+                        'hint': 'message_1688_check_inbox로 업체명 확인 후 재시도'}
+
+            target.click()
+            time.sleep(4)
+
+            # 입력창 탐색
+            input_box = None
+            for sel in ['textarea:visible', '[contenteditable="true"]',
+                        'textarea', '[role="textbox"]', '[class*="input"]']:
+                try:
+                    el = pw_page.query_selector(sel)
+                    if el and el.is_visible():
+                        input_box = el
+                        break
+                except Exception:
+                    continue
+
+            if not input_box:
+                page_text = pw_page.inner_text('body')[:1000]
+                return {'success': False, 'error': '입력창을 찾지 못함',
+                        'page_text': page_text}
+
+            input_box.click()
+            time.sleep(1)
+            pw_page.keyboard.type(message, delay=30)
+            time.sleep(1)
+
+            # 전송 버튼 탐색
+            send_btn = None
+            for sel in ['button:has-text("发送")', 'button:has-text("Send")',
+                        '[class*="send-btn"]', '[class*="btn-send"]',
+                        'button[class*="submit"]']:
+                try:
+                    el = pw_page.query_selector(sel)
+                    if el and el.is_visible():
+                        send_btn = el
+                        break
+                except Exception:
+                    continue
+
+            if send_btn:
+                send_btn.click()
+            else:
+                pw_page.keyboard.press('Control+Enter')
+            time.sleep(3)
+
+            return {'success': True, 'supplier': supplier_name, 'message_sent': message[:300]}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+
+# ── 툴 20: 1688 상품 페이지에서 새 문의 발송 ─────────────────
+def message_1688_send_inquiry(product_url: str, message: str) -> dict:
+    """
+    1688 상품 상세페이지 → 联系供应商(문의하기) 버튼 → 웹 채팅 또는 문의폼으로 발송
+    왕왕 네이티브 앱 대신 웹 기반 채팅 경로 시도
+    """
+    with sync_playwright() as p:
+        browser = p.chromium.connect_over_cdp(CDP_URL)
+        ctx = browser.contexts[0] if browser.contexts else browser.new_context()
+        pw_page = ctx.new_page()
+        try:
+            pw_page.goto(product_url, wait_until='domcontentloaded', timeout=30000)
+            time.sleep(5)
+
+            # 客服(고객서비스) 버튼 클릭 — 1688 실제 셀렉터
+            contact_btn = None
+            for sel in [
+                'a.action-link.customer-service',
+                'a[data-click="咨询客服"]',
+                'a:has-text("客服")',
+                'a:has-text("联系供应商")', 'a:has-text("联系卖家")',
+                '[class*="customer-service"]', '[class*="contact-supplier"]',
+            ]:
+                try:
+                    el = pw_page.query_selector(sel)
+                    if el and el.is_visible():
+                        contact_btn = el
+                        break
+                except Exception:
+                    continue
+
+            if not contact_btn:
+                page_text = pw_page.inner_text('body')[:1500]
+                return {'success': False, 'error': '客服 버튼을 찾지 못함',
+                        'hint': '1688 로그인 여부 확인, 캡차 해제 필요할 수 있음',
+                        'page_preview': page_text}
+
+            # 클릭 → def_cbu_web_im 탭이 새로 열리거나 기존 탭 재사용
+            contact_btn.click()
+            time.sleep(3)
+
+            # 최대 15초 대기하며 채팅 탭 + core iframe 탐색
+            new_page = None
+            chat_frame = None
+            for _ in range(15):
+                for pg in ctx.pages:
+                    if 'def_cbu_web_im' in pg.url:
+                        for frame in pg.frames:
+                            if 'def_cbu_web_im_core' in frame.url:
+                                new_page = pg
+                                chat_frame = frame
+                                break
+                    if chat_frame:
+                        break
+                if chat_frame:
+                    break
+                time.sleep(1)
+
+            if not new_page:
+                # core iframe 없어도 def_cbu_web_im 탭 자체는 사용
+                for pg in ctx.pages:
+                    if 'def_cbu_web_im' in pg.url:
+                        new_page = pg
+                        break
+
+            if not new_page:
+                return {'success': False, 'error': '채팅 탭이 열리지 않음',
+                        'hint': 'CDP Chrome에서 客服 클릭 후 "优先使用网页版" 선택 필요'}
+
+            target = chat_frame if chat_frame else new_page
+
+            # 입력창 탐색
+            input_box = None
+            for sel in ['[contenteditable="true"]', 'textarea:visible',
+                        '[role="textbox"]', 'textarea']:
+                try:
+                    el = target.query_selector(sel)
+                    if el and el.is_visible():
+                        input_box = el
+                        break
+                except Exception:
+                    continue
+
+            if not input_box:
+                page_text = new_page.inner_text('body')[:1000]
+                return {'success': False,
+                        'error': '채팅 입력창 없음 — 웹 채팅 미설정 상태일 수 있음',
+                        'new_page_url': new_page.url,
+                        'hint': 'CDP Chrome에서 客服 클릭 후 "优先使用网页版" 선택 필요',
+                        'page_preview': page_text}
+
+            input_box.click()
+            time.sleep(0.5)
+            new_page.keyboard.type(message, delay=30)
+            time.sleep(1)
+            new_page.keyboard.press('Enter')
+            time.sleep(3)
+
+            return {
+                'success': True,
+                'product_url': product_url,
+                'new_page_url': new_page.url,
+                'message_sent': message[:300],
+            }
+        except Exception as e:
+            return {'success': False, 'error': str(e), 'product_url': product_url}
+
+
 # ── 툴 디스패처 ────────────────────────────────────────────────
 def dispatch_tool(tool_name: str, tool_input: dict) -> str:
     """미오의 custom_tool_use 이벤트를 받아 실행"""
@@ -675,6 +1097,18 @@ def dispatch_tool(tool_name: str, tool_input: dict) -> str:
             result = search_1688_by_image(**tool_input)
         elif tool_name == 'sourcing_box_detail_analysis':
             result = sourcing_box_detail_analysis(**tool_input)
+        elif tool_name == 'coupang_get_detail_structured':
+            result = coupang_get_detail_structured(**tool_input)
+        elif tool_name == 'coupang_analyze_top_products':
+            result = coupang_analyze_top_products(**tool_input)
+        elif tool_name == 'message_1688_check_inbox':
+            result = message_1688_check_inbox(**tool_input)
+        elif tool_name == 'message_1688_read_conversation':
+            result = message_1688_read_conversation(**tool_input)
+        elif tool_name == 'message_1688_reply':
+            result = message_1688_reply(**tool_input)
+        elif tool_name == 'message_1688_send_inquiry':
+            result = message_1688_send_inquiry(**tool_input)
         else:
             result = {'error': f'알 수 없는 툴: {tool_name}'}
 
