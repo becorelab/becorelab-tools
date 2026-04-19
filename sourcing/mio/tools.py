@@ -400,6 +400,244 @@ def escalate_to_user(subject: str, reason: str, supplier_message: str = "",
     return {"success": True, "sent": True, "owner_reply": reply["text"]}
 
 
+# ── 툴 8: 소싱박스 GO 상품 목록 조회 ─────────────────────────
+def sourcing_box_get_opportunities(keyword: str = None, limit: int = 20) -> dict:
+    """
+    소싱박스 API에서 GO 판정 상품 목록 조회
+    keyword 지정 시 해당 키워드 포함된 기회만 필터링
+    """
+    import urllib.request
+    try:
+        url = 'http://localhost:8090/api/opportunities?status=go'
+        with urllib.request.urlopen(url, timeout=10) as r:
+            data = json.loads(r.read().decode())
+        items = data.get('opportunities', [])
+        if keyword:
+            kw_lower = keyword.lower()
+            items = [i for i in items if kw_lower in i.get('keyword', '').lower()
+                     or kw_lower in i.get('category', '').lower()]
+        items = sorted(items, key=lambda x: x.get('opportunity_score', 0), reverse=True)[:limit]
+        return {
+            'success': True,
+            'count': len(items),
+            'opportunities': items,
+            'note': 'keyword/category/top10_avg_revenue/top10_avg_sales/scan_id(=id) 포함. '
+                    'scan_id로 coupang_search_top 호출 가능.',
+        }
+    except Exception as e:
+        return {'error': str(e)}
+
+
+# ── 툴 9: 쿠팡 키워드 상위 상품 수집 ─────────────────────────
+def coupang_search_top(keyword: str, max_products: int = 15) -> dict:
+    """
+    쿠팡 키워드 검색 → 상위 상품 URL + 기본 정보 반환
+    대표님 Chrome CDP 사용 (봇 탐지 우회)
+    """
+    with sync_playwright() as p:
+        browser = p.chromium.connect_over_cdp(CDP_URL)
+        ctx = browser.contexts[0] if browser.contexts else browser.new_context()
+        page = ctx.new_page()
+        try:
+            encoded = keyword.replace(' ', '+')
+            url = f'https://www.coupang.com/np/search?q={encoded}&channel=user'
+            page.goto(url, wait_until='domcontentloaded', timeout=30000)
+            time.sleep(4)
+
+            # 상품 카드 링크 수집
+            links = page.query_selector_all('a[href*="/vp/products/"]')
+            seen, product_urls = set(), []
+            for a in links:
+                href = a.get_attribute('href') or ''
+                if not href:
+                    continue
+                if not href.startswith('http'):
+                    href = 'https://www.coupang.com' + href
+                base = href.split('?')[0]
+                if base not in seen:
+                    seen.add(base)
+                    product_urls.append(href)
+
+            body_text = page.inner_text('body')
+            return {
+                'success': True,
+                'keyword': keyword,
+                'product_urls': product_urls[:max_products],
+                'url_count': len(product_urls),
+                'note': 'raw_text에서 상품명/가격/리뷰수/랭킹을 파싱하세요. '
+                        'product_urls 순서가 검색 순위와 대응됩니다. '
+                        '상세 분석은 coupang_get_detail로 개별 URL을 확인하세요.',
+                'raw_text': body_text[:6000],
+            }
+        except Exception as e:
+            return {'error': str(e), 'keyword': keyword}
+        finally:
+            page.close()
+
+
+# ── 툴 10: 쿠팡 상품 상세페이지 읽기 ─────────────────────────
+def coupang_get_detail(product_url: str) -> dict:
+    """
+    쿠팡 상품 상세페이지 텍스트 반환
+    제목/가격/리뷰수/상품 설명/옵션 등 포함
+    """
+    with sync_playwright() as p:
+        browser = p.chromium.connect_over_cdp(CDP_URL)
+        ctx = browser.contexts[0] if browser.contexts else browser.new_context()
+        page = ctx.new_page()
+        try:
+            page.goto(product_url, wait_until='domcontentloaded', timeout=30000)
+            time.sleep(4)
+
+            body_text = page.inner_text('body')
+            return {
+                'success': True,
+                'url': product_url,
+                'note': 'raw_text에서 제품명/가격/옵션/리뷰수/별점/상품설명/주요특징을 파싱하세요. '
+                        '제품 유형/소재/사이즈/기능 키워드에 집중해 공통점을 찾으세요.',
+                'raw_text': body_text[:6000],
+            }
+        except Exception as e:
+            return {'error': str(e), 'url': product_url}
+        finally:
+            page.close()
+
+
+# ── 툴 11: 1688 키워드 검색 (Elimapi) ─────────────────────────
+def search_1688(keyword: str, page: int = 1, sort: str = "sales",
+                size: int = 20) -> dict:
+    """
+    1688 키워드 검색 — Elimapi API
+    sort: sales(판매량), price_low, price_high, retention
+    """
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+    from search_1688 import search_1688 as _search, login
+    result = _search(keyword, page=page, sort=sort, size=size)
+    if not result.get('success'):
+        return result
+    items = result.get('data', {}).get('items', [])
+    return {
+        'success': True,
+        'keyword': keyword,
+        'count': len(items),
+        'items': [{
+            'id': str(i.get('id', '')),
+            'title': i.get('title', ''),
+            'titleEn': i.get('titleEn', ''),
+            'price': i.get('price'),
+            'sales_volume': i.get('sales_volume'),
+            'retention_rate': i.get('retention_rate'),
+            'seller_type': i.get('seller_type'),
+            'link': i.get('link', ''),
+            'img_url': i.get('img_url', ''),
+        } for i in items],
+        'note': '상세 정보는 find_1688_detail로 id를 조회하세요.',
+    }
+
+
+# ── 툴 12: 1688 상품 상세 조회 (Elimapi) ─────────────────────
+def find_1688_detail(product_id: str) -> dict:
+    """
+    1688 상품 상세 조회 — SKU/가격/판매자/리뷰 전부 반환
+    product_id: 1688 상품 ID (예: 987266748920)
+    """
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+    from search_1688 import login, BASE_URL, _post_json
+    token = login()
+    if not token:
+        return {'error': 'Elimapi login failed'}
+    body = {'id': product_id, 'platform': 'alibaba', 'lang': 'en'}
+    data = _post_json(f'{BASE_URL}/v1/products/find', body, token=token)
+    if data.get('error'):
+        return data
+    review = data.get('review', {})
+    skus = data.get('skus', [])
+    return {
+        'success': True,
+        'id': product_id,
+        'title': data.get('title', ''),
+        'titleEn': data.get('titleEn', ''),
+        'price_range': data.get('price_range', []),
+        'moq': data.get('moq'),
+        'sold': data.get('sold'),
+        'quantity': data.get('quantity'),
+        'review': {
+            'retention_rate': review.get('retention_rate'),
+            'total_score': review.get('total_score'),
+            'service_score': review.get('service_score'),
+        },
+        'seller_type': data.get('seller_type'),
+        'sku_count': len(skus),
+        'skus': [{
+            'price': s.get('price'),
+            'quantity': s.get('quantity'),
+            'option': s['options'][0].get('valueEn', s['options'][0].get('value', ''))
+            if s.get('options') else '',
+        } for s in skus[:15]],
+        'link': f'https://detail.1688.com/offer/{product_id}.html',
+        'img_urls': data.get('img_urls', [])[:3],
+        'note': 'skus 배열에서 대표님 타겟 단가(¥2.92=$0.4) 이하인 옵션을 찾으세요.',
+    }
+
+
+# ── 툴 13: 1688 이미지 검색 (Elimapi) ────────────────────────
+def search_1688_by_image(img_url: str, page: int = 1, size: int = 20) -> dict:
+    """
+    1688 이미지 유사 상품 검색 — 동일 형태 제품 찾기
+    img_url: 1688/알리바바 상품 이미지 URL
+    """
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+    from search_1688 import login, BASE_URL, _post_json
+    token = login()
+    if not token:
+        return {'error': 'Elimapi login failed'}
+    body = {
+        'img_url': img_url,
+        'platform': 'alibaba',
+        'page': page,
+        'size': size,
+        'lang': 'en',
+    }
+    data = _post_json(f'{BASE_URL}/v1/products/search-img', body, token=token)
+    if data.get('error'):
+        return data
+    items = data.get('items', [])
+    return {
+        'success': True,
+        'count': len(items),
+        'items': [{
+            'id': str(i.get('id', '')),
+            'title': i.get('title', ''),
+            'titleEn': i.get('titleEn', ''),
+            'price': i.get('price'),
+            'sales_volume': i.get('sales_volume'),
+            'link': i.get('link', ''),
+        } for i in items],
+        'note': '이미지 기반 유사 상품입니다. find_1688_detail로 상세 확인하세요.',
+    }
+
+
+# ── 툴 14: 소싱박스 상세 분석 조회 ───────────────────────────
+def sourcing_box_detail_analysis(scan_id: str) -> dict:
+    """
+    소싱박스 상세분석 결과 조회
+    scan_id: sourcing_box_get_opportunities에서 받은 id
+    """
+    import urllib.request
+    try:
+        url = f'http://localhost:8090/api/scan/{scan_id}/detail-analysis'
+        with urllib.request.urlopen(url, timeout=30) as r:
+            data = json.loads(r.read().decode())
+        return {
+            'success': True,
+            'scan_id': scan_id,
+            'data': data,
+            'note': '쿠팡 상위 상품 공통점/소구점/가격대가 포함되어 있습니다.',
+        }
+    except Exception as e:
+        return {'error': str(e)}
+
+
 # ── 툴 디스패처 ────────────────────────────────────────────────
 def dispatch_tool(tool_name: str, tool_input: dict) -> str:
     """미오의 custom_tool_use 이벤트를 받아 실행"""
@@ -423,6 +661,20 @@ def dispatch_tool(tool_name: str, tool_input: dict) -> str:
             result = alibaba_reply(**tool_input)
         elif tool_name == 'escalate_to_user':
             result = escalate_to_user(**tool_input)
+        elif tool_name == 'sourcing_box_get_opportunities':
+            result = sourcing_box_get_opportunities(**tool_input)
+        elif tool_name == 'coupang_search_top':
+            result = coupang_search_top(**tool_input)
+        elif tool_name == 'coupang_get_detail':
+            result = coupang_get_detail(**tool_input)
+        elif tool_name == 'search_1688':
+            result = search_1688(**tool_input)
+        elif tool_name == 'find_1688_detail':
+            result = find_1688_detail(**tool_input)
+        elif tool_name == 'search_1688_by_image':
+            result = search_1688_by_image(**tool_input)
+        elif tool_name == 'sourcing_box_detail_analysis':
+            result = sourcing_box_detail_analysis(**tool_input)
         else:
             result = {'error': f'알 수 없는 툴: {tool_name}'}
 
