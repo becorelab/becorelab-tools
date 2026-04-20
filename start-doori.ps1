@@ -52,4 +52,4 @@ if (-not (Test-Path $StateDir)) {
 # 4. Start doori foreground (lena-identical: claude.cmd direct call)
 Set-Location $DooriWorkDir
 Write-Host "Starting doori session (foreground)..." -ForegroundColor Cyan
-& "C:\Users\info\AppData\Roaming\npm\claude.cmd" --channels "plugin:telegram@claude-plugins-official" --dangerously-skip-permissions --model haiku
+& "C:\Users\info\AppData\Roaming\npm\claude.cmd" --channels "plugin:telegram@claude-plugins-official" --dangerously-skip-permissions --model sonnet

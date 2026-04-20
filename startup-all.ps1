@@ -1,6 +1,6 @@
 # Becorelab Auto-Startup Script
 # Called by Task Scheduler at logon (can also run manually)
-# Order: Chrome CDP -> Doori -> Lena
+# Order: Cleanup -> Chrome CDP -> Doori -> Lena
 
 chcp 65001 > $null
 $ErrorActionPreference = "Continue"
@@ -9,6 +9,12 @@ $ErrorActionPreference = "Continue"
 Start-Sleep -Seconds 10
 
 Write-Host "=== Becorelab Startup ===" -ForegroundColor Cyan
+Write-Host ""
+
+# --- 0. Cleanup: Kill previous sessions before starting new ones ---
+Write-Host "[0/3] Cleaning up previous sessions..." -ForegroundColor Yellow
+& "C:\Users\info\ClaudeAITeam\cleanup-processes.ps1"
+Write-Host "  Cleanup done" -ForegroundColor Green
 Write-Host ""
 
 # --- 1. Chrome CDP (port 9222) ---
@@ -47,10 +53,12 @@ Start-Sleep -Seconds 5
 
 # --- 3. Lena session (separate window) ---
 Write-Host "[3/3] Lena session..." -ForegroundColor Yellow
-Start-Process cmd -ArgumentList @(
+$lenaProc = Start-Process cmd -ArgumentList @(
     "/k",
     "C:\Users\info\claudeaiteam\Channel_lena\run_lena.bat"
-)
+) -PassThru
+# Save Lena PID for cleanup next time
+if ($lenaProc) { $lenaProc.Id | Set-Content $LenaPidFile }
 Write-Host "  Lena window launched" -ForegroundColor Green
 
 Write-Host ""
