@@ -1,4 +1,4 @@
-"""메일 템플릿 시트 업데이트 — pipeline.py의 TEMPLATES를 그대로 반영."""
+﻿"""메일 템플릿 시트 업데이트 — pipeline.py의 TEMPLATES를 그대로 반영."""
 import gspread, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from google.oauth2.service_account import Credentials
@@ -7,7 +7,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 # pipeline.py의 템플릿을 그대로 가져와서 싱글 소스로 유지
 from pipeline import TEMPLATES
 
-KEY_PATH = r"C:\Users\info\claudeaiteam\sourcing\analyzer\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
+KEY_PATH = r"C:\Users\User\claudeaiteam\sourcing\analyzer\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
 SHEET_ID = "1x3uiTImNWPoS03HRfzHDeNSeKa2PynpzdShbgY5hOSs"
 
 creds = Credentials.from_service_account_file(KEY_PATH, scopes=["https://www.googleapis.com/auth/spreadsheets"])

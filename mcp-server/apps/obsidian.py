@@ -1,4 +1,4 @@
-"""옵시디언 볼트 파일 시스템 MCP 도구
+﻿"""옵시디언 볼트 파일 시스템 MCP 도구
 두리가 모바일/PC 어디서든 옵시디언 볼트 읽고 쓰기 가능
 """
 import os
@@ -6,7 +6,7 @@ import json as _json
 from pathlib import Path
 
 # 옵시디언 볼트 경로
-VAULT_ROOT = Path(r"C:\Users\info\Documents\비코어랩")
+VAULT_ROOT = Path(r"C:\Users\User\Documents\비코어랩")
 
 
 def _safe_path(rel_path: str) -> Path:

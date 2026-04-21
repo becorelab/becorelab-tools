@@ -1,4 +1,4 @@
-"""
+﻿"""
 레나 정기 보고 — 하루 2회 (11시, 17시)
 - 폴러 로그 + conversations/ 디렉토리 + poller_state.json 종합
 - 처리 대화 요약, 진행중 건, 에스컬레이션 현황을 텔레그램으로 전송
@@ -12,10 +12,10 @@ import urllib.parse
 from datetime import datetime, timedelta
 from pathlib import Path
 
-LENA_DIR = Path(r"C:\Users\info\ClaudeAITeam\Channel_lena")
+LENA_DIR = Path(r"C:\Users\User\ClaudeAITeam\Channel_lena")
 STATE_FILE = LENA_DIR / "poller_state.json"
 LOG_FILE = LENA_DIR / "poller.log"
-CONV_DIR = Path(r"C:\Users\info\ClaudeAITeam\sourcing\mio\conversations")
+CONV_DIR = Path(r"C:\Users\User\ClaudeAITeam\sourcing\mio\conversations")
 
 LENA_BOT_TOKEN = "8663458998:AAEEnXYWJhq98o2PfoBuqVxbe7JOUvJZYxc"
 BOSS_CHAT_ID = "8708718261"

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 iLBiA 물류 대시보드 서버
 - 발주대시보드 HTML 서빙
@@ -1104,7 +1104,7 @@ def api_daily_report_obsidian():
             "alerts_yellow": alerts_yellow,
         })
 
-        obs_dir = r"C:\Users\info\Documents\비코어랩\01. Becorelab AI Agent Team\2️⃣ Areas\📊 Sales Report\일일"
+        obs_dir = r"C:\Users\User\Documents\비코어랩\01. Becorelab AI Agent Team\2️⃣ Areas\📊 Sales Report\일일"
         os.makedirs(obs_dir, exist_ok=True)
         filename = f"{target} 매출 일일 보고서.md"
         filepath = os.path.join(obs_dir, filename)
@@ -1381,7 +1381,7 @@ def api_order_analysis():
 
 
 # ── 옵시디언 재고 일일 보고서 생성 ──
-OBSIDIAN_STOCK_DIR = r"C:\Users\info\Documents\비코어랩\01. Becorelab AI Agent Team\2️⃣ Areas\📦 Stock & Order"
+OBSIDIAN_STOCK_DIR = r"C:\Users\User\Documents\비코어랩\01. Becorelab AI Agent Team\2️⃣ Areas\📦 Stock & Order"
 
 @app.route("/api/inventory-report-obsidian", methods=["POST", "GET"])
 def api_inventory_report_obsidian():

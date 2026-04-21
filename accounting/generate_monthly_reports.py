@@ -1,4 +1,4 @@
-"""
+﻿"""
 월간 매출 보고서 자동 생성 (Obsidian용)
 정산 엑셀 → 월별 마크다운 보고서 생성
 채널 범위를 B열에서 동적으로 감지
@@ -11,7 +11,7 @@ import openpyxl
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-OBSIDIAN = r'C:\Users\info\Documents\비코어랩\01. Becorelab AI Agent Team\📊 Sales Report\월간'
+OBSIDIAN = r'C:\Users\User\Documents\비코어랩\01. Becorelab AI Agent Team\📊 Sales Report\월간'
 os.makedirs(OBSIDIAN, exist_ok=True)
 
 def sf(v):

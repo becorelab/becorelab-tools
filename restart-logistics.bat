@@ -11,8 +11,8 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8082 "') do (
 timeout /t 2 /nobreak
 
 :: 물류 서버 재시작
-cd /d C:\Users\info\ClaudeAITeam
-start "물류서버(8082)" C:\Users\info\AppData\Local\Python\pythoncore-3.14-64\python.exe logistics\logistics_app.py
+cd /d C:\Users\User\ClaudeAITeam
+start "물류서버(8082)" C:\Users\User\AppData\Local\Python\pythoncore-3.14-64\python.exe logistics\logistics_app.py
 
 echo 재시작 완료! 5초 후 창 닫힘
 timeout /t 5 /nobreak

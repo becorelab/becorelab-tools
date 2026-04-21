@@ -1,4 +1,4 @@
-"""
+﻿"""
 미오 옵시디언 히스토리 작성
 대화가 끝났거나 에스컬레이션 시 Claude 디자인 노트 생성
 """
@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from datetime import datetime
 
-VAULT_ROOT = Path(r"C:\Users\info\Documents\비코어랩\01. Becorelab AI Agent Team")
+VAULT_ROOT = Path(r"C:\Users\User\Documents\비코어랩\01. Becorelab AI Agent Team")
 
 CATEGORY_FOLDER = {
     "alibaba": VAULT_ROOT / "1️⃣ Projects" / "🔍 소싱 파이프라인" / "미오 대화",

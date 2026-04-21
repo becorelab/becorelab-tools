@@ -1,4 +1,4 @@
-"""기존 승인대기/승인 행들에 personal_hook 재생성.
+﻿"""기존 승인대기/승인 행들에 personal_hook 재생성.
 
 실제 시트 L열(channel_id)을 보고 enrich_full()로 최근 영상 재수집 →
 Haiku 재스크리닝 → personal_hook만 N열에 업데이트.
@@ -18,7 +18,7 @@ from google.oauth2.service_account import Credentials
 from youtube_crawler import enrich_full
 from screener import screen_channel
 
-KEY_PATH = r"C:\Users\info\claudeaiteam\sourcing\analyzer\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
+KEY_PATH = r"C:\Users\User\claudeaiteam\sourcing\analyzer\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
 SHEET_ID = "1x3uiTImNWPoS03HRfzHDeNSeKa2PynpzdShbgY5hOSs"
 
 creds = Credentials.from_service_account_file(KEY_PATH, scopes=["https://www.googleapis.com/auth/spreadsheets"])

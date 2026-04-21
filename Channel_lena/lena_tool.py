@@ -1,4 +1,4 @@
-"""
+﻿"""
 레나 도구 CLI 래퍼
 사용:
   python lena_tool.py inbox
@@ -9,9 +9,9 @@ import sys
 import os
 import json
 
-MIO_DIR = r"C:\Users\info\ClaudeAITeam\sourcing\mio"
+MIO_DIR = r"C:\Users\User\ClaudeAITeam\sourcing\mio"
 sys.path.insert(0, MIO_DIR)
-sys.path.insert(0, r"C:\Users\info\ClaudeAITeam\sourcing")
+sys.path.insert(0, r"C:\Users\User\ClaudeAITeam\sourcing")
 
 from tools import (
     alibaba_check_inbox,

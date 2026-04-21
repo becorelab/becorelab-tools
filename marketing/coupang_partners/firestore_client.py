@@ -1,4 +1,4 @@
-"""쿠팡 파트너스 파이프라인 — Firestore 접근 레이어
+﻿"""쿠팡 파트너스 파이프라인 — Firestore 접근 레이어
 
 컬렉션 (PRD §7):
   coupang_partners_candidates    — 유튜버 후보 (channel_id = doc id)
@@ -24,7 +24,7 @@ _db: Optional[firestore.Client] = None
 
 _KEY_SEARCH_DIRS = [
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "credentials"),
-    r"C:\Users\info\ClaudeAITeam\sourcing\analyzer",
+    r"C:\Users\User\ClaudeAITeam\sourcing\analyzer",
 ]
 
 

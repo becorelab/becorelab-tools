@@ -1,4 +1,4 @@
-"""
+﻿"""
 봇 그룹채팅 공유 상태 관리
 
 모든 봇(보리/픽시/레나)이 같은 파일을 읽고 쓰면서 협업.
@@ -11,8 +11,8 @@ import os
 import time
 from datetime import datetime
 
-STATE_FILE = r"C:\Users\info\ClaudeAITeam\data\group_state.json"
-MESSAGES_FILE = r"C:\Users\info\ClaudeAITeam\data\group_messages.json"
+STATE_FILE = r"C:\Users\User\ClaudeAITeam\data\group_state.json"
+MESSAGES_FILE = r"C:\Users\User\ClaudeAITeam\data\group_messages.json"
 
 # 봇 자율 대화 설정
 MAX_BOT_ROUNDS = 100  # 사실상 무제한 (대표님이 STOP으로 통제)

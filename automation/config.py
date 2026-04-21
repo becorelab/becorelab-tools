@@ -1,10 +1,10 @@
-"""비코어랩 새벽 자동화 설정"""
+﻿"""비코어랩 새벽 자동화 설정"""
 import os
 from datetime import datetime, timedelta
 
-PROJECT_ROOT = r"C:\Users\info\ClaudeAITeam"
-PYTHON_EXE = r"C:\Users\info\AppData\Local\Python\pythoncore-3.14-64\python.exe"
-OPENCLAW_CMD = r"C:\Users\info\AppData\Roaming\npm\openclaw.cmd"
+PROJECT_ROOT = r"C:\Users\User\ClaudeAITeam"
+PYTHON_EXE = r"C:\Users\User\AppData\Local\Python\pythoncore-3.14-64\python.exe"
+OPENCLAW_CMD = r"C:\Users\User\AppData\Roaming\npm\openclaw.cmd"
 
 # 서버 정보
 SERVICES = {
@@ -79,7 +79,7 @@ OUTPUT_JSON = os.path.join(DATA_DIR, "morning_data.json")
 LOG_FILE = os.path.join(DATA_DIR, "morning_collect.log")
 
 # 옵시디언 볼트 경로
-OBSIDIAN_VAULT = r"C:\Users\info\Documents\비코어랩"
+OBSIDIAN_VAULT = r"C:\Users\User\Documents\비코어랩"
 OBSIDIAN_AD_DIR = os.path.join(OBSIDIAN_VAULT, "01. Becorelab AI Agent Team", "2️⃣ Areas", "📢 Ad Performance")
 OBSIDIAN_SALES_DIR = os.path.join(OBSIDIAN_VAULT, "01. Becorelab AI Agent Team", "2️⃣ Areas", "📊 Sales Report", "일일")
 OBSIDIAN_STOCK_DIR = os.path.join(OBSIDIAN_VAULT, "01. Becorelab AI Agent Team", "2️⃣ Areas", "📦 Stock & Order")

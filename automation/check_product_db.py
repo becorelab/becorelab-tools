@@ -1,6 +1,6 @@
-from pathlib import Path
+﻿from pathlib import Path
 
-BASE = Path(r"C:\Users\info\Documents\비코어랩\01. Becorelab AI Agent Team\3️⃣ Resources\🗂️ 상품 DB\상품 상세")
+BASE = Path(r"C:\Users\User\Documents\비코어랩\01. Becorelab AI Agent Team\3️⃣ Resources\🗂️ 상품 DB\상품 상세")
 
 skip = {"| - |", "|  |", "[ ]", "---", "#", ">", "tags:", "상품명:", "기회점수:", "단계:", "타임보드", "최종 판단", "빠른 정보"}
 

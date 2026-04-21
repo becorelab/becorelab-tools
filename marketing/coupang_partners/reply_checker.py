@@ -1,4 +1,4 @@
-"""유튜버 회신 감지 + 텔레그램 알림.
+﻿"""유튜버 회신 감지 + 텔레그램 알림.
 
 크론(또는 스케줄러)에서 run()을 호출하면:
   1. 네이버웍스 '유튜브 협찬 메일' 폴더의 미열람 메일 조회
@@ -20,7 +20,7 @@ from config import PARTNERS_INBOX_MAILBOX, BASE_DIR
 # ── 경로 ──────────────────────────────────────────────────────────
 SEND_RESULTS_PATH = str(BASE_DIR / "send_results.json")
 REPLY_SEEN_PATH = str(BASE_DIR / "credentials" / "reply_seen.json")
-LENA_ENV_PATH = r"C:\Users\info\claudeaiteam\Channel_lena\.env"
+LENA_ENV_PATH = r"C:\Users\User\claudeaiteam\Channel_lena\.env"
 
 
 # ── 텔레그램 자격증명 ────────────────────────────────────────────

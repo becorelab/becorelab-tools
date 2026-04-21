@@ -1,4 +1,4 @@
-Set WshShell = CreateObject("WScript.Shell")
+﻿Set WshShell = CreateObject("WScript.Shell")
 
 ' Check if already running
 Dim checkCmd
@@ -10,4 +10,4 @@ If exitCode = 0 Then
 End If
 
 ' Start logistics server silently
-WshShell.Run "powershell -WindowStyle Hidden -NoProfile -Command ""Start-Process -FilePath 'C:\Users\info\AppData\Local\Python\pythoncore-3.14-64\python.exe' -ArgumentList 'C:\Users\info\ClaudeAITeam\logistics\logistics_app.py' -WindowStyle Hidden""", 0, False
+WshShell.Run "powershell -WindowStyle Hidden -NoProfile -Command ""Start-Process -FilePath 'C:\Users\User\AppData\Local\Python\pythoncore-3.14-64\python.exe' -ArgumentList 'C:\Users\User\ClaudeAITeam\logistics\logistics_app.py' -WindowStyle Hidden""", 0, False

@@ -1,4 +1,4 @@
-"""1688 검색 결과 → 구글 시트 업로드"""
+﻿"""1688 검색 결과 → 구글 시트 업로드"""
 
 import json
 import sys
@@ -11,7 +11,7 @@ from google.oauth2.service_account import Credentials
 SHEET_ID = "1x3uiTImNWPoS03HRfzHDeNSeKa2PynpzdShbgY5hOSs"
 SHEET_NAME = "1688 검색"
 KEY_PATH = (
-    r"C:\Users\info\claudeaiteam\sourcing\analyzer"
+    r"C:\Users\User\claudeaiteam\sourcing\analyzer"
     r"\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
 )
 SCOPES = [

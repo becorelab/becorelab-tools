@@ -1,4 +1,4 @@
-"""인스타 공동구매 파이프라인 — 설정 상수"""
+﻿"""인스타 공동구매 파이프라인 — 설정 상수"""
 import os
 from pathlib import Path
 
@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).parent
 
 # ── 구글 시트 ────────────────────────────────────────────────
 KEY_PATH = (
-    r"C:\Users\info\claudeaiteam\sourcing\analyzer"
+    r"C:\Users\User\claudeaiteam\sourcing\analyzer"
     r"\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
 )
 SHEET_ID = "1x3uiTImNWPoS03HRfzHDeNSeKa2PynpzdShbgY5hOSs"

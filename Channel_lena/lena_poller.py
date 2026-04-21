@@ -1,4 +1,4 @@
-"""
+﻿"""
 레나 알리바바 인박스 폴러
 - 5분 주기로 알리바바 인박스 raw text 가져옴
 - 이전 상태와 비교해서 새 메시지 신호 감지
@@ -16,7 +16,7 @@ import urllib.parse
 from datetime import datetime, timedelta
 from pathlib import Path
 
-LENA_DIR = Path(r"C:\Users\info\ClaudeAITeam\Channel_lena")
+LENA_DIR = Path(r"C:\Users\User\ClaudeAITeam\Channel_lena")
 STATE_FILE = LENA_DIR / "poller_state.json"
 LOG_FILE = LENA_DIR / "poller.log"
 
@@ -66,9 +66,9 @@ def extract_signal_text(raw: str) -> str:
         result.append(s)
     return "\n".join(result)
 
-MIO_DIR = r"C:\Users\info\ClaudeAITeam\sourcing\mio"
+MIO_DIR = r"C:\Users\User\ClaudeAITeam\sourcing\mio"
 sys.path.insert(0, MIO_DIR)
-sys.path.insert(0, r"C:\Users\info\ClaudeAITeam\sourcing")
+sys.path.insert(0, r"C:\Users\User\ClaudeAITeam\sourcing")
 
 
 def log(msg):

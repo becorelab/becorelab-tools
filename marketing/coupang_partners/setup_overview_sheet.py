@@ -1,11 +1,11 @@
-"""구글 시트 프로젝트 개요 시트 생성"""
+﻿"""구글 시트 프로젝트 개요 시트 생성"""
 import sys
 import gspread
 from google.oauth2.service_account import Credentials
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-KEY_PATH = r"C:\Users\info\claudeaiteam\sourcing\analyzer\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
+KEY_PATH = r"C:\Users\User\claudeaiteam\sourcing\analyzer\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
 SHEET_ID = "1x3uiTImNWPoS03HRfzHDeNSeKa2PynpzdShbgY5hOSs"
 
 creds = Credentials.from_service_account_file(KEY_PATH, scopes=[

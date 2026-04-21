@@ -1,4 +1,4 @@
-"""
+﻿"""
 비코어랩 디스코드 봇 코어
 4개 봇이 같은 코드로 돌아감 (페르소나만 다름)
 
@@ -47,7 +47,7 @@ BOT_EMOJI = BOT_INFO[BOT_NAME]["emoji"]
 SOUL_PATH = BOT_INFO[BOT_NAME]["soul_path"]
 
 # === 데이터 파일 ===
-DATA_DIR = r"C:\Users\info\ClaudeAITeam\data\discord"
+DATA_DIR = r"C:\Users\User\ClaudeAITeam\data\discord"
 os.makedirs(DATA_DIR, exist_ok=True)
 GROUP_LOG_FILE = os.path.join(DATA_DIR, "group_messages.json")
 GROUP_STATE_FILE = os.path.join(DATA_DIR, "group_state.json")
@@ -276,7 +276,7 @@ async def read_attachment(attachment: discord.Attachment) -> str:
 
 
 # 옵시디언 볼트 경로
-OBSIDIAN_VAULT = r"C:\Users\info\Documents\비코어랩"
+OBSIDIAN_VAULT = r"C:\Users\User\Documents\비코어랩"
 
 
 def find_obsidian_file(filename: str) -> str:

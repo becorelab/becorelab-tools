@@ -1,4 +1,4 @@
-"""
+﻿"""
 카페24 매출 검증용 마스터 매핑 JSON 빌더
 - 14개월 raw 품명 추출
 - 12개 품명리스트 → raw→standard 매핑 통합
@@ -13,7 +13,7 @@ import openpyxl
 BASE = r"N:\개인\Becorelab\03. 영업\20. 월별 매출정산\기타\자사몰 검증"
 BASE_2026_01 = r"N:\개인\Becorelab\03. 영업\20. 월별 매출정산\2026.01"
 BASE_2026_02 = r"N:\개인\Becorelab\03. 영업\20. 월별 매출정산\2026.02"
-OUT_DIR = r"C:\Users\info\ClaudeAITeam\accounting\multi_agent_verify"
+OUT_DIR = r"C:\Users\User\ClaudeAITeam\accounting\multi_agent_verify"
 
 # ---------- 파일 매핑 ----------
 RAW_FILES = {

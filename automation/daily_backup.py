@@ -1,4 +1,4 @@
-"""
+﻿"""
 비코어랩 일일 백업 스크립트
 PC 로컬 데이터를 OneDrive에 자동 백업
 
@@ -19,7 +19,7 @@ import logging
 from datetime import datetime
 
 # 설정
-BACKUP_BASE = r"C:\Users\info\OneDrive\(주)비코어랩\Claude-Setup\backups"
+BACKUP_BASE = r"C:\Users\User\OneDrive\(주)비코어랩\Claude-Setup\backups"
 HOME = os.path.expanduser("~")
 PROJECT = os.path.join(HOME, "ClaudeAITeam")
 

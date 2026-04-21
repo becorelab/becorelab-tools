@@ -1,4 +1,4 @@
-"""Remote MCP 서버 watchdog
+﻿"""Remote MCP 서버 watchdog
 5분마다 헬스체크 → 죽었으면 자동 재시작
 Windows 작업 스케줄러로 5분마다 실행
 """
@@ -8,7 +8,7 @@ import subprocess
 import socket
 from datetime import datetime
 
-PROJECT_ROOT = r"C:\Users\info\ClaudeAITeam"
+PROJECT_ROOT = r"C:\Users\User\ClaudeAITeam"
 START_BAT = os.path.join(PROJECT_ROOT, "automation", "start_remote_mcp.bat")
 LOG_FILE = os.path.join(PROJECT_ROOT, "data", "remote_mcp_watchdog.log")
 PORT = 8500

@@ -1,4 +1,4 @@
-"""
+﻿"""
 상품 상세 폴더 구조 변환
 단일 파일 → 상품별 폴더 (상품 정보.md + 견적.md)
 """
@@ -6,7 +6,7 @@ import os
 import shutil
 from pathlib import Path
 
-BASE = Path(r"C:\Users\info\Documents\비코어랩\01. Becorelab AI Agent Team\3️⃣ Resources\🗂️ 상품 DB\상품 상세")
+BASE = Path(r"C:\Users\User\Documents\비코어랩\01. Becorelab AI Agent Team\3️⃣ Resources\🗂️ 상품 DB\상품 상세")
 
 QUOTE_TEMPLATE = """# 💰 견적 — {name}
 

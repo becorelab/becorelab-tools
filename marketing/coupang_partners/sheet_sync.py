@@ -1,4 +1,4 @@
-"""구글 시트 ↔ 파이프라인 동기화 모듈.
+﻿"""구글 시트 ↔ 파이프라인 동기화 모듈.
 
 '후보 리스트' 시트를 읽고 쓰는 함수 모음.
 열 구조: A=번호, B=채널명, C=구독자, D=카테고리, E=추천제품,
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 SHEET_ID = "1x3uiTImNWPoS03HRfzHDeNSeKa2PynpzdShbgY5hOSs"
 SHEET_NAME = "후보 리스트"
 KEY_PATH = (
-    r"C:\Users\info\claudeaiteam\sourcing\analyzer"
+    r"C:\Users\User\claudeaiteam\sourcing\analyzer"
     r"\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
 )
 

@@ -1,4 +1,4 @@
-"""1688 SKU 가격 필터 — 타겟 단가 기준 정리 → 구글 시트"""
+﻿"""1688 SKU 가격 필터 — 타겟 단가 기준 정리 → 구글 시트"""
 import json
 import time
 from datetime import datetime
@@ -10,7 +10,7 @@ from search_1688 import login, BASE_URL, _post_json
 SHEET_ID = "1x3uiTImNWPoS03HRfzHDeNSeKa2PynpzdShbgY5hOSs"
 SHEET_NAME = "1688 SKU 비교"
 KEY_PATH = (
-    r"C:\Users\info\claudeaiteam\sourcing\analyzer"
+    r"C:\Users\User\claudeaiteam\sourcing\analyzer"
     r"\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
 )
 SCOPES = [

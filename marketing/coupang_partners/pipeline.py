@@ -1,4 +1,4 @@
-"""쿠팡 파트너스 유튜버 컨택 파이프라인 — 중앙 오케스트레이터.
+﻿"""쿠팡 파트너스 유튜버 컨택 파이프라인 — 중앙 오케스트레이터.
 
 Windows Task Scheduler에서 서브커맨드별 호출:
   python pipeline.py crawl    — YouTube 크롤 + Haiku 스크리닝 + 구글 시트 추가
@@ -34,7 +34,7 @@ from auto_reply import process_replies
 import gspread
 from google.oauth2.service_account import Credentials
 
-KEY_PATH = r"C:\Users\info\claudeaiteam\sourcing\analyzer\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
+KEY_PATH = r"C:\Users\User\claudeaiteam\sourcing\analyzer\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
 SHEET_ID = "1x3uiTImNWPoS03HRfzHDeNSeKa2PynpzdShbgY5hOSs"
 CANDIDATE_SHEET_NAME = "후보 리스트"
 
