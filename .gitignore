@@ -69,3 +69,5 @@ Channel_lena/run_lena.bat
 Channel_*/doori.pid
 Channel_*/lena.pid
 Channel_*/*.pid
+config.py
+logistics/config.py
