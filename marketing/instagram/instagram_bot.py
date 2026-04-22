@@ -185,7 +185,7 @@ class AccountDiscovery:
         try:
             self.cl.login(username, password)
             self.cl.dump_settings(API_SESSION_PATH)
-            logger.info("instagrapi: 새 세션으로 로그인 성공")
+            logger.info("instagrapi: 비밀번호로 로그인 성공")
             return True
         except Exception as e:
             logger.error(f"instagrapi 로그인 실패: {e}")

@@ -5,10 +5,13 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent
 
 # 구글 시트 (쿠팡 파트너스와 동일 스프레드시트, 별도 워크시트)
-KEY_PATH = os.path.expanduser(
-    "~/ClaudeAITeam/sourcing/analyzer"
-    "/becorelab-tools-firebase-adminsdk-fbsvc-4af6f0c5ac.json"
-)
+_KEY_CANDIDATES = [
+    r"C:\Users\User\claudeaiteam\sourcing\analyzer\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json",   # 사무실 PC (User)
+    r"C:\Users\info\claudeaiteam\sourcing\analyzer\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json",   # 사무실 PC (info)
+    r"C:\Users\pnp28\claude\sourcing\analyzer\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json",        # 집 PC
+    os.path.expanduser("~/ClaudeAITeam/sourcing/analyzer/becorelab-tools-firebase-adminsdk-fbsvc-4af6f0c5ac.json"),  # macOS
+]
+KEY_PATH = next((p for p in _KEY_CANDIDATES if Path(p).exists()), _KEY_CANDIDATES[0])
 SHEET_ID = "1x3uiTImNWPoS03HRfzHDeNSeKa2PynpzdShbgY5hOSs"
 CANDIDATE_SHEET_NAME = "인스타 공구 후보"
 

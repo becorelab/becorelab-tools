@@ -48,12 +48,11 @@ async def manual_login():
 
     for _ in range(300):  # 최대 5분
         await asyncio.sleep(1)
-        url = page.url
-        if '/accounts/login/' not in url and 'instagram.com' in url:
-            # 메인 페이지에 도달했는지 확인
-            await asyncio.sleep(3)
-            if '/accounts/login/' not in page.url:
-                break
+        cookies = await context.cookies()
+        has_session = any(c['name'] == 'sessionid' for c in cookies)
+        if has_session:
+            await asyncio.sleep(2)
+            break
     else:
         print("❌ 5분 내에 로그인하지 않아 종료합니다.")
         await browser.close()
