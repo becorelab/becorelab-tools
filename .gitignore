@@ -71,3 +71,13 @@ Channel_*/lena.pid
 Channel_*/*.pid
 config.py
 logistics/config.py
+
+# Python 가상환경
+.venv/
+*/.venv/
+
+# MCP 설정 (로컬 전용)
+.mcp.json
+
+# Wing 브라우저 프로필 (세션 — 절대 커밋 금지)
+sourcing/analyzer/.wing_profile/

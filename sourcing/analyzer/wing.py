@@ -26,17 +26,25 @@ STATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.wing_prof
 
 # 헬프스토어 확장 프로그램 경로 찾기
 def _find_extension():
-    ext_base = os.path.join(
+    import sys
+    ext_id = 'nfbjgieajobfohijlkaaplipbiofblef'
+    candidates = []
+    if sys.platform == 'darwin':
+        candidates.append(os.path.join(
+            os.path.expanduser('~'), 'Library', 'Application Support',
+            'Google', 'Chrome', 'Default', 'Extensions', ext_id
+        ))
+    candidates.append(os.path.join(
         os.environ.get('LOCALAPPDATA', ''),
-        'Google', 'Chrome', 'User Data', 'Default', 'Extensions',
-        'nfbjgieajobfohijlkaaplipbiofblef'
-    )
-    if os.path.isdir(ext_base):
-        versions = sorted(os.listdir(ext_base), reverse=True)
-        for v in versions:
-            p = os.path.join(ext_base, v)
-            if os.path.isdir(p) and os.path.exists(os.path.join(p, 'manifest.json')):
-                return p
+        'Google', 'Chrome', 'User Data', 'Default', 'Extensions', ext_id
+    ))
+    for ext_base in candidates:
+        if os.path.isdir(ext_base):
+            versions = sorted(os.listdir(ext_base), reverse=True)
+            for v in versions:
+                p = os.path.join(ext_base, v)
+                if os.path.isdir(p) and os.path.exists(os.path.join(p, 'manifest.json')):
+                    return p
     return ''
 
 
@@ -124,8 +132,11 @@ def _start_browser():
             f'--disable-extensions-except={ext_path}',
         ])
 
-    # Docker/서버 환경에서는 headless 모드 사용
-    is_server = os.environ.get('DOCKER_ENV') == '1' or not os.environ.get('DISPLAY', os.name == 'nt' and 'yes' or '')
+    # Docker/서버: headless, 로컬 GUI(macOS/Windows): headed
+    import sys
+    is_server = os.environ.get('DOCKER_ENV') == '1' or (
+        sys.platform == 'linux' and not os.environ.get('DISPLAY')
+    )
     use_headless = is_server and not ext_path
 
     _pw = sync_playwright().start()

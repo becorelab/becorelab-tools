@@ -20,11 +20,11 @@
       "Bash(export *)",
       "WebFetch",
       "WebSearch",
-      "Bash(find /c/Users/info/ClaudeAITeam -type f \\\\\\(-name *.py -o -name *.json \\\\\\))"
+      "Bash(find /Users/macmini_ky/ClaudeAITeam -type f \\(-name *.py -o -name *.json \\))"
     ],
     "deny": [],
     "additionalDirectories": [
-      "C:\\Users\\info\\.claude"
+      "/Users/macmini_ky/.claude"
     ]
   }
 }
