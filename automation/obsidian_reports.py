@@ -1,8 +1,8 @@
 """하치 옵시디언 일일 보고서 누적 스크립트
-- Windows 작업 스케줄러에서 매일 05:50에 실행 (morning_brief 05:40 이후)
+- macOS launchd에서 매일 05:50에 실행 (morning_collect 03:50 이후)
 - 매출: POST /api/daily-report-obsidian → 서버가 Claude 스타일 HTML로 저장
 - 재고: POST /api/inventory-report-obsidian → 서버가 Claude 스타일 HTML로 저장
-- 실패 시 보리 봇으로 에러 알림
+- 실패 시 두리 봇으로 에러 알림
 """
 import os
 import sys

@@ -1,10 +1,10 @@
 ﻿"""비코어랩 새벽 자동화 설정"""
 import os
+import sys
 from datetime import datetime, timedelta
 
-PROJECT_ROOT = r"C:\Users\User\ClaudeAITeam"
-PYTHON_EXE = r"C:\Users\User\AppData\Local\Python\pythoncore-3.14-64\python.exe"
-OPENCLAW_CMD = r"C:\Users\User\AppData\Roaming\npm\openclaw.cmd"
+PROJECT_ROOT = "/Users/macmini_ky/ClaudeAITeam"
+PYTHON_EXE = "/usr/bin/python3"
 
 # 서버 정보
 SERVICES = {
@@ -12,54 +12,31 @@ SERVICES = {
         "name": "물류서버",
         "url": "http://localhost:8082",
         "health_path": "/",
-        "start_cmd": [PYTHON_EXE, "logistics/logistics_app.py"],
-        "cwd": PROJECT_ROOT,
+        "start_cmd": ["launchctl", "start", "com.becorelab.logistics"],
     },
     "sourcing": {
         "name": "소싱앱",
         "url": "http://localhost:8090",
         "health_path": "/",
-        "start_cmd": [PYTHON_EXE, "analyzer/app.py"],
-        "cwd": os.path.join(PROJECT_ROOT, "sourcing"),
+        "start_cmd": ["launchctl", "start", "com.becorelab.sourcing"],
     },
-    "openclaw": {
-        "name": "오픈클로",
-        "url": "http://localhost:18789",
+    "hub": {
+        "name": "허브대시보드",
+        "url": "http://localhost:8000",
         "health_path": "/",
-        "start_cmd": [OPENCLAW_CMD, "gateway", "start"],
-        "cwd": PROJECT_ROOT,
+        "start_cmd": ["launchctl", "start", "com.becorelab.hub"],
     },
     "pixie": {
         "name": "픽시봇",
         "url": None,
         "process_keyword": "pixie_bot.py",
         "start_cmd": [PYTHON_EXE, "-u", "pixie_bot.py"],
-        "cwd": os.path.join(PROJECT_ROOT, "pixie-bot"),
-    },
-    "chrome_cdp": {
-        "name": "Chrome CDP",
-        "url": "http://localhost:9222",
-        "health_path": "/json/version",
-        "start_cmd": [
-            "cmd", "/c",
-            os.path.join(PROJECT_ROOT, "automation", "start_chrome_cdp.bat"),
-        ],
-        "cwd": PROJECT_ROOT,
-    },
-    "remote_mcp": {
-        "name": "Remote MCP",
-        "url": "http://localhost:8500",
-        "health_path": "/sse",
-        "start_cmd": [
-            "cmd", "/c",
-            os.path.join(PROJECT_ROOT, "automation", "start_remote_mcp.bat"),
-        ],
-        "cwd": PROJECT_ROOT,
+        "cwd": os.path.join(PROJECT_ROOT, "Channel_pixie"),
     },
 }
 
-# 텔레그램 (보리 봇으로 에러 알림)
-TELEGRAM_BOT_TOKEN = "8385451689:AAG1ixwV8E_yaidNpEZ16iZpAi9K55yUbRM"
+# 텔레그램 (두리 봇으로 보고)
+TELEGRAM_BOT_TOKEN = "8621050278:AAE56VUp5v7X9TDrK27ykX_POsYNqDvwO6U"
 TELEGRAM_CHAT_ID = "8708718261"
 
 # API 키
@@ -79,7 +56,7 @@ OUTPUT_JSON = os.path.join(DATA_DIR, "morning_data.json")
 LOG_FILE = os.path.join(DATA_DIR, "morning_collect.log")
 
 # 옵시디언 볼트 경로
-OBSIDIAN_VAULT = r"C:\Users\User\Documents\비코어랩"
+OBSIDIAN_VAULT = os.path.expanduser("~/Documents/비코어랩")
 OBSIDIAN_AD_DIR = os.path.join(OBSIDIAN_VAULT, "01. Becorelab AI Agent Team", "2️⃣ Areas", "📢 Ad Performance")
 OBSIDIAN_SALES_DIR = os.path.join(OBSIDIAN_VAULT, "01. Becorelab AI Agent Team", "2️⃣ Areas", "📊 Sales Report", "일일")
 OBSIDIAN_STOCK_DIR = os.path.join(OBSIDIAN_VAULT, "01. Becorelab AI Agent Team", "2️⃣ Areas", "📦 Stock & Order")

@@ -8,7 +8,7 @@
 - 결과 저장 (morning_data.json)
 - 에러 시 텔레그램 알림
 
-Windows 작업 스케줄러에서 매일 03:50에 실행
+macOS launchd에서 매일 03:50에 실행
 """
 import json
 import logging
@@ -70,23 +70,23 @@ def check_socket(url, timeout=2):
 def check_process(keyword):
     try:
         result = subprocess.run(
-            ["powershell", "-NoProfile", "-Command",
-             f"(Get-CimInstance Win32_Process -Filter \"CommandLine LIKE '%{keyword}%'\").ProcessId"],
+            ["pgrep", "-f", keyword],
             capture_output=True, text=True, timeout=10,
         )
-        pids = [l.strip() for l in result.stdout.strip().split("\n") if l.strip().isdigit()]
-        return len(pids) > 0
+        return result.returncode == 0
     except Exception:
         return False
 
 
-def start_service(name, cmd, cwd):
+def start_service(name, cmd, cwd=None):
     try:
-        subprocess.Popen(
-            cmd, cwd=cwd,
-            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS,
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-        )
+        if cmd[0] == "launchctl":
+            subprocess.run(cmd, timeout=10)
+        else:
+            subprocess.Popen(
+                cmd, cwd=cwd,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            )
         log.info(f"  -> {name} 기동 명령 실행")
         return True
     except Exception as e:
@@ -125,16 +125,7 @@ def step1_health_check():
             results[key] = "ok"
         else:
             log.warning(f"  {name}: 죽어있음 -> 재시작")
-            # Chrome CDP는 기존 크롬 먼저 죽이고 재시작
-            if key == "chrome_cdp":
-                log.info("  -> 기존 크롬 프로세스 종료 중...")
-                subprocess.run(
-                    ["powershell", "-NoProfile", "-Command",
-                     "Get-Process chrome -ErrorAction SilentlyContinue | Stop-Process -Force"],
-                    capture_output=True, timeout=10,
-                )
-                time.sleep(3)
-            ok = start_service(name, svc["start_cmd"], svc["cwd"])
+            ok = start_service(name, svc["start_cmd"], svc.get("cwd"))
             results[key] = "restarted" if ok else "failed"
 
     # 재시작한 서비스 있으면 60초까지 5초마다 재확인 (점진적 재시도)

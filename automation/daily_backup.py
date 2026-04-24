@@ -19,70 +19,33 @@ import logging
 from datetime import datetime
 
 # 설정
-BACKUP_BASE = r"C:\Users\User\OneDrive\(주)비코어랩\Claude-Setup\backups"
+BACKUP_BASE = os.path.expanduser("~/Library/CloudStorage/OneDrive-개인/(주)비코어랩/Claude-Setup/backups")
 HOME = os.path.expanduser("~")
 PROJECT = os.path.join(HOME, "ClaudeAITeam")
 
 # 백업 대상 (소스 → 백업 하위 폴더)
 BACKUP_TARGETS = [
-    # 보리 workspace
-    {
-        "src": os.path.join(HOME, ".openclaw", "workspace-bori"),
-        "dst": "openclaw/workspace-bori",
-        "type": "dir",
-    },
-    # 픽시 workspace
-    {
-        "src": os.path.join(HOME, ".openclaw", "workspace-pixie"),
-        "dst": "openclaw/workspace-pixie",
-        "type": "dir",
-    },
-    # 오픈클로 설정
-    {
-        "src": os.path.join(HOME, ".openclaw", "openclaw.json"),
-        "dst": "openclaw/openclaw.json",
-        "type": "file",
-    },
-    # 크론 설정
-    {
-        "src": os.path.join(HOME, ".openclaw", "cron"),
-        "dst": "openclaw/cron",
-        "type": "dir",
-    },
-    # 보리 에이전트 auth
-    {
-        "src": os.path.join(HOME, ".openclaw", "agents", "bori", "agent", "auth-profiles.json"),
-        "dst": "openclaw/bori-auth-profiles.json",
-        "type": "file",
-    },
     # 하치 메모리
     {
-        "src": os.path.join(HOME, ".claude", "projects", "C--Users-info", "memory"),
+        "src": os.path.join(HOME, ".claude", "projects", "-Users-macmini-ky", "memory"),
         "dst": "claude/memory",
         "type": "dir",
     },
-    # 하치 대화 이력
-    {
-        "src": os.path.join(HOME, ".claude", "projects", "C--Users-info"),
-        "dst": "claude/sessions",
-        "type": "dir",
-        "pattern": "*.jsonl",
-    },
     # CLAUDE.md
     {
-        "src": os.path.join(HOME, ".claude", "CLAUDE.md"),
+        "src": os.path.join(HOME, "CLAUDE.md"),
         "dst": "claude/CLAUDE.md",
         "type": "file",
     },
     # 픽시봇 SOUL.md
     {
-        "src": os.path.join(PROJECT, "pixie-bot", "SOUL.md"),
+        "src": os.path.join(PROJECT, "Channel_pixie", "SOUL.md"),
         "dst": "pixie-bot/SOUL.md",
         "type": "file",
     },
     # 픽시봇 코드
     {
-        "src": os.path.join(PROJECT, "pixie-bot", "pixie_bot.py"),
+        "src": os.path.join(PROJECT, "Channel_pixie", "pixie_bot.py"),
         "dst": "pixie-bot/pixie_bot.py",
         "type": "file",
     },
