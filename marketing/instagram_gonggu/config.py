@@ -5,9 +5,9 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent
 
 # ── 구글 시트 ────────────────────────────────────────────────
-KEY_PATH = (
-    r"C:\Users\User\claudeaiteam\sourcing\analyzer"
-    r"\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
+KEY_PATH = os.path.expanduser(
+    "~/ClaudeAITeam/sourcing/analyzer"
+    "/becorelab-tools-firebase-adminsdk-fbsvc-4af6f0c5ac.json"
 )
 SHEET_ID = "1x3uiTImNWPoS03HRfzHDeNSeKa2PynpzdShbgY5hOSs"
 SHEET_NAME = "인스타 공구"

@@ -1,5 +1,4 @@
 """네이버 검색광고 API MCP 도구"""
-import asyncio
 import hashlib
 import hmac
 import base64
@@ -133,41 +132,16 @@ def register(mcp, client, base_url=None):
         start_date: str,
         end_date: str,
     ) -> str:
-        """캠페인별 광고 성과 통계를 조회합니다 (비동기 리포트).
-        노출수, 클릭수, 비용, CTR, CPC 등을 확인합니다.
+        """캠페인별 광고 성과 통계를 조회합니다.
+        노출수, 클릭수, 비용, CTR, CPC, 전환수 등을 확인합니다.
         campaign_id: 캠페인 ID
         start_date: 시작일 (YYYY-MM-DD)
         end_date: 종료일 (YYYY-MM-DD)"""
         try:
-            body = {
-                "reportTp": "CAMPAIGN",
-                "statDt": start_date.replace("-", ""),
-                "endDt": end_date.replace("-", ""),
-                "ids": [campaign_id],
-            }
-            # 리포트 생성 요청
-            result = await _post("/stat-reports", body)
-            report = _json.loads(result)
-            report_job_id = report.get("reportJobId")
-            if not report_job_id:
-                return result  # 즉시 결과가 온 경우
-
-            # 폴링 (최대 60초)
-            for _ in range(12):
-                await asyncio.sleep(5)
-                status_text = await _get(f"/stat-reports/{report_job_id}")
-                status = _json.loads(status_text)
-                if status.get("status") == "READY":
-                    # 결과 다운로드
-                    download_url = status.get("downloadUrl")
-                    if download_url:
-                        async with httpx.AsyncClient(timeout=30) as c:
-                            dl = await c.get(download_url)
-                            return dl.text
-                    return status_text
-                elif status.get("status") == "FAILURE":
-                    return f"[오류] 리포트 생성 실패: {status_text}"
-            return "[오류] 리포트 생성 시간 초과 (60초)"
+            fields = '["impCnt","clkCnt","salesAmt","ctr","cpc","ccnt","crto","convAmt","ror"]'
+            time_range = _json.dumps({"since": start_date, "until": end_date}, separators=(",", ":"))
+            path = f"/stats?ids={campaign_id}&fields={fields}&timeRange={time_range}"
+            return await _get(path)
         except Exception as e:
             return f"[오류] 네이버 검색광고 API 실패: {e}"
 
@@ -178,38 +152,16 @@ def register(mcp, client, base_url=None):
         start_date: str,
         end_date: str,
     ) -> str:
-        """키워드별 광고 성과 통계를 조회합니다 (비동기 리포트).
+        """키워드별 광고 성과 통계를 조회합니다.
         어떤 키워드가 효과적인지 분석할 수 있습니다.
         adgroup_id: 광고그룹 ID
         start_date: 시작일 (YYYY-MM-DD)
         end_date: 종료일 (YYYY-MM-DD)"""
         try:
-            body = {
-                "reportTp": "KEYWORD",
-                "statDt": start_date.replace("-", ""),
-                "endDt": end_date.replace("-", ""),
-                "ids": [adgroup_id],
-            }
-            result = await _post("/stat-reports", body)
-            report = _json.loads(result)
-            report_job_id = report.get("reportJobId")
-            if not report_job_id:
-                return result
-
-            for _ in range(12):
-                await asyncio.sleep(5)
-                status_text = await _get(f"/stat-reports/{report_job_id}")
-                status = _json.loads(status_text)
-                if status.get("status") == "READY":
-                    download_url = status.get("downloadUrl")
-                    if download_url:
-                        async with httpx.AsyncClient(timeout=30) as c:
-                            dl = await c.get(download_url)
-                            return dl.text
-                    return status_text
-                elif status.get("status") == "FAILURE":
-                    return f"[오류] 리포트 생성 실패: {status_text}"
-            return "[오류] 리포트 생성 시간 초과 (60초)"
+            fields = '["impCnt","clkCnt","salesAmt","ctr","cpc","ccnt","crto","convAmt","ror"]'
+            time_range = _json.dumps({"since": start_date, "until": end_date}, separators=(",", ":"))
+            path = f"/stats?ids={adgroup_id}&fields={fields}&timeRange={time_range}"
+            return await _get(path)
         except Exception as e:
             return f"[오류] 네이버 검색광고 API 실패: {e}"
 

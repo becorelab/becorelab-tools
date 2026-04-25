@@ -3,3 +3,5 @@ api_session.json
 dm_log.db
 crawl_backup.json
 __pycache__/
+venv/
+.env

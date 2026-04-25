@@ -1,10 +1,14 @@
 ﻿"""인스타그램 공동구매 파이프라인 — 설정 상수"""
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
 
 # 구글 시트 (쿠팡 파트너스와 동일 스프레드시트, 별도 워크시트)
-KEY_PATH = r"C:\Users\User\claudeaiteam\sourcing\analyzer\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
+KEY_PATH = os.path.expanduser(
+    "~/ClaudeAITeam/sourcing/analyzer"
+    "/becorelab-tools-firebase-adminsdk-fbsvc-4af6f0c5ac.json"
+)
 SHEET_ID = "1x3uiTImNWPoS03HRfzHDeNSeKa2PynpzdShbgY5hOSs"
 CANDIDATE_SHEET_NAME = "인스타 공구 후보"
 

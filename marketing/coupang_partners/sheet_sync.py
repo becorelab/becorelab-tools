@@ -28,10 +28,7 @@ logger = logging.getLogger(__name__)
 # ── 시트 상수 ──────────────────────────────────────────────
 SHEET_ID = "1x3uiTImNWPoS03HRfzHDeNSeKa2PynpzdShbgY5hOSs"
 SHEET_NAME = "후보 리스트"
-KEY_PATH = (
-    r"C:\Users\User\claudeaiteam\sourcing\analyzer"
-    r"\becorelab-tools-firebase-adminsdk-fbsvc-c665234c8b.json"
-)
+KEY_PATH = "/Users/macmini_ky/ClaudeAITeam/sourcing/analyzer/becorelab-tools-firebase-adminsdk-fbsvc-4af6f0c5ac.json"
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 

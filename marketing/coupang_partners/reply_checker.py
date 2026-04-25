@@ -20,7 +20,7 @@ from config import PARTNERS_INBOX_MAILBOX, BASE_DIR
 # ── 경로 ──────────────────────────────────────────────────────────
 SEND_RESULTS_PATH = str(BASE_DIR / "send_results.json")
 REPLY_SEEN_PATH = str(BASE_DIR / "credentials" / "reply_seen.json")
-LENA_ENV_PATH = r"C:\Users\User\claudeaiteam\Channel_lena\.env"
+LENA_ENV_PATH = "/Users/macmini_ky/ClaudeAITeam/Channel_lena/.env"
 
 
 # ── 텔레그램 자격증명 ────────────────────────────────────────────

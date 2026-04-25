@@ -24,7 +24,7 @@ _db: Optional[firestore.Client] = None
 
 _KEY_SEARCH_DIRS = [
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "credentials"),
-    r"C:\Users\User\ClaudeAITeam\sourcing\analyzer",
+    "/Users/macmini_ky/ClaudeAITeam/sourcing/analyzer",
 ]
 
 

@@ -14,6 +14,12 @@ __pycache__/
 .venv/
 venv/
 
+# config (민감 정보)
+config.py
+
 # local data
 *.sqlite
 *.db
+
+# logs
+logs/

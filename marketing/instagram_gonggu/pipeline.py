@@ -21,6 +21,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 from dotenv import load_dotenv
+load_dotenv(os.path.join(_DIR, ".env"))
 load_dotenv(os.path.join(_DIR, "..", "..", "sourcing", "analyzer", ".env"))
 
 # ── 내부 모듈 ────────────────────────────────────────────────
