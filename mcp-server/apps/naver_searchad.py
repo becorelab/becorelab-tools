@@ -18,7 +18,8 @@ NAVER_SECRET_KEY = "AQAAAAAB7GZDZsi31aqPVREoA1jC88Jr8tixVLmHcRg+Tvqi0A=="
 def _naver_headers(method: str, path: str) -> dict:
     """네이버 검색광고 API 인증 헤더 생성 (HMAC-SHA256)"""
     timestamp = str(int(time.time() * 1000))
-    sign = f"{timestamp}.{method}.{path}"
+    sign_path = path.split("?")[0]
+    sign = f"{timestamp}.{method}.{sign_path}"
     signature = hmac.new(
         NAVER_SECRET_KEY.encode("utf-8"),
         sign.encode("utf-8"),
@@ -26,7 +27,7 @@ def _naver_headers(method: str, path: str) -> dict:
     ).digest()
     sig_b64 = base64.b64encode(signature).decode("utf-8")
     return {
-        "X-Custid": NAVER_CUSTOMER_ID,
+        "X-Customer": NAVER_CUSTOMER_ID,
         "X-API-KEY": NAVER_API_KEY,
         "X-Timestamp": timestamp,
         "X-Signature": sig_b64,
@@ -139,10 +140,10 @@ def register(mcp, client, base_url=None):
         end_date: 종료일 (YYYY-MM-DD)"""
         try:
             body = {
-                "reportTp": "CAMPAIGN_STATS",
+                "reportTp": "CAMPAIGN",
                 "statDt": start_date.replace("-", ""),
                 "endDt": end_date.replace("-", ""),
-                "campaignId": campaign_id,
+                "ids": [campaign_id],
             }
             # 리포트 생성 요청
             result = await _post("/stat-reports", body)
@@ -184,10 +185,10 @@ def register(mcp, client, base_url=None):
         end_date: 종료일 (YYYY-MM-DD)"""
         try:
             body = {
-                "reportTp": "KEYWORD_STATS",
+                "reportTp": "KEYWORD",
                 "statDt": start_date.replace("-", ""),
                 "endDt": end_date.replace("-", ""),
-                "nccAdgroupId": adgroup_id,
+                "ids": [adgroup_id],
             }
             result = await _post("/stat-reports", body)
             report = _json.loads(result)
