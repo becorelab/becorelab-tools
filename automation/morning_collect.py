@@ -166,13 +166,7 @@ def step1_5_wing_login():
     log.info("[1.5단계] 쿠팡윙 로그인")
     base = "http://localhost:8090"
     try:
-        # 상태 확인
-        r = requests.get(f"{base}/api/wing/status", timeout=10)
-        status = r.json()
-        if status.get("wing_ok") and status.get("logged_in"):
-            log.info("  쿠팡윙: 이미 로그인됨")
-            return "already_logged_in"
-        # 로그인 시도
+        # 새벽 크론은 세션 만료 상태이므로 무조건 재로그인
         r = requests.post(f"{base}/api/wing/login", timeout=60)
         log.info(f"  쿠팡윙 로그인 시도: {r.json().get('message', '')}")
         time.sleep(15)

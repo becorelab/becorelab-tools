@@ -1104,7 +1104,7 @@ def api_daily_report_obsidian():
             "alerts_yellow": alerts_yellow,
         })
 
-        obs_dir = r"C:\Users\User\Documents\비코어랩\01. Becorelab AI Agent Team\2️⃣ Areas\📊 Sales Report\일일"
+        obs_dir = os.path.expanduser("~/Library/CloudStorage/OneDrive-개인/앱/remotely-save/비코어랩/01. Becorelab AI Agent Team/2️⃣ Areas/📊 Operations/📊 Sales Report/일일")
         os.makedirs(obs_dir, exist_ok=True)
         filename = f"{target} 매출 일일 보고서.md"
         filepath = os.path.join(obs_dir, filename)
@@ -1381,7 +1381,7 @@ def api_order_analysis():
 
 
 # ── 옵시디언 재고 일일 보고서 생성 ──
-OBSIDIAN_STOCK_DIR = r"C:\Users\User\Documents\비코어랩\01. Becorelab AI Agent Team\2️⃣ Areas\📦 Stock & Order"
+OBSIDIAN_STOCK_DIR = os.path.expanduser("~/Library/CloudStorage/OneDrive-개인/앱/remotely-save/비코어랩/01. Becorelab AI Agent Team/2️⃣ Areas/📊 Operations/📦 Stock & Order")
 
 @app.route("/api/inventory-report-obsidian", methods=["POST", "GET"])
 def api_inventory_report_obsidian():
