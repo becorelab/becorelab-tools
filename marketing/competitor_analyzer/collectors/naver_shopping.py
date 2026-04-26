@@ -140,12 +140,20 @@ class NaverShoppingCollector:
                 url_data = d.get('productUrl') or {}
                 url = url_data.get('pcUrl') or url_data.get('mobileUrl') or ''
 
+                # 구매건수
+                try:
+                    purchase_count = int(d.get('purchaseCount') or 0)
+                except (TypeError, ValueError):
+                    purchase_count = 0
+
                 results.append({
                     'rank': rank,
                     'product_name': _clean_text(d.get('productName') or ''),
                     'price': price,
                     'review_count': review_count,
                     'zzim_count': zzim_count,
+                    'purchase_count': purchase_count,
+                    'estimated_revenue': purchase_count * price if purchase_count and price else 0,
                     'mall_name': d.get('mallName') or '',
                     'mall_grade': mall_grade,
                     'category': category,
@@ -161,3 +169,100 @@ class NaverShoppingCollector:
 
         time.sleep(0.5)
         return results[:count]
+
+    def search_our_brand(self, product_keyword: str, brand_names: List[str] = None) -> List[Dict]:
+        """우리 브랜드 상품만 검색하여 리뷰/구매 데이터 확보.
+
+        "일비아 {keyword}" 등으로 검색 → 우리 몰 상품만 필터링.
+        경쟁분석 시 우리 상품이 순위 밖이어도 정확한 데이터를 제공.
+        """
+        if brand_names is None:
+            brand_names = ['일비아', 'ILBIA', 'ilbia', '비코어랩']
+
+        search_queries = [f'일비아 {product_keyword}', f'iLBiA {product_keyword}']
+        our_products: List[Dict] = []
+        seen_urls = set()
+
+        for query in search_queries:
+            results = self.search(query, count=40)
+            for item in results:
+                mall = item.get('mall_name', '')
+                if any(name.lower() in mall.lower() for name in brand_names):
+                    url = item.get('url', '')
+                    url_key = url.split('?')[0] if url else f"{item.get('product_name')}|{item.get('price')}"
+                    if url_key not in seen_urls:
+                        seen_urls.add(url_key)
+                        our_products.append(item)
+
+        our_products.sort(key=lambda x: (-x.get('review_count', 0), -x.get('purchase_count', 0)))
+        logger.info('[브랜드 검색] "%s" → 우리 상품 %d개 발견', product_keyword, len(our_products))
+        return our_products
+
+    def search_multi(self, keywords: List[str], count_per_kw: int = 40) -> dict:
+        """여러 키워드로 검색 → 중복 제거 → 통합 결과 반환.
+
+        Returns:
+            {
+                'products': List[Dict],       # 중복 제거된 상품 목록
+                'keyword_stats': List[Dict],   # 키워드별 수집 현황
+                'total_unique': int,
+                'total_before_dedup': int,
+            }
+        """
+        all_raw: List[Dict] = []
+        keyword_stats: List[Dict] = []
+
+        for kw in keywords:
+            results = self.search(kw, count=count_per_kw)
+            keyword_stats.append({
+                'keyword': kw,
+                'count': len(results),
+                'ad_count': sum(1 for r in results if r.get('is_ad')),
+            })
+            for r in results:
+                r['source_keyword'] = kw
+            all_raw.extend(results)
+            logger.info('[멀티검색] %s: %d개 수집', kw, len(results))
+
+        total_before = len(all_raw)
+
+        # 중복 제거: URL 기준 → URL 없으면 (상품명+판매자+가격) 기준
+        seen = set()
+        unique: List[Dict] = []
+        for item in all_raw:
+            url = item.get('url', '')
+            if url:
+                key = url.split('?')[0]
+            else:
+                key = f"{item.get('product_name', '')}|{item.get('mall_name', '')}|{item.get('price', 0)}"
+
+            if key not in seen:
+                seen.add(key)
+                unique.append(item)
+            else:
+                # 기존 상품에 키워드 정보 추가
+                for existing in unique:
+                    existing_url = existing.get('url', '')
+                    existing_key = existing_url.split('?')[0] if existing_url else f"{existing.get('product_name', '')}|{existing.get('mall_name', '')}|{existing.get('price', 0)}"
+                    if existing_key == key:
+                        kws = existing.get('found_keywords', [existing.get('source_keyword', '')])
+                        kws.append(item.get('source_keyword', ''))
+                        existing['found_keywords'] = list(set(kws))
+                        break
+
+        # found_keywords 초기화 (단일 키워드만 나온 상품)
+        for item in unique:
+            if 'found_keywords' not in item:
+                item['found_keywords'] = [item.get('source_keyword', '')]
+
+        # 추정매출 기준 정렬 (매출 높은 순), 매출 없으면 rank 순
+        unique.sort(key=lambda x: (-x.get('estimated_revenue', 0), x.get('rank', 999)))
+
+        logger.info('[멀티검색] 총 %d개 → 중복제거 %d개 (키워드 %d개)', total_before, len(unique), len(keywords))
+
+        return {
+            'products': unique,
+            'keyword_stats': keyword_stats,
+            'total_unique': len(unique),
+            'total_before_dedup': total_before,
+        }
