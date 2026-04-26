@@ -72,6 +72,9 @@ Channel_*/*.pid
 config.py
 logistics/config.py
 
+# 경쟁 분석 민감 정보
+marketing/competitor_analyzer/.env
+
 # Python 가상환경
 .venv/
 */.venv/
