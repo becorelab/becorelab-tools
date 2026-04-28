@@ -65,45 +65,67 @@
 
 ## 옵시디언 볼트 구조 (Single Source of Truth)
 
-볼트 경로: `~/Documents/비코어랩/비코어랩/01. Becorelab AI Agent Team/`
+**⚠️ 경로를 추측하지 말 것. 반드시 아래 경로표대로 저장할 것.**
+
+볼트 루트 (macOS): `~/Library/CloudStorage/OneDrive-개인/앱/remotely-save/비코어랩`
+볼트 팀 폴더: `{볼트루트}/01. Becorelab AI Agent Team/`
 
 ### 전체 폴더 트리
 ```
 01. Becorelab AI Agent Team/
 ├── 1️⃣ Projects/
-│   ├── 🏭 이커머스 풀 자동화/              ← 최상위 프로젝트 (모든 파이프라인의 모체)
+│   ├── 🏭 이커머스 풀 자동화/
 │   │   ├── 🏭 이커머스 풀 자동화.md        ← 전체 현황판 (Phase 1~5)
 │   │   ├── 🎛️ 미션 컨트롤.md              ← 파이프라인별 단계 상태
-│   │   ├── 🔍 소싱 파이프라인/             ← Phase 2 소싱 관련 문서
-│   │   │   └── 🤖 알리바바 소싱 에이전트 개발 스펙/
-│   │   ├── 📸 인스타 공동구매/             ← Phase 5 마케팅
-│   │   ├── 📢 카페 홍보 대행 자동화 파이프라인/  ← Phase 5 마케팅
-│   │   └── 🎬 유튜브 파이프라인/           ← Phase 5 마케팅
+│   │   ├── 🔍 소싱 파이프라인/
+│   │   ├── 📸 인스타 공동구매/
+│   │   ├── 📢 카페 홍보 대행 자동화 파이프라인/
+│   │   └── 🎬 유튜브 파이프라인/
 │   └── 📋 채용 검토/
 │
-├── 2️⃣ Areas/                             ← 마감 없는 상시 관리 영역
+├── 2️⃣ Areas/
 │   ├── 💰 Finance/
 │   │   └── 💰 Financial Control/
 │   ├── 📊 Operations/
-│   │   ├── 📊 Sales Report/               ← 매출 보고 (일일·주간·월간)
+│   │   ├── 📊 Sales Report/
+│   │   │   └── 일일/                      ← 매출 일일 보고서
 │   │   ├── 📦 Stock & Order/              ← 재고·발주
-│   │   └── 🤖 자동화·개발/               ← 자동화 타임보드 (칸반)
+│   │   └── 🤖 자동화·개발/
 │   └── 📢 Marketing/
-│       ├── 📢 Ad Performance/             ← 메타·쿠팡·네이버 광고 성과
-│       └── 📢 마케팅 운영/               ← 마케팅 타임보드 (칸반)
+│       ├── 📢 Ad Performance/             ← 광고 성과
+│       │   ├── 01. Meta/{연도}/           ← 메타 일일보고서 (YYYY-MM-DD.md)
+│       │   ├── 02. Coupang/
+│       │   ├── 03. Naver/
+│       │   └── 경쟁분석/
+│       └── 📢 마케팅 운영/
 │
-├── 3️⃣ Resources/                         ← 참고 자료
+├── 3️⃣ Resources/
 │   ├── ⚙️ Automation/
 │   ├── 🎯 Product Lab/
-│   ├── 🗂️ 상품 DB/                       ← 소싱 GO 상품 DB + 칸반 타임보드
-│   └── 📝 Agent Notes/                   ← 세션 노트 + 가이드 + 인수인계
-│       ├── 🗄️ 인수인계/                  ← 하치 인수인계 문서
+│   ├── 🗂️ 상품 DB/
+│   └── 📝 Agent Notes/                   ← 세션 노트
+│       ├── 🗄️ 인수인계/
 │       └── 이슈 트래킹/
 │
-└── 4️⃣ Archive/                           ← 완료·종료된 프로젝트
+└── 4️⃣ Archive/
 ```
 
-### 업데이트 위치 규칙 (AI는 반드시 준수)
+### 파일 저장 경로표 (AI 필수 준수)
+
+아래에서 `$V`는 볼트 팀 폴더 (`{볼트루트}/01. Becorelab AI Agent Team`)
+
+| 파일 종류 | 정확한 경로 | 파일명 규칙 |
+| :--- | :--- | :--- |
+| 메타 광고 일일보고서 | `$V/2️⃣ Areas/📢 Marketing/📢 Ad Performance/01. Meta/{연도}/` | `YYYY-MM-DD.md` |
+| 쿠팡 광고 분석 | `$V/2️⃣ Areas/📢 Marketing/📢 Ad Performance/02. Coupang/` | `YYYY-MM-DD {제목}.md` |
+| 네이버 광고 분석 | `$V/2️⃣ Areas/📢 Marketing/📢 Ad Performance/03. Naver/` | `YYYY-MM-DD {제목}.md` |
+| 매출 일일 보고서 | `$V/2️⃣ Areas/📊 Operations/📊 Sales Report/일일/` | `YYYY-MM-DD 매출 일일 보고서.md` |
+| 재고 일일 보고서 | `$V/2️⃣ Areas/📊 Operations/📦 Stock & Order/` | `YYYY-MM-DD 재고 일일 보고서.md` |
+| 세션 노트 | `$V/3️⃣ Resources/📝 Agent Notes/` | `YYYY-MM-DD {세션명}.md` |
+| 인수인계 문서 | `$V/3️⃣ Resources/📝 Agent Notes/🗄️ 인수인계/` | 자유 |
+| 경쟁 분석 | `$V/2️⃣ Areas/📢 Marketing/📢 Ad Performance/경쟁분석/{카테고리}/` | `YYYY-MM-DD {제목}.md` |
+
+### 업데이트 위치 규칙
 
 | 업데이트 내용 | 정식 위치 |
 | :--- | :--- |
@@ -113,8 +135,6 @@
 | 마케팅 채널 진행 현황 | `2️⃣ Areas/📢 Marketing/📢 마케팅 운영/마케팅 타임보드.md` (칸반) |
 | 자동화·개발 현황 | `2️⃣ Areas/📊 Operations/🤖 자동화·개발/자동화 타임보드.md` (칸반) |
 | 소싱 상품 상세 정보 | `3️⃣ Resources/🗂️ 상품 DB/상품 상세/{상품명}/` |
-| 세션 작업 노트 | `3️⃣ Resources/📝 Agent Notes/YYYY-MM-DD {세션명}.md` |
-| 하치 인수인계 문서 | `3️⃣ Resources/📝 Agent Notes/🗄️ 인수인계/` |
 
 ---
 

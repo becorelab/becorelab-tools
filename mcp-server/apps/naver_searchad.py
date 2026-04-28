@@ -4,6 +4,7 @@ import hmac
 import base64
 import time
 import json as _json
+from urllib.parse import quote
 
 import httpx
 
@@ -111,7 +112,7 @@ def register(mcp, client, base_url=None):
         소싱 시 시장 수요 파악에 매우 유용합니다!
         keyword: 검색할 키워드 (쉼표로 여러 개 가능, 예: '건조기시트,섬유탈취제')"""
         try:
-            return await _get(f"/keywordstool?hintKeywords={keyword}&showDetail=1")
+            return await _get(f"/keywordstool?hintKeywords={quote(keyword)}&showDetail=1")
         except Exception as e:
             return f"[오류] 네이버 검색광고 API 실패: {e}"
 
@@ -140,7 +141,7 @@ def register(mcp, client, base_url=None):
         try:
             fields = '["impCnt","clkCnt","salesAmt","ctr","cpc","ccnt","crto","convAmt","ror"]'
             time_range = _json.dumps({"since": start_date, "until": end_date}, separators=(",", ":"))
-            path = f"/stats?ids={campaign_id}&fields={fields}&timeRange={time_range}"
+            path = f"/stats?ids={campaign_id}&fields={quote(fields)}&timeRange={quote(time_range)}"
             return await _get(path)
         except Exception as e:
             return f"[오류] 네이버 검색광고 API 실패: {e}"
@@ -160,7 +161,7 @@ def register(mcp, client, base_url=None):
         try:
             fields = '["impCnt","clkCnt","salesAmt","ctr","cpc","ccnt","crto","convAmt","ror"]'
             time_range = _json.dumps({"since": start_date, "until": end_date}, separators=(",", ":"))
-            path = f"/stats?ids={adgroup_id}&fields={fields}&timeRange={time_range}"
+            path = f"/stats?ids={adgroup_id}&fields={quote(fields)}&timeRange={quote(time_range)}"
             return await _get(path)
         except Exception as e:
             return f"[오류] 네이버 검색광고 API 실패: {e}"

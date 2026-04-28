@@ -31,8 +31,8 @@ BASE_LOGISTICS = "http://localhost:8082"
 REPORT_LOG = os.path.join(DATA_DIR, "obsidian_reports.log")
 
 AREAS_DIR = os.path.join(OBSIDIAN_VAULT, "01. Becorelab AI Agent Team", "2️⃣ Areas")
-SALES_DASH = os.path.join(AREAS_DIR, "📊 Sales Report", "📊 Sales Report.md")
-STOCK_DASH = os.path.join(AREAS_DIR, "📦 Stock & Order", "📦 Stock & Order.md")
+SALES_DASH = os.path.join(AREAS_DIR, "📊 Operations", "📊 Sales Report", "📊 Sales Report.md")
+STOCK_DASH = os.path.join(AREAS_DIR, "📊 Operations", "📦 Stock & Order", "📦 Stock & Order.md")
 
 
 def log(msg):

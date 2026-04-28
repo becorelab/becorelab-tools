@@ -366,9 +366,9 @@ def generate_report(target_date, prev_date=None):
 
 
 def save_report(target_date, content):
-    """보고서를 옵시디언 볼트에 저장"""
+    """보고서를 옵시디언 볼트에 저장 (01. Meta/연도/ 구조)"""
     year = target_date[:4]
-    year_dir = os.path.join(OBSIDIAN_AD_DIR, year)
+    year_dir = os.path.join(OBSIDIAN_AD_DIR, "01. Meta", year)
     os.makedirs(year_dir, exist_ok=True)
 
     filepath = os.path.join(year_dir, f"{target_date}.md")
