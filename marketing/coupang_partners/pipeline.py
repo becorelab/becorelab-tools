@@ -11,6 +11,7 @@ import os
 import argparse
 import json
 import time
+import requests
 from datetime import datetime, timezone
 
 # ── 경로 설정 ────────────────────────────────────────────────────
@@ -175,11 +176,22 @@ def sheet_get_status_counts() -> dict:
 
 # ── 크롤 키워드 ──────────────────────────────────────────────────
 KEYWORDS = [
+    # 핵심 — 살림/육아
     "쿠팡 추천템 살림",
-    "쿠팡 파트너스 생활용품",
     "쿠팡 살림템 리뷰",
     "육아템 추천 쿠팡",
+    # 확장 — 세탁/빨래/청소
+    "세탁 꿀팁 추천",
+    "빨래 루틴 브이로그",
     "청소 꿀템 추천",
+    # 확장 — 자취/원룸/신혼
+    "자취템 추천 생활용품",
+    "신혼살림 필수템",
+    "원룸 살림 꿀템",
+    # 니치 — 주방/홈인테리어/반려동물
+    "주방용품 추천 리뷰",
+    "홈인테리어 살림",
+    "반려동물 살림 꿀팁",
 ]
 
 
@@ -505,6 +517,51 @@ def cmd_status():
     print(f"\n{'='*60}")
 
 
+# ── 서브커맨드: notify ───────────────────────────────────────────
+
+DOORI_BOT_TOKEN = "8621050278:AAE56VUp5v7X9TDrK27ykX_POsYNqDvwO6U"
+DOORI_CHAT_ID = "8708718261"
+
+
+def cmd_notify():
+    """승인 대기 후보가 있으면 두리를 통해 텔레그램 알림."""
+    ws = _get_candidate_sheet()
+    all_rows = ws.get_all_values()
+
+    pending = []
+    for row in all_rows[1:]:
+        if len(row) < 10 or not row[0]:
+            continue
+        status = (row[8] if len(row) > 8 else "").strip()
+        approval = (row[9] if len(row) > 9 else "").strip()
+        if status == "screened" and not approval:
+            name = row[0]
+            subs = row[2] if len(row) > 2 else ""
+            pending.append(f"  • {name} ({subs}명)")
+
+    if not pending:
+        print("[NOTIFY] 승인 대기 후보 없음 — 알림 스킵")
+        return
+
+    text = (
+        f"🐰 대표님~ 두리예요!\n\n"
+        f"유튜브 파트너스 승인 대기 후보 {len(pending)}명이 있어요:\n\n"
+        + "\n".join(pending[:10])
+        + (f"\n  ...외 {len(pending)-10}명" if len(pending) > 10 else "")
+        + "\n\n시트에서 J열에 '승인' 입력해주시면 자동 발송돼요 💕"
+    )
+
+    resp = requests.post(
+        f"https://api.telegram.org/bot{DOORI_BOT_TOKEN}/sendMessage",
+        json={"chat_id": DOORI_CHAT_ID, "text": text},
+        timeout=10,
+    )
+    if resp.ok:
+        print(f"[NOTIFY] 텔레그램 알림 발송 완료 ({len(pending)}명)")
+    else:
+        print(f"[NOTIFY] 텔레그램 발송 실패: {resp.status_code} {resp.text[:200]}")
+
+
 # ── argparse ─────────────────────────────────────────────────────
 
 def main():
@@ -514,10 +571,11 @@ def main():
     sub = parser.add_subparsers(dest="command", help="실행할 커맨드")
     sub.required = True
 
-    sub.add_parser("crawl", help="YouTube 크롤 + Haiku 스크리닝 + 구글 시트 추가")
+    sub.add_parser("crawl", help="YouTube 크롤 + Gemini 스크리닝 + 구글 시트 추가")
     sub.add_parser("send", help="승인된 유튜버에게 메일 발송")
     sub.add_parser("check", help="이메일 답장 확인")
     sub.add_parser("status", help="파이프라인 현황 요약")
+    sub.add_parser("notify", help="승인 대기 후보 텔레그램 알림")
 
     args = parser.parse_args()
 
@@ -526,6 +584,7 @@ def main():
         "send": cmd_send,
         "check": cmd_check,
         "status": cmd_status,
+        "notify": cmd_notify,
     }
 
     try:

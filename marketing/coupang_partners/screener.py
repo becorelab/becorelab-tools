@@ -1,30 +1,42 @@
-"""Haiku 기반 유튜버 1차 스크리닝.
+"""Gemini Flash 기반 유튜버 1차 스크리닝.
 
 입력: 크롤러가 수집한 채널 데이터 (제목·설명·최근 영상 5개)
 출력: {match_score 0~10, matched_products[], rationale, verdict}
   verdict: "approved" | "rejected" | "maybe"
 
-비용 원칙 (미오 비용 3원칙):
-  - 1차 스크리닝은 Haiku (저비용)
+비용 원칙:
+  - 1차 스크리닝은 Gemini Flash (무료 티어)
   - Opus는 pitch_write / 답장 분류에서만 사용
 """
 import os
 import json
-import anthropic
+import requests
+
+_DIR = os.path.dirname(os.path.abspath(__file__))
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+if not GEMINI_API_KEY:
+    _env_path = os.path.join(_DIR, "..", "..", "sourcing", "analyzer", ".env")
+    if os.path.exists(_env_path):
+        with open(_env_path) as _f:
+            for _line in _f:
+                if _line.startswith("GEMINI_API_KEY=") and not GEMINI_API_KEY:
+                    GEMINI_API_KEY = _line.split("=", 1)[1].strip()
 
 PRODUCT_CATALOG = """iLBiA (생활세제 브랜드):
-- 건조기 시트 (코튼블루 / 베이비크림 / 바이올렛 머스크) — 건조기 쓰는 가정
-- 식기세척기 세제 — 식세기 사용자
-- 캡슐 세제 — 세탁용
-- 얼룩 제거제 — 육아/반려동물 가정
-- 섬유 탈취제 (준비 중)
+- 건조기 시트 (코튼블루 / 베이비크림 / 바이올렛 머스크) — 건조기 쓰는 가정, 세탁 루틴, 빨래 관리
+- 식기세척기 세제 — 식세기 사용자, 주방 살림, 홈카페
+- 캡슐 세제 — 세탁용, 자취생, 원룸, 미니멀 살림
+- 얼룩 제거제 — 육아/반려동물 가정, 캠핑/아웃도어, 세탁 꿀팁
+- 섬유 탈취제 (준비 중) — 반려동물, 자취, 겨울옷 관리, 원룸
 
 Omomo (아이디어 유통 브랜드):
 - 주방·욕실·생활편의 아이템 (시즌별 변동)
 
-타깃 채널 프로필:
-- 주부/살림/인테리어/육아/반려동물/자취/미니멀 라이프
-- 협업 가능성 낮음: 게임·음식 먹방·여행·뷰티(색조)·정치·투자"""
+타깃 채널 프로필 (넓게 평가):
+- 핵심: 살림/육아/세탁/빨래/청소
+- 확장: 자취/원룸/신혼/이사/홈인테리어/미니멀 라이프
+- 니치: 반려동물/캠핑/홈카페/정리수납/주방/욕실
+- 협업 가능성 낮음: 게임·음식 먹방·여행전문·뷰티(색조)·정치·투자·IT리뷰"""
 
 
 SCREENER_PROMPT = """너는 비코어랩(iLBiA/Omomo) 쿠팡 파트너스 유튜버 1차 스크리닝 담당이야.
@@ -33,11 +45,19 @@ SCREENER_PROMPT = """너는 비코어랩(iLBiA/Omomo) 쿠팡 파트너스 유튜
 ## 제품 카탈로그
 {catalog}
 
-## 평가 기준
-1. 채널 주제가 타깃 프로필과 일치하는가? (가족·살림·육아·생활팁·자취)
+## 평가 기준 (넓게 보되, 매칭 근거를 구체적으로)
+1. 채널 주제가 타깃 프로필과 겹치는가?
+   - 핵심 매칭: 살림·육아·세탁·빨래·청소 → 높은 점수
+   - 확장 매칭: 자취·원룸·신혼·이사·홈인테리어·미니멀 라이프 → 중간 점수
+   - 니치 매칭: 반려동물·캠핑·홈카페·정리수납·주방·욕실 → 제품 연결 시 중간 점수
 2. 구독자 1만~10만 범위인가?
 3. 최근 30일 업로드 활동 있는가?
 4. 제품 카탈로그 중 자연스럽게 매칭되는 게 있는가?
+   - 건조기 시트: 건조기 후기, 빨래 루틴, 세탁팁
+   - 식기세척기 세제: 주방정리, 식세기 후기, 홈카페
+   - 캡슐 세제: 자취 살림, 세탁법, 원룸 살림
+   - 얼룩 제거제: 육아 빨래, 반려동물 생활, 캠핑 세탁
+   - 섬유 탈취제: 반려동물 냄새, 자취방 관리, 겨울옷
 5. 경쟁 브랜드(타사 세제) 광고 이력 의심되는가?
 
 ## 개인화 훅(personal_hook) 생성 규칙
@@ -69,13 +89,39 @@ verdict 기준:
 JSON만 출력. 설명 금지."""
 
 
-def _client() -> anthropic.Anthropic:
-    return anthropic.Anthropic()
+GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
 
-def screen_channel(channel: dict, model: str = "claude-haiku-4-5-20251001") -> dict:
+def _call_gemini(prompt: str) -> str:
+    """Gemini REST API 호출. 텍스트 응답 반환."""
+    if not GEMINI_API_KEY:
+        raise RuntimeError("GEMINI_API_KEY가 설정되지 않았습니다")
+    resp = requests.post(
+        f"{GEMINI_URL}?key={GEMINI_API_KEY}",
+        json={
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "maxOutputTokens": 1024,
+                "temperature": 0.1,
+                "thinkingConfig": {"thinkingBudget": 0},
+            },
+        },
+        timeout=30,
+    )
+    if not resp.ok:
+        raise RuntimeError(f"Gemini API {resp.status_code}: {resp.text[:200]}")
+    data = resp.json()
+    candidates = data.get("candidates", [])
+    if candidates:
+        parts = candidates[0].get("content", {}).get("parts", [])
+        if parts:
+            return parts[0].get("text", "")
+    raise RuntimeError(f"Gemini 빈 응답: {json.dumps(data)[:200]}")
+
+
+def screen_channel(channel: dict, model: str = GEMINI_MODEL) -> dict:
     """단일 채널 스크리닝. 반환: screen result dict."""
-    # 입력 최소화 (토큰 절약)
     trimmed = {
         "channel_id": channel.get("channel_id"),
         "title": channel.get("title"),
@@ -94,13 +140,7 @@ def screen_channel(channel: dict, model: str = "claude-haiku-4-5-20251001") -> d
         catalog=PRODUCT_CATALOG,
         channel_json=json.dumps(trimmed, ensure_ascii=False, indent=2),
     )
-    resp = _client().messages.create(
-        model=model,
-        max_tokens=600,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    text = "".join(b.text for b in resp.content if b.type == "text").strip()
-    # JSON만 추출 (코드펜스 대비)
+    text = _call_gemini(prompt).strip()
     if text.startswith("```"):
         text = text.strip("`").lstrip("json").strip()
     try:
@@ -113,7 +153,6 @@ def screen_channel(channel: dict, model: str = "claude-haiku-4-5-20251001") -> d
             "verdict": "maybe",
             "red_flags": ["screener_parse_error"],
         }
-    # 필수 필드 보강
     parsed.setdefault("matched_products", [])
     parsed.setdefault("red_flags", [])
     parsed.setdefault("verdict", "maybe")
@@ -124,7 +163,7 @@ def screen_channel(channel: dict, model: str = "claude-haiku-4-5-20251001") -> d
     return parsed
 
 
-def screen_batch(channels: list[dict], model: str = "claude-haiku-4-5-20251001") -> list[dict]:
+def screen_batch(channels: list[dict], model: str = GEMINI_MODEL) -> list[dict]:
     """N개 채널 연속 스크리닝 (순차 — 레이트리밋 회피 목적)."""
     results = []
     for ch in channels:
@@ -144,13 +183,9 @@ def screen_batch(channels: list[dict], model: str = "claude-haiku-4-5-20251001")
 
 if __name__ == "__main__":
     import sys
-    from dotenv import load_dotenv
-    _dir = os.path.dirname(os.path.abspath(__file__))
-    load_dotenv(os.path.join(_dir, "..", "..", "sourcing", "analyzer", ".env"))
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
-    # 샘플 테스트 — API 키 없이도 프롬프트 생성만 확인 가능
     sample = {
         "channel_id": "UCsample",
         "title": "살림하는 엄마",

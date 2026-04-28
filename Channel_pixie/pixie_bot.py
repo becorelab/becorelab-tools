@@ -49,7 +49,7 @@ APIS = [
 ]
 
 # 이미지 분석용 (Google Gemini Flash - 무료 비전)
-GEMINI_API_KEY = "AIzaSyD9QzFNwGKYgZ61hlDpFPXKDqd2d6ssiho"
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 current_api = APIS[0]["name"]
 

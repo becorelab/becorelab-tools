@@ -34,6 +34,8 @@ instagram/api_session.json
 
 # 환경변수 (API 키 — 절대 커밋 금지)
 .env
+**/.env
+*.env
 sourcing/analyzer/.env
 
 # Firebase 서비스 계정 키 (절대 커밋 금지)

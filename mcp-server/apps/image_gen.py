@@ -6,7 +6,7 @@ import os
 import time
 import httpx
 
-GEMINI_API_KEY = "AIzaSyD9QzFNwGKYgZ61hlDpFPXKDqd2d6ssiho"
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "generated_images")
 
 
