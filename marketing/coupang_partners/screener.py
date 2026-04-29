@@ -93,23 +93,29 @@ GEMINI_MODEL = "gemini-2.5-flash"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
 
-def _call_gemini(prompt: str) -> str:
-    """Gemini REST API 호출. 텍스트 응답 반환."""
+def _call_gemini(prompt: str, max_retries: int = 3) -> str:
+    """Gemini REST API 호출. 429/503 시 재시도."""
+    import time
     if not GEMINI_API_KEY:
         raise RuntimeError("GEMINI_API_KEY가 설정되지 않았습니다")
-    resp = requests.post(
-        f"{GEMINI_URL}?key={GEMINI_API_KEY}",
-        json={
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "maxOutputTokens": 1024,
-                "temperature": 0.1,
-                "thinkingConfig": {"thinkingBudget": 0},
+    for attempt in range(max_retries):
+        resp = requests.post(
+            f"{GEMINI_URL}?key={GEMINI_API_KEY}",
+            json={
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {
+                    "maxOutputTokens": 1024,
+                    "temperature": 0.1,
+                    "thinkingConfig": {"thinkingBudget": 0},
+                },
             },
-        },
-        timeout=30,
-    )
-    if not resp.ok:
+            timeout=60,
+        )
+        if resp.ok:
+            break
+        if resp.status_code in (429, 503) and attempt < max_retries - 1:
+            time.sleep(5 * (attempt + 1))
+            continue
         raise RuntimeError(f"Gemini API {resp.status_code}: {resp.text[:200]}")
     data = resp.json()
     candidates = data.get("candidates", [])
@@ -173,9 +179,10 @@ def screen_batch(channels: list[dict], model: str = GEMINI_MODEL) -> list[dict]:
             result = {
                 "match_score": 0,
                 "matched_products": [],
-                "rationale": f"스크리닝 실패: {e}",
-                "verdict": "maybe",
+                "rationale": "스크리닝 재시도 필요",
+                "verdict": "retry",
                 "red_flags": ["screener_exception"],
+                "_error_detail": str(e)[:200],
             }
         results.append({"channel": ch, "screen": result})
     return results
