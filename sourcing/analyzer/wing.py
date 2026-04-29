@@ -80,6 +80,8 @@ def _worker_loop():
                 print(f'[WORKER] goldbox_crawl 완료: {len(holder["result"])}개')
             elif action == 'collect_reviews':
                 holder['result'] = _do_collect_reviews(args.get('product_url', ''), args.get('max_reviews', 30))
+            elif action == 'fetch_product_detail':
+                holder['result'] = _do_fetch_product_detail(args.get('product_url', ''))
             elif action == 'coupang_keywords':
                 holder['result'] = _do_coupang_keywords(args.get('keyword', ''))
         except Exception as e:
@@ -114,10 +116,40 @@ def _send(action, args=None, timeout=600):
 
 
 # ─── 브라우저 작업 (워커 스레드에서만) ───
+def _is_context_alive():
+    try:
+        if not _ctx or not _page:
+            return False
+        _page.url
+        return True
+    except:
+        return False
+
+
+def _reset_browser():
+    global _pw, _ctx, _page, _logged_in, _wing_ok
+    try:
+        if _ctx:
+            _ctx.close()
+    except:
+        pass
+    try:
+        if _pw:
+            _pw.stop()
+    except:
+        pass
+    _pw = _ctx = _page = None
+    _logged_in = False
+    _wing_ok = False
+    logger.info('브라우저 리셋 완료')
+
+
 def _start_browser():
     global _pw, _ctx, _page
-    if _ctx:
+    if _ctx and _is_context_alive():
         return
+    if _ctx:
+        _reset_browser()
 
     from playwright.sync_api import sync_playwright
     os.makedirs(STATE_DIR, exist_ok=True)
@@ -125,7 +157,9 @@ def _start_browser():
     ext_path = _find_extension()
     logger.info(f'확장 프로그램: {ext_path or "없음"}')
 
-    launch_args = ['--disable-blink-features=AutomationControlled']
+    launch_args = ['--disable-blink-features=AutomationControlled',
+                    '--window-position=-32000,-32000', '--window-size=1,1',
+                    '--no-focus-on-launch']
     if ext_path:
         launch_args.extend([
             f'--load-extension={ext_path}',
@@ -222,6 +256,10 @@ def _do_search(keyword):
     global _logged_in
     from analyzer.helpstore import CoupangProduct
 
+    if not _is_context_alive():
+        logger.warning('브라우저 컨텍스트 죽어있음 — 재시작')
+        _reset_browser()
+
     if not _ctx:
         _start_browser()
     if not _logged_in:
@@ -230,8 +268,16 @@ def _do_search(keyword):
         if not result.get('success'):
             raise Exception('WING_LOGIN_REQUIRED')
 
-    # 매번 페이지 새로 로드 (이전 검색 결과 캐시 방지)
-    _page.goto(COUPANG_PAGE, wait_until='domcontentloaded', timeout=15000)
+    try:
+        _page.goto(COUPANG_PAGE, wait_until='domcontentloaded', timeout=15000)
+    except Exception as e:
+        logger.warning(f'페이지 이동 실패 ({e}) — 브라우저 재시작')
+        _reset_browser()
+        _start_browser()
+        result = _do_full_login()
+        if not result.get('success'):
+            raise Exception('WING_LOGIN_REQUIRED')
+        _page.goto(COUPANG_PAGE, wait_until='domcontentloaded', timeout=15000)
     _page.wait_for_timeout(3000)
 
     # extension/page로 리다이렉트 되면 확장 미감지
@@ -446,6 +492,90 @@ def _do_collect_reviews(product_url: str, max_reviews: int = 30) -> list:
 
     logger.info(f'리뷰 {len(reviews)}개 수집 (pid={pid})')
     return reviews
+
+
+def _do_fetch_product_detail(product_url: str) -> dict:
+    """쿠팡 상품 상세페이지 데이터 추출 (Playwright persistent context 사용, Akamai 우회)
+    Returns: {'title': ..., 'price': ..., 'detail': ..., 'images': [...]}
+    """
+    if not _ctx:
+        _start_browser()
+
+    detail_page = _ctx.new_page()
+    try:
+        detail_page.goto(product_url, wait_until='domcontentloaded', timeout=20000)
+        detail_page.wait_for_timeout(3000)
+
+        # Access Denied 확인
+        title_check = detail_page.title()
+        if 'Access Denied' in title_check or 'denied' in title_check.lower():
+            print(f'[WING_DETAIL] Access Denied — 재시도 중...')
+            detail_page.wait_for_timeout(2000)
+            detail_page.reload(wait_until='domcontentloaded', timeout=15000)
+            detail_page.wait_for_timeout(3000)
+
+        # lazy loading 트리거 — 페이지 끝까지 스크롤
+        for _ in range(5):
+            detail_page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
+            detail_page.wait_for_timeout(1000)
+        detail_page.evaluate('window.scrollTo(0, 0)')
+        detail_page.wait_for_timeout(1000)
+
+        # JS로 상세 데이터 추출
+        data = detail_page.evaluate(r"""() => {
+            var title = '';
+            var titleSelectors = ['h2.prod-buy-header__title','h1.prod-buy-header__title','.prod-buy-header__title','[class*="prod-title"]','h1','h2'];
+            for (var ti=0; ti<titleSelectors.length; ti++) {
+                var el = document.querySelector(titleSelectors[ti]);
+                if (el && el.textContent.trim().length > 3) { title = el.textContent.trim(); break; }
+            }
+
+            var price = '';
+            var priceSelectors = ['.total-price strong','[class*="total-price"] strong','.prod-coupon-price strong','[class*="prod-price"] strong','[class*="price"] strong'];
+            for (var pi=0; pi<priceSelectors.length; pi++) {
+                var pel = document.querySelector(priceSelectors[pi]);
+                if (pel && pel.textContent.trim()) { price = pel.textContent.trim(); break; }
+            }
+
+            var detail = '';
+            var detailSelectors = ['.product-detail-content-inside','.product-detail-content','#productDetail','.prod-description-detail','.prod-description','[class*="detail-content"]','[id*="productDetail"]'];
+            for (var di=0; di<detailSelectors.length; di++) {
+                var del_ = document.querySelector(detailSelectors[di]);
+                if (del_ && del_.innerText && del_.innerText.trim().length > 50) {
+                    detail = del_.innerText.trim().substring(0, 1500); break;
+                }
+            }
+            if (!detail) {
+                var allText = document.body.innerText || '';
+                var lines = allText.split('\n').filter(function(l){ return l.trim().length > 10; });
+                detail = lines.slice(0, 80).join('\n').substring(0, 2000);
+            }
+
+            var images = [];
+            var imgSelectors = ['.product-detail-content-inside img','.product-detail-content img','#productDetail img','[class*="detail"] img'];
+            for (var j=0; j<imgSelectors.length; j++) {
+                var imgs = document.querySelectorAll(imgSelectors[j]);
+                if (imgs.length > 0) {
+                    for (var k=0; k<Math.min(imgs.length,15); k++) {
+                        var src = imgs[k].src || imgs[k].getAttribute('data-src') || '';
+                        if (src && src.indexOf('http') === 0) images.push(src);
+                    }
+                    if (images.length > 0) break;
+                }
+            }
+
+            return {title: title, price: price, detail: detail, images: images};
+        }""")
+
+        return data or {}
+    except Exception as e:
+        print(f'[WING_DETAIL] 오류: {e}')
+        return {}
+    finally:
+        try:
+            detail_page.close()
+        except Exception:
+            pass
 
 
 def _do_goldbox_crawl(url):
@@ -690,3 +820,9 @@ def get_wing_status():
 
 def wing_coupang_keywords(keyword):
     return _send('coupang_keywords', {'keyword': keyword}, timeout=60)
+
+
+def wing_fetch_product_detail(product_url: str) -> dict:
+    """Playwright persistent context로 쿠팡 상품 상세페이지 데이터 추출
+    CDP와 달리 로그인 세션과 anti-detection이 적용되어 Akamai 차단 우회"""
+    return _send('fetch_product_detail', {'product_url': product_url}, timeout=30)

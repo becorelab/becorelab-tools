@@ -1852,14 +1852,14 @@ def start_detail_analysis(scan_id):
             try:
                 collected = _collect_product_details(products, scan_id)
                 if not collected:
-                    _detail_state[scan_id] = {'status': 'error', 'progress': '', 'analysis': {'error': '상품 정보를 수집하지 못했습니다. Chrome CDP가 실행 중인지 확인해주세요.'}}
+                    _detail_state[scan_id] = {'status': 'error', 'progress': '', 'analysis': {'error': '상품 정보를 수집하지 못했습니다. Playwright 브라우저 상태를 확인해주세요.'}}
                     return
 
                 _detail_state[scan_id]['status'] = 'analyzing'
                 analysis = _analyze_product_details(collected, keyword)
                 _detail_state[scan_id]['analysis'] = analysis
                 _detail_state[scan_id]['status'] = 'done'
-                fdb.save_detail_analysis(scan_id, keyword, analysis)
+                fdb.save_detail_analysis(scan_id, keyword, analysis, raw_products=collected)
                 print(f'[DETAIL] 분석 완료: {keyword} ({len(collected)}개 상품)')
             except Exception as e:
                 import traceback; traceback.print_exc()
@@ -2051,6 +2051,7 @@ def _ensure_cdp_running():
 
     # Chrome 경로 탐색
     chrome_paths = [
+        '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
         r'C:\Program Files\Google\Chrome\Application\chrome.exe',
         r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe',
     ]
@@ -2213,27 +2214,15 @@ def _fetch_page_via_cdp(url: str, wait_seconds: int = 7) -> dict:
 
 
 def _collect_product_details(products, scan_id) -> list:
-    """Chrome CDP 직접 네비게이션으로 상품 상세페이지 수집 (Akamai 완전 우회)"""
-    import time, requests as req
-
-    # CDP 자동 실행
-    if not _ensure_cdp_running():
-        print('[DETAIL] CDP Chrome 시작 실패')
-        return []
+    """Playwright persistent context로 상품 상세페이지 수집 (Akamai 우회)
+    wing.py의 브라우저를 사용하여 로그인 세션 + anti-detection 적용.
+    CDP 방식은 쿠팡 Akamai 봇 차단(Access Denied)에 걸려 폐기."""
+    import time
+    from analyzer.wing import wing_fetch_product_detail
 
     collected = []
     total = len(products)
-
-    cdp_url = _get_cdp_url()
-    try:
-        tabs = req.get(f'{cdp_url}/json', timeout=5).json()
-        if not tabs:
-            print('[DETAIL] CDP 미연결 — Chrome CDP 실행 필요')
-            return []
-        print(f'[DETAIL] CDP 연결 확인 (탭 {len(tabs)}개)')
-    except Exception as e:
-        print(f'[DETAIL] CDP 연결 실패: {e}')
-        return []
+    print(f'[DETAIL] Playwright 모드로 {total}개 상품 상세 수집 시작')
 
     for i, p in enumerate(products):
         url = p.get('product_url', '')
@@ -2243,7 +2232,7 @@ def _collect_product_details(products, scan_id) -> list:
         if not url:
             continue
         try:
-            data = _fetch_page_via_cdp(url, wait_seconds=7)
+            data = wing_fetch_product_detail(url)
             if not data or not data.get('detail'):
                 print(f'[DETAIL] {i+1}/{total} {pname} → 데이터 없음')
                 time.sleep(2)

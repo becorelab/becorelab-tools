@@ -30,23 +30,44 @@ if os.path.exists(_env_path):
 
 
 def _call_gemini(prompt: str, max_tokens: int = 4000) -> str:
-    """Gemini 2.0 Flash API 호출 (무료 티어)"""
+    """Gemini 2.5 Flash API 호출 (무료 티어, 503/429 자동 재시도)"""
+    import time as _time
     url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}'
-    res = requests.post(url, json={
+    payload = {
         'contents': [{'parts': [{'text': prompt}]}],
         'generationConfig': {
             'maxOutputTokens': max_tokens,
             'thinkingConfig': {'thinkingBudget': 0},
         },
-    }, timeout=60)
-    if res.ok:
-        data = res.json()
-        candidates = data.get('candidates', [])
-        if candidates:
-            parts = candidates[0].get('content', {}).get('parts', [])
-            if parts:
-                return parts[0].get('text', '')
-    logger.error(f'Gemini API 에러: {res.status_code} {res.text[:200]}')
+    }
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            res = requests.post(url, json=payload, timeout=120)
+            if res.ok:
+                data = res.json()
+                candidates = data.get('candidates', [])
+                if candidates:
+                    parts = candidates[0].get('content', {}).get('parts', [])
+                    if parts:
+                        return parts[0].get('text', '')
+            if res.status_code in (429, 503) and attempt < max_retries - 1:
+                wait = (attempt + 1) * 10
+                logger.warning(f'Gemini API {res.status_code} — {wait}초 후 재시도 ({attempt+1}/{max_retries})')
+                _time.sleep(wait)
+                continue
+            logger.error(f'Gemini API 에러: {res.status_code} {res.text[:200]}')
+            return ''
+        except requests.exceptions.Timeout:
+            if attempt < max_retries - 1:
+                logger.warning(f'Gemini API 타임아웃 — 재시도 ({attempt+1}/{max_retries})')
+                _time.sleep(5)
+                continue
+            logger.error('Gemini API 타임아웃 (최대 재시도 초과)')
+            return ''
+        except Exception as e:
+            logger.error(f'Gemini API 예외: {e}')
+            return ''
     return ''
 
 
