@@ -89,7 +89,7 @@ verdict 기준:
 JSON만 출력. 설명 금지."""
 
 
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODEL = "gemini-2.0-flash"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
 
@@ -106,7 +106,6 @@ def _call_gemini(prompt: str, max_retries: int = 3) -> str:
                 "generationConfig": {
                     "maxOutputTokens": 1024,
                     "temperature": 0.1,
-                    "thinkingConfig": {"thinkingBudget": 0},
                 },
             },
             timeout=60,
