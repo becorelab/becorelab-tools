@@ -71,15 +71,11 @@ def render_recent_block(reports, empty_msg="> 아직 생성된 보고서가 없�
 
 
 def render_status_block(last_date, callout_class="", label="정상 운영 중"):
-    """상단 상태 callout HTML"""
+    """상단 상태 — 옵시디언 네이티브 callout"""
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    cls = f"callout {callout_class}".strip()
     if last_date:
-        msg = f'✅ <b>{label}</b> — 마지막 생성: {last_date} (갱신 {now})'
-    else:
-        msg = f'⚠️ <b>보고서 없음</b> — 최근 기록을 찾지 못했어요 (갱신 {now})'
-        cls = "callout warn"
-    return f'<div class="{cls}">{msg}</div>'
+        return f"> [!success] ✅ {label}\n> 마지막 생성: {last_date} · 갱신 {now}"
+    return f"> [!warning] ⚠️ 보고서 없음\n> 최근 기록을 찾지 못했어요 · 갱신 {now}"
 
 
 def update_dashboard(dashboard_path, reports_folders, limit=7, recurse=False, status_label="정상 운영 중"):
@@ -105,12 +101,12 @@ def update_dashboard(dashboard_path, reports_folders, limit=7, recurse=False, st
         try:
             with open(dashboard_path, "w", encoding="utf-8") as f:
                 f.write(text)
-        except PermissionError:
+        except OSError:
             subprocess.run(["xattr", "-cr", dashboard_path], capture_output=True)
             try:
                 with open(dashboard_path, "w", encoding="utf-8") as f:
                     f.write(text)
-            except PermissionError:
+            except OSError:
                 tmp_dir = os.path.dirname(dashboard_path)
                 fd, tmp_path = tempfile.mkstemp(dir=tmp_dir, suffix=".md")
                 with os.fdopen(fd, "w", encoding="utf-8") as f:
