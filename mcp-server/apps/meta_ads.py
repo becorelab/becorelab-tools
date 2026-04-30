@@ -1,4 +1,4 @@
-"""메타 광고 API MCP 도구 — 파이프보드 없이 직접 조회"""
+"""메타 광고 API MCP 도구 — 직접 조회 + 캠페인 관리"""
 import json as _json
 import httpx
 
@@ -17,6 +17,14 @@ async def _meta_get(client: httpx.AsyncClient, endpoint: str, params: dict = Non
     if params:
         p.update(params)
     resp = await client.get(f"{META_BASE}/{endpoint}", params=p, timeout=30)
+    return resp.json()
+
+
+async def _meta_post(client: httpx.AsyncClient, endpoint: str, data: dict = None):
+    payload = {"access_token": META_ACCESS_TOKEN}
+    if data:
+        payload.update(data)
+    resp = await client.post(f"{META_BASE}/{endpoint}", data=payload, timeout=30)
     return resp.json()
 
 
@@ -212,6 +220,134 @@ def register(mcp, client):
             endpoint = f"{account_id}/ads"
         data = await _meta_get(client, endpoint, {
             "fields": "name,status,creative{title,body,image_url,thumbnail_url}",
+            "limit": "50",
+        })
+        return _json.dumps(data.get("data", []), ensure_ascii=False, indent=2)
+
+    # ── 캠페인 관리 (쓰기) ──
+
+    @mcp.tool()
+    async def meta_campaign_update(
+        campaign_id: str,
+        status: str = "",
+        daily_budget: str = "",
+        name: str = "",
+    ) -> str:
+        """캠페인 상태/예산/이름 변경.
+        campaign_id: 캠페인 ID (필수)
+        status: 'ACTIVE' 또는 'PAUSED'
+        daily_budget: 일예산 (원 단위, 예: '10000' = 1만원)
+        name: 새 캠페인 이름"""
+        data = {}
+        if status:
+            data["status"] = status.upper()
+        if daily_budget:
+            data["daily_budget"] = str(int(daily_budget) * 100)
+        if name:
+            data["name"] = name
+        if not data:
+            return "변경할 항목을 지정해주세요 (status, daily_budget, name)"
+        result = await _meta_post(client, campaign_id, data)
+        if result.get("success"):
+            changes = ", ".join(f"{k}={v}" for k, v in data.items())
+            return f"✅ 캠페인 {campaign_id} 업데이트 완료: {changes}"
+        return f"❌ 실패: {_json.dumps(result, ensure_ascii=False)}"
+
+    @mcp.tool()
+    async def meta_campaign_create(
+        account: str = "일비아",
+        name: str = "",
+        objective: str = "OUTCOME_SALES",
+        daily_budget: str = "",
+        status: str = "PAUSED",
+    ) -> str:
+        """새 캠페인 생성 (기본 일시중지 상태).
+        account: '일비아' 또는 '세탁제품'
+        name: 캠페인 이름 (필수)
+        objective: OUTCOME_SALES, OUTCOME_TRAFFIC, OUTCOME_AWARENESS 등
+        daily_budget: 일예산 (원 단위)
+        status: 'PAUSED'(기본) 또는 'ACTIVE'"""
+        if not name:
+            return "캠페인 이름을 지정해주세요"
+        account_id = AD_ACCOUNTS.get(account, AD_ACCOUNTS["일비아"])
+        data = {
+            "name": name,
+            "objective": objective,
+            "status": status.upper(),
+            "special_ad_categories": "[]",
+        }
+        if daily_budget:
+            data["daily_budget"] = str(int(daily_budget) * 100)
+        result = await _meta_post(client, f"{account_id}/campaigns", data)
+        if result.get("id"):
+            return f"✅ 캠페인 생성 완료! ID: {result['id']}, 이름: {name}"
+        return f"❌ 실패: {_json.dumps(result, ensure_ascii=False)}"
+
+    @mcp.tool()
+    async def meta_adset_update(
+        adset_id: str,
+        status: str = "",
+        daily_budget: str = "",
+        name: str = "",
+    ) -> str:
+        """광고세트 상태/예산/이름 변경.
+        adset_id: 광고세트 ID (필수)
+        status: 'ACTIVE' 또는 'PAUSED'
+        daily_budget: 일예산 (원 단위)
+        name: 새 이름"""
+        data = {}
+        if status:
+            data["status"] = status.upper()
+        if daily_budget:
+            data["daily_budget"] = str(int(daily_budget) * 100)
+        if name:
+            data["name"] = name
+        if not data:
+            return "변경할 항목을 지정해주세요"
+        result = await _meta_post(client, adset_id, data)
+        if result.get("success"):
+            changes = ", ".join(f"{k}={v}" for k, v in data.items())
+            return f"✅ 광고세트 {adset_id} 업데이트 완료: {changes}"
+        return f"❌ 실패: {_json.dumps(result, ensure_ascii=False)}"
+
+    @mcp.tool()
+    async def meta_ad_update(
+        ad_id: str,
+        status: str = "",
+        name: str = "",
+    ) -> str:
+        """개별 광고 상태/이름 변경.
+        ad_id: 광고 ID (필수)
+        status: 'ACTIVE' 또는 'PAUSED'
+        name: 새 이름"""
+        data = {}
+        if status:
+            data["status"] = status.upper()
+        if name:
+            data["name"] = name
+        if not data:
+            return "변경할 항목을 지정해주세요"
+        result = await _meta_post(client, ad_id, data)
+        if result.get("success"):
+            changes = ", ".join(f"{k}={v}" for k, v in data.items())
+            return f"✅ 광고 {ad_id} 업데이트 완료: {changes}"
+        return f"❌ 실패: {_json.dumps(result, ensure_ascii=False)}"
+
+    @mcp.tool()
+    async def meta_adsets(
+        account: str = "일비아",
+        campaign_id: str = "",
+    ) -> str:
+        """광고세트 목록 조회.
+        account: '일비아' 또는 '세탁제품'
+        campaign_id: 특정 캠페인의 광고세트만 보려면 캠페인 ID 입력"""
+        if campaign_id:
+            endpoint = f"{campaign_id}/adsets"
+        else:
+            account_id = AD_ACCOUNTS.get(account, AD_ACCOUNTS["일비아"])
+            endpoint = f"{account_id}/adsets"
+        data = await _meta_get(client, endpoint, {
+            "fields": "name,status,daily_budget,optimization_goal,targeting",
             "limit": "50",
         })
         return _json.dumps(data.get("data", []), ensure_ascii=False, indent=2)
