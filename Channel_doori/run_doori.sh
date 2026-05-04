@@ -15,4 +15,4 @@ echo ""
 
 claude --channels "plugin:telegram@claude-plugins-official" \
   --dangerously-skip-permissions \
-  --model sonnet
+  --model claude-opus-4-6

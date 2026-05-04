@@ -1108,6 +1108,10 @@ def api_daily_report_obsidian():
         os.makedirs(obs_dir, exist_ok=True)
         filename = f"{target} 매출 일일 보고서.md"
         filepath = os.path.join(obs_dir, filename)
+        try:
+            os.remove(filepath)
+        except OSError:
+            pass
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(html_content)
 
@@ -1514,6 +1518,10 @@ def api_inventory_report_obsidian():
     os.makedirs(OBSIDIAN_STOCK_DIR, exist_ok=True)
     filename = f"{target_date} 재고 일일 보고서.md"
     filepath = os.path.join(OBSIDIAN_STOCK_DIR, filename)
+    try:
+        os.remove(filepath)
+    except OSError:
+        pass
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(md_content)
 

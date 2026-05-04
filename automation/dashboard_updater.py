@@ -97,19 +97,10 @@ def update_dashboard(dashboard_path, reports_folders, limit=7, recurse=False, st
     text, r2 = _replace_markers(text, "STATUS", status_block)
 
     if r1 or r2:
-        import tempfile, shutil, subprocess
         try:
-            with open(dashboard_path, "w", encoding="utf-8") as f:
-                f.write(text)
+            os.remove(dashboard_path)
         except OSError:
-            subprocess.run(["xattr", "-cr", dashboard_path], capture_output=True)
-            try:
-                with open(dashboard_path, "w", encoding="utf-8") as f:
-                    f.write(text)
-            except OSError:
-                tmp_dir = os.path.dirname(dashboard_path)
-                fd, tmp_path = tempfile.mkstemp(dir=tmp_dir, suffix=".md")
-                with os.fdopen(fd, "w", encoding="utf-8") as f:
-                    f.write(text)
-                os.replace(tmp_path, dashboard_path)
+            pass
+        with open(dashboard_path, "w", encoding="utf-8") as f:
+            f.write(text)
     return (r1 or r2), last_date, len(reports)
