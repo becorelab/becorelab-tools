@@ -4,6 +4,8 @@
 """
 import os
 import re
+import subprocess
+import tempfile
 from datetime import datetime
 
 DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
@@ -97,10 +99,16 @@ def update_dashboard(dashboard_path, reports_folders, limit=7, recurse=False, st
     text, r2 = _replace_markers(text, "STATUS", status_block)
 
     if r1 or r2:
+        # OneDrive blocks Python open(w) on existing files from launchd.
+        # Write to /tmp then use system cp -f which bypasses the lock.
+        fd, tmp_path = tempfile.mkstemp(suffix=".md")
         try:
-            os.remove(dashboard_path)
-        except OSError:
-            pass
-        with open(dashboard_path, "w", encoding="utf-8") as f:
-            f.write(text)
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write(text)
+            subprocess.run(["cp", "-f", tmp_path, dashboard_path], check=True)
+        finally:
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass
     return (r1 or r2), last_date, len(reports)

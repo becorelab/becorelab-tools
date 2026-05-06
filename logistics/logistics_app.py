@@ -1108,12 +1108,16 @@ def api_daily_report_obsidian():
         os.makedirs(obs_dir, exist_ok=True)
         filename = f"{target} 매출 일일 보고서.md"
         filepath = os.path.join(obs_dir, filename)
+        fd, tmp = tempfile.mkstemp(suffix=".md")
         try:
-            os.remove(filepath)
-        except OSError:
-            pass
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(html_content)
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write(html_content)
+            subprocess.run(["cp", "-f", tmp, filepath], check=True)
+        finally:
+            try:
+                os.remove(tmp)
+            except OSError:
+                pass
 
         log.info(f"옵시디언 매출 보고서 저장: {filepath}")
 
@@ -1518,12 +1522,16 @@ def api_inventory_report_obsidian():
     os.makedirs(OBSIDIAN_STOCK_DIR, exist_ok=True)
     filename = f"{target_date} 재고 일일 보고서.md"
     filepath = os.path.join(OBSIDIAN_STOCK_DIR, filename)
+    fd, tmp = tempfile.mkstemp(suffix=".md")
     try:
-        os.remove(filepath)
-    except OSError:
-        pass
-    with open(filepath, "w", encoding="utf-8") as f:
-        f.write(md_content)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(md_content)
+        subprocess.run(["cp", "-f", tmp, filepath], check=True)
+    finally:
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
 
     log.info(f"옵시디언 재고 보고서 저장: {filepath}")
 
