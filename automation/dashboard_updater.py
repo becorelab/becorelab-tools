@@ -6,6 +6,7 @@ import os
 import re
 import subprocess
 import tempfile
+import time
 from datetime import datetime
 
 DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
@@ -80,14 +81,34 @@ def render_status_block(last_date, callout_class="", label="정상 운영 중"):
     return f"> [!warning] ⚠️ 보고서 없음\n> 최근 기록을 찾지 못했어요 · 갱신 {now}"
 
 
+def _read_onedrive_file(path, retries=3, delay=2):
+    """OneDrive 동기화 락 대비 재시도 읽기. cp로 임시 복사 후 읽기."""
+    for attempt in range(retries):
+        try:
+            fd, tmp = tempfile.mkstemp(suffix=".md")
+            os.close(fd)
+            subprocess.run(["cp", path, tmp], check=True)
+            with open(tmp, encoding="utf-8") as f:
+                text = f.read()
+            os.remove(tmp)
+            return text
+        except (OSError, subprocess.CalledProcessError):
+            try:
+                os.remove(tmp)
+            except OSError:
+                pass
+            if attempt < retries - 1:
+                time.sleep(delay)
+    raise OSError(f"[Errno 1] {retries}회 재시도 실패: {path}")
+
+
 def update_dashboard(dashboard_path, reports_folders, limit=7, recurse=False, status_label="정상 운영 중"):
     """대시보드 파일의 STATUS / RECENT 마커 사이를 갱신
     반환: (updated: bool, last_date: str|None, count: int)"""
     if not os.path.isfile(dashboard_path):
         return False, None, 0
 
-    with open(dashboard_path, encoding="utf-8") as f:
-        text = f.read()
+    text = _read_onedrive_file(dashboard_path)
 
     reports = list_recent_reports(reports_folders, limit=limit, recurse=recurse)
     last_date = reports[0][0] if reports else None
@@ -99,8 +120,6 @@ def update_dashboard(dashboard_path, reports_folders, limit=7, recurse=False, st
     text, r2 = _replace_markers(text, "STATUS", status_block)
 
     if r1 or r2:
-        # OneDrive blocks Python open(w) on existing files from launchd.
-        # Write to /tmp then use system cp -f which bypasses the lock.
         fd, tmp_path = tempfile.mkstemp(suffix=".md")
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as f:
