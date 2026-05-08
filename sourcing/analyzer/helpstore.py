@@ -755,11 +755,10 @@ def scan_keyword_full_sync(keyword: str, cdp_url: str = 'http://localhost:9222')
 def ensure_chrome_debug(port: int = 9222):
     """
     Chrome이 디버그 모드(CDP)로 실행 중인지 확인.
-    미실행 시 헬프스토어 확장 프로그램을 로드한 새 프로필로 자동 시작.
+    미실행 시 자동 시작 (macOS/Windows 모두 지원).
     """
-    import socket, subprocess, os
+    import socket, subprocess, os, sys, time
 
-    # 이미 열려있는지 확인
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     result = s.connect_ex(('127.0.0.1', port))
     s.close()
@@ -769,47 +768,53 @@ def ensure_chrome_debug(port: int = 9222):
 
     logger.info(f'Chrome CDP 미실행 — 자동 시작합니다')
 
-    # 헬프스토어 확장 프로그램 경로 찾기
-    ext_base = os.path.join(
-        os.environ.get('LOCALAPPDATA', ''),
-        'Google', 'Chrome', 'User Data', 'Default', 'Extensions',
-        'nfbjgieajobfohijlkaaplipbiofblef'  # 헬프스토어 확장 ID
-    )
+    if sys.platform == 'darwin':
+        chrome_path = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+        user_data_dir = os.path.expanduser('~/ChromeCDP')
+        args = [
+            chrome_path,
+            f'--remote-debugging-port={port}',
+            '--remote-allow-origins=*',
+            f'--user-data-dir={user_data_dir}',
+            '--headless=new',
+            '--js-flags=--max-old-space-size=256',
+            '--renderer-process-limit=4',
+            '--disable-gpu',
+            '--disable-extensions',
+            '--disable-background-networking',
+            '--aggressive-cache-discard',
+            '--no-first-run',
+            '--disable-default-apps',
+        ]
+    else:
+        chrome_path = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
+        if not os.path.exists(chrome_path):
+            chrome_path = r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+        user_data_dir = os.path.join(os.environ.get('TEMP', '/tmp'), 'chrome-debug-helpstore')
+        os.makedirs(user_data_dir, exist_ok=True)
 
-    ext_path = ''
-    if os.path.isdir(ext_base):
-        versions = [d for d in os.listdir(ext_base) if os.path.isdir(os.path.join(ext_base, d))]
-        if versions:
-            ext_path = os.path.join(ext_base, versions[0])
+        ext_base = os.path.join(
+            os.environ.get('LOCALAPPDATA', ''),
+            'Google', 'Chrome', 'User Data', 'Default', 'Extensions',
+            'nfbjgieajobfohijlkaaplipbiofblef'
+        )
+        ext_path = ''
+        if os.path.isdir(ext_base):
+            versions = [d for d in os.listdir(ext_base) if os.path.isdir(os.path.join(ext_base, d))]
+            if versions:
+                ext_path = os.path.join(ext_base, versions[0])
 
-    # 디버그 전용 프로필 디렉토리
-    debug_profile = os.path.join(os.environ.get('TEMP', '/tmp'), 'chrome-debug-helpstore')
-    os.makedirs(debug_profile, exist_ok=True)
+        args = [
+            chrome_path,
+            f'--remote-debugging-port={port}',
+            '--remote-allow-origins=*',
+            f'--user-data-dir={user_data_dir}',
+        ]
+        if ext_path:
+            args.extend([f'--load-extension={ext_path}', f'--disable-extensions-except={ext_path}'])
 
-    chrome_path = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
-    if not os.path.exists(chrome_path):
-        chrome_path = r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+    subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    args = [
-        chrome_path,
-        f'--remote-debugging-port={port}',
-        '--remote-allow-origins=*',
-        f'--user-data-dir={debug_profile}',
-    ]
-
-    if ext_path:
-        args.extend([
-            f'--load-extension={ext_path}',
-            f'--disable-extensions-except={ext_path}',
-        ])
-        logger.info(f'헬프스토어 확장 로드: {ext_path}')
-
-    args.append(f'{HELPSTORE_BASE}/keyword/keyword_analyze_coupang/')
-
-    subprocess.Popen(args)
-
-    # Chrome 시작 대기
-    import time
     for i in range(15):
         time.sleep(1)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
