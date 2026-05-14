@@ -18,7 +18,7 @@ from playwright_stealth import Stealth
 sys.path.insert(0, os.path.dirname(__file__))
 from coupang_ad_config import ACCOUNTS, AD_CENTER_URL, DOWNLOAD_DIR, DATA_DIR
 
-WING_AUTH_URL = "https://advertising.coupang.com/user/wing/authorization"
+WING_AUTH_URL = "https://advertising.coupang.com/user/login?_cap_client=WING&returnUrl=%2Fdashboard"
 REPORT_PAGE_URL = f"{AD_CENTER_URL}/marketing-reporting/billboard/reports/pa"
 
 
@@ -69,15 +69,13 @@ def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10
 
         page.fill('input[name="username"]', acct["id"])
         page.fill('input[name="password"]', acct["pw"])
-        page.click('input[name="login"]')
+        time.sleep(1)
 
-        try:
-            page.wait_for_url("**/advertising.coupang.com/**", timeout=30000)
-        except Exception:
-            pass
+        with page.expect_navigation(timeout=30000, wait_until="load"):
+            page.click('input[name="login"]')
         time.sleep(3)
 
-        if "xauth" in page.url:
+        if "xauth" in page.url and "advertising.coupang.com" not in page.url:
             print("  ❌ 로그인 실패")
             browser.close()
             return []
