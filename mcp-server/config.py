@@ -1,8 +1,9 @@
 """비코어랩 MCP 서버 설정"""
 import os
 
-# 서버 호스트 (맥미니 로컬에서 실행 중, 환경변수로 오버라이드 가능)
-OFFICE_IP = os.environ.get("OFFICE_IP", "localhost")
+# 사무실 맥미니 Tailscale IP (환경변수로 오버라이드 가능)
+# 맥미니 로컬에서는 OFFICE_IP=localhost 로 오버라이드
+OFFICE_IP = os.environ.get("OFFICE_IP", "100.105.211.14")
 
 # 앱별 베이스 URL
 LOGISTICS_BASE = f"http://{OFFICE_IP}:8082"

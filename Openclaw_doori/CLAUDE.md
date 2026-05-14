@@ -79,7 +79,7 @@ Start-Process -FilePath 'node' -ArgumentList '"C:\Users\info\AppData\Roaming\npm
 - 거래처코드 매핑: `erp_customer_codes.json` (128개)
 
 ## Tailscale
-- 사무실 PC: `100.83.96.49`
+- 사무실 맥미니: `100.105.211.14`
 - 물류: `:8082` / 마켓 파인더: `:8090`
 
 ## Firebase
