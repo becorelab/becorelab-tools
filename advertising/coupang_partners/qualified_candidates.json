@@ -1,0 +1,592 @@
+[
+  {
+    "channel_id": "UCFYrO0zAqlfu3IjC4u_Enag",
+    "title": "살림사랑",
+    "description": "❤️❤️영상속 제품 구매링크❤️❤️\nlink.inpock.co.kr/sallimsarang\n\n이메일\nwjmedia300@gmail.com\n",
+    "country": "KR",
+    "published_at": "2024-08-12T01:34:20.420414Z",
+    "thumbnail": "https://yt3.ggpht.com/xkpKTcDkXXS9N74N7MfsvXGPKAAcMr3KjazbN3tvz8nZUBOVPJH_YNJ2kIyNVbk9Hr5U59Bi7Q=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 16300,
+    "video_count": 112,
+    "view_count": 4749098,
+    "uploads_playlist": "UUFYrO0zAqlfu3IjC4u_Enag",
+    "keywords": "살림사랑 \"살림 사랑\" 살림 쿠팡 쿠팡꿀템 살림꿀템 살림꿀팁 살림리뷰 리뷰 살림템 다이소리뷰 다이소꿀템 생활꿀템 살림마니아 쿠팡리뷰 살림마켓 다이소 갓성비",
+    "custom_url": "@살림사랑",
+    "contact_email": "wjmedia300@gmail.com",
+    "keyword": "세탁 꿀팁",
+    "screen": {
+      "match_score": 6,
+      "matched_products": [
+        "건조기 시트",
+        "식기세척기 세제",
+        "캡슐 세제",
+        "얼룩 제거제"
+      ],
+      "rationale": "살림 관련 채널로 타깃 프로필과 잘 맞으나, 최근 30일 업로드 활동이 확인되지 않아 현재 채널 상태 검증 필요. 구독자 수와 제품 매칭도는 적합.",
+      "verdict": "maybe",
+      "red_flags": [
+        "recent_videos 데이터 없음 - 최근 활동 여부 미확인",
+        "is_fresh 정보 없음 - 채널 활성도 판단 불가"
+      ],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCCadBjYJlCIBf7gbaP2t0pA",
+    "title": "세상의 모든 쇼핑",
+    "description": "세상의 모든 인기 제품.\n모든 쇼핑 정보를 알려주는 세.모.쇼\n\n문의 : hozzang12345@gmail.com\n",
+    "country": "KR",
+    "published_at": "2012-11-08T07:05:12Z",
+    "thumbnail": "https://yt3.ggpht.com/k9ox48Kcu_mV-0pzPfNUmhR079sYb0wH1PsLYGspcBfGXqZjrMlLRMMPlx9LDPd6TaWeI7NpeTM=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 24200,
+    "video_count": 9092,
+    "view_count": 17845685,
+    "uploads_playlist": "UUCadBjYJlCIBf7gbaP2t0pA",
+    "keywords": "쇼핑 쇼핑리스트 인기순위 추천순위 쇼핑추천 상품추천",
+    "custom_url": "@semoshow_",
+    "contact_email": "hozzang12345@gmail.com",
+    "keyword": "건조기 시트 추천",
+    "screen": {
+      "match_score": 4,
+      "matched_products": [],
+      "rationale": "일반 쇼핑 추천 채널로 생활용품 카테고리는 있으나, 구체적인 살림·육아·인테리어 등 특정 라이프스타일 콘텐츠가 부재하고 최근 30일 업로드 활동 정보 미확인으로 협업 적합도 낮음.",
+      "verdict": "rejected",
+      "red_flags": [
+        "최근 업로드 활동 없음 (recent_videos 공백)",
+        "채널 주제가 포괄적 쇼핑 추천으로 iLBiA/Omomo 타깃 프로필과 직접 매칭 어려움",
+        "is_fresh 정보 미확인 (활동성 검증 불가)"
+      ],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCKlVAr5IFzGuQHssBAglonw",
+    "title": "리뷰아재",
+    "description": "비즈니스 문의\nmallangnim@gmail.com\n",
+    "country": "KR",
+    "published_at": "2024-09-18T09:00:34.040158Z",
+    "thumbnail": "https://yt3.ggpht.com/-xchqSVBcbNw7-VyfL5TAauoVtkQpMdr9O3RfwcRWQriyRcpapdzojcE7Y-MOL1J0dfVeI5-3Q=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 35300,
+    "video_count": 591,
+    "view_count": 814459,
+    "uploads_playlist": "UUKlVAr5IFzGuQHssBAglonw",
+    "keywords": "가전제품 청소기 로봇청소기 무선청소기 생활용품 TV 세탁기 드럼세탁기 통돌이세탁기 공기청정기 추천 건조기 냉장고 김치냉장고 에어컨 제습기",
+    "custom_url": "@socialislam-005",
+    "contact_email": "mallangnim@gmail.com",
+    "keyword": "건조기 시트 추천",
+    "screen": {
+      "match_score": 6,
+      "matched_products": [
+        "건조기 시트",
+        "식기세척기 세제",
+        "캡슐 세제"
+      ],
+      "rationale": "가전제품 리뷰 채널로 건조기, 세탁기 등 생활가전을 다루며 iLBiA 제품과의 자연스러운 매칭 가능성이 있으나, 최근 30일 업로드 활동 확인 불가로 활동성 검증 필요.",
+      "verdict": "maybe",
+      "red_flags": [
+        "최근_업로드_활동_미확인",
+        "recent_videos_데이터_없음",
+        "주부_육아_살림_콘텐츠_부재_가능성"
+      ],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCXedN5q7AwMyLmUQ0h6XjiQ",
+    "title": "알뜰파파",
+    "description": "⬇️⬇️⬇️ 영상 속 제품 링크 ⬇️⬇️⬇️\n저만 알기에 너무 아까운 알뜰살림템들 모아 모아 직접 구매하여 추천 드리는 채널입니다 ♡\n\n■ 비즈니스 문의\nemail : su110422@gmail.com\n카카오톡 : alddlepapa\n\n",
+    "country": "KR",
+    "published_at": "2024-05-07T14:38:22.417365Z",
+    "thumbnail": "https://yt3.ggpht.com/U_iOqvytorrJPoqwX9ULm6Xj-lPt1ISh5IXrPpSZhdAqf73IL-i2Y6Cp5hDjZwSgrFCQzsixRg=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 21700,
+    "video_count": 244,
+    "view_count": 4741787,
+    "uploads_playlist": "UUXedN5q7AwMyLmUQ0h6XjiQ",
+    "keywords": "살림 쿠팡 쿠팡추천 가성비",
+    "custom_url": "@알뜰파파",
+    "contact_email": "su110422@gmail.com",
+    "keyword": "살림템 추천",
+    "screen": {
+      "match_score": 8,
+      "matched_products": [
+        "건조기 시트",
+        "식기세척기 세제",
+        "캡슐 세제",
+        "얼룩 제거제"
+      ],
+      "rationale": "알뜰살림에 특화된 채널로 타깃 프로필(주부/살림/가성비)과 완벽 일치하며, 구독자 수 21.7만은 범위 상한이나 쿠팡 추천 콘텐츠 특성상 생활용품 협업에 최적화되어 있음.",
+      "verdict": "approved",
+      "red_flags": [],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCvzViMPSztQ6tb3TYFsxHFQ",
+    "title": "희지 Heezy",
+    "description": "안녕하세요! 희지입니다☆.☆\n\n여기는 제가 좋아하는, 입는, 바르는, 가는, 먹는 모든 things를 공유하는 영상일기장입니다★\n\n제 취향이 담긴 모든 것들을 담아서 하울, 룩북, 겟레디, 메이크업, 브이로그 등 다양하게 보여드리는 곳이니\n다들 편하게 놀다 가세욥!♥\n\n더 많은 정보는... 163/52  - 봄웜라 입니댕.\n\n놀러와주셔서 감사해욥♡.♡\n\nInstagram : hi_zzi_ni\nmail : wlslgmltmd@naver.com\n\n",
+    "country": "KR",
+    "published_at": "2013-10-12T07:27:57Z",
+    "thumbnail": "https://yt3.ggpht.com/JMiWcnk2ZMI_8oXl28XWfhsdzPt4TP0djwwrmyO_4i1GOV5Mdg1vCEWhiyEEtzO0lex5SCX7=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 42400,
+    "video_count": 464,
+    "view_count": 7363418,
+    "uploads_playlist": "UUvzViMPSztQ6tb3TYFsxHFQ",
+    "keywords": "",
+    "custom_url": "@heezy_",
+    "contact_email": "wlslgmltmd@naver.com",
+    "keyword": "자취 청소템",
+    "screen": {
+      "match_score": 3,
+      "matched_products": [],
+      "rationale": "뷰티(색조) 중심의 하울/메이크업/룩북 채널로 타깃 프로필(주부/살림/육아/생활팁)과 완전 불일치. 협력 불가능 카테고리에 해당.",
+      "verdict": "rejected",
+      "red_flags": [
+        "채널 주제 완전 불일치 (뷰티/패션/라이프스타일)",
+        "생활용품/세제와 무관한 콘텐츠",
+        "협력 가능성 낮음 카테고리: 뷰티(색조)"
+      ],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UC_b570p2suB2Auc1n2DO2Kg",
+    "title": "살림박스",
+    "description": "👇️👇️ 영상 속 제품 바로가기 👇️👇️\n\n비즈니스 문의 : ktaewan12@naver.com\n",
+    "country": "KR",
+    "published_at": "2024-08-18T08:29:09.5575Z",
+    "thumbnail": "https://yt3.ggpht.com/N81o1rCP7rRww8jj7V5hrDs2rKvhFwmS-FyqIkpM9YfkUPpnf_aNmQc76YYckSlr0--NRDFGDw=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 25500,
+    "video_count": 365,
+    "view_count": 39955869,
+    "uploads_playlist": "UU_b570p2suB2Auc1n2DO2Kg",
+    "keywords": "살림 꿀템 꿀팁 추천템 필수템 쿠팡 다이소 테무 알리 \"살림 추천템\" \"살림 꿀템\" \"자취 꿀템\" 자취 \"생활 꿀템\" 주방 욕실 거실 자취방 정리 집꾸미기 청소 베란다 이케아 \"꿀템 추천\" 살림템 \"살림템 추천\"",
+    "custom_url": "@살림박스",
+    "contact_email": "ktaewan12@naver.com",
+    "keyword": "살림템 추천",
+    "screen": {
+      "match_score": 6,
+      "matched_products": [
+        "건조기 시트",
+        "식기세척기 세제",
+        "캡슐 세제",
+        "얼룩 제거제"
+      ],
+      "rationale": "살림·정리·생활템 중심 채널로 타깃 프로필과 잘 맞고 구독자 수도 적합하나, 최근 30일 업로드 활동 정보 부족으로 활동성 확인 불가.",
+      "verdict": "maybe",
+      "red_flags": [
+        "최근 30일 업로드 활동 데이터 없음(is_fresh: null)",
+        "최근 영상 목록 비어있음"
+      ],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCSi53kMYfbZNN0KLqU07KYA",
+    "title": "살림사리",
+    "description": "↓↓↓♥ 영상 속 제품 링크 ♥↓↓↓\n\n비즈니스 문의 : yuuudaeng@gmail.com\n",
+    "country": "KR",
+    "published_at": "2024-09-30T12:26:43.886205Z",
+    "thumbnail": "https://yt3.ggpht.com/1Dujxd9IlD4wCfrOFGZhh2idfaQhJV6WIJt4dtHb6Ob0Pvpf7eijar2oW1hO4kemTsboMmD8=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 13200,
+    "video_count": 263,
+    "view_count": 3226002,
+    "uploads_playlist": "UUSi53kMYfbZNN0KLqU07KYA",
+    "keywords": "살림템 쿠팡템 주방템 청소템 정리템 생활용품 추천템 가성비템 리뷰 생활꿀템 다이소템 쿠팡템 쿠팡추천템 다이소추천템 정리정돈",
+    "custom_url": "@살림사리",
+    "contact_email": "yuuudaeng@gmail.com",
+    "keyword": "살림템 추천",
+    "screen": {
+      "match_score": 8,
+      "matched_products": [
+        "건조기 시트",
+        "식기세척기 세제",
+        "캡슐 세제",
+        "얼룩 제거제"
+      ],
+      "rationale": "살림템/쿠팡템 중심의 생활용품 추천 채널로 iLBiA 제품군과 높은 연관성을 보임. 구독자 수(13.2K)와 채널 방향성이 타깃 프로필과 완벽 부합.",
+      "verdict": "approved",
+      "red_flags": [],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCm2LjQEx3Ix96tbDh_xwKFg",
+    "title": "뭉댕살림",
+    "description": "↓↓↓♥ 영상 속 제품 링크 ♥↓↓↓\n\n비즈니스 문의 : reviewdaeng@gmail.com\n\n인스타그램 : mungdaengsalim\n틱톡 : mungdaengsalim\n\n♥ YD MCN Creator ♥\n",
+    "country": "KR",
+    "published_at": "2024-10-24T01:45:09.926785Z",
+    "thumbnail": "https://yt3.ggpht.com/F6TwRxiW-wDsM5-kLUir_vzXFMsXnpfobK_Ga2y9BuFfMIzK9Qql7fcyimlkv1das4Bw4Xsi-w=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 13500,
+    "video_count": 285,
+    "view_count": 9286110,
+    "uploads_playlist": "UUm2LjQEx3Ix96tbDh_xwKFg",
+    "keywords": "살림템 쿠팡템 주방템 청소템 정리템 생활용품 추천템 가성비템 리뷰 생활꿀템 다이소템 쿠팡템 쿠팡추천템 다이소추천템 정리정돈",
+    "custom_url": "@mungdaengsalim",
+    "contact_email": "reviewdaeng@gmail.com",
+    "keyword": "살림템 추천",
+    "screen": {
+      "match_score": 8,
+      "matched_products": [
+        "건조기 시트",
+        "식기세척기 세제",
+        "캡슐 세제",
+        "얼룩 제거제"
+      ],
+      "rationale": "살림·청소·생활용품 중심의 채널로 타깃 프로필과 완벽 일치하며, 구독자 1.35만 명으로 적정 범위 내. 키워드에 청소템·생활용품이 강조되어 세제류 전반과 자연스러운 매칭 가능.",
+      "verdict": "approved",
+      "red_flags": [],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCFoO0WUqerPktmw9x_wPa5w",
+    "title": "친절한 경애씨",
+    "description": "친절한경애씨는 황혼육아와 함께 청소영상,수납정리,소소한요리등 친정엄마 같은 마음으로 많은걸 알려주고싶은 마음으로 영상을 업로드 합니다. ",
+    "country": "KR",
+    "published_at": "2018-12-28T04:21:42Z",
+    "thumbnail": "https://yt3.ggpht.com/ytc/AIdro_mmJy7Z4av31mpraGe_qPmulBe9Dwi5aNlMMpbcUK8mPg=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 24000,
+    "video_count": 208,
+    "view_count": 3745753,
+    "uploads_playlist": "UUFoO0WUqerPktmw9x_wPa5w",
+    "keywords": "육아 황혼육아 수납 친절한 브이로그 #주방수납 황혼육아프로그램 황혼 육아2회차 미니멀라이프 주부 주방 할머니 손녀 할머니와손녀",
+    "custom_url": "@친절한경애씨",
+    "contact_email": "tngidrla@naver.com",
+    "keyword": "빨래 꿀팁",
+    "screen": {
+      "match_score": 8,
+      "matched_products": [
+        "건조기 시트",
+        "식기세척기 세제",
+        "캡슐 세제",
+        "얼룩 제거제"
+      ],
+      "rationale": "황혼육아, 청소, 수납정리, 주부 라이프스타일을 다루는 채널로 iLBiA 타깃 프로필과 완벽하게 일치하며, 구독자 2.4만명으로 적정 범위 내 있음.",
+      "verdict": "approved",
+      "red_flags": [],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCEEy2CHBhikXd3KTxEcGcGQ",
+    "title": "레아픽 Lea's pick",
+    "description": "패션과 일상 속 꿀팁&꿀템 제가 딱 알려드릴게요🫶\n\n패션 브랜드부터 트렌드, 패션아이템 추천 등\n패션을 전공한 패션 디렉터의 다년간 경험으로\n여러분들에게 도움되는 솔직한 정보들 많이 알려드릴게요😎\n\nContact: leaspickk@gmail.com\n",
+    "country": "KR",
+    "published_at": "2020-07-23T11:51:21.03227Z",
+    "thumbnail": "https://yt3.ggpht.com/pR0SV0s4L-IpRAOSnSNEFNzpWFsMdkAb8PN6zOpmOjOw84jZ6W3-Bcd0vtlpyZwVvGQxZuwU=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 27800,
+    "video_count": 318,
+    "view_count": 14791886,
+    "uploads_playlist": "UUEEy2CHBhikXd3KTxEcGcGQ",
+    "keywords": "fashion 패션블로거 패션유튜버 \"k fashion youtuber\" \"fashoin youtuber\" \"패션 유튜버\" \"korea fashion\" \"Fashion YouTuberin\" \"youtuber de modas\" \"korea sub\" 명품가방 명품지갑 명품하울 명품유튜버 명품리뷰 명품추천 명품유튜브 쇼핑하울 룩북 언박싱 이벤트 패션하울 코디추천 패션룩북 하울 명품입문 명품가방추천 명품백추천 명품백 CEO 창업 쇼핑몰추천 쇼핑몰대표 대표 명품 쇼핑몰 디자이너브랜드 디자이너가방 디자이너백",
+    "custom_url": "@leapick",
+    "contact_email": "leaspickk@gmail.com",
+    "keyword": "육아템 추천",
+    "screen": {
+      "match_score": 1,
+      "matched_products": [],
+      "rationale": "채널의 핵심 주제가 패션·명품·하울로 생활세제 및 생활용품과 완전히 불일치하며, 최근 30일 업로드 활동 기록이 없습니다.",
+      "verdict": "rejected",
+      "red_flags": [
+        "타깃 프로필 완전 불일치 (패션 전문 채널)",
+        "최근 30일 업로드 활동 없음",
+        "제품 카탈로그와 자연스러운 매칭 불가능"
+      ],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCSMXHb6eaO1kuURCBAzRO0g",
+    "title": "임쁨임",
+    "description": "강아지와 함께하는 살림살이\n삶을 더 센스 있게 만드는 리뷰를 보여드릴게요 ❤︎\n\n비지니스 문의 → limbbeumlim@gmail.com\n",
+    "country": "KR",
+    "published_at": "2021-05-29T11:09:26.427722Z",
+    "thumbnail": "https://yt3.ggpht.com/ddGqT9jBzF2JIgMO6XF-wMbrxOJ1BIiBPXjdQ-ySakIJgdxLwExhdpHWRWZTqRfF9e5FeSE8_w=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 32800,
+    "video_count": 613,
+    "view_count": 10108377,
+    "uploads_playlist": "UUSMXHb6eaO1kuURCBAzRO0g",
+    "keywords": "리뷰 자취 맛집 가이드 추천 꿀팁 코스트코 쿠팡 트레이더스 소분 강아지 캠핑 백패킹",
+    "custom_url": "@limbbeumlim",
+    "contact_email": "limbbeumlim@gmail.com",
+    "keyword": "주방용품 추천",
+    "screen": {
+      "match_score": 8,
+      "matched_products": [
+        "얼룩 제거제",
+        "건조기 시트",
+        "섬유 탈취제"
+      ],
+      "rationale": "반려동물(강아지) 가정 중심의 살림 리뷰 채널로, 얼룩 제거제와 섬유 관련 제품의 자연스러운 매칭이 가능합니다. 구독자 수와 활동성도 협업 기준을 충족합니다.",
+      "verdict": "approved",
+      "red_flags": [],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UC5Bu7ZrR94WBUpqk9ALJ6bQ",
+    "title": "경가캠핑",
+    "description": "📌 비지니스 문의: peteryu77@naver.com\n📌인스타그램: https://www.instagram.com/kyungga_camping/\n📌블로그: https://blog.naver.com/wjhj99\n\n‘경가캠핑’은 초보 캠퍼를 위한 캠핑 가이드입니다.\n비싸지 않아도 충분히 즐거운 현실적인 캠핑 정보를 나누고 있어요.\n가성비 좋은 캠핑용품 리뷰와 필수 팁을 영상으로 담았습니다.\n구독자 이벤트도 진행하며, 진짜 캠핑의 즐거움을 함께합니다.\n캠핑이 막막할 땐, 경가캠핑을 구독하세요. 캠핑 설명서가 되어 드릴께요.\n\n#캠핑 #캠핑장비 #캠핑용품 #캠핑브이로그 #캠핑장 #캠핑장추천 #오토캠핑 #가족캠핑\n#camping #Koreancamping #campinggear\n\n\n",
+    "country": "KR",
+    "published_at": "2021-05-12T02:37:10.356064Z",
+    "thumbnail": "https://yt3.ggpht.com/X_oNGd2py-Fb7XXaRZdBWKK3v4xFMaKXfi7wE2GbZKYXM7IqYXlwHs7dALJTbFphbM5UxRQES-o=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 28700,
+    "video_count": 386,
+    "view_count": 10082957,
+    "uploads_playlist": "UU5Bu7ZrR94WBUpqk9ALJ6bQ",
+    "keywords": "캠핑 캠핑장비 캠핑용품 캠핑장 가족캠핑 오토캠핑 경이로운가족 텐트 우중캠핑 camping campingsite 여름캠핑 겨울캠핑 동계캠핑 난로사용법 캠핑장추천 korean koreancamping campsite campinggear 계곡캠핑 단풍캠핑 아웃도어 여행 첫캠핑 캠핑카 캠핑음식 캠핑요리 폴라리스 스노우피크 경가 파워뱅크 난로 쉘터 돔텐트 '",
+    "custom_url": "@wonderful_family",
+    "contact_email": "peteryu77@naver.com",
+    "keyword": "주방용품 추천",
+    "screen": {
+      "match_score": 2,
+      "matched_products": [],
+      "rationale": "캠핑 여행 채널로 iLBiA/Omomo 타깃 프로필(주부/살림/육아/인테리어)과 완전 불일치. 생활세제 제품과 자연스러운 매칭점 부재.",
+      "verdict": "rejected",
+      "red_flags": [
+        "채널 주제 완전 불일치(여행/캠핑)",
+        "협업 불가능 카테고리 해당",
+        "최근 30일 업로드 활동 없음(recent_videos 공란)"
+      ],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCEQzI6Bz2vVwAb4wJpTKN1Q",
+    "title": "바닐라콩 Vanillabean",
+    "description": "주로 혼자 보내는 일상을 담아요. \n고양이와 귀여운 모든 것을 좋아해요. 🍪\n\nmostly about spending days alone\nlike cats and everything cute. \n\n\n🤳🏻Contact : hi.vanillabean@gmail.com\n(공동구매 문의는 정중히 사양합니다. 🙏🏻)",
+    "country": "KR",
+    "published_at": "2022-05-04T12:41:20.092377Z",
+    "thumbnail": "https://yt3.ggpht.com/GgqJ7IJJ_D5Tpb3E5l302saQPDUjeeDv25hYLGnE4feN0b4oshV3tLEPhJ20Sqe3-5f0c68DJg=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 30000,
+    "video_count": 40,
+    "view_count": 2394620,
+    "uploads_playlist": "UUEQzI6Bz2vVwAb4wJpTKN1Q",
+    "keywords": "브이로그 일상브이로그 자취브이로그 프리랜서브이로그 서울브이로그 seoullife",
+    "custom_url": "@vanillabean_vlog",
+    "contact_email": "hi.vanillabean@gmail.com",
+    "keyword": "청소 브이로그",
+    "screen": {
+      "match_score": 6,
+      "matched_products": [
+        "건조기 시트",
+        "섬유 탈취제"
+      ],
+      "rationale": "자취 라이프스타일과 반려동물(고양이) 콘텐츠가 있어 생활용품 매칭 가능하나, 최근 30일 업로드 활동 확인 불가로 협업 신뢰도 낮음.",
+      "verdict": "maybe",
+      "red_flags": [
+        "recent_videos 데이터 없음 - 최근 활동성 미확인",
+        "구독자 3만으로 상위 범위 - 협업비 예상 높음",
+        "공동구매 사양 표기 - 타사 협업 선호도 불명확"
+      ],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCa5KbflziIj3gvCvz5CE0oA",
+    "title": "헤이무",
+    "description": "나는야 헤이무 🦖",
+    "country": "KR",
+    "published_at": "2019-01-30T13:11:09Z",
+    "thumbnail": "https://yt3.ggpht.com/ytc/AIdro_kBWLEfTdz1GtuOuE4uNzMvmH2nJeiMXsNF_1SGz4B8XZE=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 89300,
+    "video_count": 391,
+    "view_count": 16613984,
+    "uploads_playlist": "UUa5KbflziIj3gvCvz5CE0oA",
+    "keywords": "",
+    "custom_url": "@hyeimoo",
+    "contact_email": "hyeim@cableagency.co.kr",
+    "keyword": "주방용품 추천",
+    "screen": {
+      "match_score": 2,
+      "matched_products": [],
+      "rationale": "채널명과 설명만으로는 실제 콘텐츠 주제를 파악할 수 없으며, 최근 30일 업로드 활동 데이터 부재로 현재 활동성 확인 불가. 타깃 프로필과의 매칭 여부를 판단할 근거 부족.",
+      "verdict": "rejected",
+      "red_flags": [
+        "채널 설명 정보 불충분 (공백)",
+        "최근 업로드 활동 데이터 없음 (is_fresh: null, recent_videos: [])",
+        "콘텐츠 주제 파악 불가능",
+        "키워드 정보 없음"
+      ],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCJq2J5oemht1YOfFpi4atiA",
+    "title": "살림왕티라노",
+    "description": "✅영상 속 제품 링크 ⬇︎\n\n✅이메일(제안/문의)\nilsangsallim@gmail.com\n",
+    "country": "",
+    "published_at": "2025-02-18T13:48:37.290039Z",
+    "thumbnail": "https://yt3.ggpht.com/zvL8GfAVYGmIsPkLFodLFnBm_NVHJPlRKpwqrtY9hL60I6eU7HpOhMtE0sI-pdGDxlkJfDy9=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 17500,
+    "video_count": 36,
+    "view_count": 2949471,
+    "uploads_playlist": "UUJq2J5oemht1YOfFpi4atiA",
+    "keywords": "",
+    "custom_url": "@ariilsang",
+    "contact_email": "ilsangsallim@gmail.com",
+    "keyword": "살림 꿀템 쿠팡",
+    "screen": {
+      "match_score": 8,
+      "matched_products": [
+        "건조기 시트",
+        "식기세척기 세제",
+        "캡슐 세제",
+        "얼룩 제거제"
+      ],
+      "rationale": "채널명과 설명에서 '살림'에 특화된 생활팁 콘텐츠로 추정되며, 구독자 1.75만명은 파트너십 범위 내 적정 규모입니다. iLBiA 전 주력 제품과 자연스러운 매칭이 가능합니다.",
+      "verdict": "approved",
+      "red_flags": [],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCjw9TFx7MxiQphKqErZl_0g",
+    "title": "루비 영 Ruby Young",
+    "description": "아기와 함께하는 소중한 시간을 기록하고 있습니다 🤍\n💌 ruby.with.young@gmail.com\n",
+    "country": "",
+    "published_at": "2022-11-19T11:49:04.323067Z",
+    "thumbnail": "https://yt3.ggpht.com/PDRNS4NJMJmyMnjcrtCqYzYMTeUJqSC7WbLDE3coq0i7DUE8MR66vpLXOyeHbUR_diZHPr1i_A=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 17600,
+    "video_count": 224,
+    "view_count": 4361553,
+    "uploads_playlist": "UUjw9TFx7MxiQphKqErZl_0g",
+    "keywords": "",
+    "custom_url": "@rubywithyoung",
+    "contact_email": "ruby.with.young@gmail.com",
+    "keyword": "아기 세탁 세제",
+    "screen": {
+      "match_score": 8,
+      "matched_products": [
+        "건조기 시트",
+        "얼룩 제거제",
+        "캡슐 세제"
+      ],
+      "rationale": "육아 채널로 타깃 프로필과 높은 일치도를 보이며, 구독자 수 17.6K는 범위 내입니다. 아기 양육 중심이므로 얼룩 제거제와 세제류가 자연스럽게 연결됩니다.",
+      "verdict": "approved",
+      "red_flags": [],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCJTQcnL7VQzjT10SC78wKZQ",
+    "title": "유정씨의 라이프 로그",
+    "description": "내 경험의 가치 & 기록의 즐거움을 함께합니다 ❤️\n\n📧 협업: hyj901009@naver.com\n",
+    "country": "",
+    "published_at": "2022-10-02T12:00:07.560006Z",
+    "thumbnail": "https://yt3.ggpht.com/NN6H6wGamc3kqZ5fwyv_RGVaL88-WAXiaUGNnVeydn2j4-dhEhfBk3xhhAyM237LRJJtTGcE8Ns=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 19000,
+    "video_count": 158,
+    "view_count": 1736093,
+    "uploads_playlist": "UUJTQcnL7VQzjT10SC78wKZQ",
+    "keywords": "",
+    "custom_url": "@gifttoyou",
+    "contact_email": "hyj901009@naver.com",
+    "keyword": "쿠팡 파트너스 링크",
+    "screen": {
+      "match_score": 6,
+      "matched_products": [
+        "건조기 시트",
+        "식기세척기 세제",
+        "캡슐 세제"
+      ],
+      "rationale": "구독자 수(1.9만)와 채널명이 생활 관련으로 보여 기본 조건을 만족하나, 채널 설명이 모호하고 최근 활동 데이터 부재로 정확한 평가가 어렵습니다.",
+      "verdict": "maybe",
+      "red_flags": [
+        "최근 30일 업로드 활동 확인 불가",
+        "채널 상세 주제 및 콘텐츠 유형 불명확",
+        "recent_videos 데이터 없음"
+      ],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCMD6dQUXm3ELqaiEs5yFycQ",
+    "title": "AI 리더스 연구소",
+    "description": "생성형AI 교육 강의, 콘텐츠 수익화 전문 채널!\n\n안녕하세요! AI 리더스 연구소 강병규 대표입니다.\n\n📩 강의 및 협업 문의\n📧 nsff2023@naver.com\n\nAI 리더스 연구소는\nAI 업무 자동화, 디지털 전환, 콘텐츠 수익화 등\n누구나 즉시 활용할 수 있는 실전형 AI 활용법을 제공합니다.\n\n생성형 AI 기반의 업무·교육·수익화 특화 콘텐츠를 통해\n1인 창업자부터 기업·공공기관까지\n실무에서 바로 적용할 수 있는 AI 전략을 안내합니다.\n\n🧠 AI 리더스 연구소 강병규 대표 프로필\n\n✔ AI강사사관학교 지도교수 / 선임연구원\n✔ 사)한국AINFT협회 경기지회장\n✔ 기업·기관·개인이 즉시 적용 가능한 실전형 AI 교육·컨설팅 제공\n✔ 생성형 AI 활용 업무혁신 도서 공동저자\n\n📘 AI로 월 100만 원 이상 자동 수익을 만드는 핵심 전략,\n지금 바로 배우고 싶으신가요?\n누구나 쉽게 따라 할 수 있는 AI 자동화 수익화 방법을 알려드립니다.\n👇 아래 링크에서 바로 확인하세요!\n🔗 https://forms.gle/csQ36b2toztAufPe6\n",
+    "country": "KR",
+    "published_at": "2020-11-14T08:55:50.32172Z",
+    "thumbnail": "https://yt3.ggpht.com/cjqmPFqrepMEXR9bhJVH5L0m1rcD0ldIKBzzLQF7TQPnHqozCbL1FpXeB7simm3xd-JE8ntqdVI=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 22600,
+    "video_count": 144,
+    "view_count": 900079,
+    "uploads_playlist": "UUMD6dQUXm3ELqaiEs5yFycQ",
+    "keywords": "유튜브수익화 유튜브부업 유튜브자동화 AI유튜브 AI콘텐츠 제휴마케팅 유튜브채널운영 유튜브수익내기 유튜브쇼츠수익 부업시작하기 디지털노마드 온라인부업 수익형유튜브 유튜브성장 유튜브조회수늘리기 유튜브브랜딩 유튜브AI활용 유튜브GPT 유튜브콘텐츠기획 채널성장전략 유튜브알고리즘 크리에이터수익 유튜브광고수익 얼굴없는유튜브 유튜브템플릿 자동화유튜브 GPT활용법",
+    "custom_url": "@ai_leaders_lab",
+    "contact_email": "nsff2023@naver.com",
+    "keyword": "쿠팡 파트너스 링크",
+    "screen": {
+      "match_score": 1,
+      "matched_products": [],
+      "rationale": "AI 교육 및 수익화 전문 채널로 생활용품·살림·육아 카테고리와 완전히 불일치합니다. 타깃 프로필(주부/살림/육아)과 채널 주제(AI/디지털/수익화)가 전혀 다릅니다.",
+      "verdict": "rejected",
+      "red_flags": [
+        "채널 주제 완전 불일치 (AI 교육 vs 생활용품)",
+        "최근 30일 업로드 활동 없음 (recent_videos 비어있음)",
+        "협업 가능성 낮은 카테고리 (투자/기술 교육)"
+      ],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UCQeMR5TnFl-j6o7pBJtcsZw",
+    "title": "프로N잡러 오호랄라",
+    "description": "사진, 그림, 디자인, 굿즈 콘텐츠로 \n다양한 온라인 부업을 하고 있는 \n프로N잡러 오호랄라입니다.\n\n🌈스톡이미지 판매 부업의 모든 것\nhttps://bit.ly/47dx0eh\n\n🌈오호랄라랜드\nhttps://smartstore.naver.com/ohholala\n\n🌈프로N잡러 오호랄라 더보기\nhttps://linkon.id/ohholala\n\n🌈오호랄라 비즈니스 협업 문의 \noribandd@naver.com\n\n📌그림, 사진, 디자인 기반 취미 수익화, N잡, 부업\n📌생산적 콘텐츠 플랫폼, 앱, 도서, 디지털 기기 리뷰\n📌승화전사 굿즈 단체 제작\n\n",
+    "country": "KR",
+    "published_at": "2012-11-04T07:12:42Z",
+    "thumbnail": "https://yt3.ggpht.com/gfbGDUqoCB5IaQkWNBbr1fKiqs9TCmB2tHON7eZyN9EZoJSRIvtRAhbKH1sPFrO23RLUiXqWbA=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 46200,
+    "video_count": 248,
+    "view_count": 3866687,
+    "uploads_playlist": "UUQeMR5TnFl-j6o7pBJtcsZw",
+    "keywords": "",
+    "custom_url": "@ohholala",
+    "contact_email": "oribandd@naver.com",
+    "keyword": "쿠팡 파트너스 링크",
+    "screen": {
+      "match_score": 2,
+      "matched_products": [],
+      "rationale": "채널 주제가 부업/디자인/굿즈 판매로 생활세제 타깃층과 완전히 불일치하며, 제품 카탈로그와 매칭되는 콘텐츠가 없습니다.",
+      "verdict": "rejected",
+      "red_flags": [
+        "채널 주제: 부업/디자인/스톡이미지 판매 (타깃 프로필 완전 불일치)",
+        "최근 30일 업로드 활동 데이터 없음",
+        "iLBiA/Omomo 제품과 자연스러운 매칭 불가능"
+      ],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  },
+  {
+    "channel_id": "UC38J4GG8OnE3FaGZl2PZ0Mw",
+    "title": "살림마니아",
+    "description": "",
+    "country": "KR",
+    "published_at": "2024-04-05T17:05:44.205829Z",
+    "thumbnail": "https://yt3.ggpht.com/6Y_sRGPr7qqilu2-91KD7ToT3Igt9rdViGj98hHIaA3wD8Kv02hWBYv4B3qV8dhVuahMKEOT1Xc=s88-c-k-c0x00ffffff-no-rj",
+    "subscriber_count": 63200,
+    "video_count": 29,
+    "view_count": 8049503,
+    "uploads_playlist": "UU38J4GG8OnE3FaGZl2PZ0Mw",
+    "keywords": "다이소 쿠팡 추천템 꿀템",
+    "custom_url": "@살림마니아",
+    "contact_email": "nuribomlife@gmail.com",
+    "keyword": "쿠팡 추천 살림",
+    "screen": {
+      "match_score": 6,
+      "matched_products": [
+        "건조기 시트",
+        "식기세척기 세제",
+        "캡슐 세제",
+        "얼룩 제거제"
+      ],
+      "rationale": "살림 관련 채널로 타깃 프로필과 부분 일치하며 구독자 수(63,200명)가 적합 범위 내입니다. 다만 최근 30일 업로드 활동 확인 불가능한 점이 검토 필요합니다.",
+      "verdict": "maybe",
+      "red_flags": [
+        "최근 업로드 활동 데이터 부재(is_fresh: null)",
+        "동영상 29개는 상대적으로 적은 편성",
+        "채널 설명 미작성"
+      ],
+      "model": "claude-haiku-4-5-20251001"
+    }
+  }
+]

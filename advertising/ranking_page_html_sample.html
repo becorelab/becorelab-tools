@@ -1,0 +1,1426 @@
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- 	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, target-densityDpi=device-dpi"> -->
+	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=0.5, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, target-densityDpi=device-dpi">
+	<link rel="shortcut icon" href="/assets/icon/favicon.ico">
+	<script src="/assets/js/jquery-3.7.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+	<script src="/assets/js/swiper-bundle.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+	<script src="/assets/js/ui.js?ver=20251228"></script>
+	<script src="/assets/jquery.validate.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.6.0/clipboard.min.js"></script>
+	<script src="https://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+	<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.min.js"></script>
+	
+	
+	<script src="/assets/js/common.js?ver=20260305"></script>
+	
+	
+		<script src="/assets/js/pagejs/commons.min.js?ver=1777162279415"></script>
+		
+			<script src="/assets/js/pagejs/fastDetail.min.js?ver=1777162279415"></script>
+		
+	
+	
+	
+		
+	
+	<script>
+	const isLogin = true;
+	const pType = 'P';
+	</script>
+	<script src="/assets/js/hbutil.js?ver=20251227"></script>
+	<link rel="stylesheet" href="/assets/css/style.css?ver=202510">
+	<link rel="stylesheet" href="/assets/css/common.css?ver=20250904">
+	<title>빠른 순위추적</title>
+	<meta  name="description" content="내 상품의 노출 순위를 빠르게 추적, 조회합니다.">
+	<meta  name="keywords" content="키워드도구,아이템소싱,카테고리검색,키워드검색,순위추적,랭킹추척,키워드,부업,헬프스토어,스마트스토어,쿠팡,스마트스토어 판매량,경쟁상품분석,최적화진단">
+	<meta property="og:title"         content="빠른 순위추적" />
+	<meta property="og:description" content="내 상품의 노출 순위를 빠르게 추적, 조회합니다.">
+	<meta  property="og:image" content="/static/img/logo.png">
+	<meta  property="og:type" content="website">
+	<preference name="KeyboardShrinksView" value="false" />
+	
+	<!-- 리포트2.0 로그분석코드 시작 -->
+	<script type="text/javascript">
+	var sTime = new Date().getTime();
+	(function(i,s,o,g,r,a,m){i['webObject']=g;i['webUid']=r;a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})
+	(window,document,'script','//kissingsky.weblog.cafe24.com/weblog.js?v='+sTime,'kissingsky_2');
+	</script>
+	<!-- 리포트2.0 로그분석코드 완료 -->
+	
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-J1WZJ3G6N4"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'G-J1WZJ3G6N4');
+	</script>
+	
+
+	
+	<style>
+		.progress-text{
+			vertical-align:baseline;
+			margin:0;
+			margin-left:20px;
+			padding:0;
+			border:0;
+			outline:0;
+			background:transparent;
+			font-size:2em;
+		}	
+	</style>
+	<script>
+	$(function(){
+		
+	})
+	</script>
+	<script>
+	setInterval(function(){
+		$.ajax({
+			type: 'GET',
+			url: '/session',	
+			success: function(result){
+			},
+			error: function(){
+				
+			}
+		});	
+	}, 120000);
+	</script>
+</head>
+<body>
+
+<div class="overlay" style="display:none;z-index:10000;">
+	<div class="loader"></div>
+	<div class="progress-text">-</div>
+</div>
+	<!-- Menu -->
+	
+
+
+
+
+
+
+<script>
+$(function(){
+	
+	var href = window.location.pathname;
+
+	if(href.startsWith('/item')){
+		$('.menuItem').addClass('current');
+	}else if(href.startsWith('/keyword/keyword_analyze_coupang')){		
+		$('.menuKeywordCoupang').addClass('current');
+	}else if(href.startsWith('/keyword')){		
+		$('.menuKeyword').addClass('current');
+	}else if(href.startsWith('/strategy') || href.startsWith('/estimate') || href.startsWith('/bid')){
+		$('.menuAd').addClass('current');
+	}else if(href.startsWith('/rank') || href.startsWith('/fast') || href.startsWith('/coupang')){
+		$('.menuRanking').addClass('current');
+	}else if(href.startsWith('/analysis') || href.startsWith('/tracking') || href.startsWith('/optcheck') || href.startsWith('/extract')){
+		$('.menuAnalyze').addClass('current');
+	}else if(href.startsWith('/clip')){
+		$('.menuClip').addClass('current');
+	}else if(href.startsWith('/board/notice')){
+		$('.menuNotice').addClass('current');
+	}else if(href.startsWith('/optimize')){
+		$('.menuOptimize').addClass('current');
+	}else if(href.startsWith('/my/course')){
+		$('.menuCourse').addClass('current');
+	}
+	
+	getExtensionVersion().then((version) => {
+		if (version) {
+			$('#currentVersion').text('v.' + version);
+		} else {
+			$('#currentVersion').text('미설치');
+			
+		}
+	});
+});
+</script>
+
+
+
+<nav id="menu">
+	<button type="button" class="toggle" onclick="$('body').toggleClass('menuClosed');"><span>메뉴 접기/펼치기</span></button>
+	<!-- 로그인 정보 -->
+	
+	
+		
+			
+			
+			
+			
+			
+				<div class="info type2" onclick="location.href='/my'">
+					<strong>비코어랩님</strong>
+					<span>멤버십</span>
+					<p id="currentVersion">-</p>
+				</div>
+				
+			
+		
+		
+	
+  
+		
+
+    <!-- //로그인 정보 -->
+
+	<!-- 메뉴 -->
+	<div class="menu">
+		<a href="/item" 		class="menuItem"><span>아이템</span></a>
+		<a href="/keyword" 				class="menuKeyword"><span>키워드</span></a>
+		<a href="/keyword/keyword_analyze_coupang" 				class="menuKeywordCoupang"><span>키워드-쿠팡</span></a>
+		<a href="/strategy"				class="menuAd"><span>광고</span></a>
+		<a href="/rank"			class="menuRanking"><span>순위</span></a>
+		<a href="/tracking"		class="menuAnalyze"><span>분석</span></a>
+		<a href="/optimize"					class="menuOptimize"><span>최적화</span></a>
+		<hr>
+		<a href="/my/course"			class="menuCourse"><span>강의실</span></a>
+		<a href="/clip"					class="menuClip"><span>추천 영상</span></a>
+		
+<!-- 		<a href="/board/notice/list"	class="menuNotice"><span>공지 및 뉴스</span></a> -->
+	</div>
+	<!-- //메뉴 -->
+</nav>
+	<!-- //Menu -->
+
+  <div id="container">
+  	
+	<!-- Header -->
+	<header id="header">
+    	
+
+
+
+
+
+
+<style>
+	#naverStatus {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-family: sans-serif;
+		padding: 6px 12px;
+		border-radius: 9999px;
+		transition: background-color 0.3s;
+	}
+	.status-dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		transition: background-color 0.3s;
+	}
+	.status-text {
+		font-size: 14px;
+		font-weight: bold;
+	}
+	.logged-in {
+		background-color: #03c75a;
+		color: white;
+	}
+	.logged-out {
+		background-color: #ccc;
+		color: black;
+	}
+	
+	#coupangStatus {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-family: sans-serif;
+		padding: 6px 12px;
+		border-radius: 9999px;
+		transition: background-color 0.3s;
+	}
+	.logged-inC {
+		background-color: #d93d34;
+		color: white;
+	}
+	
+ 	#wingStatus { 
+ 		display: inline-flex; 
+ 		align-items: center; 
+ 		gap: 8px; 
+ 		font-family: sans-serif; 
+ 		padding: 6px 12px; 
+ 		border-radius: 9999px; 
+ 		transition: background-color 0.3s; 
+ 	} 
+ 	.logged-inW { 
+ 		background-color: #661919; 
+ 		color: white; 
+ 	} 
+</style>
+<script>
+$(function(){	
+	getExtensionVersion().then(async (version) => {
+		if (version) {
+			const isLoginNaver = await sendReceiveProcess('isLoginNaver', 'isLoginNaverResult', {  });
+			if(isLoginNaver){
+// 			if(isLoginNaver.success){
+				$('#naverStatus').removeClass('logged-out').addClass('logged-in')
+				$('#statusDot').css('background-color', 'white');
+				$('#statusText').text('네이버연동');
+			}	else{
+				$('#naverStatus').removeClass('logged-in').addClass('logged-out')
+				$('#statusDot').css('background-color', 'blank');
+				$('#statusText').text('네이버미연동');
+			}
+			
+			const isLoginCoupang = await isCoupangLogin();
+			if(isLoginCoupang){
+// 			if(isLoginCoupang.success){
+				$('#coupangStatus').removeClass('logged-out').addClass('logged-inC')
+				$('#statusDotC').css('background-color', 'white');
+				$('#statusTextC').text('쿠팡연동');
+			}	else{
+				$('#coupangStatus').removeClass('logged-inC').addClass('logged-out')
+				$('#statusDotC').css('background-color', 'blank');
+				$('#statusTextC').text('쿠팡미연동');
+			}
+			
+			const isLoginWing = await isWingLogin();
+			if(isLoginWing){
+				$('#wingStatus').removeClass('logged-out').addClass('logged-inW')
+				$('#statusDotW').css('background-color', 'white');
+				$('#statusTextW').text('윙 연동완료');
+			}	else{
+				$('#wingStatus').removeClass('logged-inW').addClass('logged-out')
+				$('#statusDotW').css('background-color', 'blank');
+				$('#statusTextW').text('윙 미연동');
+			}
+		}else{
+			$('#statusText').text('확장 프로그램을 설치하세요');
+			$('.coupangStatus').hide();
+			$('.wingStatus').hide();
+		}
+	});
+	
+});
+
+</script>
+<h1>
+	<a href="/"><span>HELP STORE</span></a>
+		
+	<div id="naverStatus" class="logged-out">
+		<div class="status-dot" id="statusDot" style="background:black;"></div>
+		<div class="status-text"" id="statusText">확인 중...</div>
+	</div>
+	<div id="coupangStatus" class="logged-out">
+		<div class="status-dot" id="statusDotC" style="background:black;"></div>
+		<div class="status-text" id="statusTextC">확인 중...</div>
+	</div>
+	
+
+	<div id="wingStatus" class="logged-out">
+		<div class="status-dot" id="statusDotW" style="background:black;"></div>
+		<div class="status-text" id="statusTextW">확인 중...</div>
+	</div>
+	<div class="tooltip show">
+		<button type="button">
+			<span>
+				도움말 보기
+			</span>
+		</button>
+		<div style="left: -70px;">
+			미연동시 검색 차단이 발생할수 있습니다.<br>연동하려면 새 탭에서 네이버,쿠팡,윙  로그인하세요.
+		</div>
+	</div>		
+</h1>
+      
+<div class="swiper">
+	<ul class="swiper-wrapper">
+		
+			
+			
+			
+		
+		<!-- item -->
+		
+<!-- 		<li class="swiper-slide"> -->
+<!-- 			<a href=""> -->
+<!-- 				<img src="/assets/@temp/@banner.png" alt="NYT 21세기 최고의 책 100대 도서 쇼퍼백 증정"> -->
+<!-- 			</a> -->
+<!-- 		</li> -->
+	</ul>
+	<div class="pagination"></div>
+</div>
+<div class="shortcut">
+	<a href="/membership/monthly">멤버십</a>
+	<a href="https://rainy-cyclamen-990.notion.site/HELPSTORE-e45258ee9bf244f995176361f5fff649" target="_blank">사용 가이드</a>
+</div>
+
+
+    </header>
+    <!-- //Header -->
+  
+    <!-- Contents -->
+    
+    
+
+
+
+
+
+
+
+
+<script>extensionCheck()</script>
+
+<style>
+	.tableOverview{visibility:hidden} /* 레이아웃 유지 + 첫 페인트 차단 */
+	.hidden {
+    display: none !important;
+  }
+</style>
+<script>
+  const keywordList = [
+    
+      {
+        "keyword_id": "383380",
+        "keyword": "식기세척기세제"
+      }
+      ,
+    
+      {
+        "keyword_id": "383381",
+        "keyword": "식세기세제"
+      }
+      ,
+    
+      {
+        "keyword_id": "383382",
+        "keyword": "식기세척기 린스"
+      }
+      ,
+    
+      {
+        "keyword_id": "383383",
+        "keyword": "lg 식기세척기세제"
+      }
+      ,
+    
+      {
+        "keyword_id": "383384",
+        "keyword": "식세기린스"
+      }
+      ,
+    
+      {
+        "keyword_id": "383385",
+        "keyword": "식기세척기세제추천"
+      }
+      ,
+    
+      {
+        "keyword_id": "383386",
+        "keyword": "lg식기세척기세제"
+      }
+      ,
+    
+      {
+        "keyword_id": "383387",
+        "keyword": "삼성 식기세척기 세제"
+      }
+      ,
+    
+      {
+        "keyword_id": "383388",
+        "keyword": "1종 식기세척기 세제"
+      }
+      ,
+    
+      {
+        "keyword_id": "383389",
+        "keyword": "엘지 식기세척기 세제"
+      }
+      ,
+    
+      {
+        "keyword_id": "383390",
+        "keyword": "밀레 식기세척기 세제"
+      }
+      ,
+    
+      {
+        "keyword_id": "383391",
+        "keyword": "식기세척기전용세제"
+      }
+      ,
+    
+      {
+        "keyword_id": "383392",
+        "keyword": "sk매직 식기세척기 세제"
+      }
+      ,
+    
+      {
+        "keyword_id": "383393",
+        "keyword": "식기세척기 고체세제"
+      }
+      ,
+    
+      {
+        "keyword_id": "383394",
+        "keyword": "sk식기세척기 세제"
+      }
+      ,
+    
+      {
+        "keyword_id": "383395",
+        "keyword": "아기 식기세척기 세제"
+      }
+      ,
+    
+      {
+        "keyword_id": "383396",
+        "keyword": "아기 식세기세제"
+      }
+      
+    
+  ];
+</script>
+<script>
+const selectedRankingId = 45522;
+</script>
+<!-- Contents -->
+<section id="contents">
+<header class="rankingDetailHeader">
+	<button type="button" onclick="history.back()" class="back">이전</button>
+<!-- 	<h2>빠른 순위 추적</h2> -->
+
+	<!--
+	<div>
+	<em class="shop">상점명으로 추적</em>
+	</div>
+	-->
+
+	<!--
+	<div>
+	<em class="id2">상품ID[가격비교]로 추적</em>
+	<span>상품ID: 123412312</span>
+	<span>가격비교ID: 123412312</span>
+	</div>
+	-->
+	
+	<!--
+	<div>
+	<em class="id1">상품ID[단일상품]로 추적</em>
+	<span>상품ID: 123412312</span>
+	</div>
+	-->
+
+	<div>
+<!-- 	<em class="url">상품주소로 추적</em> -->
+<!-- 	<input type="text" readonly value="https://smartstore.naver.com/supremo/products/4867775aaaaaaaaaaaaa"> -->
+<!-- 	<button type="button" class="copy">복사</button> -->
+	</div>
+
+	
+	<p>
+<!-- 	최종 분석시간 2024.02.24 06:42 -->
+	<button type="button" class="caseXsmall refresh" id="btnRequest"><span>추적</span></button>
+	</p>
+	
+
+<!-- 	<p> -->
+<!-- 	<em>분석중..</em> -->
+<!-- 	<span class="refresh">54%</span> -->
+<!-- 	</p> -->
+</header>
+
+<!-- Overview -->
+
+<div class="productOverview">
+	<a href="https://smartstore.naver.com/ilbia/products/8555036975">
+	<div class="con">
+	<strong>일비아 <b>식기세척기 세제</b> 올인원 1종 <b>식세기세제</b> 린스 <b>아기</b> 하트 타블렛 LG 삼성 SK 밀레 호환 60정 x 3개</strong>
+<!-- 	<dl class="type2"> -->
+<!-- 		<dt>상점명</dt><dd>바이크셀링</dd> -->
+<!-- 		<dt>등록일</dt><dd>0000.00.00</dd> -->
+<!-- 		<dt>구매수</dt><dd>362</dd> -->
+<!-- 		<dt>리뷰</dt><dd>362</dd> -->
+<!-- 		<dt>찜</dt><dd>362</dd> -->
+<!-- 		<dt>평점</dt><dd>4.2</dd> -->
+<!-- 		<dt>7일내 배송건수</dt><dd>22</dd> -->
+<!-- 		<dt>하루판매량(추정)</dt><dd>0.52</dd> -->
+<!-- 	</dl> -->
+	</div>
+	<div class="thumb" style="background-image: url('https://shopping-phinf.pstatic.net/main_8609953/86099537298.8.jpg');"><span>썸네일</span></div>	
+	</a>
+	<div class="memoBox">
+		<span>메모 : </span>
+	<textarea class="memoInput" rows="1" name="memoInput" placeholder="메모를 입력하세요..." data-id="45522"></textarea>	
+   <button type="button" class="caseXmemo memoButton hidden"  data-id="45522"><span>수정</span></button>
+   </div>
+</div>
+
+<!-- //Overview -->
+
+<!-- 추적 키워드 -->
+
+<!-- //추적 키워드 -->
+<div class="fastKeywordList">
+    <div class="fastKeywordBox">
+        <span>키워드 : </span>
+        <textarea id="fastKeywordInput" class="fastKeywordInput" placeholder="키워드1, 키워드2, 키워드3... (쉼표로 구분)">식기세척기세제, 식세기세제, 식기세척기 린스, lg 식기세척기세제, 식세기린스, 식기세척기세제추천, lg식기세척기세제, 삼성 식기세척기 세제, 1종 식기세척기 세제, 엘지 식기세척기 세제, 밀레 식기세척기 세제, 식기세척기전용세제, sk매직 식기세척기 세제, 식기세척기 고체세제, sk식기세척기 세제, 아기 식기세척기 세제, 아기 식세기세제</textarea>
+    	<p><button type="button" class="caseXsmall refresh hidden" id="saveFastKeywordBtn"><span>수정</span></button></p>
+    </div>    
+</div>
+
+<!-- Toggle buttons -->
+<ul class="toggles">
+	<li>
+		<strong>일간 자동 추적 / 알림톡 발송</strong>
+		<label class="slide normal"><input type="checkbox"  data-id="45522" class="btnActiveAlim"><span>ON</span><span>OFF</span></label>
+	</li>
+	<li>
+		<button type="button" class="aside excel btnExcel" id="btnExcel" data-id="45522">엑셀 다운로드</button>
+<!-- 		<strong>순위 알림</strong> -->
+<!-- 		<label class="slide normal"><input type="checkbox"><span>ON</span><span>OFF</span></label> -->
+	</li>
+</ul>
+<!-- //Toggle buttons -->
+
+<!-- Table -->
+<div class="tableOverview case">	
+	<table>
+	<colgroup>
+		<col width="235">
+	</colgroup>
+	<thead>
+		<tr>
+		<th scope="col" class="left">키워드</th>
+		
+			<th scope="col">
+				2026-04-26 07:31
+				<br>
+				<a class="btnDelete" data-id="1905567">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-24 06:51
+				<br>
+				<a class="btnDelete" data-id="1901644">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-23 06:30
+				<br>
+				<a class="btnDelete" data-id="1899454">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-18 06:40
+				<br>
+				<a class="btnDelete" data-id="1889410">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-17 06:06
+				<br>
+				<a class="btnDelete" data-id="1887340">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-14 11:11
+				<br>
+				<a class="btnDelete" data-id="1883023">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-13 10:34
+				<br>
+				<a class="btnDelete" data-id="1880822">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-12 08:01
+				<br>
+				<a class="btnDelete" data-id="1877172">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-09 10:43
+				<br>
+				<a class="btnDelete" data-id="1872625">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-08 06:44
+				<br>
+				<a class="btnDelete" data-id="1868555">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-06 04:25
+				<br>
+				<a class="btnDelete" data-id="1863941">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-05 04:59
+				<br>
+				<a class="btnDelete" data-id="1862099">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-03 04:44
+				<br>
+				<a class="btnDelete" data-id="1858019">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-02 06:48
+				<br>
+				<a class="btnDelete" data-id="1856061">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-04-01 06:52
+				<br>
+				<a class="btnDelete" data-id="1854138">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-31 06:35
+				<br>
+				<a class="btnDelete" data-id="1852372">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-30 06:32
+				<br>
+				<a class="btnDelete" data-id="1850508">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-29 09:18
+				<br>
+				<a class="btnDelete" data-id="1850426">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-28 06:45
+				<br>
+				<a class="btnDelete" data-id="1847141">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-26 06:49
+				<br>
+				<a class="btnDelete" data-id="1843415">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-24 06:51
+				<br>
+				<a class="btnDelete" data-id="1839711">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-23 06:44
+				<br>
+				<a class="btnDelete" data-id="1837822">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-22 08:26
+				<br>
+				<a class="btnDelete" data-id="1837566">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-20 06:50
+				<br>
+				<a class="btnDelete" data-id="1832863">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-18 06:50
+				<br>
+				<a class="btnDelete" data-id="1829301">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-16 06:49
+				<br>
+				<a class="btnDelete" data-id="1825587">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-14 08:42
+				<br>
+				<a class="btnDelete" data-id="1823902">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-13 06:41
+				<br>
+				<a class="btnDelete" data-id="1820481">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-12 06:51
+				<br>
+				<a class="btnDelete" data-id="1818648">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-05 06:52
+				<br>
+				<a class="btnDelete" data-id="1806441">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-03 06:51
+				<br>
+				<a class="btnDelete" data-id="1802879">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-03-01 08:39
+				<br>
+				<a class="btnDelete" data-id="1801229">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-28 08:38
+				<br>
+				<a class="btnDelete" data-id="1799661">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-27 05:24
+				<br>
+				<a class="btnDelete" data-id="1796319">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-26 07:20
+				<br>
+				<a class="btnDelete" data-id="1794489">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-24 06:58
+				<br>
+				<a class="btnDelete" data-id="1790767">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-23 18:34
+				<br>
+				<a class="btnDelete" data-id="1790740">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-23 08:59
+				<br>
+				<a class="btnDelete" data-id="1790467">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-22 08:05
+				<br>
+				<a class="btnDelete" data-id="1787720">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-21 09:38
+				<br>
+				<a class="btnDelete" data-id="1787322">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-20 10:50
+				<br>
+				<a class="btnDelete" data-id="1785672">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-19 12:29
+				<br>
+				<a class="btnDelete" data-id="1783870">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-15 08:06
+				<br>
+				<a class="btnDelete" data-id="1776254">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-13 06:55
+				<br>
+				<a class="btnDelete" data-id="1772387">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-12 07:13
+				<br>
+				<a class="btnDelete" data-id="1770524">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-11 07:16
+				<br>
+				<a class="btnDelete" data-id="1768663">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-10 09:11
+				<br>
+				<a class="btnDelete" data-id="1768364">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-09 16:06
+				<br>
+				<a class="btnDelete" data-id="1766613">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-07 07:52
+				<br>
+				<a class="btnDelete" data-id="1761453">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-06 08:55
+				<br>
+				<a class="btnDelete" data-id="1760979">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-04 15:44
+				<br>
+				<a class="btnDelete" data-id="1757299">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-02-01 07:08
+				<br>
+				<a class="btnDelete" data-id="1750283">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-01-31 08:40
+				<br>
+				<a class="btnDelete" data-id="1750127">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-01-28 06:43
+				<br>
+				<a class="btnDelete" data-id="1743306">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-01-27 06:37
+				<br>
+				<a class="btnDelete" data-id="1741554">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-01-25 08:57
+				<br>
+				<a class="btnDelete" data-id="1739591">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-01-24 04:55
+				<br>
+				<a class="btnDelete" data-id="1736792">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-01-23 06:34
+				<br>
+				<a class="btnDelete" data-id="1735033">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-01-20 06:54
+				<br>
+				<a class="btnDelete" data-id="1729959">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-01-19 06:29
+				<br>
+				<a class="btnDelete" data-id="1728309">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-01-18 08:45
+				<br>
+				<a class="btnDelete" data-id="1728149">[삭제]</a>
+			</th>
+		
+			<th scope="col">
+				2026-01-17 11:05
+				<br>
+				<a class="btnDelete" data-id="1726787">[삭제]</a>
+			</th>
+		
+		
+		</tr>
+	</thead>
+	<tbody id="keywordTbody">
+	
+		
+		
+			<tr>				
+				<td class="left keyboard">
+				<span class="drag-handle">≡</span>			
+				<input type="text"
+				 name="keyword"
+		         class="keyword-input"
+		         data-keyword="식기세척기세제"
+		         data-keyword-id="383380"
+		         data-sort-order="1"		         
+		         value="식기세척기세제"
+		         placeholder="키워드 입력" />
+				</td>				
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>8위<small>(1p 8)</small></strong>
+								
+								
+									<span class="up">1</span>
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>7위<small>(1p 7)</small></strong>
+								
+									<span class="down">1</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>8위<small>(1p 8)</small></strong>
+								
+									<span class="down">91</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>99위<small>(3p 19)</small></strong>
+								
+									<span class="down">40</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>139위<small>(4p 19)</small></strong>
+								
+									<span class="down">58</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>197위<small>(5p 37)</small></strong>
+								
+									<span class="down">12</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>209위<small>(6p 9)</small></strong>
+								
+									<span class="down">78</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>287위<small>(8p 7)</small></strong>
+								
+								
+								
+								
+									<span>-</span>
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+							<p class="flow">
+								-
+							</p>
+						
+							
+						
+					</td>
+				
+					<td>
+						
+							<p class="flow">
+								-
+							</p>
+						
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>99위<small>(3p 19)</small></strong>
+								
+								
+									<span class="up">34</span>
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>65위<small>(2p 25)</small></strong>
+								
+								
+									<span class="up">3</span>
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>62위<small>(2p 22)</small></strong>
+								
+									<span class="down">1</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>63위<small>(2p 23)</small></strong>
+								
+									<span class="down">4</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>67위<small>(2p 27)</small></strong>
+								
+								
+									<span class="up">1</span>
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>66위<small>(2p 26)</small></strong>
+								
+									<span class="down">7</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>73위<small>(2p 33)</small></strong>
+								
+									<span class="down">1</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>74위<small>(2p 34)</small></strong>
+								
+									<span class="down">31</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>105위<small>(3p 25)</small></strong>
+								
+									<span class="down">85</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>190위<small>(5p 30)</small></strong>
+								
+								
+									<span class="up">43</span>
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>147위<small>(4p 27)</small></strong>
+								
+								
+									<span class="up">59</span>
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>88위<small>(3p 8)</small></strong>
+								
+								
+									<span class="up">2</span>
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>86위<small>(3p 6)</small></strong>
+								
+									<span class="down">43</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>129위<small>(4p 9)</small></strong>
+								
+								
+									<span class="up">14</span>
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>115위<small>(3p 35)</small></strong>
+								
+								
+									<span class="up">89</span>
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>26위<small>(1p 26)</small></strong>
+								
+									<span class="down">1</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					</td>
+				
+					<td>
+						
+						
+							<p class="flow">
+								<strong>27위<small>(1p 27)</small></strong>
+								
+									<span class="down">16</span>
+								
+								
+								
+								
+							</p>
+							
+						
+					

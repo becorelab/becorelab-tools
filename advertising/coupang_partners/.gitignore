@@ -1,0 +1,25 @@
+# secrets
+mio.env
+credentials/
+*.key
+*.pem
+*-firebase-adminsdk-*.json
+serviceAccountKey.json
+gmail_oauth.json
+gmail_token.json
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# config (민감 정보)
+config.py
+
+# local data
+*.sqlite
+*.db
+
+# logs
+logs/
