@@ -61,11 +61,17 @@ def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10
             return []
 
         try:
-            page.wait_for_selector('input[name="username"]', timeout=15000)
+            page.wait_for_selector('input[name="username"]', timeout=30000)
         except Exception:
-            print("  ❌ 로그인 폼 없음")
-            browser.close()
-            return []
+            print("  ⚠️ 로그인 폼 없음 — 1회 재시도")
+            page.reload(wait_until="domcontentloaded", timeout=30000)
+            time.sleep(5)
+            try:
+                page.wait_for_selector('input[name="username"]', timeout=30000)
+            except Exception:
+                print("  ❌ 로그인 폼 없음 (재시도 실패)")
+                browser.close()
+                return []
 
         page.fill('input[name="username"]', acct["id"])
         page.fill('input[name="password"]', acct["pw"])

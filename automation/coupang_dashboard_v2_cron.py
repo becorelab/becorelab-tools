@@ -15,6 +15,7 @@ import os
 import sys
 import subprocess
 import logging
+import glob
 from datetime import datetime
 
 # ── 설정 ──────────────────────────────────────────────────────
@@ -22,6 +23,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNLOAD_SCRIPT = os.path.join(SCRIPT_DIR, "coupang_ad_download.py")
 DASHBOARD_V2_SCRIPT = os.path.join(SCRIPT_DIR, "coupang_dashboard_v2.py")
 LOG_DIR = os.path.join(SCRIPT_DIR, "logs")
+DOWNLOAD_DIR = "/Users/macmini_ky/ClaudeAITeam/marketing/coupang_data/downloads"
+DATA_DIR = "/Users/macmini_ky/ClaudeAITeam/marketing/coupang_data"
 
 ACCOUNT_KEYS = {
     "chaewoom": "chaewoom",
@@ -54,7 +57,7 @@ def run_download(account_key, headed=False):
     logging.info(f"[다운로드] {account_key} 시작")
     try:
         result = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=300, cwd=SCRIPT_DIR,
+            cmd, capture_output=True, text=True, timeout=420, cwd=SCRIPT_DIR,
         )
         for line in result.stdout.strip().split("\n"):
             if line.strip():
@@ -105,6 +108,34 @@ def run_dashboard_v2(account_keys=None):
         return False
 
 
+def convert_missing_xlsx():
+    """downloads/ 폴더의 XLSX 중 DATA_DIR에 JSON이 없는 파일을 변환.
+    다운로드 실패 시에도 수동 다운로드 XLSX로 대시보드 업데이트 가능하게 함.
+    """
+    xlsx_files = glob.glob(os.path.join(DOWNLOAD_DIR, "*_pa_daily_keyword_*.xlsx"))
+    converted = 0
+
+    for xlsx_path in xlsx_files:
+        basename = os.path.splitext(os.path.basename(xlsx_path))[0]
+        json_path = os.path.join(DATA_DIR, f"{basename}.json")
+
+        if not os.path.exists(json_path):
+            try:
+                sys.path.insert(0, SCRIPT_DIR)
+                from coupang_ad_download import excel_to_json
+                result = excel_to_json(xlsx_path, DATA_DIR)
+                if result:
+                    logging.info(f"  ✅ 변환: {os.path.basename(xlsx_path)} → JSON")
+                    converted += 1
+            except Exception as e:
+                logging.warning(f"  ❌ 변환 실패: {os.path.basename(xlsx_path)} — {e}")
+
+    if converted:
+        logging.info(f"  총 {converted}개 XLSX → JSON 변환 완료")
+    else:
+        logging.info("  변환 대상 없음 (모든 XLSX에 대응 JSON 존재)")
+
+
 def main():
     log_file = setup_logging()
 
@@ -132,6 +163,10 @@ def main():
         logging.info("\n" + "=" * 30 + " STEP 1: 다운로드 " + "=" * 30)
         for acct_key in target_accounts:
             run_download(acct_key, headed=headed)
+
+    # Step 1.5: downloads/ 의 XLSX 중 JSON 없는 것 자동 변환
+    logging.info("\n" + "=" * 30 + " STEP 1.5: XLSX→JSON 변환 " + "=" * 30)
+    convert_missing_xlsx()
 
     # Step 2: 대시보드 v2 업데이트
     logging.info("\n" + "=" * 30 + " STEP 2: 대시보드 v2 " + "=" * 30)
