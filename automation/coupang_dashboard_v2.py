@@ -37,6 +37,7 @@ from google.oauth2.service_account import Credentials
 
 # ── 설정 ──────────────────────────────────────────────────────
 SHEET_ID = "1RqEKC5KT0O_aZWnsDH4UdX3grfYSpg68hqyJteRVmBw"
+MGMT_SHEET_ID = "1bmN5H7lB-kIr9Oo5vqUokXanTM0O7xeCMgHoP24WAJg"
 SA_KEY = "/Users/macmini_ky/ClaudeAITeam/sourcing/analyzer/becorelab-tools-firebase-adminsdk-fbsvc-4af6f0c5ac.json"
 DATA_DIR = "/Users/macmini_ky/ClaudeAITeam/marketing/coupang_data"
 
@@ -46,17 +47,23 @@ ACCOUNTS = {
         "summary_tab": "비코어랩 요약",
         "campaign_tab": "비코어랩 캠페인별",
         "zone_tab": "비코어랩 검색/비검색",
+        "mgmt_summary_tab": "📊 비코어랩 요약",
+        "mgmt_campaign_tab": "📊 비코어랩 캠페인별",
+        "mgmt_zone_tab": None,  # 비코어랩은 캠페인필터 구조라 스킵
     },
     "A00940134": {
         "name": "채움컴퍼니",
         "summary_tab": "채움컴퍼니 요약",
         "campaign_tab": "채움컴퍼니 캠페인별",
         "zone_tab": "채움컴퍼니 검색/비검색",
+        "mgmt_summary_tab": "📊 채움컴퍼니 요약",
+        "mgmt_campaign_tab": "📊 채움컴퍼니 캠페인별",
+        "mgmt_zone_tab": "📊 채움컴퍼니 검색/비검색",
     },
 }
 
 
-# ── 포맷터 ─────────────────────────────────────────────────────
+# ── 포맷터 (대시보드용) ──────────────────────────────────────────
 def fmt_num(val):
     """정수 → '1,234' (쉼표 구분, ₩ 없음)"""
     return f"{int(round(val)):,}"
@@ -70,6 +77,15 @@ def fmt_pct_int(val):
 def fmt_decimal(val, places=2):
     """소수 → '0.16' (퍼센트 기호 없음)"""
     return str(round(val, places))
+
+
+# ── 포맷터 (관리시트용: ₩ 접두사, % 소수점) ──────────────────────
+def mgmt_money(val):
+    return f"₩{int(round(val)):,}"
+
+
+def mgmt_pct(val, places=1):
+    return f"{round(val, places):.{places}f}%"
 
 
 def fmt_date(raw_date):
@@ -209,6 +225,9 @@ def aggregate_daily_summary(rows):
             "ctr": fmt_decimal(ctr),
             "cpc": fmt_num(cpc),
             "cvr": fmt_decimal(cvr, 1),
+            "_cost": cost, "_sales": sales, "_roas": roas,
+            "_orders": orders, "_impressions": impressions, "_clicks": clicks,
+            "_ctr": ctr, "_cpc": cpc, "_cvr": cvr,
         })
     return result
 
@@ -250,6 +269,9 @@ def aggregate_daily_by_campaign(rows):
             "ctr": fmt_decimal(ctr),
             "cpc": fmt_num(cpc),
             "cvr": fmt_decimal(cvr, 1),
+            "_cost": cost, "_sales": sales, "_roas": roas,
+            "_orders": orders, "_impressions": impressions, "_clicks": clicks,
+            "_ctr": ctr, "_cpc": cpc, "_cvr": cvr,
         })
     return result
 
@@ -514,6 +536,143 @@ def update_keyword_top(sh, keyword_rows):
     return len(keyword_rows)
 
 
+# ── 관리시트 업데이트 ────────────────────────────────────────────
+def mgmt_update_summary(sh, tab_name, summary_data):
+    """관리시트 요약 탭: ₩/% 포맷, 하단에 추가(오름차순)"""
+    try:
+        ws = sh.worksheet(tab_name)
+    except gspread.WorksheetNotFound:
+        return 0
+
+    existing_dates = get_existing_dates(ws)
+    new_entries = [d for d in summary_data if d["date"] not in existing_dates]
+    if not new_entries:
+        print(f"  ⏭️ {tab_name}: 새로운 데이터 없음")
+        return 0
+
+    new_entries.sort(key=lambda x: x["date"])
+    rows = []
+    for d in new_entries:
+        rows.append([
+            d["date"], mgmt_money(d["_cost"]), mgmt_money(d["_sales"]),
+            mgmt_pct(d["_roas"]), str(int(d["_orders"])),
+            f'{int(d["_impressions"]):,}', f'{int(d["_clicks"]):,}',
+            mgmt_pct(d["_ctr"], 2), mgmt_money(d["_cpc"]),
+            mgmt_pct(d["_cvr"], 1), "",
+        ])
+
+    ws.append_rows(rows, value_input_option="RAW")
+    total_rows = len(ws.get_all_values())
+    apply_left_align(sh, ws, total_rows - len(rows) + 1, total_rows + 1, 11)
+    dates = [d["date"] for d in new_entries]
+    print(f"  ✅ {tab_name}: {len(new_entries)}일 추가 ({dates[0]} ~ {dates[-1]})")
+    return len(new_entries)
+
+
+def mgmt_update_campaign(sh, tab_name, campaign_data):
+    """관리시트 캠페인별 탭: ₩/% 포맷, 상단 삽입(내림차순)"""
+    try:
+        ws = sh.worksheet(tab_name)
+    except gspread.WorksheetNotFound:
+        return 0
+
+    existing_dates = get_existing_dates(ws)
+    new_entries = [d for d in campaign_data if d["date"] not in existing_dates]
+    if not new_entries:
+        print(f"  ⏭️ {tab_name}: 새로운 데이터 없음")
+        return 0
+
+    new_entries.sort(key=lambda x: x["date"], reverse=True)
+    rows = []
+    for d in new_entries:
+        rows.append([
+            d["date"], d["campaign"], mgmt_money(d["_cost"]), mgmt_money(d["_sales"]),
+            mgmt_pct(d["_roas"]), str(int(d["_orders"])),
+            f'{int(d["_impressions"]):,}', f'{int(d["_clicks"]):,}',
+            mgmt_pct(d["_ctr"], 2), mgmt_money(d["_cpc"]),
+            mgmt_pct(d["_cvr"], 1), "",
+        ])
+
+    insert_rows_at_top(ws, rows, 12)
+    apply_left_align(sh, ws, 2, 2 + len(rows), 12)
+    dates = sorted(set(d["date"] for d in new_entries), reverse=True)
+    print(f"  ✅ {tab_name}: {len(new_entries)}행 추가 ({dates[0]} ~ {dates[-1]})")
+    return len(new_entries)
+
+
+def mgmt_update_zone(sh, tab_name, rows_data):
+    """관리시트 검색/비검색 탭: 가로 병렬 (검색|비검색|합계), 하단 추가"""
+    try:
+        ws = sh.worksheet(tab_name)
+    except gspread.WorksheetNotFound:
+        return 0
+
+    existing_dates = get_existing_dates(ws, date_col=1)
+    if not existing_dates:
+        all_vals = ws.get_all_values()
+        for i, row in enumerate(all_vals):
+            if row and re.match(r"^\d{4}-\d{2}-\d{2}$", str(row[0]).strip()):
+                existing_dates.add(row[0].strip())
+
+    dates_in_data = set()
+    daily = defaultdict(lambda: {
+        "search": {"cost": 0, "sales": 0, "orders": 0, "clicks": 0},
+        "nonsearch": {"cost": 0, "sales": 0, "orders": 0, "clicks": 0},
+    })
+    for row in rows_data:
+        date_str = fmt_date(row.get("날짜", 0))
+        zone = row.get("광고 노출 지면") or row.get("노출 영역") or ""
+        cost = float(row.get("광고비", 0) or 0)
+        sales = float(row.get("총 전환매출액(1일)", 0) or 0)
+        orders = float(row.get("총 주문수(1일)", 0) or 0)
+        clicks = float(row.get("클릭수", 0) or 0)
+
+        if zone == "검색 영역":
+            d = daily[date_str]["search"]
+        elif zone in ("비검색 영역", "오디언스 플러스"):
+            d = daily[date_str]["nonsearch"]
+        else:
+            continue
+        d["cost"] += cost
+        d["sales"] += sales
+        d["orders"] += orders
+        d["clicks"] += clicks
+        dates_in_data.add(date_str)
+
+    new_dates = sorted(dates_in_data - existing_dates)
+    if not new_dates:
+        print(f"  ⏭️ {tab_name}: 새로운 데이터 없음")
+        return 0
+
+    rows_to_add = []
+    for date_str in new_dates:
+        s = daily[date_str]["search"]
+        ns = daily[date_str]["nonsearch"]
+        total_cost = s["cost"] + ns["cost"]
+        total_sales = s["sales"] + ns["sales"]
+        total_roas = safe_div(total_sales, total_cost) * 100
+
+        rows_to_add.append([
+            date_str,
+            mgmt_money(s["cost"]), mgmt_money(s["sales"]),
+            mgmt_pct(safe_div(s["sales"], s["cost"]) * 100),
+            str(int(s["orders"])), str(int(s["clicks"])),
+            mgmt_money(safe_div(s["cost"], s["clicks"])),
+            mgmt_money(ns["cost"]), mgmt_money(ns["sales"]),
+            mgmt_pct(safe_div(ns["sales"], ns["cost"]) * 100),
+            str(int(ns["orders"])), str(int(ns["clicks"])),
+            mgmt_money(safe_div(ns["cost"], ns["clicks"])),
+            mgmt_money(total_cost), mgmt_money(total_sales),
+            mgmt_pct(total_roas),
+        ])
+
+    ws.append_rows(rows_to_add, value_input_option="RAW")
+    total_rows = len(ws.get_all_values())
+    apply_left_align(sh, ws, total_rows - len(rows_to_add) + 1, total_rows + 1, 16)
+    print(f"  ✅ {tab_name}: {len(new_dates)}일 추가 ({new_dates[0]} ~ {new_dates[-1]})")
+    return len(new_dates)
+
+
 # ── 메인 ──────────────────────────────────────────────────────
 def run(vendor_ids=None, dry_run=False):
     if vendor_ids is None:
@@ -561,6 +720,7 @@ def run(vendor_ids=None, dry_run=False):
         }
 
         all_keyword_rows_input.append((acct["name"], rows))
+        all_account_data[vid]["raw_rows"] = rows
 
     if dry_run:
         print("\n[DRY RUN] 시트 업데이트를 건너뜁니다.")
@@ -574,8 +734,8 @@ def run(vendor_ids=None, dry_run=False):
         print("❌ 업데이트할 데이터가 없습니다.")
         return {}
 
-    # 구글시트 연결
-    print("[시트] 구글시트 연결 중...")
+    # 구글시트 연결 — 대시보드
+    print("[시트] 대시보드 구글시트 연결 중...")
     sh = connect_sheet()
     print(f"  ✅ 시트 연결: {sh.title}")
     print()
@@ -583,31 +743,68 @@ def run(vendor_ids=None, dry_run=False):
     total_updated = 0
     for vid, data in all_account_data.items():
         acct = ACCOUNTS[vid]
-        print(f"[{acct['name']}] 시트 업데이트...")
+        print(f"[{acct['name']}] 대시보드 시트 업데이트...")
 
-        # 요약 탭
         n = update_summary_tab(sh, acct["summary_tab"], data["summary"])
         total_updated += n
-
-        # 캠페인별 탭
         n = update_campaign_tab(sh, acct["campaign_tab"], data["by_campaign"])
         total_updated += n
-
-        # 검색/비검색 탭
         n = update_zone_tab(sh, acct["zone_tab"], data["by_zone"])
         total_updated += n
 
-    # 키워드 TOP
     if all_keyword_rows_input:
         print("\n[키워드 TOP] 업데이트...")
         keyword_rows = aggregate_keyword_top(all_keyword_rows_input)
         n = update_keyword_top(sh, keyword_rows)
         total_updated += n
 
+    # 관리시트 업데이트
+    print("\n[관리시트] 구글시트 연결 중...")
+    try:
+        creds = Credentials.from_service_account_file(
+            SA_KEY, scopes=["https://www.googleapis.com/auth/spreadsheets"]
+        )
+        gc = gspread.authorize(creds)
+        mgmt_sh = gc.open_by_key(MGMT_SHEET_ID)
+        print(f"  ✅ 관리시트 연결: {mgmt_sh.title}")
+
+        for vid, data in all_account_data.items():
+            acct = ACCOUNTS[vid]
+            print(f"[{acct['name']}] 관리시트 업데이트...")
+
+            n = mgmt_update_summary(mgmt_sh, acct["mgmt_summary_tab"], data["summary"])
+            total_updated += n
+            n = mgmt_update_campaign(mgmt_sh, acct["mgmt_campaign_tab"], data["by_campaign"])
+            total_updated += n
+
+            if acct.get("mgmt_zone_tab"):
+                n = mgmt_update_zone(mgmt_sh, acct["mgmt_zone_tab"], data["raw_rows"])
+                total_updated += n
+
+        # 관리시트 키워드 TOP
+        if all_keyword_rows_input:
+            print("\n[관리시트 키워드 TOP] 업데이트...")
+            try:
+                mgmt_kw_ws = mgmt_sh.worksheet("📊 키워드 TOP")
+                HEADERS = ["계정", "키워드", "광고비", "매출", "ROAS", "주문", "노출", "클릭", "CTR", "CPC"]
+                mgmt_kw_rows = []
+                for row in keyword_rows:
+                    mgmt_kw_rows.append(row)
+                all_values = [HEADERS] + mgmt_kw_rows
+                mgmt_kw_ws.clear()
+                mgmt_kw_ws.update(values=all_values, range_name="A1", value_input_option="RAW")
+                apply_left_align(mgmt_sh, mgmt_kw_ws, 1, len(all_values) + 1, len(HEADERS))
+                print(f"  ✅ 📊 키워드 TOP: {len(mgmt_kw_rows)}개 업데이트")
+                total_updated += len(mgmt_kw_rows)
+            except gspread.WorksheetNotFound:
+                print("  ⚠️ 📊 키워드 TOP 탭 없음 — 건너뜀")
+    except Exception as e:
+        print(f"  ❌ 관리시트 업데이트 실패: {e}")
+
     print(f"\n{'='*50}")
     print(f"✅ 완료! 총 {total_updated}개 행 업데이트")
-    sheet_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}"
-    print(f"📊 시트: {sheet_url}")
+    print(f"📊 대시보드: https://docs.google.com/spreadsheets/d/{SHEET_ID}")
+    print(f"📊 관리시트: https://docs.google.com/spreadsheets/d/{MGMT_SHEET_ID}")
     return all_account_data
 
 
