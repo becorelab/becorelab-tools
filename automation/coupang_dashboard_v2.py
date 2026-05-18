@@ -538,7 +538,7 @@ def update_keyword_top(sh, keyword_rows):
 
 # ── 관리시트 업데이트 ────────────────────────────────────────────
 def mgmt_update_summary(sh, tab_name, summary_data):
-    """관리시트 요약 탭: ₩/% 포맷, 하단에 추가(오름차순)"""
+    """관리시트 요약 탭: ₩/% 포맷, 상단 삽입(내림차순)"""
     try:
         ws = sh.worksheet(tab_name)
     except gspread.WorksheetNotFound:
@@ -550,7 +550,7 @@ def mgmt_update_summary(sh, tab_name, summary_data):
         print(f"  ⏭️ {tab_name}: 새로운 데이터 없음")
         return 0
 
-    new_entries.sort(key=lambda x: x["date"])
+    new_entries.sort(key=lambda x: x["date"], reverse=True)
     rows = []
     for d in new_entries:
         rows.append([
@@ -561,16 +561,15 @@ def mgmt_update_summary(sh, tab_name, summary_data):
             mgmt_pct(d["_cvr"], 1), "",
         ])
 
-    ws.append_rows(rows, value_input_option="RAW")
-    total_rows = len(ws.get_all_values())
-    apply_left_align(sh, ws, total_rows - len(rows) + 1, total_rows + 1, 11)
+    insert_rows_at_top(ws, rows, 11)
+    apply_left_align(sh, ws, 2, 2 + len(rows), 11)
     dates = [d["date"] for d in new_entries]
     print(f"  ✅ {tab_name}: {len(new_entries)}일 추가 ({dates[0]} ~ {dates[-1]})")
     return len(new_entries)
 
 
-def mgmt_update_campaign(sh, tab_name, campaign_data):
-    """관리시트 캠페인별 탭: ₩/% 포맷, 상단 삽입(내림차순)"""
+def mgmt_update_campaign(sh, tab_name, campaign_data, raw_rows=None):
+    """관리시트 캠페인별 탭: ₩/% 포맷, 상단 삽입(내림차순), 검색/비검색 열 포함"""
     try:
         ws = sh.worksheet(tab_name)
     except gspread.WorksheetNotFound:
@@ -582,19 +581,40 @@ def mgmt_update_campaign(sh, tab_name, campaign_data):
         print(f"  ⏭️ {tab_name}: 새로운 데이터 없음")
         return 0
 
+    zone_agg = defaultdict(lambda: {"cost": 0, "sales": 0})
+    if raw_rows:
+        for row in raw_rows:
+            d = fmt_date(row.get("날짜", 0))
+            camp = str(row.get("캠페인", row.get("캠페인명", "기타")))
+            zone = row.get("광고 노출 지면") or row.get("노출 영역") or ""
+            cost = float(row.get("광고비", 0) or 0)
+            sales = float(row.get("총 전환매출액(1일)", 0) or 0)
+            if zone == "검색 영역":
+                zone_agg[(d, camp, "s")]["cost"] += cost
+                zone_agg[(d, camp, "s")]["sales"] += sales
+            elif zone in ("비검색 영역", "오디언스 플러스"):
+                zone_agg[(d, camp, "ns")]["cost"] += cost
+                zone_agg[(d, camp, "ns")]["sales"] += sales
+
     new_entries.sort(key=lambda x: x["date"], reverse=True)
     rows = []
     for d in new_entries:
+        s = zone_agg.get((d["date"], d["campaign"], "s"), {"cost": 0, "sales": 0})
+        ns = zone_agg.get((d["date"], d["campaign"], "ns"), {"cost": 0, "sales": 0})
+        s_roas = safe_div(s["sales"], s["cost"]) * 100
+        ns_roas = safe_div(ns["sales"], ns["cost"]) * 100
         rows.append([
             d["date"], d["campaign"], mgmt_money(d["_cost"]), mgmt_money(d["_sales"]),
             mgmt_pct(d["_roas"]), str(int(d["_orders"])),
             f'{int(d["_impressions"]):,}', f'{int(d["_clicks"]):,}',
             mgmt_pct(d["_ctr"], 2), mgmt_money(d["_cpc"]),
             mgmt_pct(d["_cvr"], 1), "",
+            mgmt_money(s["cost"]), mgmt_money(s["sales"]), mgmt_pct(s_roas),
+            mgmt_money(ns["cost"]), mgmt_money(ns["sales"]), mgmt_pct(ns_roas),
         ])
 
-    insert_rows_at_top(ws, rows, 12)
-    apply_left_align(sh, ws, 2, 2 + len(rows), 12)
+    insert_rows_at_top(ws, rows, 18)
+    apply_left_align(sh, ws, 2, 2 + len(rows), 18)
     dates = sorted(set(d["date"] for d in new_entries), reverse=True)
     print(f"  ✅ {tab_name}: {len(new_entries)}행 추가 ({dates[0]} ~ {dates[-1]})")
     return len(new_entries)
@@ -774,7 +794,7 @@ def run(vendor_ids=None, dry_run=False):
 
             n = mgmt_update_summary(mgmt_sh, acct["mgmt_summary_tab"], data["summary"])
             total_updated += n
-            n = mgmt_update_campaign(mgmt_sh, acct["mgmt_campaign_tab"], data["by_campaign"])
+            n = mgmt_update_campaign(mgmt_sh, acct["mgmt_campaign_tab"], data["by_campaign"], data.get("raw_rows"))
             total_updated += n
 
             if acct.get("mgmt_zone_tab"):

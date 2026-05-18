@@ -69,8 +69,8 @@ advertising/
 
 - 데이터: `coupang_data/` 내 JSON (키워드 보고서) + 대표님 제공 XLSX
 - 자동 다운로드: `../automation/coupang_ad_download.py` (매일 06:30 크론)
-- 구글시트 대시보드: `1RqEKC5KT0O_aZWnsDH4UdX3grfYSpg68hqyJteRVmBw`
-- 대표님 관리 시트 (READ ONLY): `1bmN5H7lB-kIr9Oo5vqUokXanTM0O7xeCMgHoP24WAJg`
+- 구글시트 대시보드 (백업용): `1RqEKC5KT0O_aZWnsDH4UdX3grfYSpg68hqyJteRVmBw`
+- 대표님 관리 시트 (📊 탭 자동 업데이트 대상): `1bmN5H7lB-kIr9Oo5vqUokXanTM0O7xeCMgHoP24WAJg`
 
 ### 네이버 검색광고
 - SA (검색광고): 일예산 5만원, 소진율 62%
