@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "비코어랩 소싱 분석기",
+  "version": "4.0",
+  "description": "쿠팡 소싱 분석 올인원 — 키워드·경쟁·리뷰·판매·광고·마진·카테고리",
+  "permissions": ["activeTab", "scripting", "downloads", "storage", "cookies", "tabs"],
+  "host_permissions": [
+    "https://www.coupang.com/*",
+    "https://wing.coupang.com/*",
+    "https://advertising.coupang.com/*",
+    "https://supplier.coupang.com/*",
+    "http://localhost:8090/*"
+  ],
+  "content_scripts": [{
+    "matches": ["https://www.coupang.com/vp/products/*"],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+:root {
+  --bg-base: #0b0f19;
+  --bg-surface: #131825;
+  --bg-elevated: #1a2035;
+  --bg-input: #0d1220;
+  --bg-hover: #1e2a42;
+  --border: #1e2a42;
+  --border-light: #2a3654;
+  --accent: #e2b87e;
+  --accent-dim: rgba(226,184,126,0.12);
+  --text: #e2e8f0;
+  --text-secondary: #8892b0;
+  --text-muted: #4a5568;
+  --success: #48bb78;
+  --error: #fc8181;
+  --warning: #f6ad55;
+  --info: #63b3ed;
+  --radius: 8px;
+  --radius-sm: 5px;
+  --radius-lg: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  width: 520px;
+  min-height: 460px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Noto Sans KR', system-ui, sans-serif;
+  background: var(--bg-base);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+
+/* ===== HEADER ===== */
+.header {
+  background: linear-gradient(135deg, var(--bg-surface) 0%, #161d30 100%);
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.brand-dot {
+  width: 10px; height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(226,184,126,0.4);
+}
+.brand-name { font-size: 14px; font-weight: 700; color: var(--accent); }
+.brand-ver { font-size: 10px; color: var(--text-muted); margin-left: 4px; }
+.header-product {
+  text-align: right;
+  max-width: 280px;
+  overflow: hidden;
+}
+.header-product-name {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.header-product-id { font-size: 10px; color: var(--text-muted); }
+
+/* ===== TAB NAVIGATION ===== */
+.tab-nav {
+  display: flex;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 10px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.tab-btn:hover { color: var(--text-secondary); background: var(--accent-dim); }
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ===== CONTENT ===== */
+.content {
+  padding: 16px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ===== SHARED COMPONENTS ===== */
+.section { margin-bottom: 16px; }
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.stat-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.stat-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.stat-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.stat-value {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.stat-value.sm { font-size: 14px; }
+.stat-value.success { color: var(--success); }
+.stat-value.error { color: var(--error); }
+
+.search-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.search-row input {
+  flex: 1;
+}
+
+input[type="text"], input[type="number"], input[type="date"], select {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+input:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
+}
+input::placeholder { color: var(--text-muted); }
+
+.btn {
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--accent); color: var(--bg-base); }
+.btn-primary:hover:not(:disabled) { background: #ecc896; }
+.btn-secondary { background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover:not(:disabled) { background: var(--bg-hover); }
+.btn-success { background: var(--success); color: var(--bg-base); }
+.btn-success:hover:not(:disabled) { background: #5cc98a; }
+.btn-full { width: 100%; }
+.btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.progress-wrap {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.progress-text { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+.progress-bar {
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #ecc896);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+th {
+  text-align: left;
+  padding: 6px 8px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+td {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+tr:hover td { background: var(--accent-dim); }
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+}
+
+.tag-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tag:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.log-area {
+  font-size: 11px;
+  color: var(--text-muted);
+  max-height: 60px;
+  overflow-y: auto;
+  line-height: 1.6;
+  margin-top: 8px;
+  font-family: 'SF Mono', 'Menlo', monospace;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 36px 20px;
+  color: var(--text-muted);
+}
+.empty-icon { font-size: 28px; margin-bottom: 8px; }
+.empty-text { font-size: 13px; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.field { margin-bottom: 0; }
+.field-label {
+  display: block;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+.field-full { grid-column: 1 / -1; }
+
+.date-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.date-row span { color: var(--text-muted); font-size: 12px; }
+.date-row input { flex: 1; }
+
+.msg {
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+.msg-info { background: rgba(99,179,237,0.1); border: 1px solid rgba(99,179,237,0.2); color: var(--info); }
+.msg-error { background: rgba(252,129,129,0.1); border: 1px solid rgba(252,129,129,0.2); color: var(--error); }
+.msg-success { background: rgba(72,187,120,0.1); border: 1px solid rgba(72,187,120,0.2); color: var(--success); }
+
+.loading-shimmer {
+  background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-hover) 50%, var(--bg-elevated) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius);
+  height: 40px;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="brand-dot"></div>
+    <span class="brand-name">소싱분석기</span>
+    <span class="brand-ver">v4.0</span>
+  </div>
+  <div id="header-product" class="header-product hidden">
+    <div class="header-product-name" id="header-title"></div>
+    <div class="header-product-id" id="header-pid"></div>
+  </div>
+</div>
+
+<!-- TAB NAVIGATION -->
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="keyword">키워드</button>
+  <button class="tab-btn" data-tab="compete">경쟁</button>
+  <button class="tab-btn" data-tab="review">리뷰</button>
+  <button class="tab-btn" data-tab="sales">판매</button>
+  <button class="tab-btn" data-tab="ads">광고</button>
+  <button class="tab-btn" data-tab="margin">마진</button>
+  <button class="tab-btn" data-tab="category">카테고리</button>
+</nav>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- ===== KEYWORD TAB ===== -->
+  <div class="panel active" id="panel-keyword">
+    <div class="search-row">
+      <input type="text" id="kw-input" placeholder="키워드 입력 (예: 일회용 수세미)">
+      <button class="btn btn-primary" id="kw-search-btn">검색</button>
+    </div>
+    <div id="kw-loading" class="loading-shimmer hidden"></div>
+    <div id="kw-result" class="hidden">
+      <div class="stat-grid cols-4">
+        <div class="stat-card">
+          <div class="stat-label">상품수</div>
+          <div class="stat-value sm" id="kw-total-count">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">로켓 비율</div>
+          <div class="stat-value sm" id="kw-rocket-pct">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">평균가격</div>
+          <div class="stat-value sm" id="kw-avg-price">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">CPC 입찰가</div>
+          <div class="stat-value sm" id="kw-cpc-price">-</div>
+        </div>
+      </div>
+    </div>
+    <div id="kw-related" class="hidden">
+      <div class="section-title">연관 키워드</div>
+      <div class="tag-grid" id="kw-related-list"></div>
+    </div>
+    <div id="kw-ranking" class="hidden" style="margin-top:14px">
+      <div class="section-title">상위 랭킹 (1페이지)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>상품명</th><th>가격</th><th>리뷰</th><th>배송</th></tr></thead>
+          <tbody id="kw-ranking-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== COMPETITOR TAB ===== -->
+  <div class="panel" id="panel-compete">
+    <div id="compete-empty" class="empty-state">
+      <div class="empty-icon">🏪</div>
+      <div class="empty-text">쿠팡 상품 페이지에서 열어주세요</div>
+    </div>
+    <div id="compete-content" class="hidden">
+      <div class="section">
+        <div class="section-title">상품 정보</div>
+        <div class="stat-grid cols-3">
+          <div class="stat-card">
+            <div class="stat-label">판매가</div>
+            <div class="stat-value sm" id="compete-price">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">배송</div>
+            <div class="stat-value sm" id="compete-delivery">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">브랜드</div>
+            <div class="stat-value sm" id="compete-brand">-</div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">다른 판매자</div>
+        <div id="compete-sellers-msg" class="msg msg-info hidden"></div>
+        <div id="compete-sellers-wrap" class="table-wrap hidden">
+          <table>
+            <thead><tr><th>판매자</th><th>가격</th><th>배송</th></tr></thead>
+            <tbody id="compete-sellers-body"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-secondary btn-full" id="compete-load-btn">판매자 비교 조회</button>
+      </div>
+      <div class="section">
+        <div class="section-title">옵션 / SKU</div>
+        <div id="compete-options-wrap" class="table-wrap hidden">
+          <table>
+            <thead><tr><th>옵션</th><th>가격</th><th>상태</th></tr></thead>
+            <tbody id="compete-options-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== REVIEW TAB ===== -->
+  <div class="panel" id="panel-review">
+    <div id="review-empty" class="empty-state">
+      <div class="empty-icon">⭐</div>
+      <div class="empty-text">쿠팡 상품 페이지에서 열어주세요</div>
+    </div>
+    <div id="review-content" class="hidden">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">총 리뷰</div>
+          <div class="stat-value" id="review-total">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">평균 평점</div>
+          <div class="stat-value" id="review-avg">-</div>
+        </div>
+      </div>
+      <div id="review-progress" class="progress-wrap hidden">
+        <div class="progress-text" id="review-progress-text">수집 중...</div>
+        <div class="progress-bar"><div class="progress-fill" id="review-fill"></div></div>
+      </div>
+      <div class="btn-group" style="margin-bottom:8px">
+        <button class="btn btn-primary" id="btn-review-start" style="flex:1">전체 리뷰 수집</button>
+      </div>
+      <div class="btn-group" id="review-downloads">
+        <button class="btn btn-secondary hidden" id="btn-review-json">JSON</button>
+        <button class="btn btn-secondary hidden" id="btn-review-csv">CSV</button>
+        <button class="btn btn-success hidden" id="btn-review-send">소싱앱 전송</button>
+      </div>
+      <div class="log-area" id="review-log"></div>
+    </div>
+  </div>
+
+  <!-- ===== SALES TAB ===== -->
+  <div class="panel" id="panel-sales">
+    <div class="msg msg-info" id="sales-info">Wing 로그인 상태에서 조회 가능합니다</div>
+    <div class="date-row">
+      <input type="date" id="sales-start">
+      <span>~</span>
+      <input type="date" id="sales-end">
+      <button class="btn btn-primary" id="sales-fetch-btn">조회</button>
+    </div>
+    <div id="sales-loading" class="loading-shimmer hidden"></div>
+    <div id="sales-result" class="hidden">
+      <div class="stat-grid cols-4">
+        <div class="stat-card">
+          <div class="stat-label">총 매출</div>
+          <div class="stat-value sm" id="sales-gmv">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">판매량</div>
+          <div class="stat-value sm" id="sales-units">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">전환율</div>
+          <div class="stat-value sm" id="sales-cvr">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">PV</div>
+          <div class="stat-value sm" id="sales-pv">-</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>날짜</th><th>매출</th><th>판매량</th><th>PV</th><th>CVR</th></tr></thead>
+          <tbody id="sales-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ADS TAB ===== -->
+  <div class="panel" id="panel-ads">
+    <div class="msg msg-info" id="ads-info">쿠팡 광고 로그인 상태에서 조회 가능합니다</div>
+    <div class="date-row">
+      <input type="date" id="ads-start">
+      <span>~</span>
+      <input type="date" id="ads-end">
+      <button class="btn btn-primary" id="ads-fetch-btn">조회</button>
+    </div>
+    <div id="ads-loading" class="loading-shimmer hidden"></div>
+    <div id="ads-result" class="hidden">
+      <div class="stat-grid cols-4">
+        <div class="stat-card">
+          <div class="stat-label">노출</div>
+          <div class="stat-value sm" id="ads-impressions">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">클릭</div>
+          <div class="stat-value sm" id="ads-clicks">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">광고비</div>
+          <div class="stat-value sm" id="ads-spend">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">ROAS</div>
+          <div class="stat-value sm" id="ads-roas">-</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>캠페인</th><th>노출</th><th>클릭</th><th>광고비</th><th>ROAS</th></tr></thead>
+          <tbody id="ads-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MARGIN TAB ===== -->
+  <div class="panel" id="panel-margin">
+    <div class="form-grid">
+      <div class="field">
+        <label class="field-label">판매가 (원)</label>
+        <input type="number" id="margin-price" placeholder="19,900">
+      </div>
+      <div class="field">
+        <label class="field-label">원가 (원)</label>
+        <input type="number" id="margin-cost" placeholder="5,000">
+      </div>
+      <div class="field">
+        <label class="field-label">카테고리 수수료 (%)</label>
+        <input type="number" id="margin-commission-rate" value="10.8" step="0.1">
+      </div>
+      <div class="field">
+        <label class="field-label">풀필먼트비 (원)</label>
+        <input type="number" id="margin-fulfillment" value="0">
+      </div>
+      <div class="field">
+        <label class="field-label">창고비/월 (원)</label>
+        <input type="number" id="margin-warehouse" value="0">
+      </div>
+      <div class="field">
+        <label class="field-label">예상 일 판매량</label>
+        <input type="number" id="margin-daily-qty" value="10">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" id="margin-calc-btn">마진 계산</button>
+    <div id="margin-result" class="hidden" style="margin-top:12px">
+      <div class="stat-grid cols-4">
+        <div class="stat-card">
+          <div class="stat-label">수수료</div>
+          <div class="stat-value sm" id="margin-fee">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">순이익/개</div>
+          <div class="stat-value sm" id="margin-profit">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">마진율</div>
+          <div class="stat-value sm" id="margin-rate">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">ROI</div>
+          <div class="stat-value sm" id="margin-roi">-</div>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">월 예상 이익</div>
+          <div class="stat-value" id="margin-monthly">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">손익분기 판매량</div>
+          <div class="stat-value" id="margin-breakeven">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CATEGORY TAB ===== -->
+  <div class="panel" id="panel-category">
+    <div class="msg msg-info">Wing 로그인 상태에서 카테고리 트렌드를 조회합니다</div>
+    <div class="search-row">
+      <input type="text" id="cat-input" placeholder="카테고리 코드 (예: 486898)">
+      <button class="btn btn-primary" id="cat-search-btn">조회</button>
+    </div>
+    <div id="cat-loading" class="loading-shimmer hidden"></div>
+    <div id="cat-result" class="hidden">
+      <div class="stat-grid cols-3">
+        <div class="stat-card">
+          <div class="stat-label">28일 PV</div>
+          <div class="stat-value sm" id="cat-pv">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">상품수</div>
+          <div class="stat-value sm" id="cat-products">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">트렌드</div>
+          <div class="stat-value sm" id="cat-trend">-</div>
+        </div>
+      </div>
+      <div class="section" style="margin-top:8px">
+        <div class="section-title">상위 키워드</div>
+        <div class="tag-grid" id="cat-keywords-list"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
