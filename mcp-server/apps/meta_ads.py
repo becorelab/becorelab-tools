@@ -68,6 +68,10 @@ def _format_insights(rows):
         entry = {
             "campaign_name": row.get("campaign_name", ""),
             "ad_name": row.get("ad_name", ""),
+            "age": row.get("age", ""),
+            "gender": row.get("gender", ""),
+            "publisher_platform": row.get("publisher_platform", ""),
+            "platform_position": row.get("platform_position", ""),
             "spend": f"{spend:,.0f}원",
             "purchases": f"{int(purchases)}건",
             "purchase_value": f"{purchase_value:,.0f}원",
