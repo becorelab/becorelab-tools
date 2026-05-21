@@ -49,7 +49,7 @@ ACCOUNTS = {
         "zone_tab": "비코어랩 검색/비검색",
         "mgmt_summary_tab": "📊 비코어랩 요약",
         "mgmt_campaign_tab": "📊 비코어랩 캠페인별",
-        "mgmt_zone_tab": None,  # 비코어랩은 캠페인필터 구조라 스킵
+        "mgmt_zone_tab": "📊 비코어랩 검색/비검색",
     },
     "A00940134": {
         "name": "채움컴퍼니",

@@ -80,6 +80,8 @@ def _worker_loop():
                 print(f'[WORKER] goldbox_crawl 완료: {len(holder["result"])}개')
             elif action == 'collect_reviews':
                 holder['result'] = _do_collect_reviews(args.get('product_url', ''), args.get('max_reviews', 30))
+            elif action == 'collect_all_reviews':
+                holder['result'] = _do_collect_all_reviews(args.get('product_url', ''), args.get('max_reviews', 9999))
             elif action == 'fetch_product_detail':
                 holder['result'] = _do_fetch_product_detail(args.get('product_url', ''))
             elif action == 'coupang_keywords':
@@ -492,6 +494,179 @@ def _do_collect_reviews(product_url: str, max_reviews: int = 30) -> list:
 
     logger.info(f'리뷰 {len(reviews)}개 수집 (pid={pid})')
     return reviews
+
+
+def _do_collect_all_reviews(product_url: str, max_reviews: int = 9999) -> dict:
+    """전체 리뷰 수집 — HTML 엔드포인트 + DOM 파싱 (크롬 확장과 동일 방식)"""
+    import re as _re
+    if not _ctx:
+        _start_browser()
+
+    pid_match = _re.search(r'products/(\d+)', product_url)
+    if not pid_match:
+        return {'error': 'invalid_url'}
+    pid = pid_match.group(1)
+
+    review_page = _ctx.new_page()
+    reviews = []
+    product_title = ''
+    total_count = 0
+    rating_summary = {}
+
+    FETCH_REVIEWS_JS = """(url) => {
+        return new Promise(resolve => {
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'accept': '*/*',
+                    'accept-language': 'ko-KR,ko;q=0.9',
+                    'sec-fetch-dest': 'empty',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-site': 'same-origin',
+                },
+                credentials: 'include',
+            })
+            .then(r => r.text())
+            .then(html => {
+                if (html.includes('301 Moved') || html.includes('Access Denied')) {
+                    resolve({error: 'blocked'});
+                    return;
+                }
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                const totalEl = doc.querySelector('.js_reviewArticleTotalCountHiddenValue');
+                const total = totalEl ? parseInt(totalEl.dataset.totalCount || '0', 10) : 0;
+
+                const countEls = doc.querySelectorAll('.js_reviewArticleHiddenValue');
+                const counts = {};
+                countEls.forEach((el, i) => {
+                    counts[5 - i] = parseInt(el.dataset.count || '0', 10);
+                });
+
+                const items = doc.querySelectorAll('.js_reviewArticleReviewList');
+                const parsed = [];
+                items.forEach(item => {
+                    const ratingEl = item.querySelector('.js_reviewArticleRatingValue');
+                    const r = ratingEl ? parseInt(ratingEl.dataset.rating || '0', 10) : 0;
+                    const userEl = item.querySelector('.sdp-review__article__list__info__user');
+                    let userName = '';
+                    if (userEl) userName = userEl.textContent.trim();
+                    const dateEl = item.querySelector('.sdp-review__article__list__info__product-info__reg-date');
+                    const createdAt = dateEl ? dateEl.textContent.trim() : '';
+                    const optionEl = item.querySelector('.sdp-review__article__list__info__product-info__name');
+                    const option = optionEl ? optionEl.textContent.trim() : '';
+                    const headlineEl = item.querySelector('.sdp-review__article__list__headline');
+                    const headline = headlineEl ? headlineEl.textContent.trim() : '';
+                    let content = '';
+                    const contentEl = item.querySelector('.sdp-review__article__list__review__content');
+                    if (contentEl) content = contentEl.textContent.trim();
+                    else {
+                        const contentEl2 = item.querySelector('.sdp-review__article__list__review');
+                        if (contentEl2) content = contentEl2.textContent.trim();
+                    }
+                    const attachEl = item.querySelector('.sdp-review__article__list__attachment__list');
+                    const photoCount = attachEl ? attachEl.querySelectorAll('li').length : 0;
+                    let helpfulCount = 0;
+                    const helpEl = item.querySelector('.js_reviewArticleHelpfulBtn, .sdp-review__article__list__help__count');
+                    if (helpEl) { const hm = helpEl.textContent.match(/(\\d+)/); if (hm) helpfulCount = parseInt(hm[1], 10); }
+                    let answer = '';
+                    const answerEl = item.querySelector('.js_reviewArticleReplyArea, .sdp-review__article__list__seller-reply');
+                    if (answerEl) answer = answerEl.textContent.trim();
+                    parsed.push({ rating: r, headline, content, created_at: createdAt, helpful_count: helpfulCount, user_name: userName, option, photo_count: photoCount, answer });
+                });
+                resolve({ total, counts, reviews: parsed });
+            })
+            .catch(e => resolve({error: e.toString()}));
+        });
+    }"""
+
+    try:
+        review_page.goto(product_url, wait_until='domcontentloaded', timeout=20000)
+        review_page.wait_for_timeout(3000)
+
+        title_check = review_page.title()
+        if 'Access Denied' in title_check:
+            review_page.wait_for_timeout(2000)
+            review_page.reload(wait_until='domcontentloaded', timeout=15000)
+            review_page.wait_for_timeout(3000)
+
+        product_title = review_page.evaluate("""() => {
+            const selectors = ['h2.prod-buy-header__title', 'h1.prod-buy-header__title', '.prod-buy-header__title', 'h1', 'h2'];
+            for (const s of selectors) {
+                const el = document.querySelector(s);
+                if (el && el.textContent.trim().length > 3) return el.textContent.trim();
+            }
+            return '';
+        }""")
+
+        page_size = 30
+        info = review_page.evaluate(
+            FETCH_REVIEWS_JS,
+            f'https://www.coupang.com/vp/product/reviews?productId={pid}&page=1&size={page_size}&sortBy=ORDER_SCORE_ASC&ratingSummary=true&viRoleCode=2'
+        )
+        if not info or info.get('error'):
+            logger.error(f'리뷰 첫 페이지 에러: {info}')
+            review_page.close()
+            return {'product_id': pid, 'product_title': product_title, 'total_count': 0, 'collected_count': 0, 'rating_summary': {}, 'reviews': []}
+
+        total_count = info.get('total', 0)
+        rating_counts = info.get('counts', {})
+        sum_r = sum(int(r) * c for r, c in rating_counts.items())
+        sum_c = sum(rating_counts.values())
+        avg_rating = round(sum_r / sum_c, 1) if sum_c > 0 else 0
+        rating_summary = {'averageRating': avg_rating, 'ratingCounts': rating_counts}
+
+        seen = set()
+        for r in info.get('reviews', []):
+            key = f"{r.get('user_name','')}|{r.get('created_at','')}|{r.get('content','')[:50]}"
+            if key not in seen:
+                seen.add(key)
+                reviews.append(r)
+
+        for rating in range(1, 6):
+            if len(reviews) >= max_reviews:
+                break
+            count = rating_counts.get(rating, rating_counts.get(str(rating), 0))
+            if count == 0:
+                continue
+
+            page_num = 1
+            while len(reviews) < max_reviews:
+                url = f'https://www.coupang.com/vp/product/reviews?productId={pid}&page={page_num}&size={page_size}&sortBy=ORDER_SCORE_ASC&ratingSummary=true&viRoleCode=2&ratings={rating}'
+                try:
+                    res = review_page.evaluate(FETCH_REVIEWS_JS, url)
+                except Exception as e:
+                    logger.error(f'리뷰 수집 에러 ★{rating} p{page_num}: {e}')
+                    break
+
+                if not res or res.get('error') or not res.get('reviews'):
+                    break
+
+                for r in res['reviews']:
+                    key = f"{r.get('user_name','')}|{r.get('created_at','')}|{r.get('content','')[:50]}"
+                    if key not in seen:
+                        seen.add(key)
+                        reviews.append(r)
+
+                if len(res['reviews']) < page_size:
+                    break
+                page_num += 1
+                review_page.wait_for_timeout(300 + (400 * (page_num % 5 == 0)))
+
+            review_page.wait_for_timeout(500)
+    finally:
+        review_page.close()
+
+    logger.info(f'전체 리뷰 {len(reviews)}개 수집 (pid={pid}, title={product_title[:30]})')
+    return {
+        'product_id': pid,
+        'product_title': product_title,
+        'total_count': total_count,
+        'collected_count': len(reviews),
+        'rating_summary': rating_summary,
+        'reviews': reviews,
+    }
 
 
 def _do_fetch_product_detail(product_url: str) -> dict:

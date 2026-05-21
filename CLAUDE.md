@@ -79,7 +79,6 @@
 │   │   ├── 🎛️ 미션 컨트롤.md              ← 파이프라인별 단계 상태
 │   │   ├── 🔍 소싱 파이프라인/
 │   │   ├── 📸 인스타 공동구매/
-│   │   ├── 📢 카페 홍보 대행 자동화 파이프라인/
 │   │   └── 🎬 유튜브 파이프라인/
 │   └── 📋 채용 검토/
 │
@@ -88,24 +87,35 @@
 │   │   └── 💰 Financial Control/
 │   ├── 📊 Operations/
 │   │   ├── 📊 Sales Report/
-│   │   │   └── 일일/                      ← 매출 일일 보고서
+│   │   │   ├── 일일/                      ← 매출 일일 보고서
+│   │   │   ├── 주간/                      ← 매출 주간 보고서
+│   │   │   ├── 월간/                      ← 매출 월간 보고서
+│   │   │   └── Revenue Ledger/{연도}/     ← 매출 원장
 │   │   ├── 📦 Stock & Order/              ← 재고·발주
 │   │   └── 🤖 자동화·개발/
-│   └── 📢 Marketing/
-│       ├── 📢 Ad Performance/             ← 광고 성과
-│       │   ├── 01. Meta/{연도}/{월}/       ← 메타 일일보고서 (YYYY-MM-DD.md)
-│       │   ├── 02. Coupang/
-│       │   ├── 03. Naver/
-│       │   └── 경쟁분석/
-│       └── 📢 마케팅 운영/
+│   ├── 📢 Marketing/
+│   │   ├── 📢 Ad Performance/             ← 광고 성과
+│   │   │   ├── 01. Meta/{연도}/{월}/       ← 메타 일일보고서 (YYYY-MM-DD.md)
+│   │   │   ├── 02. Coupang/
+│   │   │   ├── 03. Naver/
+│   │   │   └── 경쟁분석/{카테고리}/
+│   │   └── 📢 마케팅 운영/
+│   └── 🏢 Management/
+│       ├── 👥 People/                     ← 인사·팀
+│       ├── 💰 Financial/                  ← 경영 재무
+│       └── 🧠 Insights/                   ← 경영 인사이트
 │
 ├── 3️⃣ Resources/
 │   ├── ⚙️ Automation/
 │   ├── 🎯 Product Lab/
+│   │   ├── 상품 상세/
+│   │   └── 리뷰 분석/
 │   ├── 🗂️ 상품 DB/
+│   │   └── 상품 상세/
 │   └── 📝 Agent Notes/                   ← 세션 노트
 │       ├── 🗄️ 인수인계/
-│       └── 이슈 트래킹/
+│       ├── 이슈 트래킹/
+│       └── {YYYY-MM}/                    ← 월별 세션 노트
 │
 └── 4️⃣ Archive/
 ```
@@ -120,9 +130,12 @@
 | 쿠팡 광고 분석 | `$V/2️⃣ Areas/📢 Marketing/📢 Ad Performance/02. Coupang/` | `YYYY-MM-DD {제목}.md` |
 | 네이버 광고 분석 | `$V/2️⃣ Areas/📢 Marketing/📢 Ad Performance/03. Naver/` | `YYYY-MM-DD {제목}.md` |
 | 매출 일일 보고서 | `$V/2️⃣ Areas/📊 Operations/📊 Sales Report/일일/` | `YYYY-MM-DD 매출 일일 보고서.md` |
+| 매출 주간 보고서 | `$V/2️⃣ Areas/📊 Operations/📊 Sales Report/주간/` | `YYYY-MM-DD 매출 주간 보고서.md` |
+| 매출 월간 보고서 | `$V/2️⃣ Areas/📊 Operations/📊 Sales Report/월간/` | `YYYY-MM {제목}.md` |
 | 재고 일일 보고서 | `$V/2️⃣ Areas/📊 Operations/📦 Stock & Order/` | `YYYY-MM-DD 재고 일일 보고서.md` |
-| 세션 노트 | `$V/3️⃣ Resources/📝 Agent Notes/` | `YYYY-MM-DD {세션명}.md` |
+| 세션 노트 | `$V/3️⃣ Resources/📝 Agent Notes/{YYYY-MM}/` | `YYYY-MM-DD {세션명}.md` |
 | 인수인계 문서 | `$V/3️⃣ Resources/📝 Agent Notes/🗄️ 인수인계/` | 자유 |
+| 리뷰 분석 | `$V/3️⃣ Resources/🎯 Product Lab/리뷰 분석/` | 자유 |
 | 경쟁 분석 | `$V/2️⃣ Areas/📢 Marketing/📢 Ad Performance/경쟁분석/{카테고리}/` | `YYYY-MM-DD {제목}.md` |
 
 ### 업데이트 위치 규칙

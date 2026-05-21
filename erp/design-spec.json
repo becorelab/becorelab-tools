@@ -1,0 +1,179 @@
+{
+  "project": {
+    "name": "비코어랩 ERP",
+    "description": "소규모 생활용품 회사의 ERP 웹앱. 거래처/품목/재고/매출/발주를 한 화면에서 관리.",
+    "brand": "BECORELAB (비코어랩) — 생활용품 브랜드 iLBiA(일비아) 운영사",
+    "users": "사무실 직원 2-5명",
+    "tech": "SPA, Vanilla HTML/CSS/JS (프레임워크 없이)",
+    "language": "한국어 UI"
+  },
+
+  "layout": {
+    "type": "왼쪽 사이드바 + 상단 헤더 + 메인 콘텐츠",
+    "sidebar": {
+      "logo": "BECORELAB ERP",
+      "sections": [
+        {
+          "title": "OVERVIEW",
+          "items": ["대시보드"]
+        },
+        {
+          "title": "마스터",
+          "items": ["거래처", "품목"]
+        },
+        {
+          "title": "운영",
+          "items": ["재고", "매출", "발주"]
+        },
+        {
+          "title": "설정",
+          "items": ["사용자"]
+        }
+      ],
+      "footer": "로그인한 사용자명 · v1.0"
+    },
+    "header": {
+      "left": "현재 페이지 제목",
+      "right": "현재 시각"
+    }
+  },
+
+  "pages": {
+    "login": {
+      "title": "BECORELAB",
+      "subtitle": "비코어랩 ERP 시스템에 로그인하세요",
+      "fields": ["아이디", "비밀번호"],
+      "button": "로그인"
+    },
+
+    "dashboard": {
+      "title": "대시보드",
+      "summary_cards": [
+        { "label": "거래처", "value": "128개" },
+        { "label": "품목", "value": "136개" },
+        { "label": "재고부족", "value": "5건" },
+        { "label": "오늘 매출", "value": "₩3,827,920" },
+        { "label": "이번달 매출", "value": "₩56,054,506" },
+        { "label": "진행중 발주", "value": "3건" }
+      ]
+    },
+
+    "partners": {
+      "title": "거래처 관리",
+      "action_button": "+ 거래처 등록",
+      "table": {
+        "search": "이름, 코드, 사업자번호 검색",
+        "columns": ["코드", "거래처명", "유형", "사업자번호", "대표자", "연락처", "관리(수정/삭제)"],
+        "sample_data": [
+          { "code": "P0001", "name": "(주)아밍제이", "type": "공급처", "biz_no": "6308101323", "ceo": "-", "phone": "-" },
+          { "code": "P0013", "name": "비코어랩 로켓배송", "type": "판매채널", "biz_no": "1208800767-1", "ceo": "-", "phone": "-" },
+          { "code": "P0042", "name": "소프트팩주식회사", "type": "공급처", "biz_no": "1428141060", "ceo": "-", "phone": "-" }
+        ],
+        "type_values": ["공급처", "판매채널", "공급+판매"],
+        "pagination": true
+      },
+      "modal_fields": [
+        ["거래처코드(text)", "거래처명(text)"],
+        ["유형(select: 공급처/판매채널/공급+판매)", "사업자번호(text)"],
+        ["대표자(text)", "연락처(text)"],
+        ["이메일(text)", "휴대폰(text)"],
+        "주소(text)",
+        "메모(textarea)"
+      ]
+    },
+
+    "products": {
+      "title": "품목 관리",
+      "action_button": "+ 품목 등록",
+      "table": {
+        "search": "품목명, 코드 검색",
+        "columns": ["코드", "품목명", "규격", "단위", "재고", "매입가", "판매가", "관리"],
+        "sample_data": [
+          { "code": "10892", "name": "♥일비아 하트 식기세척기 세제", "spec": "", "unit": "EA", "stock": 1104, "purchase": 0, "sell": 0 },
+          { "code": "S10357", "name": "일비아 건조기 퍼퓸시트", "spec": "코튼블루", "unit": "EA", "stock": 2349, "purchase": 0, "sell": 0 },
+          { "code": "13996", "name": "일비아화이트 버블스팀 캡슐표백제", "spec": "", "unit": "EA", "stock": 2839, "purchase": 0, "sell": 0 }
+        ],
+        "pagination": true
+      }
+    },
+
+    "stock": {
+      "title": "재고 현황",
+      "action_button": "이지어드민 동기화",
+      "table": {
+        "search": "품목명, 코드 검색",
+        "filter": "부족만 보기 (체크박스)",
+        "columns": ["코드", "품목명", "규격", "현재고", "예약", "가용", "안전재고", "상태", "동기화일시"],
+        "status_values": ["정상", "부족", "품절"],
+        "sample_data": [
+          { "code": "10892", "name": "♥일비아 하트 식기세척기 세제", "stock": 1104, "reserved": 0, "available": 1104, "safety": 0, "status": "정상" },
+          { "code": "S10357", "name": "일비아 건조기 퍼퓸시트 코튼블루", "stock": 2349, "reserved": 0, "available": 2349, "safety": 0, "status": "정상" },
+          { "code": "11512", "name": "건조기시트 테스트키트", "stock": -410, "reserved": 0, "available": -410, "safety": 0, "status": "품절" }
+        ],
+        "pagination": true
+      }
+    },
+
+    "sales": {
+      "title": "매출 관리",
+      "action_button": "매출 동기화",
+      "table": {
+        "filters": [
+          { "type": "date_range", "label": "기간", "default": "이번달 1일 ~ 오늘" },
+          { "type": "select", "label": "채널", "options": ["전체 채널", "비코어랩 로켓배송", "비코어랩 카페24 일비아", "비코어랩 쿠팡(자동)", "비코어랩 11번가", "비코어랩 G마켓", "비코어랩 오늘의집"] },
+          { "type": "search", "placeholder": "품목명 검색" }
+        ],
+        "summary": "합계 ₩56,054,506",
+        "columns": ["매출일", "채널", "품목", "공급가", "세액", "합계", "상태"],
+        "sample_data": [
+          { "date": "2026-05-18", "channel": "비코어랩 로켓배송", "product": "♥일비아 하트 식기세척기 세제", "supply": 580364, "tax": 58036, "total": 638400, "status": "확정" },
+          { "date": "2026-05-18", "channel": "비코어랩 카페24 일비아", "product": "♥일비아 하트 식기세척기 세제", "supply": 569857, "tax": 55986, "total": 625843, "status": "확정" },
+          { "date": "2026-05-18", "channel": "비코어랩 로켓배송", "product": "일비아화이트 버블스팀 캡슐표백제", "supply": 658209, "tax": 65821, "total": 723600, "status": "확정" }
+        ],
+        "row_click": "모달로 매출 상세 표시",
+        "pagination": true
+      }
+    },
+
+    "orders": {
+      "title": "발주 관리",
+      "action_button": "+ 발주서 작성",
+      "table": {
+        "filters": [
+          { "type": "date_range", "label": "기간", "default": "최근 3개월" },
+          { "type": "search", "placeholder": "거래처명 검색" },
+          { "type": "select", "label": "상태", "options": ["전체 상태", "작성중", "확정", "부분입고", "완료"] }
+        ],
+        "summary": "합계 금액 표시",
+        "columns": ["발주번호", "발주일", "공급처", "납품예정일", "금액", "상태"],
+        "status_values": ["작성중", "확정", "부분입고", "완료", "취소"],
+        "sample_data": [
+          { "po_number": "PO-20260512-1", "date": "2026-05-12", "supplier": "로드에프(road.F)", "delivery": "2026-05-17", "amount": 11830520, "status": "확정" },
+          { "po_number": "PO-20260504-1", "date": "2026-05-04", "supplier": "로드에프(road.F)", "delivery": "2026-06-01", "amount": 11830520, "status": "확정" },
+          { "po_number": "PO-20260420-1", "date": "2026-04-20", "supplier": "현진하이텍(road.F)", "delivery": "2026-06-01", "amount": 23261040, "status": "완료" }
+        ],
+        "row_click": "모달로 발주 상세 (품목별 발주량/입고량/단가/금액)",
+        "pagination": true
+      },
+      "create_modal": {
+        "fields": ["발주일(date)", "납품예정일(date)", "공급처(검색형 select)", "메모(textarea)"],
+        "line_items": {
+          "add_button": "+ 품목 추가",
+          "columns": ["품목(검색형 select)", "수량", "단가", "삭제"]
+        }
+      }
+    }
+  },
+
+  "common": {
+    "modal": "오버레이 + 제목/닫기 + 스크롤 바디 + 취소/저장 버튼",
+    "toast": "우상단, 3초 후 자동 사라짐 (성공/에러/경고)",
+    "pagination": "번호 버튼 + 이전/다음 화살표",
+    "interactions": {
+      "table_row_hover": "배경색 변경",
+      "table_row_click": "상세 모달 (매출, 발주)",
+      "search": "입력 300ms 후 자동 검색",
+      "sidebar_active": "현재 페이지 강조"
+    }
+  }
+}

@@ -1501,6 +1501,81 @@ def api_get_reviews(scan_id):
     })
 
 
+@app.route('/api/reviews/download', methods=['POST'])
+def api_reviews_download():
+    """상품 URL로 전체 리뷰 다운로드"""
+    from analyzer.wing import _send as wing_send
+    data = request.get_json(silent=True) or {}
+    product_url = data.get('url', data.get('product_url', ''))
+    max_reviews = data.get('max_reviews', 9999)
+
+    if not product_url:
+        return jsonify({'success': False, 'error': 'url 필요'})
+
+    try:
+        result = wing_send('collect_all_reviews', {
+            'product_url': product_url,
+            'max_reviews': max_reviews,
+        }, timeout=600)
+        if result and not isinstance(result, dict):
+            result = {'reviews': result}
+        return jsonify({'success': True, 'data': result or {}})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/api/reviews/import-bulk', methods=['POST', 'OPTIONS'])
+def api_reviews_import_bulk():
+    """크롬 확장에서 전체 리뷰 데이터 수신 → JSON/Excel 저장"""
+    if request.method == 'OPTIONS':
+        return jsonify({'success': True})
+
+    data = request.get_json(silent=True) or {}
+    pid = data.get('product_id', '')
+    title = data.get('product_title', '').strip()
+    reviews = data.get('reviews', [])
+
+    if not reviews:
+        return jsonify({'success': False, 'error': '리뷰 데이터 없음'})
+
+    import re as _re
+    safe_title = _re.sub(r'[^\w가-힣\s\-]', '', title)[:40].strip() if title else pid
+    folder_name = f'{pid}_{safe_title}' if safe_title != pid else pid
+
+    output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'review_output', folder_name)
+    os.makedirs(output_dir, exist_ok=True)
+
+    from datetime import datetime
+    ts = datetime.now().strftime('%Y%m%d_%H%M')
+    base = os.path.join(output_dir, f'reviews_{ts}')
+
+    import json as _json
+    with open(f'{base}.json', 'w', encoding='utf-8') as f:
+        _json.dump(data, f, ensure_ascii=False, indent=2)
+
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, Alignment, PatternFill
+        wb = Workbook()
+        ws = wb.active
+        ws.title = '리뷰'
+        headers = ['번호', '별점', '제목', '내용', '작성일', '작성자', '옵션', '도움됨', '사진수', '판매자답변']
+        for col, h in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=h)
+            cell.font = Font(bold=True)
+        for i, r in enumerate(reviews, 1):
+            ws.append([i, r.get('rating', 0), r.get('headline', ''), r.get('content', ''),
+                        str(r.get('created_at', ''))[:10], r.get('user_name', ''), r.get('option', ''),
+                        r.get('helpful_count', 0), r.get('photo_count', 0), r.get('answer', '')])
+        ws.auto_filter.ref = f'A1:J{len(reviews) + 1}'
+        ws.freeze_panes = 'A2'
+        wb.save(f'{base}.xlsx')
+    except ImportError:
+        pass
+
+    return jsonify({'success': True, 'saved': f'{base}.json', 'count': len(reviews)})
+
+
 @app.route('/api/reviews/import', methods=['POST', 'OPTIONS'])
 def api_reviews_import():
     """크롬 확장프로그램에서 수집된 리뷰 데이터 수신"""

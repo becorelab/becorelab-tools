@@ -120,6 +120,7 @@ def register(mcp, client):
         since: str = "",
         until: str = "",
         level: str = "campaign",
+        breakdowns: str = "",
     ) -> str:
         """메타 광고 성과 데이터 조회 (핵심 도구!).
 
@@ -127,6 +128,7 @@ def register(mcp, client):
         date_preset: 'today', 'yesterday', 'last_7d', 'last_30d' 등
         since/until: 'YYYY-MM-DD' 형식 (date_preset 대신 사용)
         level: 'campaign', 'adset', 'ad'
+        breakdowns: 'age,gender' (연령/성별) 또는 'publisher_platform,platform_position' (노출 지면)
 
         반환: 캠페인/광고별 지출, 전환수, ROAS, CPC, CTR, CPM, AOV, 퍼널(ATC/IC/Purchase)
         """
@@ -140,7 +142,9 @@ def register(mcp, client):
         if level == "ad":
             fields += ",ad_name,ad_id"
 
-        params = {"fields": fields, "level": level, "limit": "100"}
+        params = {"fields": fields, "level": level, "limit": "200"}
+        if breakdowns:
+            params["breakdowns"] = breakdowns
         if date_preset:
             params["date_preset"] = date_preset
         elif since and until:
