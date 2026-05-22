@@ -80,9 +80,7 @@ ALLOWED_TOOLS = {
     # 소싱 (5)
     "sourcing_opportunities", "sourcing_scans", "sourcing_scan_detail",
     "sourcing_scan_and_wait", "sourcing_detail_analysis",
-    # 옵시디언 (6)
-    "obsidian_list_files", "obsidian_read_file", "obsidian_write_file",
-    "obsidian_append_file", "obsidian_search", "obsidian_recent_files",
+    # 옵시디언: 제외 (볼트에 경영/재무/전략 문서 포함, 외부 노출 불가)
     # 네이버 광고 (3)
     "naver_ad_campaigns", "naver_ad_stats_campaign", "naver_ad_keyword_tool",
     # 이미지 생성 (2)

@@ -1,0 +1,47 @@
+{
+  "status": "api_not_found",
+  "timestamp": "2026-05-19T18:13:30.838706",
+  "zone": "BB",
+  "com_code": "640682",
+  "user_id": "BECORELAB1",
+  "login_success": true,
+  "session_id": "3634303638327c4245434f52454c414231:BB-ETU4LaIP6hhDm",
+  "tested_endpoints": [
+    {
+      "endpoint": "PurchaseOrder/GetListPurchaseOrder",
+      "result": "Not Found"
+    },
+    {
+      "endpoint": "BuyOrder/GetListBuyOrder",
+      "result": "Not Found"
+    },
+    {
+      "endpoint": "Purchase/GetListPurchase",
+      "result": "Not Found"
+    },
+    {
+      "endpoint": "Sale/GetListSaleOrder",
+      "result": "No HTTP resource (메서드 없음)"
+    },
+    {
+      "endpoint": "Inventory/GetListInventory",
+      "result": "Not Found"
+    },
+    {
+      "endpoint": "Accounting/GetListVoucher",
+      "result": "Not Found"
+    },
+    {
+      "endpoint": "IO/GetListIO",
+      "result": "Not Found"
+    }
+  ],
+  "purchase_orders": [],
+  "error_message": "이카운트 BB Zone에서 발주서 조회 API를 찾을 수 없습니다. 이카운트 ERP에서 API 권한 설정이 필요하거나 BB Zone에서 지원하지 않는 API일 수 있습니다.",
+  "recommended_action": [
+    "이카운트 ERP 관리자 로그인",
+    "환경설정 > 외부연동(API) > API 사용 기능 설정",
+    "발주서(구매발주) API 활성화",
+    "또는 이카운트 고객지원팀에 BB Zone 발주서 API 지원 여부 문의"
+  ]
+}
