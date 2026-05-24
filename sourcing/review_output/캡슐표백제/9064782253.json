@@ -1,0 +1,51 @@
+{
+ "product_id": "9064782253",
+ "product_title": "제트 표백 캡슐세제",
+ "review_count_listed": 3,
+ "collected_count": 3,
+ "rating_summary": {
+  "averageRating": 5.0,
+  "ratingCounts": {
+   "1": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 3
+  }
+ },
+ "reviews": [
+  {
+   "answer": "",
+   "content": "",
+   "created_at": "2026.04.16",
+   "headline": "",
+   "helpful_count": 0,
+   "option": "ZET 표백 캡슐세제 15G, 80개",
+   "photo_count": 0,
+   "rating": 5,
+   "user_name": "안*국"
+  },
+  {
+   "answer": "",
+   "content": "",
+   "created_at": "2026.01.03",
+   "headline": "",
+   "helpful_count": 0,
+   "option": "ZET 표백 캡슐세제, 1개, 80개입",
+   "photo_count": 0,
+   "rating": 5,
+   "user_name": "송*욱"
+  },
+  {
+   "answer": "",
+   "content": "",
+   "created_at": "2025.10.20",
+   "headline": "",
+   "helpful_count": 0,
+   "option": "ZET 표백 캡슐세제, 2개, 80개입",
+   "photo_count": 0,
+   "rating": 5,
+   "user_name": "석*혜"
+  }
+ ]
+}

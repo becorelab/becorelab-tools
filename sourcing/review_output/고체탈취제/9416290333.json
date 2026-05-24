@@ -1,0 +1,40 @@
+{
+ "product_id": "9416290333",
+ "product_title": "벤딕트 솔베아 대용량 고체 탈취제 어쿠스틱",
+ "review_count_listed": 2,
+ "collected_count": 2,
+ "rating_summary": {
+  "averageRating": 5.0,
+  "ratingCounts": {
+   "1": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 3
+  }
+ },
+ "reviews": [
+  {
+   "answer": "",
+   "content": "",
+   "created_at": "2026.04.18",
+   "headline": "",
+   "helpful_count": 0,
+   "option": "벤딕트 솔베아 대용량 고체 탈취제 어쿠스틱, 360g, 1개",
+   "photo_count": 0,
+   "rating": 5,
+   "user_name": "김*경"
+  },
+  {
+   "answer": "",
+   "content": "",
+   "created_at": "2026.04.15",
+   "headline": "",
+   "helpful_count": 0,
+   "option": "벤딕트 솔베아 대용량 고체 탈취제 어쿠스틱, 360g, 1개",
+   "photo_count": 0,
+   "rating": 5,
+   "user_name": "김*연"
+  }
+ ]
+}
