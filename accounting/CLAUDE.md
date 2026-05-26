@@ -52,8 +52,8 @@ python3 make_summary.py              # 종합 요약
 | 에드가 | edgar_settlement.py | edgar_name_map.json |
 
 ## 데이터 원본 경로
-- 정산 원본: `OneDrive/(주)비코어랩/Claude-Setup/매출 정산/{년월}/`
-- 일일발송내역: `OneDrive/(주)비코어랩/Claude-Setup/매출 정산/{년월}/claude/`
+- 정산 원본: `GoogleDrive/(주)비코어랩/Claude-Setup/매출 정산/{년월}/`
+- 일일발송내역: `GoogleDrive/(주)비코어랩/Claude-Setup/매출 정산/{년월}/claude/`
 
 ## 주의사항
 - 가짜 데이터 절대 금지 — 원본 숫자를 그대로 사용
@@ -64,4 +64,4 @@ python3 make_summary.py              # 종합 요약
 ## macOS 환경
 - Python: python3
 - 홈: /Users/macmini_ky
-- OneDrive: ~/Library/CloudStorage/OneDrive-개인/(주)비코어랩/
+- GoogleDrive: ~/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/(주)비코어랩/

@@ -33,16 +33,16 @@ for pid in $(ps -eo pid,ppid,rss,command | grep "node" | grep -v grep | grep -v 
     kill -TERM $pid 2>/dev/null
 done
 
-# 5. OneDrive 메모리 누수 체크 (>600MB면 재시작)
-ONEDRIVE_PID=$(pgrep -x "OneDrive" 2>/dev/null)
-if [ -n "$ONEDRIVE_PID" ]; then
-    ONEDRIVE_RSS=$(ps -o rss= -p $ONEDRIVE_PID 2>/dev/null | tr -d ' ')
-    if [ -n "$ONEDRIVE_RSS" ] && [ "$ONEDRIVE_RSS" -gt 614400 ]; then
-        ONEDRIVE_MB=$((ONEDRIVE_RSS / 1024))
-        echo "$TS [RESTART] OneDrive ${ONEDRIVE_MB}MB > 600MB, 재시작" >> "$LOG"
-        pkill -f "OneDrive.app" 2>/dev/null
+# 5. Google Drive 메모리 누수 체크 (>600MB면 재시작)
+GDRIVE_PID=$(pgrep -f "Google Drive" 2>/dev/null | head -1)
+if [ -n "$GDRIVE_PID" ]; then
+    GDRIVE_RSS=$(ps -o rss= -p $GDRIVE_PID 2>/dev/null | tr -d ' ')
+    if [ -n "$GDRIVE_RSS" ] && [ "$GDRIVE_RSS" -gt 614400 ]; then
+        GDRIVE_MB=$((GDRIVE_RSS / 1024))
+        echo "$TS [RESTART] Google Drive ${GDRIVE_MB}MB > 600MB, 재시작" >> "$LOG"
+        pkill -f "Google Drive" 2>/dev/null
         sleep 5
-        open -a "OneDrive" 2>/dev/null
+        open -a "Google Drive" 2>/dev/null
     fi
 fi
 

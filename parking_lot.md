@@ -9,7 +9,8 @@
 - [ ] 크롬 확장 → 소싱앱 자동 연동 — background service worker로 작업 큐 폴링 → 자동 수집 (2026-05-20)
 
 ## 인프라
-- [ ] OneDrive → Cloudflare R2 전환 — 옵시디언 보고서/세션노트/인수인계를 R2(S3)로 이전, remotely-save 백엔드 변경 (2026-05-26)
+- [x] OneDrive → Google Drive 전환 완료 (2026-05-27) — 파일 동기화 + 옵시디언 볼트 + 스크립트 경로 전부 이전
+- [ ] 옵시디언 remotely-save 백엔드를 Google Drive로 변경 — 대표님 폰/윈도우 Obsidian 설정 필요
 
 ## ERP (이카운트 대체)
 - [ ] 발주 데이터 import — 이카운트 Excel 내보내기 or API 활성화 (거래처/발주서 API Not Found 상태)

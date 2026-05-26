@@ -19,7 +19,7 @@ import logging
 from datetime import datetime
 
 # 설정
-BACKUP_BASE = os.path.expanduser("~/Library/CloudStorage/OneDrive-개인/(주)비코어랩/Claude-Setup/backups")
+BACKUP_BASE = os.path.expanduser("~/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/(주)비코어랩/Claude-Setup/backups")
 HOME = os.path.expanduser("~")
 PROJECT = os.path.join(HOME, "ClaudeAITeam")
 
