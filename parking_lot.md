@@ -8,6 +8,9 @@
 - [ ] 미오 API 키 복구 — Anthropic 콘솔에서 활성 키 확인 후 재발급 → analyzer/.env 교체 (2026-04-23)
 - [ ] 크롬 확장 → 소싱앱 자동 연동 — background service worker로 작업 큐 폴링 → 자동 수집 (2026-05-20)
 
+## 인프라
+- [ ] OneDrive → Cloudflare R2 전환 — 옵시디언 보고서/세션노트/인수인계를 R2(S3)로 이전, remotely-save 백엔드 변경 (2026-05-26)
+
 ## ERP (이카운트 대체)
 - [ ] 발주 데이터 import — 이카운트 Excel 내보내기 or API 활성화 (거래처/발주서 API Not Found 상태)
 - [ ] 재고 단종 품목 정리 — 하나씩 확인하면서 비활성화 처리
