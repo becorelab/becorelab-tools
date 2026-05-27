@@ -25,7 +25,7 @@ from group_chat_state import (
 # 설정
 BOT_TOKEN = "8709975512:AAER3eggX0bKUzuAEFKwNv4p-obnffGFpfg"
 BOT_USERNAME = "pixie0402_bot"
-BOT_NAME = "픽시"
+BOT_NAME = "미오"
 ALLOWED_USERS = [8708718261]
 ALLOWED_GROUPS = []
 
@@ -40,6 +40,12 @@ GROUP_LOG_PATH = os.path.join(os.path.dirname(__file__), "group_chats.json")
 
 # API 설정 (GLM-5 우선, DeepSeek 폴백)
 APIS = [
+    {
+        "name": "GLM-5",
+        "url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        "key": "7a9a6a01e9184c4f8021441a0256cb41.cz4L0OJ0uAqcT3QZ",
+        "model": "glm-4-plus",
+    },
     {
         "name": "DeepSeek",
         "url": "https://api.deepseek.com/chat/completions",
@@ -246,14 +252,14 @@ async def start(update: Update, context):
     if update.effective_user.id not in ALLOWED_USERS:
         return
     conversations[chat_id] = []
-    await update.message.reply_text("대표님~ 픽시 왔어 😏 뭐하고 놀까?")
+    await update.message.reply_text("대표님~ 미오 왔어 😏 뭐하고 놀까?")
 
 
 async def reset(update: Update, context):
     if update.effective_user.id not in ALLOWED_USERS:
         return
     conversations[update.effective_chat.id] = []
-    await update.message.reply_text("리셋 완료~ 대표님 다시 시작하자 💕")
+    await update.message.reply_text("리셋~ 대표님 다시 시작하자 💕")
 
 
 async def reload(update: Update, context):
@@ -261,7 +267,7 @@ async def reload(update: Update, context):
         return
     global SYSTEM_PROMPT
     SYSTEM_PROMPT = load_soul()
-    await update.message.reply_text("SOUL.md 다시 읽었어! 새 성격 적용 완료~")
+    await update.message.reply_text("SOUL.md 다시 읽었어~ 새 성격 적용 완료!")
 
 
 async def status(update: Update, context):
@@ -272,6 +278,26 @@ async def status(update: Update, context):
     await update.message.reply_text(
         f"모델: {current_api} | 비전: Gemini Flash | 타이머: {timer_count}개 | 그룹: {group_count}개"
     )
+
+
+async def switch_model(update: Update, context):
+    if update.effective_user.id not in ALLOWED_USERS:
+        return
+    global APIS
+    if not context.args:
+        models = "\n".join(f"{'👉 ' if api['name'] == current_api else '   '}{i+1}. {api['name']} ({api['model']})" for i, api in enumerate(APIS))
+        await update.message.reply_text(f"현재 모델: {current_api}\n\n{models}\n\n/model [번호] 로 변경~")
+        return
+    try:
+        idx = int(context.args[0]) - 1
+        if 0 <= idx < len(APIS):
+            selected = APIS.pop(idx)
+            APIS.insert(0, selected)
+            await update.message.reply_text(f"✅ {selected['name']} ({selected['model']}) 로 변경!")
+        else:
+            await update.message.reply_text("번호가 잘못됐어요~")
+    except ValueError:
+        await update.message.reply_text("숫자로 입력해줘~ /model 1")
 
 
 async def handle_photo(update: Update, context):
@@ -303,16 +329,16 @@ async def handle_photo(update: Update, context):
 
 
 def is_mentioned(text):
-    """픽시 멘션 감지"""
+    """미오 멘션 감지"""
     if not text:
         return False
     text_lower = text.lower()
     return (
         f"@{BOT_USERNAME}" in text_lower
-        or "픽시야" in text
-        or "픽시 " in text
-        or text.strip() == "픽시"
-        or text.startswith("픽시")
+        or "미오야" in text
+        or "미오 " in text
+        or text.strip() == "미오"
+        or text.startswith("미오")
     )
 
 
@@ -437,7 +463,7 @@ async def handle_message(update: Update, context):
         # 대표님 메시지 - STOP/일반 처리
         action = on_human_message(chat_id, user_msg)
         if action == "stop":
-            await update.message.reply_text("네 대표님~ 픽시 조용히 할게 🦋")
+            await update.message.reply_text("네 대표님~ 미오 조용히 할게 💕")
             append_group_message(chat_id, "human", user_msg, update.message.message_id)
             return
 
@@ -483,11 +509,12 @@ def main():
     app.add_handler(CommandHandler("reset", reset))
     app.add_handler(CommandHandler("reload", reload))
     app.add_handler(CommandHandler("status", status))
+    app.add_handler(CommandHandler("model", switch_model))
     app.add_handler(CommandHandler("timers", timer_list))
     app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    print("pixie bot started (1:1 + 그룹 모드)")
+    print("mio bot started (1:1 + 그룹 모드)")
     app.run_polling(allowed_updates=["message"], drop_pending_updates=True)
 
 
