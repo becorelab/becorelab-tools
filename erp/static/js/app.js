@@ -579,19 +579,40 @@ function renderPagination(containerId, total, size, current, callback) {
 async function doLogin() {
   const username = document.getElementById('login-user').value;
   const password = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+
+  if (!username || !password) {
+    errEl.textContent = '아이디와 비밀번호를 입력하세요.';
+    errEl.classList.add('show');
+    return;
+  }
+  errEl.classList.remove('show');
+
   try {
     currentUser = await api('/api/auth/login', { method: 'POST', body: { username, password } });
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     document.getElementById('user-name').textContent = currentUser.name;
     navigate('dashboard');
-  } catch (e) { toast(e.message, 'error'); }
+  } catch (e) {
+    errEl.textContent = e.message;
+    errEl.classList.add('show');
+  }
+}
+
+async function loadLoginStats() {
+  try {
+    const d = await api('/api/dashboard');
+    const ps = document.getElementById('login-stat-partners');
+    const pr = document.getElementById('login-stat-products');
+    if (ps) ps.textContent = fmt(d.partners);
+    if (pr) pr.textContent = fmt(d.products);
+  } catch (e) {}
 }
 
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('login-btn').addEventListener('click', doLogin);
-  document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('login-form').addEventListener('submit', (e) => { e.preventDefault(); doLogin(); });
 
   document.querySelectorAll('.nav-item').forEach(el => {
     el.addEventListener('click', () => navigate(el.dataset.page));
@@ -618,4 +639,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modal').addEventListener('click', e => {
     if (e.target.classList.contains('modal-overlay')) closeModal();
   });
+
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    currentUser = null;
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+    document.getElementById('login-error').classList.remove('show');
+  });
+
+  loadLoginStats();
 });

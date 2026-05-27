@@ -494,6 +494,78 @@ async def sync_sales(request: Request, conn=Depends(db)):
     return {"synced": synced_total, "days": days, "errors": errors[:5]}
 
 
+# ── 매출 자동 동기화 (서버 시작 시 백그라운드 스케줄러) ──
+import asyncio
+import threading
+
+async def _auto_sync_sales():
+    """매일 06:00에 전일 매출 자동 동기화"""
+    import aiohttp
+    while True:
+        now = datetime.now()
+        tomorrow_6am = (now + timedelta(days=1)).replace(hour=6, minute=0, second=0, microsecond=0)
+        if now.hour < 6:
+            tomorrow_6am = now.replace(hour=6, minute=0, second=0, microsecond=0)
+        wait_sec = (tomorrow_6am - now).total_seconds()
+        await asyncio.sleep(wait_sec)
+
+        try:
+            conn = get_db()
+            yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+            existing = conn.execute("SELECT COUNT(*) as cnt FROM sales WHERE sale_date=?", (yesterday,)).fetchone()["cnt"]
+            if existing > 0:
+                conn.close()
+                continue
+
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"{LOGISTICS_URL}/api/sales-daily-orders?date={yesterday}") as resp:
+                    if resp.status != 200:
+                        conn.close()
+                        continue
+                    data = await resp.json()
+
+                orders = data.get("by_option", [])
+                synced = 0
+                for order in orders:
+                    code = order.get("code", "")
+                    product_name = order.get("name", "")
+                    channels = order.get("channels", {})
+                    product = conn.execute("SELECT id FROM products WHERE product_code=? OR ezadmin_code=?", (code, code)).fetchone()
+                    product_id = product["id"] if product else None
+
+                    for ch_name, ch_data in channels.items():
+                        ch_qty = ch_data.get("qty", 0)
+                        ch_settlement = ch_data.get("settlement", 0)
+                        if ch_qty == 0 and ch_settlement == 0:
+                            continue
+                        supply = round(ch_settlement / 1.1)
+                        tax = ch_settlement - supply
+                        partner = conn.execute("SELECT id FROM partners WHERE name=?", (ch_name,)).fetchone()
+                        partner_id = partner["id"] if partner else None
+                        cur = conn.execute(
+                            """INSERT INTO sales (sale_date, partner_id, channel, channel_order_no,
+                               total_supply, total_tax, total_amount, status, recipient)
+                               VALUES (?,?,?,?,?,?,?,'confirmed',?)""",
+                            (yesterday, partner_id, ch_name, code, supply, tax, ch_settlement, product_name))
+                        sale_id = cur.lastrowid
+                        conn.execute(
+                            """INSERT INTO sale_lines (sale_id, product_id, product_name, qty, unit_price,
+                               supply_amount, tax_amount, line_total)
+                               VALUES (?,?,?,?,?,?,?,?)""",
+                            (sale_id, product_id, product_name, ch_qty,
+                             round(ch_settlement / ch_qty) if ch_qty else 0, supply, tax, ch_settlement))
+                        synced += 1
+                conn.commit()
+            conn.close()
+        except Exception:
+            pass
+
+
+@app.on_event("startup")
+async def start_auto_sync():
+    asyncio.create_task(_auto_sync_sales())
+
+
 # ── 발주 CRUD ──
 @app.get("/api/purchase-orders")
 async def list_po(
