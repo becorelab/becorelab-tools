@@ -67,7 +67,7 @@
 
 **⚠️ 경로를 추측하지 말 것. 반드시 아래 경로표대로 저장할 것.**
 
-볼트 루트 (macOS): `~/Documents/비코어랩`
+볼트 루트 (macOS): `~/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/앱/remotely-save/비코어랩`
 볼트 팀 폴더: `{볼트루트}/01. Becorelab AI Agent Team/`
 
 ### 전체 폴더 트리
