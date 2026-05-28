@@ -64,18 +64,124 @@ function navigate(page) {
 }
 
 // ── Dashboard ──
+let chartTrend = null;
+let chartChannels = null;
+let chartSalesSummary = null;
+
+const CHART_COLORS = ['#b25839','#5e7d3a','#a86a1c','#5d7da6','#a13a2f','#7b6b8d','#3a7d6e','#c47a2b','#6b8da1','#8d6b5a'];
+
 async function loadDashboard() {
   try {
-    const d = await api('/api/dashboard');
-    document.getElementById('dash-partners').textContent = fmt(d.partners);
-    document.getElementById('dash-products').textContent = fmt(d.products);
-    document.getElementById('dash-lowstock').textContent = fmt(d.low_stock);
+    const [d, trend, channels, topProducts] = await Promise.all([
+      api('/api/dashboard'),
+      api('/api/dashboard/trend?days=30'),
+      api('/api/dashboard/channels'),
+      api('/api/dashboard/top-products'),
+    ]);
     document.getElementById('dash-today-sales').textContent = '₩' + fmt(d.today_sales);
     document.getElementById('dash-month-sales').textContent = '₩' + fmt(d.month_sales);
+    document.getElementById('dash-lowstock').textContent = fmt(d.low_stock);
     document.getElementById('dash-pending-po').textContent = fmt(d.pending_po);
+
+    renderTrendChart(trend);
+    renderChannelChart(channels);
+    renderChannelTable(channels);
   } catch (e) {
     toast(e.message, 'error');
   }
+}
+
+function renderTrendChart(data) {
+  const ctx = document.getElementById('chart-trend');
+  if (chartTrend) chartTrend.destroy();
+  chartTrend = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map(d => d.sale_date.slice(5)),
+      datasets: [{
+        label: '일매출',
+        data: data.map(d => d.total),
+        borderColor: '#b25839',
+        backgroundColor: 'rgba(178,88,57,0.08)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointHoverRadius: 8,
+        pointBackgroundColor: '#b25839',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderWidth: 3,
+        pointHoverBorderColor: '#b25839',
+        borderWidth: 2.5,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#2a241f',
+          titleFont: { size: 12 },
+          bodyFont: { size: 13, weight: '600' },
+          padding: 10,
+          cornerRadius: 8,
+          displayColors: false,
+          callbacks: { label: ctx => '₩' + fmt(ctx.raw) },
+        },
+      },
+      scales: {
+        y: { ticks: { callback: v => v >= 1e6 ? (v/1e6).toFixed(0) + 'M' : fmt(v) }, grid: { color: '#f0eadf' } },
+        x: { grid: { display: false } },
+      },
+    },
+  });
+}
+
+function renderChannelChart(data) {
+  const ctx = document.getElementById('chart-channels');
+  if (chartChannels) chartChannels.destroy();
+  if (!data.length) return;
+  chartChannels = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: data.map(d => d.channel || '기타'),
+      datasets: [{
+        data: data.map(d => d.total),
+        backgroundColor: CHART_COLORS.slice(0, data.length),
+        borderWidth: 0,
+        hoverOffset: 6,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: { position: 'right', labels: { boxWidth: 10, padding: 10, font: { size: 11 } } },
+        tooltip: { callbacks: { label: ctx => ctx.label + ': ₩' + fmt(ctx.raw) } },
+      },
+    },
+  });
+}
+
+function renderChannelTable(data) {
+  const tbody = document.getElementById('dash-top-products');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted" style="padding:24px">이번달 매출 데이터 없음</td></tr>'; return; }
+  const grandTotal = data.reduce((s, d) => s + d.total, 0) || 1;
+  tbody.innerHTML = data.map((ch, i) => {
+    const pct = ((ch.total / grandTotal) * 100).toFixed(1);
+    return `<tr>
+      <td>${i + 1}</td>
+      <td><strong>${ch.channel || '기타'}</strong></td>
+      <td class="text-right number">${fmt(ch.cnt)}건</td>
+      <td class="text-right number">₩${fmt(ch.total)}</td>
+      <td><div class="bar-cell"><div class="bar-fill" style="width:${pct}%;background:${CHART_COLORS[i % CHART_COLORS.length]}"></div><span class="bar-pct">${pct}%</span></div></td>
+    </tr>`;
+  }).join('') + `<tr style="background:var(--bg);font-weight:700">
+    <td></td><td>합계</td>
+    <td class="text-right number">${fmt(data.reduce((s,d)=>s+d.cnt,0))}건</td>
+    <td class="text-right number">₩${fmt(grandTotal)}</td><td></td></tr>`;
 }
 
 // ── Partners ──
@@ -194,6 +300,7 @@ async function loadProducts(page = 1) {
         <td class="text-right number">${fmt(p.sell_price)}</td>
         <td>
           <button class="btn btn-sm" onclick="editProduct(${p.id})">수정</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id},'${p.name.replace(/'/g,"\\'")}')">삭제</button>
         </td>
       </tr>`;
     }).join('');
@@ -258,34 +365,141 @@ async function saveProduct(id) {
   } catch (e) { toast(e.message, 'error'); }
 }
 
+// ── Product Delete ──
+async function deleteProduct(id, name) {
+  if (!confirm(`"${name}" 품목을 삭제하시겠습니까?\n(재고 및 매출 이력은 유지됩니다)`)) return;
+  try {
+    await api(`/api/products/${id}`, { method: 'DELETE' });
+    toast('품목이 삭제되었습니다');
+    loadProducts(productsPage);
+  } catch (e) { toast(e.message, 'error'); }
+}
+
 // ── Stock ──
 async function loadStock() {
   const q = document.getElementById('stock-search')?.value || '';
   const alertOnly = document.getElementById('stock-alert')?.checked || false;
+  const hideZero = document.getElementById('stock-hide-zero')?.checked || false;
   try {
-    const items = await api(`/api/stock?q=${encodeURIComponent(q)}&alert_only=${alertOnly}`);
+    const [items_raw, summary] = await Promise.all([
+      api(`/api/stock?q=${encodeURIComponent(q)}&alert_only=${alertOnly}`),
+      api('/api/stock/summary'),
+    ]);
+    document.getElementById('stock-cnt-normal').textContent = summary.normal;
+    document.getElementById('stock-cnt-low').textContent = summary.low;
+    document.getElementById('stock-cnt-out').textContent = summary.out_of_stock;
+
+    let items = items_raw;
+    if (hideZero) items = items.filter(s => (s.qty_on_hand ?? 0) > 0);
     const tbody = document.getElementById('stock-tbody');
     tbody.innerHTML = items.map(s => {
       const qty = s.qty_on_hand ?? 0;
       const safe = s.safety_stock || 0;
-      let cls = '', badge = '';
-      if (qty <= 0) { cls = 'text-danger'; badge = '<span class="badge badge-danger">품절</span>'; }
-      else if (qty <= safe) { cls = 'text-warning'; badge = '<span class="badge badge-warning">부족</span>'; }
-      else { badge = '<span class="badge badge-success">정상</span>'; }
+      const avgDaily = s.avg_daily_out || 0;
+      const maxBar = Math.max(safe * 2, qty, 1);
+      const barPct = Math.min((qty / maxBar) * 100, 100);
+      const safePct = safe > 0 ? Math.min((safe / maxBar) * 100, 100) : 0;
+      let barColor = 'var(--green)';
+      let badge = '<span class="badge badge-success">정상</span>';
+      let depletionText = '-';
+
+      if (qty <= 0) { barColor = 'var(--red)'; badge = '<span class="badge badge-danger">품절</span>'; depletionText = '<span class="text-danger">품절</span>'; }
+      else if (qty <= safe) { barColor = 'var(--amber)'; badge = '<span class="badge badge-warning">부족</span>'; }
+
+      if (qty > 0 && avgDaily > 0) {
+        const days = Math.round(qty / avgDaily);
+        if (days <= 7) depletionText = `<span class="text-danger">${days}일</span>`;
+        else if (days <= 14) depletionText = `<span class="text-warning">${days}일</span>`;
+        else depletionText = `${days}일`;
+      } else if (qty > 0) {
+        depletionText = '<span class="text-muted">-</span>';
+      }
+
       return `
       <tr>
         <td>${s.product_code}</td>
         <td><strong>${s.name}</strong></td>
-        <td>${s.spec || '-'}</td>
-        <td class="text-right number ${cls}">${fmt(qty)}</td>
-        <td class="text-right number">${fmt(s.qty_reserved ?? 0)}</td>
-        <td class="text-right number">${fmt(s.qty_available ?? qty)}</td>
-        <td class="text-right number">${fmt(safe)}</td>
+        <td class="text-right number" style="font-size:14px;font-weight:600;color:${qty <= 0 ? 'var(--red)' : qty <= safe ? 'var(--amber)' : 'var(--ink)'}">${fmt(qty)}</td>
+        <td style="min-width:120px">
+          <div class="stock-bar">
+            <div class="stock-bar-fill" style="width:${barPct}%;background:${barColor}"></div>
+            ${safePct > 0 ? `<div class="stock-bar-safe" style="left:${safePct}%" title="안전재고: ${fmt(safe)}"></div>` : ''}
+          </div>
+        </td>
+        <td class="text-right number">${avgDaily > 0 ? avgDaily.toFixed(1) : '-'}</td>
+        <td class="text-right">${depletionText}</td>
         <td>${badge}</td>
-        <td>${s.last_synced_at || '-'}</td>
+        <td><button class="btn btn-sm" onclick="viewStockLedger(${s.id},'${(s.name||'').replace(/'/g,"\\'")}')">수불부</button></td>
       </tr>`;
     }).join('');
     document.getElementById('stock-info').textContent = `총 ${items.length}건`;
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function viewStockLedger(productId, productName) {
+  try {
+    const data = await api(`/api/stock/sales-outbound/${productId}?days=90&period=daily`);
+    const m = document.getElementById('modal');
+    m.querySelector('.modal-header span').textContent = `수불부 — ${productName}`;
+    const items = data.items || [];
+    m.querySelector('.modal-body').innerHTML = `
+      <div class="form-row mb-2" style="gap:24px">
+        <div><span class="text-muted">최근 90일 출고량</span><br><strong class="number" style="font-size:20px">${fmt(data.total_qty)}개</strong></div>
+        <div><span class="text-muted">일평균 출고</span><br><strong class="number" style="font-size:20px">${fmt(data.avg_daily)}개/일</strong></div>
+        <div style="margin-left:auto;display:flex;gap:6px;align-items:end">
+          <button class="btn btn-sm ${!window._ledgerWeekly?'btn-primary':''}" onclick="viewStockLedger(${productId},'${productName.replace(/'/g,"\\'")}');window._ledgerWeekly=false">일별</button>
+          <button class="btn btn-sm ${window._ledgerWeekly?'btn-primary':''}" onclick="window._ledgerWeekly=true;viewStockLedgerWeekly(${productId},'${productName.replace(/'/g,"\\'")}')">주별</button>
+        </div>
+      </div>
+      ${items.length ? `<div style="height:200px;margin-bottom:12px"><canvas id="chart-ledger"></canvas></div>
+      <table>
+        <thead><tr><th>기간</th><th class="text-right">출고수량</th><th class="text-right">금액</th></tr></thead>
+        <tbody>${items.map(t => `<tr>
+          <td>${t.period}</td>
+          <td class="text-right number">${fmt(t.qty)}</td>
+          <td class="text-right number">₩${fmt(t.amount)}</td>
+        </tr>`).join('')}</tbody>
+      </table>` : '<div class="empty-state"><p>최근 90일 출고 이력이 없습니다</p></div>'}
+    `;
+    m.querySelector('.modal-footer').innerHTML = '<button class="btn" onclick="closeModal()">닫기</button>';
+    openModal();
+    if (items.length) {
+      const reversed = [...items].reverse();
+      new Chart(document.getElementById('chart-ledger'), {
+        type: 'bar',
+        data: { labels: reversed.map(d => d.period.slice(5)), datasets: [{ data: reversed.map(d => d.qty), backgroundColor: 'rgba(178,88,57,0.6)', borderRadius: 3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmt(c.raw) + '개' } } },
+          scales: { y: { grid: { color: '#f0eadf' } }, x: { grid: { display: false } } } },
+      });
+    }
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function viewStockLedgerWeekly(productId, productName) {
+  try {
+    const data = await api(`/api/stock/sales-outbound/${productId}?days=90&period=weekly`);
+    const m = document.getElementById('modal');
+    const items = data.items || [];
+    m.querySelector('.modal-body').querySelector('table').outerHTML = items.length ? `
+      <div style="height:200px;margin-bottom:12px"><canvas id="chart-ledger"></canvas></div>
+      <table>
+        <thead><tr><th>주차</th><th class="text-right">출고수량</th><th class="text-right">금액</th></tr></thead>
+        <tbody>${items.map(t => `<tr>
+          <td>${t.period}</td>
+          <td class="text-right number">${fmt(t.qty)}</td>
+          <td class="text-right number">₩${fmt(t.amount)}</td>
+        </tr>`).join('')}</tbody>
+      </table>` : '<p class="text-muted text-center">주별 데이터 없음</p>';
+    const canvas = document.getElementById('chart-ledger');
+    if (canvas && items.length) {
+      const reversed = [...items].reverse();
+      new Chart(canvas, {
+        type: 'bar',
+        data: { labels: reversed.map(d => d.period), datasets: [{ data: reversed.map(d => d.qty), backgroundColor: 'rgba(94,125,58,0.6)', borderRadius: 3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+          scales: { y: { grid: { color: '#f0eadf' } }, x: { grid: { display: false } } } },
+      });
+    }
   } catch (e) { toast(e.message, 'error'); }
 }
 
@@ -392,6 +606,93 @@ async function syncSales() {
   btn.textContent = '매출 동기화';
 }
 
+// ── Sales Summary Tab ──
+function switchSalesTab(tab) {
+  document.querySelectorAll('[data-sales-tab]').forEach(el => el.classList.toggle('active', el.dataset.salesTab === tab));
+  document.getElementById('sales-tab-list').classList.toggle('hidden', tab !== 'list');
+  document.getElementById('sales-tab-summary').classList.toggle('hidden', tab !== 'summary');
+  if (tab === 'summary') loadSalesSummary();
+}
+
+async function loadSalesSummary() {
+  const fromEl = document.getElementById('summary-from');
+  const toEl = document.getElementById('summary-to');
+  if (!fromEl.value) { const now = new Date(); fromEl.value = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0,10); }
+  if (!toEl.value) toEl.value = new Date().toISOString().slice(0,10);
+  const groupBy = document.getElementById('summary-group')?.value || 'daily';
+  const channel = document.getElementById('summary-channel')?.value || '';
+
+  const summaryChSel = document.getElementById('summary-channel');
+  if (summaryChSel && summaryChSel.options.length <= 1 && salesChannels.length) {
+    salesChannels.forEach(ch => { const o = document.createElement('option'); o.value = ch; o.textContent = ch; summaryChSel.appendChild(o); });
+  }
+
+  try {
+    const data = await api(`/api/sales/summary?date_from=${fromEl.value}&date_to=${toEl.value}&group_by=${groupBy}&channel=${encodeURIComponent(channel)}`);
+    const grandTotal = data.reduce((s, r) => s + (r.total || 0), 0);
+    document.getElementById('summary-total').textContent = `합계 ₩${fmt(grandTotal)}`;
+
+    const tbody = document.getElementById('summary-tbody');
+    tbody.innerHTML = data.length ? data.map(r => {
+      const pct = grandTotal ? ((r.total / grandTotal) * 100).toFixed(1) : '0';
+      return `<tr>
+        <td><strong>${r.label || '-'}</strong></td>
+        <td class="text-right number">${r.qty != null ? fmt(r.qty) : (r.cnt != null ? fmt(r.cnt) + '건' : '-')}</td>
+        <td class="text-right number">${fmt(r.supply)}</td>
+        <td class="text-right number">${fmt(r.tax)}</td>
+        <td class="text-right number"><strong>₩${fmt(r.total)}</strong></td>
+        <td><div class="bar-cell" style="min-width:60px"><div class="bar-fill" style="width:${pct}%"></div><span class="bar-pct">${pct}%</span></div></td>
+      </tr>`;
+    }).join('') + `<tr style="background:var(--bg);font-weight:700">
+      <td>합계</td><td></td>
+      <td class="text-right number">${fmt(data.reduce((s,r) => s + (r.supply||0), 0))}</td>
+      <td class="text-right number">${fmt(data.reduce((s,r) => s + (r.tax||0), 0))}</td>
+      <td class="text-right number">₩${fmt(grandTotal)}</td><td></td>
+    </tr>` : '<tr><td colspan="6" class="text-center text-muted" style="padding:40px">데이터 없음</td></tr>';
+
+    renderSalesSummaryChart(data, groupBy);
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function renderSalesSummaryChart(data, groupBy) {
+  const ctx = document.getElementById('chart-sales-summary');
+  if (chartSalesSummary) chartSalesSummary.destroy();
+  if (!data.length) return;
+  const isBar = groupBy === 'channel' || groupBy === 'product';
+  chartSalesSummary = new Chart(ctx, {
+    type: isBar ? 'bar' : 'line',
+    data: {
+      labels: data.map(d => {
+        const l = d.label || '-';
+        return l.length > 15 ? l.slice(0, 15) + '…' : l;
+      }),
+      datasets: [{
+        label: '매출',
+        data: data.map(d => d.total),
+        backgroundColor: isBar ? CHART_COLORS.slice(0, data.length) : 'rgba(178,88,57,0.08)',
+        borderColor: '#b25839',
+        borderWidth: isBar ? 0 : 2,
+        fill: !isBar,
+        tension: 0.3,
+        borderRadius: isBar ? 4 : 0,
+        pointRadius: isBar ? 0 : 2,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => '₩' + fmt(ctx.raw) } },
+      },
+      scales: {
+        y: { ticks: { callback: v => v >= 1e6 ? (v/1e6).toFixed(0) + 'M' : fmt(v) }, grid: { color: '#f0eadf' } },
+        x: { grid: { display: false }, ticks: { maxRotation: 45 } },
+      },
+    },
+  });
+}
+
 // ── Purchase Orders ──
 let ordersPage = 1;
 
@@ -411,20 +712,25 @@ async function loadOrders(page = 1) {
   const from = document.getElementById('order-from')?.value || '';
   const to = document.getElementById('order-to')?.value || '';
   try {
-    const d = await api(`/api/purchase-orders?status=${status}&q=${encodeURIComponent(q)}&date_from=${from}&date_to=${to}&page=${page}&size=30`);
+    const sort = document.getElementById('order-sort')?.value || 'date_desc';
+    const d = await api(`/api/purchase-orders?status=${status}&q=${encodeURIComponent(q)}&date_from=${from}&date_to=${to}&sort=${sort}&page=${page}&size=30`);
     const tbody = document.getElementById('orders-tbody');
     const statusMap = { draft: '작성중', confirmed: '확정', partial: '부분입고', completed: '완료', cancelled: '취소' };
     const badgeMap = { draft: 'default', confirmed: 'info', partial: 'warning', completed: 'success', cancelled: 'danger' };
-    tbody.innerHTML = d.items.length ? d.items.map(o => `
+    tbody.innerHTML = d.items.length ? d.items.map(o => {
+      const items = o.items_summary || '';
+      const shortItems = items.length > 50 ? items.slice(0, 50) + '…' : items;
+      return `
       <tr onclick="viewOrder(${o.id})" style="cursor:pointer">
         <td><strong>${o.po_number}</strong></td>
         <td>${o.po_date}</td>
         <td>${o.supplier_name || '-'}</td>
+        <td class="text-muted" style="font-size:11.5px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${items}">${shortItems || '-'}</td>
         <td>${o.delivery_date || '-'}</td>
         <td class="text-right number">${fmt(o.total_amount)}</td>
         <td><span class="badge badge-${badgeMap[o.status]}">${statusMap[o.status]}</span></td>
-      </tr>
-    `).join('') : '<tr><td colspan="6" class="text-center text-muted" style="padding:40px">발주 데이터가 없습니다</td></tr>';
+      </tr>`;
+    }).join('') : '<tr><td colspan="7" class="text-center text-muted" style="padding:40px">발주 데이터가 없습니다</td></tr>';
     document.getElementById('orders-info').textContent = `총 ${d.total}건`;
     const sumEl = document.getElementById('orders-sum');
     if (sumEl) sumEl.textContent = `합계 ₩${fmt(d.sum_amount)}`;
@@ -476,9 +782,17 @@ async function confirmPO(id) {
   } catch (e) { toast(e.message, 'error'); }
 }
 
+let _orderDebounceTimer;
+function debounceLoadOrders() {
+  clearTimeout(_orderDebounceTimer);
+  _orderDebounceTimer = setTimeout(() => loadOrders(), 300);
+}
+
 async function newOrder() {
   const suppliers = await api('/api/partners?type=supplier&size=200');
   const products = await api('/api/products?size=200');
+  window._allSuppliers = suppliers.items;
+  window._poProducts = products.items;
   const m = document.getElementById('modal');
   m.querySelector('.modal-header span').textContent = '발주서 작성';
   m.querySelector('.modal-body').innerHTML = `
@@ -487,21 +801,49 @@ async function newOrder() {
       <div class="form-group"><label>납품예정일</label><input type="date" id="m-podelivery" /></div>
     </div>
     <div class="form-group"><label>공급처</label>
-      <select id="m-posupplier"><option value="">선택</option>${suppliers.items.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}</select></div>
+      <div class="autocomplete-wrap">
+        <input type="text" id="m-posupplier-search" placeholder="공급처명 검색..." autocomplete="off" />
+        <input type="hidden" id="m-posupplier" />
+        <div class="autocomplete-list" id="supplier-autocomplete"></div>
+      </div>
+    </div>
     <div class="form-group"><label>메모</label><textarea id="m-pomemo" rows="2"></textarea></div>
-    <hr style="border-color:var(--border); margin:16px 0" />
+    <hr style="border-color:var(--line); margin:16px 0" />
     <div class="flex justify-between items-center mb-2">
       <strong>발주 품목</strong>
       <button class="btn btn-sm" onclick="addPOLine()">+ 품목 추가</button>
     </div>
     <div id="po-lines"></div>
   `;
-  window._poProducts = products.items;
+  initSupplierAutocomplete();
   m.querySelector('.modal-footer').innerHTML = `
     <button class="btn" onclick="closeModal()">취소</button>
     <button class="btn btn-primary" onclick="savePO()">발주 등록</button>`;
   openModal();
   addPOLine();
+}
+
+function initSupplierAutocomplete() {
+  const input = document.getElementById('m-posupplier-search');
+  const hidden = document.getElementById('m-posupplier');
+  const list = document.getElementById('supplier-autocomplete');
+  input.addEventListener('input', () => {
+    const q = input.value.toLowerCase();
+    hidden.value = '';
+    if (!q) { list.innerHTML = ''; list.style.display = 'none'; return; }
+    const matches = (window._allSuppliers || []).filter(s => s.name.toLowerCase().includes(q)).slice(0, 8);
+    if (!matches.length) { list.innerHTML = '<div class="autocomplete-item text-muted">결과 없음</div>'; list.style.display = 'block'; return; }
+    list.innerHTML = matches.map(s => `<div class="autocomplete-item" data-id="${s.id}">${s.name}</div>`).join('');
+    list.style.display = 'block';
+    list.querySelectorAll('.autocomplete-item[data-id]').forEach(el => {
+      el.addEventListener('click', () => {
+        input.value = el.textContent;
+        hidden.value = el.dataset.id;
+        list.style.display = 'none';
+      });
+    });
+  });
+  input.addEventListener('blur', () => setTimeout(() => { list.style.display = 'none'; }, 200));
 }
 
 function addPOLine() {

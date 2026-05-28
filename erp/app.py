@@ -246,12 +246,29 @@ async def list_stock(q: str = "", alert_only: bool = False, conn=Depends(db)):
     rows = conn.execute(
         f"""SELECT p.id, p.product_code, p.name, p.spec, p.unit, p.safety_stock,
             p.ezadmin_code, s.qty_on_hand, s.qty_reserved, s.qty_available, s.pending_inbound,
-            s.last_synced_at
+            s.last_synced_at,
+            COALESCE((SELECT SUM(sl.qty) FROM sale_lines sl JOIN sales sa ON sa.id=sl.sale_id
+             WHERE sl.product_id=p.id AND sa.status='confirmed'
+             AND sa.sale_date >= date('now', '-30 days', 'localtime')), 0) / 30.0 as avg_daily_out
             FROM products p LEFT JOIN stock s ON s.product_id=p.id
             WHERE {w} ORDER BY s.qty_on_hand ASC""",
         params,
     ).fetchall()
     return [dict(r) for r in rows]
+
+
+@app.get("/api/stock/summary")
+async def stock_summary(conn=Depends(db)):
+    normal = conn.execute(
+        "SELECT COUNT(*) as cnt FROM stock s JOIN products p ON p.id=s.product_id WHERE p.is_active=1 AND s.qty_on_hand > p.safety_stock"
+    ).fetchone()["cnt"]
+    low = conn.execute(
+        "SELECT COUNT(*) as cnt FROM stock s JOIN products p ON p.id=s.product_id WHERE p.is_active=1 AND s.qty_on_hand > 0 AND s.qty_on_hand <= p.safety_stock"
+    ).fetchone()["cnt"]
+    out = conn.execute(
+        "SELECT COUNT(*) as cnt FROM stock s JOIN products p ON p.id=s.product_id WHERE p.is_active=1 AND s.qty_on_hand <= 0"
+    ).fetchone()["cnt"]
+    return {"normal": normal, "low": low, "out_of_stock": out, "total": normal + low + out}
 
 
 @app.post("/api/stock/sync")
@@ -369,6 +386,58 @@ async def list_sales(
 async def list_sales_channels(conn=Depends(db)):
     rows = conn.execute("SELECT DISTINCT channel FROM sales WHERE channel IS NOT NULL ORDER BY channel").fetchall()
     return [r["channel"] for r in rows]
+
+
+@app.get("/api/sales/summary")
+async def sales_summary(
+    date_from: str = "", date_to: str = "",
+    group_by: str = "daily", channel: str = "",
+    conn=Depends(db),
+):
+    where, params = ["s.status='confirmed'"], []
+    if date_from:
+        where.append("s.sale_date>=?")
+        params.append(date_from)
+    if date_to:
+        where.append("s.sale_date<=?")
+        params.append(date_to)
+    if channel:
+        where.append("s.channel LIKE ?")
+        params.append(f"%{channel}%")
+    w = " AND ".join(where)
+
+    if group_by == "channel":
+        rows = conn.execute(
+            f"""SELECT s.channel as label, SUM(sl.qty) as qty,
+                SUM(s.total_supply) as supply, SUM(s.total_tax) as tax, SUM(s.total_amount) as total, COUNT(DISTINCT s.id) as cnt
+                FROM sales s LEFT JOIN sale_lines sl ON sl.sale_id=s.id
+                WHERE {w} GROUP BY s.channel ORDER BY total DESC""",
+            params,
+        ).fetchall()
+    elif group_by == "product":
+        rows = conn.execute(
+            f"""SELECT sl.product_name as label, SUM(sl.qty) as qty,
+                SUM(sl.supply_amount) as supply, SUM(sl.tax_amount) as tax, SUM(sl.line_total) as total
+                FROM sale_lines sl JOIN sales s ON s.id=sl.sale_id
+                WHERE {w} GROUP BY sl.product_name ORDER BY total DESC""",
+            params,
+        ).fetchall()
+    elif group_by == "weekly":
+        rows = conn.execute(
+            f"""SELECT strftime('%Y-W%W', s.sale_date) as label,
+                SUM(s.total_supply) as supply, SUM(s.total_tax) as tax, SUM(s.total_amount) as total, COUNT(*) as cnt
+                FROM sales s WHERE {w} GROUP BY label ORDER BY label DESC""",
+            params,
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            f"""SELECT s.sale_date as label,
+                SUM(s.total_supply) as supply, SUM(s.total_tax) as tax, SUM(s.total_amount) as total, COUNT(*) as cnt
+                FROM sales s WHERE {w} GROUP BY s.sale_date ORDER BY s.sale_date DESC""",
+            params,
+        ).fetchall()
+
+    return [dict(r) for r in rows]
 
 
 @app.get("/api/sales/{sid}")
@@ -571,6 +640,7 @@ async def start_auto_sync():
 async def list_po(
     status: str = "", supplier_id: int = 0, q: str = "",
     date_from: str = "", date_to: str = "",
+    sort: str = "date_desc",
     page: int = 1, size: int = 50, conn=Depends(db)
 ):
     where, params = ["1=1"], []
@@ -590,6 +660,14 @@ async def list_po(
         where.append("po.po_date<=?")
         params.append(date_to)
     w = " AND ".join(where)
+    sort_map = {
+        "date_desc": "po.po_date DESC",
+        "date_asc": "po.po_date ASC",
+        "amount_desc": "po.total_amount DESC",
+        "amount_asc": "po.total_amount ASC",
+        "supplier": "sup.name ASC, po.po_date DESC",
+    }
+    order_clause = sort_map.get(sort, "po.po_date DESC")
     total = conn.execute(
         f"SELECT COUNT(*) as cnt FROM purchase_orders po LEFT JOIN partners sup ON sup.id=po.supplier_id WHERE {w}", params
     ).fetchone()["cnt"]
@@ -597,9 +675,11 @@ async def list_po(
         f"SELECT COALESCE(SUM(po.total_amount),0) as sum_amount FROM purchase_orders po LEFT JOIN partners sup ON sup.id=po.supplier_id WHERE {w}", params
     ).fetchone()
     rows = conn.execute(
-        f"""SELECT po.*, sup.name as supplier_name
+        f"""SELECT po.*, sup.name as supplier_name,
+            (SELECT GROUP_CONCAT(pol.product_name, ' / ')
+             FROM purchase_order_lines pol WHERE pol.po_id=po.id) as items_summary
             FROM purchase_orders po LEFT JOIN partners sup ON sup.id=po.supplier_id
-            WHERE {w} ORDER BY po.po_date DESC LIMIT ? OFFSET ?""",
+            WHERE {w} ORDER BY {order_clause} LIMIT ? OFFSET ?""",
         params + [size, (page - 1) * size],
     ).fetchall()
     return {"items": [dict(r) for r in rows], "total": total, "page": page, "size": size, "sum_amount": sum_row["sum_amount"]}
@@ -746,6 +826,75 @@ async def stock_history(product_id: int, conn=Depends(db)):
         (product_id,),
     ).fetchall()
     return [dict(r) for r in rows]
+
+
+# ── 수불부 (매출 기반 출고량) ──
+@app.get("/api/stock/sales-outbound/{product_id}")
+async def stock_sales_outbound(product_id: int, days: int = 90, period: str = "daily", conn=Depends(db)):
+    if period == "weekly":
+        group = "strftime('%Y-W%W', s.sale_date)"
+    else:
+        group = "s.sale_date"
+    rows = conn.execute(
+        f"""SELECT {group} as period, SUM(sl.qty) as qty, SUM(sl.line_total) as amount
+            FROM sale_lines sl JOIN sales s ON s.id=sl.sale_id
+            WHERE sl.product_id=? AND s.status='confirmed'
+            AND s.sale_date >= date('now', '-' || ? || ' days', 'localtime')
+            GROUP BY {group} ORDER BY period DESC""",
+        (product_id, days),
+    ).fetchall()
+    total_qty = sum(r["qty"] for r in rows)
+    day_count = len(set(r["period"] for r in rows)) or 1
+    return {
+        "items": [dict(r) for r in rows],
+        "total_qty": total_qty,
+        "avg_daily": round(total_qty / min(days, day_count)) if total_qty else 0,
+    }
+
+
+# ── 대시보드 확장 API ──
+@app.get("/api/dashboard/trend")
+async def dashboard_trend(days: int = 30, conn=Depends(db)):
+    rows = conn.execute(
+        """SELECT sale_date, SUM(total_amount) as total
+           FROM sales WHERE sale_date >= date('now', '-' || ? || ' days', 'localtime')
+           AND status='confirmed' GROUP BY sale_date ORDER BY sale_date""",
+        (days,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+@app.get("/api/dashboard/channels")
+async def dashboard_channels(conn=Depends(db)):
+    month_start = datetime.now().strftime("%Y-%m-01")
+    rows = conn.execute(
+        """SELECT channel, SUM(total_amount) as total, COUNT(*) as cnt
+           FROM sales WHERE sale_date >= ? AND status='confirmed' AND channel IS NOT NULL
+           GROUP BY channel ORDER BY total DESC""",
+        (month_start,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+@app.get("/api/dashboard/top-products")
+async def dashboard_top_products(conn=Depends(db)):
+    month_start = datetime.now().strftime("%Y-%m-01")
+    rows = conn.execute(
+        """SELECT sl.product_name, SUM(sl.qty) as total_qty, SUM(sl.line_total) as total_amount
+           FROM sale_lines sl JOIN sales s ON s.id=sl.sale_id
+           WHERE s.sale_date >= ? AND s.status='confirmed' AND sl.product_name IS NOT NULL
+           GROUP BY sl.product_name ORDER BY total_amount DESC LIMIT 10""",
+        (month_start,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+# ── 품목 삭제 ──
+@app.delete("/api/products/{pid}")
+async def delete_product(pid: int, conn=Depends(db)):
+    conn.execute("UPDATE products SET is_active=0, updated_at=datetime('now','localtime') WHERE id=?", (pid,))
+    conn.commit()
+    return {"ok": True}
 
 
 # ── 사용자 관리 ──

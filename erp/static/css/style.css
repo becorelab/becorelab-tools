@@ -742,4 +742,150 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); }
 .tab-item:hover { color: var(--ink-2); }
 .tab-item.active { color: var(--accent); border-bottom-color: var(--accent); }
 
+/* ── Dashboard Charts ── */
+.dash-charts {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.chart-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.chart-card-wide { grid-column: 1; }
+.chart-card-header {
+  padding: 14px 18px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chart-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.chart-card-body {
+  padding: 12px 18px 18px;
+  height: 280px;
+  position: relative;
+}
+.chart-card-body-donut {
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Bar Cell (proportions) ── */
+.bar-cell {
+  width: 100%;
+  height: 6px;
+  background: var(--line-2);
+  border-radius: 3px;
+  overflow: visible;
+  position: relative;
+}
+.bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.bar-pct {
+  position: absolute;
+  right: 0;
+  top: -16px;
+  font-size: 10px;
+  color: var(--ink-3);
+  font-weight: 600;
+  font-family: 'ERPMono', 'Malgun Gothic', sans-serif;
+}
+
+/* ── Stock Summary Cards ── */
+.stock-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.stock-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.stock-card-icon { font-size: 24px; }
+.stock-card-value {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: 'ERPMono', 'Malgun Gothic', sans-serif;
+}
+.stock-card-label { font-size: 12px; color: var(--ink-3); font-weight: 600; }
+.stock-card-normal { border-left: 3px solid var(--green); }
+.stock-card-normal .stock-card-value { color: var(--green); }
+.stock-card-low { border-left: 3px solid var(--amber); }
+.stock-card-low .stock-card-value { color: var(--amber); }
+.stock-card-out { border-left: 3px solid var(--red); }
+.stock-card-out .stock-card-value { color: var(--red); }
+
+/* ── Stock Level Bar ── */
+.stock-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--line-2);
+  border-radius: 4px;
+  position: relative;
+  overflow: visible;
+}
+.stock-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+.stock-bar-safe {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 14px;
+  background: var(--red);
+  border-radius: 1px;
+  opacity: 0.6;
+}
+
+/* ── Autocomplete ── */
+.autocomplete-wrap {
+  position: relative;
+}
+.autocomplete-list {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 50;
+}
+.autocomplete-item {
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.autocomplete-item:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
 .table-scroll { overflow-x: auto; }
