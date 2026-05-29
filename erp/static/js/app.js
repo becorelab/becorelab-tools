@@ -385,48 +385,126 @@ async function loadStock() {
       api(`/api/stock?q=${encodeURIComponent(q)}&alert_only=${alertOnly}`),
       api('/api/stock/summary'),
     ]);
-    document.getElementById('stock-cnt-normal').textContent = summary.normal;
-    document.getElementById('stock-cnt-low').textContent = summary.low;
-    document.getElementById('stock-cnt-out').textContent = summary.out_of_stock;
-
     let items = items_raw;
     if (hideZero) items = items.filter(s => (s.qty_on_hand ?? 0) > 0);
-    const tbody = document.getElementById('stock-tbody');
-    tbody.innerHTML = items.map(s => {
+
+    const maxQty = Math.max(...items.map(s => s.qty_on_hand ?? 0), 1);
+
+    const classified = items.map(s => {
       const qty = s.qty_on_hand ?? 0;
       const safe = s.safety_stock || 0;
       const avgDaily = s.avg_daily_out || 0;
-      const maxBar = Math.max(safe * 2, qty, 1);
-      const barPct = Math.min((qty / maxBar) * 100, 100);
-      const safePct = safe > 0 ? Math.min((safe / maxBar) * 100, 100) : 0;
-      let barColor = 'var(--green)';
-      let badge = '<span class="badge badge-success">정상</span>';
+      const days = (qty > 0 && avgDaily > 0) ? Math.round(qty / avgDaily) : null;
+
+      let status = 'normal';
+      if (qty <= 0) status = 'out';
+      else if (days !== null && days <= 7) status = 'danger';
+      else if (qty <= safe && safe > 0) status = 'low';
+      else if (days !== null && days <= 14) status = 'warning';
+      return { ...s, qty, safe, avgDaily, days, status };
+    });
+
+    const outItems = classified.filter(s => s.status === 'out');
+    const dangerItems = classified.filter(s => s.status === 'danger').sort((a, b) => (a.days ?? 0) - (b.days ?? 0));
+    const warningItems = classified.filter(s => s.status === 'warning' || s.status === 'low').sort((a, b) => (a.days ?? 999) - (b.days ?? 999));
+    const pendingInbound = classified.filter(s => (s.pending_inbound ?? 0) > 0);
+    const CARD_LIMIT = 5;
+
+    function renderCardItems(items, badgeFn, emptyMsg) {
+      if (!items.length) return `<div class="stock-dash-ok">${emptyMsg}</div>`;
+      const show = items.slice(0, CARD_LIMIT);
+      const rest = items.length - CARD_LIMIT;
+      let html = show.map(s => `<div class="stock-dash-item">
+        <span class="stock-dash-name">${s.name.replace(/\[비코어랩\]/g,'').replace(/\(비코어랩\)/g,'').trim()}</span>
+        ${badgeFn(s)}
+      </div>`).join('');
+      if (rest > 0) html += `<div class="stock-dash-more">외 ${rest}건</div>`;
+      return html;
+    }
+
+    const dashEl = document.getElementById('stock-dashboard');
+    if (dashEl) {
+      dashEl.innerHTML = `
+        <div class="stock-dash-card stock-dash-danger">
+          <div class="stock-dash-header">
+            <span class="stock-dash-icon">🚨</span>
+            <div>
+              <div class="stock-dash-title">소진 임박</div>
+              <div class="stock-dash-subtitle">7일 이내 소진 예상</div>
+            </div>
+            <span class="stock-dash-count stock-dash-count-danger">${dangerItems.length}</span>
+          </div>
+          <div class="stock-dash-body">
+            ${renderCardItems(dangerItems, s => `<span class="stock-dash-badge stock-dash-badge-danger">${s.days}일</span>`, '✅ 모두 안전')}
+          </div>
+          ${outItems.length > 0 ? `<div class="stock-dash-footer stock-dash-footer-danger">품절 ${outItems.length}건</div>` : ''}
+        </div>
+        <div class="stock-dash-card stock-dash-warning">
+          <div class="stock-dash-header">
+            <span class="stock-dash-icon">⚠️</span>
+            <div>
+              <div class="stock-dash-title">주의</div>
+              <div class="stock-dash-subtitle">14일 이내 소진 예상</div>
+            </div>
+            <span class="stock-dash-count stock-dash-count-warning">${warningItems.length}</span>
+          </div>
+          <div class="stock-dash-body">
+            ${renderCardItems(warningItems, s => `<span class="stock-dash-badge stock-dash-badge-warning">${s.days !== null ? s.days + '일' : '부족'}</span>`, '✅ 해당 없음')}
+          </div>
+        </div>
+        <div class="stock-dash-card stock-dash-inbound">
+          <div class="stock-dash-header">
+            <span class="stock-dash-icon">📦</span>
+            <div>
+              <div class="stock-dash-title">입고 예정</div>
+              <div class="stock-dash-subtitle">발주 후 입고 대기</div>
+            </div>
+            <span class="stock-dash-count stock-dash-count-inbound">${pendingInbound.length}</span>
+          </div>
+          <div class="stock-dash-body">
+            ${renderCardItems(pendingInbound, s => `<span class="stock-dash-badge stock-dash-badge-inbound">+${fmt(s.pending_inbound)}</span>`, '<span style="color:var(--ink-3)">예정 없음</span>')}
+          </div>
+        </div>`;
+    }
+
+    const tbody = document.getElementById('stock-tbody');
+    tbody.innerHTML = classified.map(s => {
+      const barPct = Math.min((s.qty / maxQty) * 100, 100);
+      const safePct = s.safe > 0 ? Math.min((s.safe / maxQty) * 100, 100) : 0;
+
+      const colorMap = { out: 'var(--red)', danger: 'var(--red)', low: 'var(--amber)', warning: 'var(--amber)', normal: 'var(--green)' };
+      const badgeMap = {
+        out: '<span class="badge badge-danger">품절</span>',
+        danger: '<span class="badge badge-danger">위험</span>',
+        low: '<span class="badge badge-warning">부족</span>',
+        warning: '<span class="badge badge-warning">주의</span>',
+        normal: '<span class="badge badge-success">정상</span>'
+      };
+      const barColor = colorMap[s.status];
+      const badge = badgeMap[s.status];
+
       let depletionText = '-';
+      if (s.qty <= 0) depletionText = '<span class="text-danger">품절</span>';
+      else if (s.days !== null) {
+        if (s.days <= 7) depletionText = `<span class="text-danger">${s.days}일</span>`;
+        else if (s.days <= 14) depletionText = `<span class="text-warning">${s.days}일</span>`;
+        else depletionText = `${s.days}일`;
+      } else depletionText = '<span class="text-muted">-</span>';
 
-      if (qty <= 0) { barColor = 'var(--red)'; badge = '<span class="badge badge-danger">품절</span>'; depletionText = '<span class="text-danger">품절</span>'; }
-      else if (qty <= safe) { barColor = 'var(--amber)'; badge = '<span class="badge badge-warning">부족</span>'; }
-
-      if (qty > 0 && avgDaily > 0) {
-        const days = Math.round(qty / avgDaily);
-        if (days <= 7) depletionText = `<span class="text-danger">${days}일</span>`;
-        else if (days <= 14) depletionText = `<span class="text-warning">${days}일</span>`;
-        else depletionText = `${days}일`;
-      } else if (qty > 0) {
-        depletionText = '<span class="text-muted">-</span>';
-      }
+      const qtyColor = s.status === 'out' ? 'var(--red)' : s.status === 'danger' || s.status === 'low' ? 'var(--amber)' : 'var(--ink)';
 
       return `
       <tr>
         <td>${s.product_code}</td>
         <td><strong>${s.name}</strong></td>
-        <td class="text-right number" style="font-size:14px;font-weight:600;color:${qty <= 0 ? 'var(--red)' : qty <= safe ? 'var(--amber)' : 'var(--ink)'}">${fmt(qty)}</td>
+        <td class="text-right number" style="font-size:14px;font-weight:600;color:${qtyColor}">${fmt(s.qty)}</td>
         <td style="min-width:120px">
           <div class="stock-bar">
             <div class="stock-bar-fill" style="width:${barPct}%;background:${barColor}"></div>
-            ${safePct > 0 ? `<div class="stock-bar-safe" style="left:${safePct}%" title="안전재고: ${fmt(safe)}"></div>` : ''}
+            ${safePct > 0 ? `<div class="stock-bar-safe" style="left:${safePct}%" title="안전재고: ${fmt(s.safe)}"></div>` : ''}
           </div>
         </td>
-        <td class="text-right number">${avgDaily > 0 ? avgDaily.toFixed(1) : '-'}</td>
+        <td class="text-right number">${s.avgDaily > 0 ? s.avgDaily.toFixed(1) : '-'}</td>
         <td class="text-right">${depletionText}</td>
         <td>${badge}</td>
         <td><button class="btn btn-sm" onclick="viewStockLedger(${s.id},'${(s.name||'').replace(/'/g,"\\'")}')">수불부</button></td>
@@ -519,6 +597,7 @@ async function syncStock() {
 // ── Sales ──
 let salesPage = 1;
 let salesChannels = [];
+let salesGrouped = true;
 
 async function initSalesFilters() {
   const now = new Date();
@@ -544,25 +623,46 @@ async function loadSales(page = 1) {
   const channel = document.getElementById('sales-channel')?.value || '';
   const q = document.getElementById('sales-search')?.value || '';
   try {
-    const d = await api(`/api/sales?date_from=${from}&date_to=${to}&channel=${encodeURIComponent(channel)}&q=${encodeURIComponent(q)}&page=${page}&size=50`);
+    const groupParam = salesGrouped ? '&group=channel' : '';
+    const d = await api(`/api/sales?date_from=${from}&date_to=${to}&channel=${encodeURIComponent(channel)}&q=${encodeURIComponent(q)}&page=${page}&size=50${groupParam}`);
+    const thead = document.getElementById('sales-thead');
     const tbody = document.getElementById('sales-tbody');
-    tbody.innerHTML = d.items.length ? d.items.map(s => `
-      <tr onclick="viewSale(${s.id})" style="cursor:pointer">
-        <td>${s.sale_date}</td>
-        <td>${s.channel || '-'}</td>
-        <td>${s.recipient || '-'}</td>
-        <td class="text-right number">${fmt(s.total_supply)}</td>
-        <td class="text-right number">${fmt(s.total_tax)}</td>
-        <td class="text-right number"><strong>${fmt(s.total_amount)}</strong></td>
-        <td><span class="badge badge-${s.status === 'confirmed' ? 'success' : s.status === 'cancelled' ? 'danger' : 'warning'}">${
-          s.status === 'confirmed' ? '확정' : s.status === 'cancelled' ? '취소' : '반품'
-        }</span></td>
-      </tr>
-    `).join('') : '<tr><td colspan="7" class="text-center text-muted" style="padding:40px">매출 데이터가 없습니다. "매출 동기화" 버튼을 눌러주세요.</td></tr>';
+
+    if (d.grouped) {
+      thead.innerHTML = '<tr><th>매출일</th><th>채널</th><th class="text-right">건수</th><th class="text-right">공급가</th><th class="text-right">세액</th><th class="text-right">합계</th></tr>';
+      tbody.innerHTML = d.items.length ? d.items.map(s => `
+        <tr>
+          <td>${s.sale_date}</td>
+          <td><strong>${s.channel || '-'}</strong></td>
+          <td class="text-right number">${s.item_count}건</td>
+          <td class="text-right number">${fmt(s.total_supply)}</td>
+          <td class="text-right number">${fmt(s.total_tax)}</td>
+          <td class="text-right number"><strong>${fmt(s.total_amount)}</strong></td>
+        </tr>
+      `).join('') : '<tr><td colspan="6" class="text-center text-muted" style="padding:40px">데이터 없음</td></tr>';
+    } else {
+      thead.innerHTML = '<tr><th>매출일</th><th>채널</th><th>품목</th><th class="text-right">공급가</th><th class="text-right">세액</th><th class="text-right">합계</th><th>상태</th></tr>';
+      tbody.innerHTML = d.items.length ? d.items.map(s => `
+        <tr onclick="viewSale(${s.id})" style="cursor:pointer">
+          <td>${s.sale_date}</td>
+          <td>${s.channel || '-'}</td>
+          <td>${s.recipient || '-'}</td>
+          <td class="text-right number">${fmt(s.total_supply)}</td>
+          <td class="text-right number">${fmt(s.total_tax)}</td>
+          <td class="text-right number"><strong>${fmt(s.total_amount)}</strong></td>
+          <td><span class="badge badge-${s.status === 'confirmed' ? 'success' : s.status === 'cancelled' ? 'danger' : 'warning'}">${
+            s.status === 'confirmed' ? '확정' : s.status === 'cancelled' ? '취소' : '반품'
+          }</span></td>
+        </tr>
+      `).join('') : '<tr><td colspan="7" class="text-center text-muted" style="padding:40px">매출 데이터가 없습니다. "매출 동기화" 버튼을 눌러주세요.</td></tr>';
+    }
     document.getElementById('sales-info').textContent = `총 ${d.total}건`;
     const sumEl = document.getElementById('sales-sum');
     if (sumEl) sumEl.textContent = `합계 ₩${fmt(d.sum_amount)}`;
     renderPagination('sales-paging', d.total, 50, page, p => loadSales(p));
+
+    const toggleBtn = document.getElementById('sales-group-toggle');
+    if (toggleBtn) toggleBtn.textContent = salesGrouped ? '상세 보기' : '합산 보기';
   } catch (e) { toast(e.message, 'error'); }
 }
 
@@ -621,6 +721,7 @@ async function loadSalesSummary() {
   if (!toEl.value) toEl.value = new Date().toISOString().slice(0,10);
   const groupBy = document.getElementById('summary-group')?.value || 'daily';
   const channel = document.getElementById('summary-channel')?.value || '';
+  const searchQ = document.getElementById('summary-search')?.value?.trim() || '';
 
   const summaryChSel = document.getElementById('summary-channel');
   if (summaryChSel && summaryChSel.options.length <= 1 && salesChannels.length) {
@@ -628,27 +729,26 @@ async function loadSalesSummary() {
   }
 
   try {
-    const data = await api(`/api/sales/summary?date_from=${fromEl.value}&date_to=${toEl.value}&group_by=${groupBy}&channel=${encodeURIComponent(channel)}`);
+    let data = await api(`/api/sales/summary?date_from=${fromEl.value}&date_to=${toEl.value}&group_by=${groupBy}&channel=${encodeURIComponent(channel)}`);
+    if (searchQ) data = data.filter(r => (r.label || '').toLowerCase().includes(searchQ.toLowerCase()));
     const grandTotal = data.reduce((s, r) => s + (r.total || 0), 0);
     document.getElementById('summary-total').textContent = `합계 ₩${fmt(grandTotal)}`;
 
     const tbody = document.getElementById('summary-tbody');
     tbody.innerHTML = data.length ? data.map(r => {
-      const pct = grandTotal ? ((r.total / grandTotal) * 100).toFixed(1) : '0';
       return `<tr>
         <td><strong>${r.label || '-'}</strong></td>
         <td class="text-right number">${r.qty != null ? fmt(r.qty) : (r.cnt != null ? fmt(r.cnt) + '건' : '-')}</td>
         <td class="text-right number">${fmt(r.supply)}</td>
         <td class="text-right number">${fmt(r.tax)}</td>
         <td class="text-right number"><strong>₩${fmt(r.total)}</strong></td>
-        <td><div class="bar-cell" style="min-width:60px"><div class="bar-fill" style="width:${pct}%"></div><span class="bar-pct">${pct}%</span></div></td>
       </tr>`;
     }).join('') + `<tr style="background:var(--bg);font-weight:700">
       <td>합계</td><td></td>
       <td class="text-right number">${fmt(data.reduce((s,r) => s + (r.supply||0), 0))}</td>
       <td class="text-right number">${fmt(data.reduce((s,r) => s + (r.tax||0), 0))}</td>
-      <td class="text-right number">₩${fmt(grandTotal)}</td><td></td>
-    </tr>` : '<tr><td colspan="6" class="text-center text-muted" style="padding:40px">데이터 없음</td></tr>';
+      <td class="text-right number">₩${fmt(grandTotal)}</td>
+    </tr>` : '<tr><td colspan="5" class="text-center text-muted" style="padding:40px">데이터 없음</td></tr>';
 
     renderSalesSummaryChart(data, groupBy);
   } catch (e) { toast(e.message, 'error'); }
@@ -767,6 +867,9 @@ async function viewOrder(id) {
     `;
     m.querySelector('.modal-footer').innerHTML = `
       <button class="btn" onclick="closeModal()">닫기</button>
+      <button class="btn" onclick="copyPO(${id})">복사</button>
+      <button class="btn" onclick="downloadPOPdf(${id})">📄 PDF</button>
+      <button class="btn" onclick="emailPO(${id})">이메일 발송</button>
       ${d.po.status === 'draft' ? `<button class="btn btn-primary" onclick="confirmPO(${id})">발주 확정</button>` : ''}
     `;
     openModal();
@@ -779,6 +882,75 @@ async function confirmPO(id) {
     toast('발주가 확정되었습니다');
     closeModal();
     loadOrders(ordersPage);
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function copyPO(id) {
+  try {
+    const r = await api(`/api/purchase-orders/${id}/copy`, { method: 'POST' });
+    toast(`발주서 복사 완료: ${r.po_number}`);
+    closeModal();
+    loadOrders();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function downloadPOPdf(id) {
+  window.open(`/api/purchase-orders/${id}/pdf`, '_blank');
+}
+
+async function emailPO(id) {
+  try {
+    const d = await api(`/api/purchase-orders/${id}`);
+    let contacts = [];
+    if (d.po.supplier_id) {
+      try { contacts = await api(`/api/partners/${d.po.supplier_id}/contacts`); } catch(e) {}
+    }
+    const m = document.getElementById('modal');
+    const toContacts = contacts.filter(c => c.contact_type === 'to');
+    const ccContacts = contacts.filter(c => c.contact_type === 'cc');
+
+    m.querySelector('.modal-header span').textContent = `발주서 이메일 발송 — ${d.po.po_number}`;
+    m.querySelector('.modal-body').innerHTML = `
+      <div class="form-group">
+        <label>수신 (To)</label>
+        ${toContacts.length ? toContacts.map(c => `
+          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer">
+            <input type="checkbox" class="email-to" value="${c.email}" checked />
+            <span>${c.name}</span> <span class="text-muted" style="font-size:12px">${c.email}</span>
+          </label>`).join('') : ''}
+        <input type="email" id="email-to-custom" placeholder="직접 입력..." style="margin-top:4px" />
+      </div>
+      <div class="form-group">
+        <label>참조 (Cc)</label>
+        ${ccContacts.length ? ccContacts.map(c => `
+          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer">
+            <input type="checkbox" class="email-cc" value="${c.email}" checked />
+            <span>${c.name}</span> <span class="text-muted" style="font-size:12px">${c.email}</span>
+          </label>`).join('') : '<span class="text-muted" style="font-size:13px">없음</span>'}
+      </div>
+      <div class="form-group">
+        <label>발신</label>
+        <div class="text-muted" style="font-size:13px">info@becorelab.kr</div>
+      </div>
+    `;
+    m.querySelector('.modal-footer').innerHTML = `
+      <button class="btn" onclick="closeModal();viewOrder(${id})">취소</button>
+      <button class="btn btn-primary" onclick="sendPOEmail(${id})">발송</button>`;
+    openModal();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function sendPOEmail(id) {
+  const checked = document.querySelectorAll('.email-to:checked');
+  const custom = document.getElementById('email-to-custom')?.value?.trim();
+  const toList = [...checked].map(c => c.value);
+  if (custom) toList.push(custom);
+  if (!toList.length) return toast('수신 이메일을 선택하세요', 'error');
+
+  try {
+    await api(`/api/purchase-orders/${id}/email`, { method: 'POST', body: { to: toList[0] } });
+    toast(`발주서 발송 완료`);
+    closeModal();
   } catch (e) { toast(e.message, 'error'); }
 }
 

@@ -325,6 +325,50 @@ def api_fetch_data():
     return jsonify({"task_id": task_id})
 
 
+@app.route("/api/batch-rescrape", methods=["POST"])
+def api_batch_rescrape():
+    """주문일 기준 배치 재수집 (날짜 범위)"""
+    data = request.json or {}
+    start = data.get("start", "2026-01-01")
+    end = data.get("end", (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"))
+
+    task_id = uuid.uuid4().hex[:8]
+    tasks[task_id] = {"status": "running", "step": "starting", "result": None, "error": None}
+
+    def run_batch(tid):
+        try:
+            def on_progress(step):
+                tasks[tid]["step"] = step
+                log.info(f"[batch-{tid}] {step}")
+
+            from ezadmin_scraper import batch_rescrape_sales
+            results = batch_rescrape_sales(start, end, progress=on_progress)
+
+            saved = 0
+            for date_str, sales_data in results.items():
+                if not sales_data.get("orders"):
+                    continue
+                payload = {"sales": sales_data, "timestamp": datetime.now().isoformat(),
+                           "inventory": {}, "orders": []}
+                try:
+                    _save_to_firestore(payload)
+                    saved += 1
+                except Exception as e:
+                    log.warning(f"[batch-{tid}] Firestore 저장 실패 {date_str}: {e}")
+
+            tasks[tid]["status"] = "done"
+            tasks[tid]["result"] = {"days_scraped": len(results), "days_saved": saved}
+            log.info(f"[batch-{tid}] 완료: {len(results)}일 수집, {saved}일 저장")
+
+        except Exception as e:
+            tasks[tid]["status"] = "error"
+            tasks[tid]["error"] = str(e)
+            log.error(f"[batch-{tid}] 오류: {e}")
+
+    threading.Thread(target=run_batch, args=(task_id,), daemon=True).start()
+    return jsonify({"task_id": task_id, "start": start, "end": end})
+
+
 @app.route("/api/fetch-status/<task_id>")
 def api_fetch_status(task_id):
     task = tasks.get(task_id)

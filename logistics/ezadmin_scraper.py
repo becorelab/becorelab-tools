@@ -486,7 +486,7 @@ def scrape_outbound(page, days=90, progress=None):
     return result
 
 
-def scrape_sales(page, target_date=None, progress=None):
+def scrape_sales(page, target_date=None, date_end=None, progress=None):
     """확장주문검색2 (DS00) — 판매처별 주문 + 매출 데이터 수집
     컬럼 매핑 (검증 완료):
       grid1_shop_id = 판매처
@@ -500,24 +500,47 @@ def scrape_sales(page, target_date=None, progress=None):
       grid1_amount = 판매가
       grid1_supply_price = 정산금액
       grid1_stock = 현재고
+    검색 기준: 주문일 (고객 실제 주문일 — 발주일은 이지어드민 수집일이라 주말이 뭉침)
     """
     if progress:
         progress("scraping_sales")
     if target_date is None:
         target_date = (date.today() - timedelta(days=1)).isoformat()
-    log.info(f"확장주문검색2 페이지 이동 (DS00) — 날짜: {target_date}")
+    if date_end is None:
+        date_end = target_date
+    log.info(f"확장주문검색2 페이지 이동 (DS00) — 주문일 기준: {target_date} ~ {date_end}")
     page.goto(f"{BASE}/template35.htm?template=DS00", timeout=30000, wait_until="domcontentloaded")
     page.wait_for_timeout(5000)
     clear_popups(page)
 
-    # 날짜 설정 (start_date, end_date만 — start_date2/end_date2는 보조 필터)
+    # 날짜 타입을 "주문일"로 변경 (기본값 "발주일" → "주문일")
+    page.evaluate(
+        """
+        (() => {
+            const selects = [...document.querySelectorAll('select')];
+            for (const sel of selects) {
+                const opts = [...sel.options];
+                const orderOpt = opts.find(o => o.text.includes('주문일'));
+                if (orderOpt) {
+                    sel.value = orderOpt.value;
+                    sel.dispatchEvent(new Event('change', {bubbles: true}));
+                    return {ok: true, value: orderOpt.value, text: orderOpt.text};
+                }
+            }
+            return {ok: false};
+        })()
+        """
+    )
+    page.wait_for_timeout(1000)
+
+    # 날짜 설정
     page.evaluate(
         f"""
         (() => {{
             const s = document.getElementById('start_date');
             const e = document.getElementById('end_date');
             if (s) s.value = '{target_date}';
-            if (e) e.value = '{target_date}';
+            if (e) e.value = '{date_end}';
         }})()
         """
     )
@@ -676,6 +699,55 @@ def fetch_all_data(progress=None, sales_target_date=None):
             }
         except Exception as e:
             log.error(f"데이터 수집 오류: {e}")
+            raise
+        finally:
+            browser.close()
+
+
+def batch_rescrape_sales(start_date, end_date, progress=None):
+    """주문일 기준으로 날짜별 매출 재수집 (한번 로그인, 날짜별 루프)
+
+    Returns: dict of {date_str: sales_data}
+    """
+    from datetime import datetime
+    results = {}
+    current = date.fromisoformat(start_date)
+    end = date.fromisoformat(end_date)
+    total_days = (end - current).days + 1
+
+    with sync_playwright() as p:
+        browser, context, page = get_browser(p)
+        try:
+            if progress:
+                progress(f"batch_login")
+            ezadmin_login(page)
+            clear_popups(page)
+            wait_for_captcha(page, progress=progress, timeout_sec=300)
+            clear_popups(page)
+
+            day_num = 0
+            while current <= end:
+                day_num += 1
+                ds = current.isoformat()
+                if progress:
+                    progress(f"batch_sales_{day_num}/{total_days}_{ds}")
+                log.info(f"=== 배치 재수집 {day_num}/{total_days}: {ds} ===")
+                try:
+                    sales = scrape_sales(page, target_date=ds, progress=None)
+                    results[ds] = sales
+                    log.info(f"  → {ds}: {sales['total_count']}건, 정산 {sales['total_settlement']:,}원")
+                except Exception as e:
+                    log.error(f"  → {ds} 수집 실패: {e}")
+                    results[ds] = {"date": ds, "total_amount": 0, "total_settlement": 0,
+                                   "total_count": 0, "by_channel": {}, "by_product": {}, "orders": []}
+                current += timedelta(days=1)
+
+            if progress:
+                progress("batch_done")
+            log.info(f"배치 재수집 완료: {len(results)}일, 총 {sum(r['total_count'] for r in results.values())}건")
+            return results
+        except Exception as e:
+            log.error(f"배치 재수집 오류: {e}")
             raise
         finally:
             browser.close()

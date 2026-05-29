@@ -6,7 +6,7 @@
 <title>비코어랩 ERP</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-<link rel="stylesheet" href="/static/css/style.css" />
+<link rel="stylesheet" href="/static/css/style.css?v=20260529e" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -245,23 +245,7 @@
           <button class="btn btn-success" onclick="syncStock()">이지어드민 동기화</button>
         </div>
       </div>
-      <div class="stock-summary-cards">
-        <div class="stock-card stock-card-normal">
-          <div class="stock-card-icon">✅</div>
-          <div class="stock-card-value" id="stock-cnt-normal">-</div>
-          <div class="stock-card-label">정상</div>
-        </div>
-        <div class="stock-card stock-card-low">
-          <div class="stock-card-icon">⚠️</div>
-          <div class="stock-card-value" id="stock-cnt-low">-</div>
-          <div class="stock-card-label">부족</div>
-        </div>
-        <div class="stock-card stock-card-out">
-          <div class="stock-card-icon">🚫</div>
-          <div class="stock-card-value" id="stock-cnt-out">-</div>
-          <div class="stock-card-label">품절</div>
-        </div>
-      </div>
+      <div id="stock-dashboard" class="stock-dashboard"></div>
       <div class="table-wrap">
         <div class="table-toolbar">
           <input type="search" id="stock-search" placeholder="품목명, 코드 검색..." class="search-box" />
@@ -304,12 +288,13 @@
             </select>
             <input type="search" id="sales-search" placeholder="품목명 검색..." style="width:160px" onkeydown="if(event.key==='Enter')loadSales()" />
             <button class="btn btn-sm btn-primary" onclick="loadSales()">조회</button>
+            <button class="btn btn-sm" id="sales-group-toggle" onclick="salesGrouped=!salesGrouped;loadSales()">합산 보기</button>
             <span class="text-muted" id="sales-info"></span>
             <span style="margin-left:auto;font-weight:700;color:var(--accent)" id="sales-sum"></span>
           </div>
           <div class="table-scroll">
             <table>
-              <thead><tr><th>매출일</th><th>채널</th><th>품목</th><th class="text-right">공급가</th><th class="text-right">세액</th><th class="text-right">합계</th><th>상태</th></tr></thead>
+              <thead id="sales-thead"><tr><th>매출일</th><th>채널</th><th>품목</th><th class="text-right">공급가</th><th class="text-right">세액</th><th class="text-right">합계</th><th>상태</th></tr></thead>
               <tbody id="sales-tbody"></tbody>
             </table>
           </div>
@@ -332,13 +317,14 @@
             <select id="summary-channel" style="width:180px">
               <option value="">전체 채널</option>
             </select>
+            <input type="search" id="summary-search" placeholder="검색..." style="width:140px" onkeydown="if(event.key==='Enter')loadSalesSummary()" />
             <button class="btn btn-sm btn-primary" onclick="loadSalesSummary()">조회</button>
             <span style="margin-left:auto;font-weight:700;color:var(--accent)" id="summary-total"></span>
           </div>
           <div class="chart-card-body" style="height:260px;padding:12px 18px"><canvas id="chart-sales-summary"></canvas></div>
           <div class="table-scroll">
             <table>
-              <thead><tr><th>구분</th><th class="text-right">수량/건수</th><th class="text-right">공급가</th><th class="text-right">세액</th><th class="text-right">합계</th><th>비중</th></tr></thead>
+              <thead><tr><th>구분</th><th class="text-right">수량/건수</th><th class="text-right">공급가</th><th class="text-right">세액</th><th class="text-right">합계</th></tr></thead>
               <tbody id="summary-tbody"></tbody>
             </table>
           </div>
@@ -416,7 +402,7 @@
 <!-- Toast -->
 <div class="toast-container" id="toasts"></div>
 
-<script src="/static/js/app.js"></script>
+<script src="/static/js/app.js?v=20260529e"></script>
 <script>
 setInterval(() => {
   const el = document.getElementById('current-time');

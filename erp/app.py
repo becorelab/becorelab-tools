@@ -343,7 +343,7 @@ async def adjust_stock(request: Request, conn=Depends(db)):
 @app.get("/api/sales")
 async def list_sales(
     date_from: str = "", date_to: str = "", channel: str = "",
-    partner_id: int = 0, q: str = "",
+    partner_id: int = 0, q: str = "", group: str = "",
     page: int = 1, size: int = 50, conn=Depends(db)
 ):
     where, params = ["1=1"], []
@@ -363,13 +363,36 @@ async def list_sales(
         where.append("(s.recipient LIKE ? OR s.channel LIKE ?)")
         params += [f"%{q}%"] * 2
     w = " AND ".join(where)
-    total = conn.execute(f"SELECT COUNT(*) as cnt FROM sales s WHERE {w}", params).fetchone()["cnt"]
 
+    if group == "channel":
+        total = conn.execute(
+            f"SELECT COUNT(DISTINCT s.sale_date || s.channel) as cnt FROM sales s WHERE {w}", params
+        ).fetchone()["cnt"]
+        sum_row = conn.execute(
+            f"SELECT COALESCE(SUM(total_amount),0) as sum_amount, COALESCE(SUM(total_supply),0) as sum_supply FROM sales s WHERE {w}",
+            params,
+        ).fetchone()
+        rows = conn.execute(
+            f"""SELECT s.sale_date, s.channel, COUNT(*) as item_count,
+                SUM(s.total_supply) as total_supply, SUM(s.total_tax) as total_tax,
+                SUM(s.total_amount) as total_amount
+                FROM sales s WHERE {w}
+                GROUP BY s.sale_date, s.channel
+                ORDER BY s.sale_date DESC, total_amount DESC
+                LIMIT ? OFFSET ?""",
+            params + [size, (page - 1) * size],
+        ).fetchall()
+        return {
+            "items": [dict(r) for r in rows], "total": total, "page": page, "size": size,
+            "sum_amount": sum_row["sum_amount"], "sum_supply": sum_row["sum_supply"],
+            "grouped": True,
+        }
+
+    total = conn.execute(f"SELECT COUNT(*) as cnt FROM sales s WHERE {w}", params).fetchone()["cnt"]
     sum_row = conn.execute(
         f"SELECT COALESCE(SUM(total_amount),0) as sum_amount, COALESCE(SUM(total_supply),0) as sum_supply FROM sales s WHERE {w}",
         params,
     ).fetchone()
-
     rows = conn.execute(
         f"""SELECT s.*, p.name as partner_name
             FROM sales s LEFT JOIN partners p ON p.id=s.partner_id
@@ -384,7 +407,17 @@ async def list_sales(
 
 @app.get("/api/sales/channels")
 async def list_sales_channels(conn=Depends(db)):
-    rows = conn.execute("SELECT DISTINCT channel FROM sales WHERE channel IS NOT NULL ORDER BY channel").fetchall()
+    rows = conn.execute(
+        """SELECT channel, SUM(total_amount) as total
+           FROM sales
+           WHERE channel IS NOT NULL AND channel != ''
+           AND sale_date >= date('now', '-365 days', 'localtime')
+           AND LENGTH(channel) > 1
+           AND channel NOT GLOB '[0-9]*'
+           GROUP BY channel
+           HAVING total > 0
+           ORDER BY total DESC"""
+    ).fetchall()
     return [r["channel"] for r in rows]
 
 
@@ -563,6 +596,79 @@ async def sync_sales(request: Request, conn=Depends(db)):
     return {"synced": synced_total, "days": days, "errors": errors[:5]}
 
 
+@app.post("/api/sales/resync")
+async def resync_sales(request: Request, conn=Depends(db)):
+    """특정 기간 매출 삭제 후 재동기화"""
+    import aiohttp
+    body = await request.json() if request.headers.get("content-type") == "application/json" else {}
+    date_from = body.get("date_from", "2026-01-01")
+    date_to = body.get("date_to", datetime.now().strftime("%Y-%m-%d"))
+
+    deleted_sales = conn.execute(
+        "SELECT COUNT(*) as cnt FROM sales WHERE sale_date BETWEEN ? AND ?", (date_from, date_to)
+    ).fetchone()["cnt"]
+    conn.execute(
+        "DELETE FROM sale_lines WHERE sale_id IN (SELECT id FROM sales WHERE sale_date BETWEEN ? AND ?)",
+        (date_from, date_to),
+    )
+    conn.execute("DELETE FROM sales WHERE sale_date BETWEEN ? AND ?", (date_from, date_to))
+    conn.commit()
+
+    synced_total = 0
+    errors = []
+    current = datetime.strptime(date_from, "%Y-%m-%d")
+    end = datetime.strptime(date_to, "%Y-%m-%d")
+
+    async with aiohttp.ClientSession() as session:
+        while current <= end:
+            date = current.strftime("%Y-%m-%d")
+            current += timedelta(days=1)
+            try:
+                async with session.get(f"{LOGISTICS_URL}/api/sales-daily-orders?date={date}") as resp:
+                    if resp.status != 200:
+                        continue
+                    data = await resp.json()
+                orders = data.get("by_option", [])
+                if not orders:
+                    continue
+                for order in orders:
+                    code = order.get("code", "")
+                    product_name = order.get("name", "")
+                    channels = order.get("channels", {})
+                    product = conn.execute(
+                        "SELECT id FROM products WHERE product_code=? OR ezadmin_code=?", (code, code)
+                    ).fetchone()
+                    product_id = product["id"] if product else None
+                    for ch_name, ch_data in channels.items():
+                        ch_qty = ch_data.get("qty", 0)
+                        ch_settlement = ch_data.get("settlement", 0)
+                        if ch_qty == 0 and ch_settlement == 0:
+                            continue
+                        supply = round(ch_settlement / 1.1)
+                        tax = ch_settlement - supply
+                        partner = conn.execute("SELECT id FROM partners WHERE name=?", (ch_name,)).fetchone()
+                        partner_id = partner["id"] if partner else None
+                        cur = conn.execute(
+                            """INSERT INTO sales (sale_date, partner_id, channel, channel_order_no,
+                               total_supply, total_tax, total_amount, status, recipient)
+                               VALUES (?,?,?,?,?,?,?,'confirmed',?)""",
+                            (date, partner_id, ch_name, code, supply, tax, ch_settlement, product_name))
+                        sale_id = cur.lastrowid
+                        conn.execute(
+                            """INSERT INTO sale_lines (sale_id, product_id, product_name, qty, unit_price,
+                               supply_amount, tax_amount, line_total)
+                               VALUES (?,?,?,?,?,?,?,?)""",
+                            (sale_id, product_id, product_name, ch_qty,
+                             round(ch_settlement / ch_qty) if ch_qty else 0, supply, tax, ch_settlement))
+                        synced_total += 1
+                conn.commit()
+            except Exception as e:
+                errors.append(f"{date}: {str(e)}")
+
+    return {"deleted": deleted_sales, "synced": synced_total, "date_from": date_from, "date_to": date_to,
+            "errors": errors[:5]}
+
+
 # ── 매출 자동 동기화 (서버 시작 시 백그라운드 스케줄러) ──
 import asyncio
 import threading
@@ -688,7 +794,8 @@ async def list_po(
 @app.get("/api/purchase-orders/{po_id}")
 async def get_po(po_id: int, conn=Depends(db)):
     po = conn.execute(
-        "SELECT po.*, sup.name as supplier_name FROM purchase_orders po LEFT JOIN partners sup ON sup.id=po.supplier_id WHERE po.id=?",
+        """SELECT po.*, sup.name as supplier_name, sup.email as supplier_email, sup.phone as supplier_phone
+           FROM purchase_orders po LEFT JOIN partners sup ON sup.id=po.supplier_id WHERE po.id=?""",
         (po_id,),
     ).fetchone()
     if not po:
@@ -764,6 +871,355 @@ async def update_po_status(po_id: int, request: Request, conn=Depends(db)):
     )
     conn.commit()
     return {"ok": True}
+
+
+@app.post("/api/purchase-orders/{po_id}/copy")
+async def copy_po(po_id: int, conn=Depends(db)):
+    po = conn.execute("SELECT * FROM purchase_orders WHERE id=?", (po_id,)).fetchone()
+    if not po:
+        raise HTTPException(404, "발주서를 찾을 수 없습니다")
+    new_number = f"PO-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+    today = datetime.now().strftime("%Y-%m-%d")
+    cur = conn.execute(
+        """INSERT INTO purchase_orders (po_number, po_date, supplier_id, delivery_date,
+           total_amount, status, memo, created_by)
+           VALUES (?,?,?,?,?,?,?,?)""",
+        (new_number, today, po["supplier_id"], None, po["total_amount"], "draft",
+         f"[복사] {po['po_number']}", po.get("created_by")),
+    )
+    new_id = cur.lastrowid
+    lines = conn.execute("SELECT * FROM purchase_order_lines WHERE po_id=?", (po_id,)).fetchall()
+    for l in lines:
+        conn.execute(
+            """INSERT INTO purchase_order_lines (po_id, product_id, product_name, qty_ordered, unit_price, amount)
+               VALUES (?,?,?,?,?,?)""",
+            (new_id, l["product_id"], l["product_name"], l["qty_ordered"], l["unit_price"], l["amount"]),
+        )
+    conn.commit()
+    return {"id": new_id, "po_number": new_number}
+
+
+@app.get("/api/purchase-orders/{po_id}/pdf")
+async def download_po_pdf(po_id: int, conn=Depends(db)):
+    from fastapi.responses import Response
+    from fpdf import FPDF
+
+    po_row = conn.execute(
+        """SELECT po.*, sup.name as supplier_name, sup.phone as supplier_phone,
+           sup.business_no as supplier_biz_no, sup.ceo_name as supplier_ceo
+           FROM purchase_orders po LEFT JOIN partners sup ON sup.id=po.supplier_id WHERE po.id=?""",
+        (po_id,),
+    ).fetchone()
+    if not po_row:
+        raise HTTPException(404, "발주서를 찾을 수 없습니다")
+    po = dict(po_row)
+    lines_raw = conn.execute(
+        """SELECT pol.*, p.product_code, p.unit FROM purchase_order_lines pol
+           LEFT JOIN products p ON p.id=pol.product_id WHERE pol.po_id=?""",
+        (po_id,),
+    ).fetchall()
+    lines = [dict(l) for l in lines_raw]
+
+    total_qty = sum(l["qty_ordered"] for l in lines)
+    total_supply = sum(l["amount"] for l in lines)
+    total_vat = round(total_supply * 0.1)
+    total_with_vat = total_supply + total_vat
+
+    def kr_amount(n):
+        units = ["", "만", "억", "조"]
+        if n == 0:
+            return "영"
+        n = int(n)
+        result = []
+        for u in units:
+            n, r = divmod(n, 10000)
+            if r > 0:
+                result.append(f"{r:,}{u}")
+            if n == 0:
+                break
+        return "".join(reversed(result)) + "원"
+
+    FONT_PATH = "/System/Library/Fonts/AppleSDGothicNeo.ttc"
+    pdf = FPDF(orientation="P", unit="mm", format="A4")
+    pdf.add_font("gothic", "", FONT_PATH)
+    pdf.add_font("gothic", "B", FONT_PATH)
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pw = pdf.w - pdf.l_margin - pdf.r_margin
+
+    BG = (245, 240, 232)
+    BORDER_C = (153, 153, 153)
+
+    def draw_cell(x, y, w, h, txt, align="L", bold=False, bg=None, font_size=9):
+        pdf.set_xy(x, y)
+        if bg:
+            pdf.set_fill_color(*bg)
+        pdf.set_draw_color(*BORDER_C)
+        pdf.set_font("gothic", "B" if bold else "", font_size)
+        pdf.cell(w, h, txt, border=1, fill=bool(bg), align=align)
+
+    pdf.set_font("gothic", "B", 18)
+    pdf.cell(pw, 12, "발 주 서", align="C")
+    pdf.ln(16)
+
+    half = pw / 2 - 2
+    y0 = pdf.get_y()
+    lbl_w, val_w = 28, half - 28
+    rh = 7
+
+    left_data = [
+        ("일련번호", po["po_number"]),
+        ("수 신", po.get("supplier_name") or "-"),
+        ("TEL", po.get("supplier_phone") or "-"),
+        ("납기일자", po.get("delivery_date") or "-"),
+    ]
+    for i, (lbl, val) in enumerate(left_data):
+        draw_cell(pdf.l_margin, y0 + i * rh, lbl_w, rh, f" {lbl}", bold=True, bg=BG, font_size=8)
+        draw_cell(pdf.l_margin + lbl_w, y0 + i * rh, val_w, rh, f" {val}", font_size=9)
+
+    rx = pdf.l_margin + half + 4
+    logo_path = os.path.join(os.path.dirname(__file__), "static", "images", "becorelab_logo.png")
+    if os.path.exists(logo_path):
+        logo_h = 5
+        logo_w = logo_h * (3147 / 718)
+        pdf.image(logo_path, x=rx + half - logo_w, y=y0 - 6, w=logo_w, h=logo_h)
+
+    right_data = [
+        ("사업자번호", "483-81-01727"),
+        ("회사명/대표", "주식회사 비코어랩 / 정건양"),
+        ("주 소", "서울 성동구 아차산로17길 48, 1104호"),
+        ("담당/연락처", "정건양 / 070-8894-1716"),
+    ]
+    rlbl_w = 25
+    rval_w = half - rlbl_w
+    for i, (lbl, val) in enumerate(right_data):
+        draw_cell(rx, y0 + i * rh, rlbl_w, rh, f" {lbl}", bold=True, bg=BG, font_size=7)
+        draw_cell(rx + rlbl_w, y0 + i * rh, rval_w, rh, f" {val}", font_size=8)
+
+    pdf.set_y(y0 + len(left_data) * rh + 4)
+
+    pdf.set_fill_color(*BG)
+    pdf.set_draw_color(*BORDER_C)
+    pdf.set_font("gothic", "B", 10)
+    pdf.cell(pw, 8, f"  금 액 : ₩{total_with_vat:,.0f}원 / VAT포함",
+             border=1, fill=True, align="L")
+    pdf.ln(10)
+
+    cols = [
+        ("품목코드", 25, "C"),
+        ("품목명", pw - 25 - 20 - 25 - 30 - 25, "L"),
+        ("수량", 20, "R"),
+        ("단가", 25, "R"),
+        ("공급가액", 30, "R"),
+        ("부가세", 25, "R"),
+    ]
+    pdf.set_font("gothic", "B", 8)
+    pdf.set_fill_color(*BG)
+    for name, w, _ in cols:
+        pdf.cell(w, 7, name, border=1, fill=True, align="C")
+    pdf.ln()
+
+    pdf.set_font("gothic", "", 8)
+    for l in lines:
+        unit = l.get("unit") or "EA"
+        supply = l["amount"]
+        vat = round(supply * 0.1)
+        row_data = [
+            (l.get("product_code") or "", cols[0][1], "C"),
+            (l.get("product_name") or "", cols[1][1], "L"),
+            (f"{l['qty_ordered']:,} {unit}", cols[2][1], "R"),
+            (f"{l['unit_price']:,.0f}", cols[3][1], "R"),
+            (f"{supply:,.0f}", cols[4][1], "R"),
+            (f"{vat:,.0f}", cols[5][1], "R"),
+        ]
+        for txt, w, align in row_data:
+            pdf.cell(w, 7, f" {txt} ", border=1, align=align)
+        pdf.ln()
+
+    pdf.set_font("gothic", "B", 8)
+    pdf.set_fill_color(*BG)
+    sum_cols = [
+        ("수량", 25), (f"{total_qty:,}", 20),
+        ("공급가액", 25), (f"{total_supply:,.0f}", 30),
+        ("VAT", 20), (f"{total_vat:,.0f}", 25),
+        ("합계", 20), (f"{total_with_vat:,.0f}", pw - 25 - 20 - 25 - 30 - 20 - 25 - 20),
+    ]
+    for i, (txt, w) in enumerate(sum_cols):
+        pdf.cell(w, 7, f" {txt} ", border=1, fill=(i % 2 == 0), align="R" if i % 2 else "R")
+    pdf.ln()
+
+    pdf.ln(10)
+    pdf.set_font("gothic", "", 8)
+    pdf.set_text_color(136, 136, 136)
+    pdf.cell(pw, 6, "— 주식회사 비코어랩 · info@becorelab.kr —", align="C")
+
+    pdf_bytes = pdf.output()
+    filename = f"PO_{po['po_number']}.pdf"
+    return Response(
+        content=bytes(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.post("/api/purchase-orders/{po_id}/email")
+async def email_po(po_id: int, request: Request, conn=Depends(db)):
+    d = await request.json()
+    to_email = d.get("to")
+    if not to_email:
+        raise HTTPException(400, "수신 이메일을 입력해주세요")
+    po_row = conn.execute(
+        """SELECT po.*, sup.name as supplier_name, sup.phone as supplier_phone, sup.email as supplier_email
+           FROM purchase_orders po LEFT JOIN partners sup ON sup.id=po.supplier_id WHERE po.id=?""",
+        (po_id,),
+    ).fetchone()
+    if not po_row:
+        raise HTTPException(404, "발주서를 찾을 수 없습니다")
+    po = dict(po_row)
+    lines_raw = conn.execute(
+        """SELECT pol.*, p.product_code, p.unit FROM purchase_order_lines pol
+           LEFT JOIN products p ON p.id=pol.product_id WHERE pol.po_id=?""",
+        (po_id,),
+    ).fetchall()
+    lines = [dict(l) for l in lines_raw]
+
+    cc_list = []
+    if po.get("supplier_id"):
+        contacts = conn.execute(
+            "SELECT name, email, contact_type FROM partner_contacts WHERE partner_id=? AND is_active=1 ORDER BY contact_type",
+            (po["supplier_id"],),
+        ).fetchall()
+        cc_list = [dict(c) for c in contacts]
+
+    import smtplib
+    from email.mime.text import MIMEText
+
+    total_qty = sum(l["qty_ordered"] for l in lines)
+    total_supply = sum(l["amount"] for l in lines)
+    total_vat = round(total_supply * 0.1)
+    total_with_vat = total_supply + total_vat
+
+    def kr_amount(n):
+        units = ["", "만", "억", "조"]
+        if n == 0:
+            return "영"
+        n = int(n)
+        result = []
+        for u in units:
+            n, r = divmod(n, 10000)
+            if r > 0:
+                result.append(f"{r:,}{u}")
+            if n == 0:
+                break
+        return "".join(reversed(result)) + "원"
+
+    rows_html = ""
+    for l in lines:
+        unit = l.get("unit") or "EA"
+        supply = l["amount"]
+        vat = round(supply * 0.1)
+        rows_html += f"""<tr>
+            <td style="border:1px solid #999;padding:6px 8px;font-size:12px">{l.get('product_code') or ''}</td>
+            <td style="border:1px solid #999;padding:6px 8px;font-size:12px">{l.get('product_name') or ''}</td>
+            <td style="border:1px solid #999;padding:6px 8px;text-align:right;font-size:12px">{l['qty_ordered']:,}<br><span style="color:#666;font-size:10px">{unit}</span></td>
+            <td style="border:1px solid #999;padding:6px 8px;text-align:right;font-size:12px">{l['unit_price']:,.0f}</td>
+            <td style="border:1px solid #999;padding:6px 8px;text-align:right;font-size:12px">{supply:,.0f}</td>
+            <td style="border:1px solid #999;padding:6px 8px;text-align:right;font-size:12px">{vat:,.0f}</td>
+        </tr>"""
+
+    body = f"""<html><body style="font-family:'Malgun Gothic','맑은 고딕',sans-serif;color:#333;max-width:700px;margin:0 auto">
+<h2 style="text-align:center;border-bottom:2px solid #333;padding-bottom:8px;margin-bottom:16px">발 주 서</h2>
+<table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+<tr>
+  <td style="width:50%;vertical-align:top">
+    <table style="width:100%;border-collapse:collapse;border:1px solid #999">
+      <tr><td style="border:1px solid #999;padding:4px 8px;background:#f5f0e8;font-weight:bold;width:80px;font-size:12px">일련번호</td>
+          <td style="border:1px solid #999;padding:4px 8px;font-size:12px">{po['po_number']}</td></tr>
+      <tr><td style="border:1px solid #999;padding:4px 8px;background:#f5f0e8;font-weight:bold;font-size:12px">수 신</td>
+          <td style="border:1px solid #999;padding:4px 8px;font-size:12px">{po.get('supplier_name') or '-'}</td></tr>
+      <tr><td style="border:1px solid #999;padding:4px 8px;background:#f5f0e8;font-weight:bold;font-size:12px">TEL</td>
+          <td style="border:1px solid #999;padding:4px 8px;font-size:12px">{po.get('supplier_phone') or '-'}</td></tr>
+      <tr><td style="border:1px solid #999;padding:4px 8px;background:#f5f0e8;font-weight:bold;font-size:12px">납기일자</td>
+          <td style="border:1px solid #999;padding:4px 8px;font-size:12px">{po.get('delivery_date') or '-'}</td></tr>
+    </table>
+  </td>
+  <td style="width:50%;vertical-align:top;padding-left:12px">
+    <div style="text-align:right;margin-bottom:8px">
+      <strong style="font-size:18px;letter-spacing:2px">becorelab</strong>
+    </div>
+    <table style="width:100%;border-collapse:collapse;border:1px solid #999">
+      <tr><td style="border:1px solid #999;padding:4px 8px;background:#f5f0e8;font-weight:bold;font-size:11px;width:80px">사업자등록번호</td>
+          <td style="border:1px solid #999;padding:4px 8px;font-size:12px">483-81-01727</td></tr>
+      <tr><td style="border:1px solid #999;padding:4px 8px;background:#f5f0e8;font-weight:bold;font-size:11px">회사명/대표</td>
+          <td style="border:1px solid #999;padding:4px 8px;font-size:12px">주식회사 비코어랩 / 정건양</td></tr>
+      <tr><td style="border:1px solid #999;padding:4px 8px;background:#f5f0e8;font-weight:bold;font-size:11px">주 소</td>
+          <td style="border:1px solid #999;padding:4px 8px;font-size:12px">서울특별시 성동구 아차산로17길 48, 1104호 (성수 SK V1 CENTER I)</td></tr>
+      <tr><td style="border:1px solid #999;padding:4px 8px;background:#f5f0e8;font-weight:bold;font-size:11px">담당/연락처</td>
+          <td style="border:1px solid #999;padding:4px 8px;font-size:12px">정건양 / 070-8894-1716</td></tr>
+    </table>
+  </td>
+</tr>
+</table>
+
+<div style="background:#f5f0e8;padding:8px 12px;border:1px solid #999;margin-bottom:12px;font-size:13px">
+  <strong>금 액 : ₩{total_with_vat:,.0f}원 / VAT포함</strong>
+</div>
+
+<table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+<thead>
+<tr style="background:#f5f0e8">
+  <th style="border:1px solid #999;padding:6px 8px;font-size:12px">품목코드</th>
+  <th style="border:1px solid #999;padding:6px 8px;font-size:12px">품목명[규격]</th>
+  <th style="border:1px solid #999;padding:6px 8px;font-size:12px">수량<br>(단위포함)</th>
+  <th style="border:1px solid #999;padding:6px 8px;font-size:12px">단가</th>
+  <th style="border:1px solid #999;padding:6px 8px;font-size:12px">공급가액</th>
+  <th style="border:1px solid #999;padding:6px 8px;font-size:12px">부가세</th>
+</tr>
+</thead>
+<tbody>{rows_html}</tbody>
+</table>
+
+<table style="width:100%;border-collapse:collapse;border:1px solid #999">
+<tr style="background:#f5f0e8;font-weight:bold;font-size:12px">
+  <td style="border:1px solid #999;padding:6px 8px;width:80px">수량</td>
+  <td style="border:1px solid #999;padding:6px 8px;text-align:right">{total_qty:,}</td>
+  <td style="border:1px solid #999;padding:6px 8px;width:80px">공급가액</td>
+  <td style="border:1px solid #999;padding:6px 8px;text-align:right">{total_supply:,.0f}</td>
+  <td style="border:1px solid #999;padding:6px 8px;width:50px">VAT</td>
+  <td style="border:1px solid #999;padding:6px 8px;text-align:right">{total_vat:,.0f}</td>
+  <td style="border:1px solid #999;padding:6px 8px;width:50px">합계</td>
+  <td style="border:1px solid #999;padding:6px 8px;text-align:right;font-weight:bold">{total_with_vat:,.0f}</td>
+</tr>
+</table>
+
+<p style="color:#888;margin-top:24px;font-size:11px;text-align:center">— 주식회사 비코어랩 · info@becorelab.kr —</p>
+</body></html>"""
+
+    msg = MIMEText(body, "html", "utf-8")
+    msg["Subject"] = f"[비코어랩] 발주서 {po['po_number']}"
+    msg["From"] = "info@becorelab.kr"
+    msg["To"] = to_email
+
+    cc_emails = [c["email"] for c in cc_list if c["contact_type"] == "cc" and c["email"]]
+    if cc_emails:
+        msg["Cc"] = ", ".join(cc_emails)
+
+    try:
+        mail_pw = os.environ.get("NAVERWORKS_PASSWORD", "")
+        if not mail_pw:
+            raise HTTPException(500, "NAVERWORKS_PASSWORD 환경변수가 설정되지 않았습니다")
+        smtp = smtplib.SMTP("smtp.worksmobile.com", 587)
+        smtp.starttls()
+        smtp.login("info@becorelab.kr", mail_pw)
+        all_recipients = [to_email] + cc_emails
+        smtp.sendmail("info@becorelab.kr", all_recipients, msg.as_string())
+        smtp.quit()
+    except smtplib.SMTPException as e:
+        raise HTTPException(500, f"메일 발송 실패: {e}")
+
+    conn.execute("UPDATE purchase_orders SET email_sent_at=datetime('now','localtime') WHERE id=?", (po_id,))
+    conn.commit()
+    return {"ok": True, "to": to_email, "cc": cc_emails}
 
 
 # ── 입고 ──
@@ -917,6 +1373,34 @@ async def create_user(request: Request, conn=Depends(db)):
         return {"id": cur.lastrowid}
     except sqlite3.IntegrityError:
         raise HTTPException(400, "이미 존재하는 사용자입니다")
+
+
+# ── 거래처 연락처 ──
+@app.get("/api/partners/{partner_id}/contacts")
+async def list_partner_contacts(partner_id: int, conn=Depends(db)):
+    rows = conn.execute(
+        "SELECT * FROM partner_contacts WHERE partner_id=? AND is_active=1 ORDER BY contact_type, name",
+        (partner_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+@app.post("/api/partners/{partner_id}/contacts")
+async def add_partner_contact(partner_id: int, request: Request, conn=Depends(db)):
+    d = await request.json()
+    conn.execute(
+        "INSERT INTO partner_contacts (partner_id, name, email, contact_type) VALUES (?,?,?,?)",
+        (partner_id, d["name"], d["email"], d.get("contact_type", "to")),
+    )
+    conn.commit()
+    return {"ok": True}
+
+
+@app.delete("/api/partners/{partner_id}/contacts/{contact_id}")
+async def delete_partner_contact(partner_id: int, contact_id: int, conn=Depends(db)):
+    conn.execute("UPDATE partner_contacts SET is_active=0 WHERE id=? AND partner_id=?", (contact_id, partner_id))
+    conn.commit()
+    return {"ok": True}
 
 
 # ── 시작 시 DB 초기화 ──
