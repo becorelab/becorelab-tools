@@ -4,6 +4,31 @@ const API = '';
 let currentUser = null;
 let currentPage = 'dashboard';
 
+function setDateRange(preset, prefix) {
+  const now = new Date();
+  const fromEl = document.getElementById(`${prefix}-from`);
+  const toEl = document.getElementById(`${prefix}-to`);
+  if (!fromEl || !toEl) return;
+  let f, t;
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  if (preset === 'yesterday') {
+    const y = new Date(now); y.setDate(y.getDate() - 1);
+    f = t = iso(y);
+  } else if (preset === '7days') {
+    const d7 = new Date(now); d7.setDate(d7.getDate() - 6);
+    f = iso(d7); t = iso(now);
+  } else if (preset === 'thisMonth') {
+    f = iso(new Date(now.getFullYear(), now.getMonth(), 1)); t = iso(now);
+  } else if (preset === 'lastMonth') {
+    f = iso(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+    t = iso(new Date(now.getFullYear(), now.getMonth(), 0));
+  }
+  fromEl.value = f; toEl.value = t;
+  if (prefix === 'sales') loadSales();
+  else if (prefix === 'summary') loadSalesSummary();
+  else if (prefix === 'order') loadOrders();
+}
+
 // ── API Helper ──
 async function api(path, opts = {}) {
   const res = await fetch(`${API}${path}`, {
@@ -380,9 +405,10 @@ async function loadStock() {
   const q = document.getElementById('stock-search')?.value || '';
   const alertOnly = document.getElementById('stock-alert')?.checked || false;
   const hideZero = document.getElementById('stock-hide-zero')?.checked || false;
+  const showMaterial = document.getElementById('stock-show-material')?.checked || false;
   try {
     const [items_raw, summary] = await Promise.all([
-      api(`/api/stock?q=${encodeURIComponent(q)}&alert_only=${alertOnly}`),
+      api(`/api/stock?q=${encodeURIComponent(q)}&alert_only=${alertOnly}&show_material=${showMaterial}`),
       api('/api/stock/summary'),
     ]);
     let items = items_raw;
@@ -397,16 +423,18 @@ async function loadStock() {
       const days = (qty > 0 && avgDaily > 0) ? Math.round(qty / avgDaily) : null;
 
       let status = 'normal';
-      if (qty <= 0) status = 'out';
+      if (s.is_discontinued) status = 'discontinued';
+      else if (qty <= 0) status = 'out';
       else if (days !== null && days <= 7) status = 'danger';
       else if (qty <= safe && safe > 0) status = 'low';
       else if (days !== null && days <= 14) status = 'warning';
       return { ...s, qty, safe, avgDaily, days, status };
     });
 
-    const outItems = classified.filter(s => s.status === 'out');
-    const dangerItems = classified.filter(s => s.status === 'danger').sort((a, b) => (a.days ?? 0) - (b.days ?? 0));
-    const warningItems = classified.filter(s => s.status === 'warning' || s.status === 'low').sort((a, b) => (a.days ?? 999) - (b.days ?? 999));
+    const active = classified.filter(s => s.status !== 'discontinued');
+    const outItems = active.filter(s => s.status === 'out');
+    const dangerItems = active.filter(s => s.status === 'danger').sort((a, b) => (a.days ?? 0) - (b.days ?? 0));
+    const warningItems = active.filter(s => s.status === 'warning' || s.status === 'low').sort((a, b) => (a.days ?? 999) - (b.days ?? 999));
     const pendingInbound = classified.filter(s => (s.pending_inbound ?? 0) > 0);
     const CARD_LIMIT = 5;
 
@@ -472,8 +500,9 @@ async function loadStock() {
       const barPct = Math.min((s.qty / maxQty) * 100, 100);
       const safePct = s.safe > 0 ? Math.min((s.safe / maxQty) * 100, 100) : 0;
 
-      const colorMap = { out: 'var(--red)', danger: 'var(--red)', low: 'var(--amber)', warning: 'var(--amber)', normal: 'var(--green)' };
+      const colorMap = { discontinued: 'var(--ink-3)', out: 'var(--red)', danger: 'var(--red)', low: 'var(--amber)', warning: 'var(--amber)', normal: 'var(--green)' };
       const badgeMap = {
+        discontinued: '<span class="badge" style="background:var(--ink-4);color:var(--ink-2)">단종</span>',
         out: '<span class="badge badge-danger">품절</span>',
         danger: '<span class="badge badge-danger">위험</span>',
         low: '<span class="badge badge-warning">부족</span>',
@@ -484,7 +513,8 @@ async function loadStock() {
       const badge = badgeMap[s.status];
 
       let depletionText = '-';
-      if (s.qty <= 0) depletionText = '<span class="text-danger">품절</span>';
+      if (s.status === 'discontinued') depletionText = '<span class="text-muted">-</span>';
+      else if (s.qty <= 0) depletionText = '<span class="text-danger">품절</span>';
       else if (s.days !== null) {
         if (s.days <= 7) depletionText = `<span class="text-danger">${s.days}일</span>`;
         else if (s.days <= 14) depletionText = `<span class="text-warning">${s.days}일</span>`;
@@ -493,24 +523,142 @@ async function loadStock() {
 
       const qtyColor = s.status === 'out' ? 'var(--red)' : s.status === 'danger' || s.status === 'low' ? 'var(--amber)' : 'var(--ink)';
 
+      const discBadge = s.is_discontinued ? ' <span class="badge" style="background:var(--ink-4);color:var(--ink-2);font-size:10px">단종</span>' : '';
+
       return `
-      <tr>
-        <td>${s.product_code}</td>
-        <td><strong>${s.name}</strong></td>
-        <td class="text-right number" style="font-size:14px;font-weight:600;color:${qtyColor}">${fmt(s.qty)}</td>
-        <td style="min-width:120px">
+      <tr style="cursor:pointer">
+        <td onclick="event.stopPropagation()"><input type="checkbox" class="stock-check" value="${s.id}" onchange="updateStockBulkBar()" /></td>
+        <td onclick="viewStockDetail(${s.id})">${s.product_code}</td>
+        <td onclick="viewStockDetail(${s.id})"><strong>${s.name}</strong>${discBadge}</td>
+        <td onclick="viewStockDetail(${s.id})" class="text-right number" style="font-size:14px;font-weight:600;color:${qtyColor}">${fmt(s.qty)}</td>
+        <td onclick="viewStockDetail(${s.id})" style="min-width:120px">
           <div class="stock-bar">
             <div class="stock-bar-fill" style="width:${barPct}%;background:${barColor}"></div>
             ${safePct > 0 ? `<div class="stock-bar-safe" style="left:${safePct}%" title="안전재고: ${fmt(s.safe)}"></div>` : ''}
           </div>
         </td>
-        <td class="text-right number">${s.avgDaily > 0 ? s.avgDaily.toFixed(1) : '-'}</td>
-        <td class="text-right">${depletionText}</td>
-        <td>${badge}</td>
-        <td><button class="btn btn-sm" onclick="viewStockLedger(${s.id},'${(s.name||'').replace(/'/g,"\\'")}')">수불부</button></td>
+        <td onclick="viewStockDetail(${s.id})" class="text-right number">${s.avgDaily > 0 ? s.avgDaily.toFixed(1) : '-'}</td>
+        <td onclick="viewStockDetail(${s.id})" class="text-right">${depletionText}</td>
+        <td onclick="viewStockDetail(${s.id})">${badge}</td>
+        <td><button class="btn btn-sm" onclick="event.stopPropagation();viewStockLedger(${s.id},'${(s.name||'').replace(/'/g,"\\'")}')">수불부</button></td>
       </tr>`;
     }).join('');
     document.getElementById('stock-info').textContent = `총 ${items.length}건`;
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function toggleStockCheckAll(el) {
+  document.querySelectorAll('.stock-check').forEach(cb => { cb.checked = el.checked; });
+  updateStockBulkBar();
+}
+
+function updateStockBulkBar() {
+  const checked = document.querySelectorAll('.stock-check:checked');
+  const bar = document.getElementById('stock-bulk-bar');
+  const countEl = document.getElementById('stock-bulk-count');
+  if (checked.length > 0) {
+    bar.classList.remove('hidden');
+    countEl.textContent = `${checked.length}건 선택`;
+  } else {
+    bar.classList.add('hidden');
+  }
+}
+
+function clearStockSelection() {
+  document.querySelectorAll('.stock-check').forEach(cb => { cb.checked = false; });
+  document.getElementById('stock-check-all').checked = false;
+  updateStockBulkBar();
+}
+
+async function bulkStockAction(action) {
+  const checked = document.querySelectorAll('.stock-check:checked');
+  const ids = Array.from(checked).map(cb => Number(cb.value));
+  if (!ids.length) return;
+  const labels = { delete: '삭제', discontinue: '단종 처리', activate: '판매 재개' };
+  if (!confirm(`선택된 ${ids.length}건을 ${labels[action]}하시겠습니까?`)) return;
+  try {
+    const r = await api('/api/products/bulk-action', {
+      method: 'POST',
+      body: { ids, action },
+    });
+    toast(`${r.count}건 ${labels[action]} 완료`);
+    clearStockSelection();
+    loadStock();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function viewStockDetail(productId) {
+  try {
+    const p = await api(`/api/products/${productId}`);
+    const m = document.getElementById('modal');
+    const cleanName = (p.name || '').replace(/\[비코어랩\]/g, '').replace(/\(비코어랩\)/g, '').trim();
+    m.querySelector('.modal-header span').textContent = `품목 상세 — ${cleanName}`;
+
+    const statusBadge = p.is_discontinued
+      ? '<span class="badge" style="background:#e74c3c;color:#fff">단종</span>'
+      : '<span class="badge badge-success">판매중</span>';
+
+    const qtyVal = p.qty_on_hand ?? 0;
+    const safeVal = p.safety_stock || 0;
+    let stockBadge = '<span class="badge badge-success">정상</span>';
+    if (qtyVal <= 0) stockBadge = '<span class="badge badge-danger">품절</span>';
+    else if (safeVal > 0 && qtyVal <= safeVal) stockBadge = '<span class="badge badge-warning">부족</span>';
+
+    m.querySelector('.modal-body').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="display:flex;gap:8px;align-items:center">
+          ${statusBadge} ${stockBadge}
+        </div>
+        <span class="text-muted" style="font-size:12px">코드: ${p.product_code}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:20px">
+        <div><span class="text-muted" style="font-size:12px">품목명</span><br><strong>${p.name}</strong></div>
+        <div><span class="text-muted" style="font-size:12px">규격</span><br>${p.spec || '-'}</div>
+        <div><span class="text-muted" style="font-size:12px">단위</span><br>${p.unit || 'EA'}</div>
+        <div><span class="text-muted" style="font-size:12px">카테고리</span><br>${p.category || '-'}</div>
+        <div><span class="text-muted" style="font-size:12px">매입가</span><br><strong class="number">₩${fmt(p.purchase_price || 0)}</strong></div>
+        <div><span class="text-muted" style="font-size:12px">판매가</span><br><strong class="number">₩${fmt(p.sell_price || 0)}</strong></div>
+        <div><span class="text-muted" style="font-size:12px">현재고</span><br><strong class="number" style="font-size:18px;color:${qtyVal <= 0 ? 'var(--red)' : qtyVal <= safeVal ? 'var(--amber)' : 'var(--green)'}">${fmt(qtyVal)}</strong></div>
+        <div><span class="text-muted" style="font-size:12px">안전재고</span><br><strong class="number">${fmt(safeVal)}</strong></div>
+        <div><span class="text-muted" style="font-size:12px">리드타임</span><br>${p.lead_time_days || 7}일</div>
+        <div><span class="text-muted" style="font-size:12px">MOQ</span><br>${fmt(p.moq || 0)}</div>
+        <div><span class="text-muted" style="font-size:12px">이지어드민 코드</span><br>${p.ezadmin_code || '-'}</div>
+        <div><span class="text-muted" style="font-size:12px">바코드</span><br>${p.barcode || '-'}</div>
+      </div>
+      ${p.supplier_name ? `<div style="margin-bottom:12px"><span class="text-muted" style="font-size:12px">공급처</span><br>${p.supplier_name}</div>` : ''}
+      <div style="border-top:1px solid var(--line);padding-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="event.stopPropagation();closeModal();viewStockLedger(${p.id},'${cleanName.replace(/'/g, "\\'")}')">📊 수불부</button>
+        <button class="btn btn-sm" style="margin-left:auto;color:var(--amber)" onclick="toggleDiscontinue(${p.id}, ${p.is_discontinued ? 0 : 1})">${p.is_discontinued ? '🔄 판매 재개' : '⛔ 단종 처리'}</button>
+        <button class="btn btn-sm" style="color:var(--red)" onclick="deleteFromStockDetail(${p.id},'${cleanName.replace(/'/g, "\\'")}')">🗑️ 삭제</button>
+      </div>
+    `;
+    m.querySelector('.modal-footer').innerHTML = '<button class="btn" onclick="closeModal()">닫기</button>';
+    openModal();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function toggleDiscontinue(productId, discontinue) {
+  const action = discontinue ? '단종 처리' : '판매 재개';
+  if (!confirm(`이 품목을 ${action}하시겠습니까?`)) return;
+  try {
+    await api(`/api/products/${productId}/discontinue`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ discontinue: !!discontinue }),
+    });
+    toast(`${action} 완료`);
+    closeModal();
+    loadStock();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function deleteFromStockDetail(productId, productName) {
+  if (!confirm(`"${productName}" 품목을 삭제하시겠습니까?\n(재고 및 매출 이력은 유지됩니다)`)) return;
+  try {
+    await api(`/api/products/${productId}`, { method: 'DELETE' });
+    toast('품목이 삭제되었습니다');
+    closeModal();
+    loadStock();
   } catch (e) { toast(e.message, 'error'); }
 }
 
@@ -717,8 +865,8 @@ function switchSalesTab(tab) {
 async function loadSalesSummary() {
   const fromEl = document.getElementById('summary-from');
   const toEl = document.getElementById('summary-to');
-  if (!fromEl.value) { const now = new Date(); fromEl.value = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0,10); }
-  if (!toEl.value) toEl.value = new Date().toISOString().slice(0,10);
+  if (!fromEl.value) { const now = new Date(); const d = new Date(now.getFullYear(), now.getMonth(), 1); fromEl.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+  if (!toEl.value) { const now = new Date(); toEl.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`; }
   const groupBy = document.getElementById('summary-group')?.value || 'daily';
   const channel = document.getElementById('summary-channel')?.value || '';
   const searchQ = document.getElementById('summary-search')?.value?.trim() || '';
@@ -729,12 +877,14 @@ async function loadSalesSummary() {
   }
 
   try {
-    let data = await api(`/api/sales/summary?date_from=${fromEl.value}&date_to=${toEl.value}&group_by=${groupBy}&channel=${encodeURIComponent(channel)}`);
+    const resp = await api(`/api/sales/summary?date_from=${fromEl.value}&date_to=${toEl.value}&group_by=${groupBy}&channel=${encodeURIComponent(channel)}`);
+    let data = resp.items || resp;
+    const grandTotal = resp.grand_total || data.reduce((s, r) => s + (r.total || 0), 0);
     if (searchQ) data = data.filter(r => (r.label || '').toLowerCase().includes(searchQ.toLowerCase()));
-    const grandTotal = data.reduce((s, r) => s + (r.total || 0), 0);
     document.getElementById('summary-total').textContent = `합계 ₩${fmt(grandTotal)}`;
 
     const tbody = document.getElementById('summary-tbody');
+    const rowTotal = data.reduce((s, r) => s + (r.total || 0), 0);
     tbody.innerHTML = data.length ? data.map(r => {
       return `<tr>
         <td><strong>${r.label || '-'}</strong></td>
@@ -747,7 +897,7 @@ async function loadSalesSummary() {
       <td>합계</td><td></td>
       <td class="text-right number">${fmt(data.reduce((s,r) => s + (r.supply||0), 0))}</td>
       <td class="text-right number">${fmt(data.reduce((s,r) => s + (r.tax||0), 0))}</td>
-      <td class="text-right number">₩${fmt(grandTotal)}</td>
+      <td class="text-right number">₩${fmt(rowTotal)}</td>
     </tr>` : '<tr><td colspan="5" class="text-center text-muted" style="padding:40px">데이터 없음</td></tr>';
 
     renderSalesSummaryChart(data, groupBy);

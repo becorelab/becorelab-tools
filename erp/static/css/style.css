@@ -962,3 +962,19 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); }
 }
 
 .table-scroll { overflow-x: auto; }
+
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.bulk-bar .btn { font-size: 12px; padding: 4px 10px; }
+.bulk-bar.hidden { display: none; }

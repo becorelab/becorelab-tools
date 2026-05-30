@@ -6,7 +6,7 @@
 <title>비코어랩 ERP</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-<link rel="stylesheet" href="/static/css/style.css?v=20260529e" />
+<link rel="stylesheet" href="/static/css/style.css?v=20260530c" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -255,11 +255,21 @@
           <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer">
             <input type="checkbox" id="stock-hide-zero" onchange="loadStock()" /> 품절 숨기기
           </label>
+          <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="stock-show-material" onchange="loadStock()" /> 부자재 포함
+          </label>
           <span class="text-muted" id="stock-info"></span>
+        </div>
+        <div id="stock-bulk-bar" class="bulk-bar hidden">
+          <span id="stock-bulk-count">0건 선택</span>
+          <button class="btn btn-sm" onclick="bulkStockAction('discontinue')">⛔ 일괄 단종</button>
+          <button class="btn btn-sm" onclick="bulkStockAction('activate')">🔄 일괄 판매재개</button>
+          <button class="btn btn-sm" style="color:var(--red)" onclick="bulkStockAction('delete')">🗑️ 일괄 삭제</button>
+          <button class="btn btn-sm" onclick="clearStockSelection()">선택 해제</button>
         </div>
         <div class="table-scroll">
           <table>
-            <thead><tr><th>코드</th><th>품목명</th><th class="text-right">현재고</th><th>재고수준</th><th class="text-right">일평균출고</th><th class="text-right">예상소진</th><th>상태</th><th>수불부</th></tr></thead>
+            <thead><tr><th style="width:36px"><input type="checkbox" id="stock-check-all" onchange="toggleStockCheckAll(this)" /></th><th>코드</th><th>품목명</th><th class="text-right">현재고</th><th>재고수준</th><th class="text-right">일평균출고</th><th class="text-right">예상소진</th><th>상태</th><th>수불부</th></tr></thead>
             <tbody id="stock-tbody"></tbody>
           </table>
         </div>
@@ -283,6 +293,10 @@
             <input type="date" id="sales-from" onchange="loadSales()" style="width:150px" />
             <span class="text-muted">~</span>
             <input type="date" id="sales-to" onchange="loadSales()" style="width:150px" />
+            <button class="btn btn-sm" onclick="setDateRange('yesterday','sales')">어제</button>
+            <button class="btn btn-sm" onclick="setDateRange('7days','sales')">7일</button>
+            <button class="btn btn-sm" onclick="setDateRange('thisMonth','sales')">이번달</button>
+            <button class="btn btn-sm" onclick="setDateRange('lastMonth','sales')">지난달</button>
             <select id="sales-channel" onchange="loadSales()" style="width:180px">
               <option value="">전체 채널</option>
             </select>
@@ -308,6 +322,10 @@
             <input type="date" id="summary-from" style="width:150px" />
             <span class="text-muted">~</span>
             <input type="date" id="summary-to" style="width:150px" />
+            <button class="btn btn-sm" onclick="setDateRange('yesterday','summary')">어제</button>
+            <button class="btn btn-sm" onclick="setDateRange('7days','summary')">7일</button>
+            <button class="btn btn-sm" onclick="setDateRange('thisMonth','summary')">이번달</button>
+            <button class="btn btn-sm" onclick="setDateRange('lastMonth','summary')">지난달</button>
             <select id="summary-group" style="width:140px">
               <option value="daily">일별</option>
               <option value="weekly">주별</option>
@@ -402,7 +420,7 @@
 <!-- Toast -->
 <div class="toast-container" id="toasts"></div>
 
-<script src="/static/js/app.js?v=20260529e"></script>
+<script src="/static/js/app.js?v=20260530c"></script>
 <script>
 setInterval(() => {
   const el = document.getElementById('current-time');

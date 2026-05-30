@@ -293,6 +293,47 @@ def scheduled_scrape():
     run_scrape(scheduled=True)
 
 
+def scheduled_supplyhub():
+    """매일 10:30 서플라이허브 입고상세내역 수집"""
+    log.info("=== 서플라이허브 예약 수집 시작 (10:30) ===")
+    try:
+        from supplyhub_scraper import scrape_supplyhub
+        yesterday = (date.today() - timedelta(days=1)).isoformat()
+        result = scrape_supplyhub(target_date=yesterday)
+        if result and result.get("items"):
+            _save_supplyhub_to_firestore(result)
+            log.info(f"서플라이허브 수집 완료: {result['count']}건, "
+                     f"단가합계={result['total_unit_price']:,}")
+            notify_macos("서플라이허브 수집 완료",
+                         f"{result['count']}건, ₩{result['total_unit_price']:,}")
+        else:
+            log.warning("서플라이허브 수집 결과 없음")
+            notify_macos("서플라이허브 수집 실패", "데이터 없음")
+    except Exception as e:
+        log.error(f"서플라이허브 수집 오류: {e}")
+        notify_macos("서플라이허브 수집 실패", str(e)[:80])
+
+
+def _save_supplyhub_to_firestore(result):
+    """서플라이허브 데이터를 Firestore에 저장"""
+    if not db:
+        log.warning("Firestore 미연결, 서플라이허브 저장 생략")
+        return
+    target_date = result["date"]
+    doc_ref = db.collection("supplyhub_daily").document(target_date)
+    doc_ref.set({
+        "date": target_date,
+        "total_unit_price": result["total_unit_price"],
+        "total_supply_price": result["total_supply_price"],
+        "total_vat": result["total_vat"],
+        "count": result["count"],
+        "server_summary": result.get("server_summary", {}),
+        "items": result["items"],
+        "updated_at": datetime.now().isoformat(),
+    })
+    log.info(f"Firestore supplyhub_daily/{target_date} 저장 완료")
+
+
 # ── 라우트 ──
 @app.route("/")
 def index():
@@ -1591,6 +1632,79 @@ def api_inventory_report_obsidian():
     })
 
 
+@app.route("/api/supplyhub-data")
+def api_supplyhub_data():
+    """Firestore에서 서플라이허브 데이터 조회"""
+    date_from = request.args.get("date_from", "")
+    date_to = request.args.get("date_to", date_from)
+
+    if not db:
+        return jsonify({"error": "Firestore 미연결"}), 500
+
+    all_items = []
+    total_unit = 0
+    total_supply = 0
+
+    current = datetime.strptime(date_from, "%Y-%m-%d")
+    end = datetime.strptime(date_to, "%Y-%m-%d")
+    while current <= end:
+        ds = current.strftime("%Y-%m-%d")
+        current += timedelta(days=1)
+        try:
+            doc = db.collection("supplyhub_daily").document(ds).get()
+            if doc.exists:
+                data = doc.to_dict()
+                items = data.get("items", [])
+                all_items.extend(items)
+                total_unit += data.get("total_unit_price", 0)
+                total_supply += data.get("total_supply_price", 0)
+        except Exception:
+            continue
+
+    return jsonify({
+        "date_from": date_from, "date_to": date_to,
+        "count": len(all_items),
+        "total_unit_price": total_unit,
+        "total_supply_price": total_supply,
+        "items": all_items,
+    })
+
+
+@app.route("/api/supplyhub-scrape", methods=["POST"])
+def api_supplyhub_scrape():
+    """서플라이허브 수동 스크래핑 트리거"""
+    data = request.get_json(force=True, silent=True) or {}
+    target_date = data.get("date", (date.today() - timedelta(days=1)).isoformat())
+    date_end = data.get("date_end", target_date)
+
+    task_id = f"supplyhub_{datetime.now().strftime('%H%M%S')}"
+    tasks[task_id] = {"status": "running", "step": "starting"}
+
+    def run():
+        try:
+            from supplyhub_scraper import scrape_supplyhub
+            result = scrape_supplyhub(target_date=target_date, date_end=date_end)
+            if result and result.get("items"):
+                _save_supplyhub_to_firestore(result)
+                tasks[task_id]["status"] = "done"
+                tasks[task_id]["result"] = {
+                    "count": result["count"],
+                    "total_unit_price": result["total_unit_price"],
+                }
+            else:
+                tasks[task_id]["status"] = "error"
+                tasks[task_id]["error"] = "데이터 없음"
+        except Exception as e:
+            tasks[task_id]["status"] = "error"
+            tasks[task_id]["error"] = str(e)
+
+    import threading
+    threading.Thread(target=run, daemon=True).start()
+
+    return jsonify({"task_id": task_id, "status": "started",
+                    "date": target_date, "date_end": date_end})
+
+
 if __name__ == "__main__":
     from waitress import serve
 
@@ -1602,8 +1716,15 @@ if __name__ == "__main__":
         name="매일 10시 이지어드민 수집",
         misfire_grace_time=3600,
     )
+    scheduler.add_job(
+        scheduled_supplyhub,
+        CronTrigger(hour=10, minute=30),
+        id="daily_supplyhub",
+        name="매일 10:30 서플라이허브 수집",
+        misfire_grace_time=3600,
+    )
     scheduler.start()
-    log.info("APScheduler 시작 — 매일 10:00 자동 수집 예약됨")
+    log.info("APScheduler 시작 — 매일 10:00 이지어드민 / 10:30 서플라이허브 예약됨")
 
     port = int(os.environ.get('PORT', 8082))
     print(f"\n  iLBiA 물류 대시보드")
