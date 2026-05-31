@@ -77,12 +77,41 @@ def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10
         page.fill('input[name="password"]', acct["pw"])
         time.sleep(1)
 
-        with page.expect_navigation(timeout=30000, wait_until="load"):
-            page.click('input[name="login"]')
-        time.sleep(3)
+        login_success = False
+        for attempt in range(3):
+            if attempt > 0:
+                print(f"  🔄 로그인 재시도 ({attempt+1}/3) — 30초 대기...")
+                time.sleep(30)
+                page.goto(WING_AUTH_URL, wait_until="domcontentloaded", timeout=60000)
+                time.sleep(3)
+                try:
+                    page.wait_for_selector('input[name="username"]', timeout=15000)
+                except Exception:
+                    continue
+                page.fill('input[name="username"]', acct["id"])
+                page.fill('input[name="password"]', acct["pw"])
+                time.sleep(1)
 
-        if "xauth" in page.url and "advertising.coupang.com" not in page.url:
-            print("  ❌ 로그인 실패")
+            try:
+                with page.expect_navigation(timeout=30000, wait_until="load"):
+                    page.click('input[name="login"]')
+                time.sleep(3)
+            except Exception:
+                time.sleep(3)
+
+            if "xauth" in page.url and "advertising.coupang.com" not in page.url:
+                body_text = page.inner_text('body')[:100]
+                if "Access Denied" in body_text:
+                    print(f"  ⚠️ Akamai 차단 (attempt {attempt+1})")
+                else:
+                    print(f"  ⚠️ 로그인 실패 (attempt {attempt+1})")
+                continue
+            else:
+                login_success = True
+                break
+
+        if not login_success:
+            print("  ❌ 로그인 실패 (3회 재시도 후 포기)")
             browser.close()
             return []
 
