@@ -1884,6 +1884,86 @@ async def reset_user_password(uid: int, request: Request, conn=Depends(db)):
     return {"ok": True}
 
 
+# ── 일정 (캘린더) ──
+@app.get("/api/events")
+async def list_events(start: str = "", end: str = "", conn=Depends(db)):
+    """기간 내 일정 조회. 수동/노션 일정 + 발주 재입고일(자동) 합쳐서 반환."""
+    where, params = [], []
+    if start:
+        where.append("COALESCE(end_date, start_date) >= ?")
+        params.append(start)
+    if end:
+        where.append("start_date <= ?")
+        params.append(end)
+    sql = "SELECT * FROM events"
+    if where:
+        sql += " WHERE " + " AND ".join(where)
+    rows = [dict(r) for r in conn.execute(sql, params).fetchall()]
+
+    # 발주 납품예정일 → 재입고 일정으로 자동 생성 (events 테이블엔 저장 안 함, 조회 시 합성)
+    po_where = ["po.delivery_date IS NOT NULL", "po.delivery_date != ''", "po.status != 'cancelled'"]
+    po_params = []
+    if start:
+        po_where.append("po.delivery_date >= ?"); po_params.append(start)
+    if end:
+        po_where.append("po.delivery_date <= ?"); po_params.append(end)
+    po_rows = conn.execute(
+        f"""SELECT po.id, po.po_number, po.delivery_date, p.name as supplier
+            FROM purchase_orders po LEFT JOIN partners p ON p.id=po.supplier_id
+            WHERE {' AND '.join(po_where)}""",
+        po_params,
+    ).fetchall()
+    for po in po_rows:
+        rows.append({
+            "id": f"po-{po['id']}", "title": f"📦 {po['supplier'] or '발주'} 입고",
+            "event_type": "restock", "start_date": po["delivery_date"], "end_date": None,
+            "all_day": 1, "memo": f"발주번호 {po['po_number']}", "source": "po",
+            "source_id": str(po["id"]), "readonly": True,
+        })
+    return rows
+
+
+@app.post("/api/events")
+async def create_event(request: Request, conn=Depends(db)):
+    d = await request.json()
+    if not d.get("title") or not d.get("start_date"):
+        raise HTTPException(400, "제목과 날짜는 필수입니다")
+    cur = conn.execute(
+        """INSERT INTO events (title, event_type, start_date, end_date, all_day, start_time, memo, color, created_by)
+           VALUES (?,?,?,?,?,?,?,?,?)""",
+        (d["title"], d.get("event_type", "etc"), d["start_date"], d.get("end_date") or None,
+         1 if d.get("all_day", True) else 0, d.get("start_time") or None,
+         d.get("memo") or None, d.get("color") or None, d.get("created_by")),
+    )
+    conn.commit()
+    return {"id": cur.lastrowid}
+
+
+@app.put("/api/events/{eid}")
+async def update_event_erp(eid: int, request: Request, conn=Depends(db)):
+    d = await request.json()
+    fields, params = [], []
+    for k in ("title", "event_type", "start_date", "end_date", "start_time", "memo", "color"):
+        if k in d:
+            fields.append(f"{k}=?"); params.append(d[k] or None)
+    if "all_day" in d:
+        fields.append("all_day=?"); params.append(1 if d["all_day"] else 0)
+    if not fields:
+        raise HTTPException(400, "변경할 내용이 없습니다")
+    fields.append("updated_at=datetime('now','localtime')")
+    params.append(eid)
+    conn.execute(f"UPDATE events SET {', '.join(fields)} WHERE id=?", params)
+    conn.commit()
+    return {"ok": True}
+
+
+@app.delete("/api/events/{eid}")
+async def delete_event_erp(eid: int, conn=Depends(db)):
+    conn.execute("DELETE FROM events WHERE id=?", (eid,))
+    conn.commit()
+    return {"ok": True}
+
+
 # ── 거래처 연락처 ──
 @app.get("/api/partners/{partner_id}/contacts")
 async def list_partner_contacts(partner_id: int, conn=Depends(db)):

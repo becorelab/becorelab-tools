@@ -74,6 +74,7 @@ function navigate(page) {
     stock: '재고 현황',
     sales: '매출 관리',
     orders: '발주 관리',
+    calendar: '일정 관리',
     users: '사용자 관리',
   }[page] || '';
 
@@ -85,6 +86,7 @@ function navigate(page) {
     sales: loadSales,
     orders: loadOrders,
     users: loadUsers,
+    calendar: loadCalendar,
   };
   if (loaders[page]) loaders[page]();
 }
@@ -1238,6 +1240,154 @@ function renderPagination(containerId, total, size, current, callback) {
   el.querySelectorAll('[data-p]').forEach(btn => {
     btn.addEventListener('click', () => callback(Number(btn.dataset.p)));
   });
+}
+
+// ── Calendar (일정 관리) ──
+let calYear, calMonth;          // 현재 보고 있는 연/월 (calMonth: 0~11)
+let calEvents = [];
+const EVENT_TYPES = [
+  { key: 'leave', label: '연차' },
+  { key: 'meeting', label: '미팅' },
+  { key: 'restock', label: '재입고' },
+  { key: 'etc', label: '기타' },
+];
+
+function calIso(y, m, d) {
+  return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
+async function loadCalendar() {
+  if (calYear === undefined) {
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+  }
+  document.getElementById('cal-title').textContent = `${calYear}년 ${calMonth + 1}월`;
+  // 이번 달 + 앞뒤 걸치는 날짜까지 넉넉히 조회
+  const start = calIso(calYear, calMonth, 1);
+  const lastDay = new Date(calYear, calMonth + 1, 0).getDate();
+  const end = calIso(calYear, calMonth, lastDay);
+  try {
+    calEvents = await api(`/api/events?start=${start}&end=${end}`);
+  } catch (e) { calEvents = []; toast(e.message, 'error'); }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const grid = document.getElementById('cal-grid');
+  const first = new Date(calYear, calMonth, 1);
+  const startDow = first.getDay();              // 0(일)~6(토)
+  const lastDay = new Date(calYear, calMonth + 1, 0).getDate();
+  const prevLast = new Date(calYear, calMonth, 0).getDate();
+  const todayIso = (() => { const n = new Date(); return calIso(n.getFullYear(), n.getMonth(), n.getDate()); })();
+
+  // 해당 날짜의 이벤트 묶기
+  const byDate = {};
+  calEvents.forEach(ev => {
+    // 기간 이벤트는 start~end 모든 날에 표시
+    const s = ev.start_date, e = ev.end_date || ev.start_date;
+    let d = new Date(s + 'T00:00:00');
+    const last = new Date(e + 'T00:00:00');
+    while (d <= last) {
+      const key = calIso(d.getFullYear(), d.getMonth(), d.getDate());
+      (byDate[key] = byDate[key] || []).push(ev);
+      d.setDate(d.getDate() + 1);
+    }
+  });
+
+  let cells = [];
+  // 앞쪽 지난달
+  for (let i = startDow - 1; i >= 0; i--) cells.push({ d: prevLast - i, other: true, ym: [calYear, calMonth - 1] });
+  // 이번달
+  for (let d = 1; d <= lastDay; d++) cells.push({ d, other: false, ym: [calYear, calMonth] });
+  // 뒤쪽 다음달 (7의 배수 채우기)
+  let nd = 1;
+  while (cells.length % 7 !== 0) cells.push({ d: nd++, other: true, ym: [calYear, calMonth + 1] });
+
+  grid.innerHTML = cells.map(c => {
+    const ny = c.ym[0], nm = c.ym[1];
+    const realDate = new Date(ny, nm, c.d);
+    const iso = calIso(realDate.getFullYear(), realDate.getMonth(), realDate.getDate());
+    const dow = realDate.getDay();
+    const evs = byDate[iso] || [];
+    const shown = evs.slice(0, 3);
+    const more = evs.length - shown.length;
+    const dayClass = dow === 0 ? 'sun' : dow === 6 ? 'sat' : '';
+    return `<div class="cal-cell ${c.other ? 'other-month' : ''} ${iso === todayIso ? 'today' : ''}" onclick="editEvent(0,'${iso}')">
+      <div class="cal-daynum ${dayClass}">${c.d}</div>
+      ${shown.map(ev => `<div class="cal-event type-${ev.event_type}" onclick="event.stopPropagation();${ev.readonly ? `toast('발주 입고 일정이에요 (발주 메뉴에서 관리)','warning')` : `editEvent(${ev.id})`}" title="${(ev.title || '').replace(/"/g, '')}">${ev.title}</div>`).join('')}
+      ${more > 0 ? `<div class="cal-more">+${more}개</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function calMove(delta) {
+  calMonth += delta;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  loadCalendar();
+}
+function calToday() {
+  const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth();
+  loadCalendar();
+}
+
+function editEvent(id, presetDate) {
+  const ev = id ? calEvents.find(x => x.id === id) : null;
+  const m = document.getElementById('modal');
+  m.querySelector('.modal-header span').textContent = ev ? '일정 수정' : '일정 추가';
+  m.querySelector('.modal-body').innerHTML = `
+    <div class="form-group"><label>제목 <span class="required">*</span></label>
+      <input id="ev-title" value="${ev ? (ev.title || '').replace(/"/g, '&quot;') : ''}" placeholder="예: 박성락님 연차 / 거래처 미팅" /></div>
+    <div class="form-group"><label>종류</label>
+      <select id="ev-type">${EVENT_TYPES.filter(t => t.key !== 'restock').map(t => `<option value="${t.key}">${t.label}</option>`).join('')}</select></div>
+    <div style="display:flex;gap:12px">
+      <div class="form-group" style="flex:1"><label>시작일 <span class="required">*</span></label>
+        <input type="date" id="ev-start" value="${ev ? ev.start_date : (presetDate || '')}" /></div>
+      <div class="form-group" style="flex:1"><label>종료일 <span class="text-muted">(선택)</span></label>
+        <input type="date" id="ev-end" value="${ev && ev.end_date ? ev.end_date : ''}" /></div>
+    </div>
+    <div class="form-group"><label>메모</label>
+      <textarea id="ev-memo" rows="2" placeholder="(선택)">${ev && ev.memo ? ev.memo : ''}</textarea></div>
+  `;
+  if (ev) m.querySelector('#ev-type').value = ev.event_type === 'restock' ? 'etc' : ev.event_type;
+  m.querySelector('.modal-footer').innerHTML = `
+    ${ev ? `<button class="btn" style="color:var(--red);margin-right:auto" onclick="deleteEvent(${id})">삭제</button>` : ''}
+    <button class="btn" onclick="closeModal()">취소</button>
+    <button class="btn btn-primary" onclick="saveEvent(${id})">저장</button>`;
+  openModal();
+}
+
+async function saveEvent(id) {
+  const title = document.getElementById('ev-title').value.trim();
+  const start_date = document.getElementById('ev-start').value;
+  if (!title) return toast('제목을 입력하세요', 'error');
+  if (!start_date) return toast('시작일을 선택하세요', 'error');
+  const body = {
+    title,
+    event_type: document.getElementById('ev-type').value,
+    start_date,
+    end_date: document.getElementById('ev-end').value || null,
+    memo: document.getElementById('ev-memo').value.trim() || null,
+  };
+  if (!id && currentUser) body.created_by = currentUser.id;
+  try {
+    if (id) await api(`/api/events/${id}`, { method: 'PUT', body });
+    else await api('/api/events', { method: 'POST', body });
+    toast(id ? '일정이 수정되었어요' : '일정이 추가되었어요');
+    closeModal();
+    loadCalendar();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function deleteEvent(id) {
+  if (!confirm('이 일정을 삭제할까요?')) return;
+  try {
+    await api(`/api/events/${id}`, { method: 'DELETE' });
+    toast('일정이 삭제되었어요');
+    closeModal();
+    loadCalendar();
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 // ── Users (직원 관리) ──

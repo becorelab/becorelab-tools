@@ -700,6 +700,37 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); }
   to { transform: translateX(0); opacity: 1; }
 }
 
+/* ── Calendar (일정관리) ── */
+.cal-nav { display: flex; align-items: center; gap: 6px; }
+.cal-legend { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--ink-2); margin-left: auto; margin-right: 16px; }
+.cal-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 3px; vertical-align: middle; }
+.cal-dot.type-leave   { background: #5e7d3a; }
+.cal-dot.type-meeting { background: #b25839; }
+.cal-dot.type-restock { background: #a86a1c; }
+.cal-dot.type-etc     { background: #998c7d; }
+.calendar { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--sidebar); border-bottom: 1px solid var(--line); }
+.cal-weekdays > div { padding: 10px; text-align: center; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.cal-weekdays > div:first-child { color: var(--red); }
+.cal-weekdays > div:last-child { color: #3a6a9c; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: minmax(96px, auto); }
+.cal-cell { border-right: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); padding: 6px; min-height: 96px; cursor: pointer; transition: background var(--transition); }
+.cal-cell:hover { background: var(--line-2); }
+.cal-cell:nth-child(7n) { border-right: none; }
+.cal-cell.other-month { background: #faf8f4; }
+.cal-cell.other-month .cal-daynum { color: var(--ink-3); opacity: 0.5; }
+.cal-cell.today { background: var(--accent-bg); }
+.cal-daynum { font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 4px; }
+.cal-cell.today .cal-daynum { color: var(--accent); font-weight: 800; }
+.cal-daynum.sun { color: var(--red); }
+.cal-daynum.sat { color: #3a6a9c; }
+.cal-event { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; cursor: pointer; }
+.cal-event.type-leave   { background: #5e7d3a; }
+.cal-event.type-meeting { background: #b25839; }
+.cal-event.type-restock { background: #a86a1c; }
+.cal-event.type-etc     { background: #998c7d; }
+.cal-more { font-size: 10px; color: var(--ink-3); padding: 0 6px; }
+
 /* ── Utilities ── */
 .text-right { text-align: right; }
 .text-center { text-align: center; }

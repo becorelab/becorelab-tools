@@ -167,7 +167,27 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     created_at TEXT DEFAULT (datetime('now', 'localtime'))
 );
 
+-- 일정 (캘린더)
+CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    event_type TEXT NOT NULL DEFAULT 'etc',  -- leave(연차), meeting(미팅), restock(재입고), etc(기타)
+    start_date TEXT NOT NULL,                 -- YYYY-MM-DD
+    end_date TEXT,                            -- 종료일 (없으면 당일)
+    all_day INTEGER DEFAULT 1,
+    start_time TEXT,                          -- HH:MM
+    memo TEXT,
+    color TEXT,
+    source TEXT DEFAULT 'manual',             -- manual, notion, po
+    source_id TEXT,
+    created_by INTEGER REFERENCES users(id),
+    created_at TEXT DEFAULT (datetime('now','localtime')),
+    updated_at TEXT DEFAULT (datetime('now','localtime'))
+);
+
 -- 인덱스
+CREATE INDEX IF NOT EXISTS idx_events_start ON events(start_date);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_events_source ON events(source, source_id) WHERE source_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_partners_code ON partners(partner_code);
 CREATE INDEX IF NOT EXISTS idx_products_code ON products(product_code);
 CREATE INDEX IF NOT EXISTS idx_stock_product ON stock(product_id);

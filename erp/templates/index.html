@@ -6,7 +6,7 @@
 <title>비코어랩 ERP</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-<link rel="stylesheet" href="/static/css/style.css?v=20260601a" />
+<link rel="stylesheet" href="/static/css/style.css?v=20260601b" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -115,6 +115,10 @@
       <a class="nav-item" data-page="orders">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         발주
+      </a>
+      <a class="nav-item" data-page="calendar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        일정관리
       </a>
     </div>
     <div class="nav-section">
@@ -389,6 +393,31 @@
       </div>
     </div>
 
+    <!-- Calendar -->
+    <div id="page-calendar" class="page hidden">
+      <div class="page-header">
+        <div class="cal-nav">
+          <button class="btn btn-sm" onclick="calMove(-1)">‹</button>
+          <h2 id="cal-title" style="margin:0 4px;min-width:140px;text-align:center"></h2>
+          <button class="btn btn-sm" onclick="calMove(1)">›</button>
+          <button class="btn btn-sm" onclick="calToday()">오늘</button>
+        </div>
+        <div class="cal-legend">
+          <span class="cal-dot type-leave"></span>연차
+          <span class="cal-dot type-meeting"></span>미팅
+          <span class="cal-dot type-restock"></span>재입고(발주)
+          <span class="cal-dot type-etc"></span>기타
+        </div>
+        <button class="btn btn-primary" onclick="editEvent(0)">+ 일정 추가</button>
+      </div>
+      <div class="calendar">
+        <div class="cal-weekdays">
+          <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+    </div>
+
     <!-- Users -->
     <div id="page-users" class="page hidden">
       <div class="page-header">
@@ -424,7 +453,7 @@
 <!-- Toast -->
 <div class="toast-container" id="toasts"></div>
 
-<script src="/static/js/app.js?v=20260601a"></script>
+<script src="/static/js/app.js?v=20260601b"></script>
 <script>
 setInterval(() => {
   const el = document.getElementById('current-time');
