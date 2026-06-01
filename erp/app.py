@@ -1849,6 +1849,41 @@ async def create_user(request: Request, conn=Depends(db)):
         raise HTTPException(400, "이미 존재하는 사용자입니다")
 
 
+@app.put("/api/users/{uid}")
+async def update_user(uid: int, request: Request, conn=Depends(db)):
+    d = await request.json()
+    fields, params = [], []
+    for k in ("name", "role", "email"):
+        if k in d:
+            fields.append(f"{k}=?")
+            params.append(d[k])
+    if "is_active" in d:
+        fields.append("is_active=?")
+        params.append(1 if d["is_active"] else 0)
+    if not fields:
+        raise HTTPException(400, "변경할 내용이 없습니다")
+    fields.append("updated_at=datetime('now','localtime')")
+    params.append(uid)
+    conn.execute(f"UPDATE users SET {', '.join(fields)} WHERE id=?", params)
+    conn.commit()
+    return {"ok": True}
+
+
+@app.post("/api/users/{uid}/reset-password")
+async def reset_user_password(uid: int, request: Request, conn=Depends(db)):
+    d = await request.json()
+    pw = d.get("password", "")
+    if len(pw) < 4:
+        raise HTTPException(400, "비밀번호는 4자 이상이어야 합니다")
+    pw_hash = hashlib.sha256(pw.encode()).hexdigest()
+    conn.execute(
+        "UPDATE users SET password_hash=?, updated_at=datetime('now','localtime') WHERE id=?",
+        (pw_hash, uid),
+    )
+    conn.commit()
+    return {"ok": True}
+
+
 # ── 거래처 연락처 ──
 @app.get("/api/partners/{partner_id}/contacts")
 async def list_partner_contacts(partner_id: int, conn=Depends(db)):

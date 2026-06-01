@@ -84,6 +84,7 @@ function navigate(page) {
     stock: loadStock,
     sales: loadSales,
     orders: loadOrders,
+    users: loadUsers,
   };
   if (loaders[page]) loaders[page]();
 }
@@ -1237,6 +1238,107 @@ function renderPagination(containerId, total, size, current, callback) {
   el.querySelectorAll('[data-p]').forEach(btn => {
     btn.addEventListener('click', () => callback(Number(btn.dataset.p)));
   });
+}
+
+// ── Users (직원 관리) ──
+let usersCache = [];
+const ROLE_LABEL = { admin: '관리자', manager: '매니저', staff: '직원', viewer: '뷰어' };
+
+async function loadUsers() {
+  try {
+    usersCache = await api('/api/users');
+  } catch (e) { toast(e.message, 'error'); return; }
+  const tb = document.getElementById('users-tbody');
+  tb.innerHTML = usersCache.map(u => `
+    <tr class="${u.is_active ? '' : 'row-inactive'}">
+      <td>${u.id}</td>
+      <td><b>${u.username}</b></td>
+      <td>${u.name}</td>
+      <td>${u.email || '<span class="text-muted">-</span>'}</td>
+      <td><span class="badge-role role-${u.role}">${ROLE_LABEL[u.role] || u.role}</span></td>
+      <td>${u.is_active
+        ? '<span class="badge badge-on">활성</span>'
+        : '<span class="badge badge-off">비활성</span>'}</td>
+      <td class="row-actions">
+        <button class="btn btn-sm" onclick="editUser(${u.id})">수정</button>
+        <button class="btn btn-sm" onclick="resetUserPw(${u.id})">비번초기화</button>
+        ${u.is_active
+          ? `<button class="btn btn-sm" style="color:var(--red)" onclick="toggleUser(${u.id},0)">비활성화</button>`
+          : `<button class="btn btn-sm" style="color:var(--green)" onclick="toggleUser(${u.id},1)">활성화</button>`}
+      </td>
+    </tr>`).join('');
+}
+
+function editUser(id) {
+  const u = id ? usersCache.find(x => x.id === id) : null;
+  const m = document.getElementById('modal');
+  m.querySelector('.modal-header span').textContent = u ? '직원 정보 수정' : '직원 추가';
+  m.querySelector('.modal-body').innerHTML = `
+    <div class="form-group"><label>이름 <span class="required">*</span></label>
+      <input id="u-name" value="${u ? u.name : ''}" placeholder="직원 이름" /></div>
+    <div class="form-group"><label>아이디 <span class="required">*</span></label>
+      <input id="u-username" value="${u ? u.username : ''}" ${u ? 'disabled' : ''} placeholder="로그인 아이디" /></div>
+    <div class="form-group"><label>이메일</label>
+      <input id="u-email" value="${u && u.email ? u.email : ''}" placeholder="name@becorelab.kr" /></div>
+    <div class="form-group"><label>권한</label>
+      <select id="u-role">
+        <option value="staff">직원 (staff)</option>
+        <option value="manager">매니저 (manager)</option>
+        <option value="admin">관리자 (admin)</option>
+        <option value="viewer">뷰어 (viewer)</option>
+      </select></div>
+    ${u ? '' : `<div class="form-group"><label>임시 비밀번호 <span class="required">*</span></label>
+      <input id="u-pass" value="ilbia2026!" /><div class="text-muted" style="font-size:12px;margin-top:4px">첫 로그인 후 변경 안내하세요.</div></div>`}
+  `;
+  if (u) m.querySelector('#u-role').value = u.role;
+  m.querySelector('.modal-footer').innerHTML = `
+    <button class="btn" onclick="closeModal()">취소</button>
+    <button class="btn btn-primary" onclick="saveUser(${id})">저장</button>`;
+  openModal();
+}
+
+async function saveUser(id) {
+  const name = document.getElementById('u-name').value.trim();
+  const role = document.getElementById('u-role').value;
+  const email = document.getElementById('u-email').value.trim();
+  if (!name) return toast('이름을 입력하세요', 'error');
+  try {
+    if (id) {
+      await api(`/api/users/${id}`, { method: 'PUT', body: { name, role, email } });
+      toast('수정되었습니다');
+    } else {
+      const username = document.getElementById('u-username').value.trim();
+      const password = document.getElementById('u-pass').value;
+      if (!username) return toast('아이디를 입력하세요', 'error');
+      if (password.length < 4) return toast('임시 비밀번호는 4자 이상이어야 합니다', 'error');
+      await api('/api/users', { method: 'POST', body: { username, name, role, email, password } });
+      toast('직원이 추가되었습니다');
+    }
+    closeModal();
+    loadUsers();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function toggleUser(id, active) {
+  const u = usersCache.find(x => x.id === id);
+  const verb = active ? '활성화' : '비활성화 (로그인 차단)';
+  if (!confirm(`${u.name}님 계정을 ${verb} 할까요?`)) return;
+  try {
+    await api(`/api/users/${id}`, { method: 'PUT', body: { is_active: active } });
+    toast(active ? '활성화되었습니다' : '비활성화되었습니다 (로그인 차단)');
+    loadUsers();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function resetUserPw(id) {
+  const u = usersCache.find(x => x.id === id);
+  const pw = prompt(`${u.name}님의 새 임시 비밀번호를 입력하세요:`, 'ilbia2026!');
+  if (pw === null) return;
+  if (pw.length < 4) return toast('4자 이상 입력하세요', 'error');
+  try {
+    await api(`/api/users/${id}/reset-password`, { method: 'POST', body: { password: pw } });
+    toast('비밀번호가 초기화되었습니다');
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 // ── Login ──
