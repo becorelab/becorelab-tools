@@ -283,7 +283,7 @@ async def sync_stock(conn=Depends(db)):
                 raise HTTPException(502, "물류서버 연결 실패")
             data = await resp.json()
 
-    inventory = data.get("inventory", {})
+    inventory = (data.get("data") or data).get("inventory", {})  # 물류서버 응답이 {data:{inventory}} 로 중첩됨
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     updated = 0
 
@@ -910,9 +910,54 @@ async def _auto_sync_sales():
             pass
 
 
+async def _auto_sync_stock():
+    """매일 10:30 (물류서버 이지어드민 수집 10:00 직후) 재고 자동 동기화"""
+    import aiohttp
+    while True:
+        now = datetime.now()
+        target = now.replace(hour=10, minute=30, second=0, microsecond=0)
+        if now >= target:
+            target += timedelta(days=1)
+        await asyncio.sleep((target - now).total_seconds())
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"{LOGISTICS_URL}/api/cached-data") as resp:
+                    payload = await resp.json() if resp.status == 200 else {}
+            inventory = (payload.get("data") or payload).get("inventory", {})
+            if inventory:
+                conn = get_db()
+                now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                for code, info in inventory.items():
+                    qty = info.get("stock", 0)
+                    product = conn.execute(
+                        "SELECT id FROM products WHERE product_code=? OR ezadmin_code=?", (code, code)).fetchone()
+                    if not product:
+                        continue
+                    ex = conn.execute("SELECT id, qty_on_hand FROM stock WHERE product_id=?", (product["id"],)).fetchone()
+                    if ex:
+                        if ex["qty_on_hand"] != qty:
+                            conn.execute(
+                                "UPDATE stock SET qty_on_hand=?, last_synced_at=?, updated_at=datetime('now','localtime') WHERE product_id=?",
+                                (qty, now, product["id"]))
+                            conn.execute(
+                                """INSERT INTO stock_transactions (product_id, tx_type, qty_change, qty_before, qty_after, ref_type, memo)
+                                   VALUES (?, 'adjust', ?, ?, ?, 'sync', '자동 동기화')""",
+                                (product["id"], qty - ex["qty_on_hand"], ex["qty_on_hand"], qty))
+                        else:
+                            conn.execute("UPDATE stock SET last_synced_at=? WHERE product_id=?", (now, product["id"]))
+                    else:
+                        conn.execute("INSERT INTO stock (product_id, qty_on_hand, last_synced_at) VALUES (?,?,?)",
+                                     (product["id"], qty, now))
+                conn.commit()
+                conn.close()
+        except Exception:
+            pass
+
+
 @app.on_event("startup")
 async def start_auto_sync():
     asyncio.create_task(_auto_sync_sales())
+    asyncio.create_task(_auto_sync_stock())
 
 
 # ── 채널별 보정계수 (2~4월 정산 대비 분석 기반, 2026-05-30 업데이트) ──
@@ -1649,9 +1694,14 @@ async def email_po(po_id: int, request: Request, conn=Depends(db)):
     try:
         mail_pw = os.environ.get("NAVERWORKS_PASSWORD", "")
         if not mail_pw:
-            raise HTTPException(500, "NAVERWORKS_PASSWORD 환경변수가 설정되지 않았습니다")
-        smtp = smtplib.SMTP("smtp.worksmobile.com", 587)
-        smtp.starttls()
+            try:
+                import config as _cfg
+                mail_pw = getattr(_cfg, "NAVERWORKS_PASSWORD", "")
+            except Exception:
+                mail_pw = ""
+        if not mail_pw:
+            raise HTTPException(500, "메일 비밀번호 미설정 — config.py에 NAVERWORKS_PASSWORD를 넣어주세요 (네이버웍스 SMTP 앱 비밀번호)")
+        smtp = smtplib.SMTP_SSL("smtp.worksmobile.com", 465)  # 네이버웍스는 465 SSL (587 STARTTLS 아님)
         smtp.login("info@becorelab.kr", mail_pw)
         all_recipients = [to_email] + cc_emails
         smtp.sendmail("info@becorelab.kr", all_recipients, msg.as_string())
