@@ -74,6 +74,7 @@ function navigate(page) {
     stock: '재고 현황',
     sales: '매출 관리',
     orders: '발주 관리',
+    pricing: '기준판매가',
     calendar: '일정 관리',
     users: '사용자 관리',
   }[page] || '';
@@ -86,6 +87,7 @@ function navigate(page) {
     sales: loadSales,
     orders: loadOrders,
     users: loadUsers,
+    pricing: loadPricing,
     calendar: loadCalendar,
   };
   if (loaders[page]) loaders[page]();
@@ -1338,7 +1340,7 @@ function editEvent(id, presetDate) {
   m.querySelector('.modal-header span').textContent = ev ? '일정 수정' : '일정 추가';
   m.querySelector('.modal-body').innerHTML = `
     <div class="form-group"><label>제목 <span class="required">*</span></label>
-      <input id="ev-title" value="${ev ? (ev.title || '').replace(/"/g, '&quot;') : ''}" placeholder="예: 박성락님 연차 / 거래처 미팅" /></div>
+      <input id="ev-title" value="${ev ? (ev.title || '').replace(/"/g, '&quot;') : ''}" placeholder="일정 제목을 입력하세요" /></div>
     <div class="form-group"><label>종류</label>
       <select id="ev-type">${EVENT_TYPES.filter(t => t.key !== 'restock').map(t => `<option value="${t.key}">${t.label}</option>`).join('')}</select></div>
     <div style="display:flex;gap:12px">
@@ -1388,6 +1390,127 @@ async function deleteEvent(id) {
     closeModal();
     loadCalendar();
   } catch (e) { toast(e.message, 'error'); }
+}
+
+// ── 채널별 가격관리 (파일럿) ──
+let pricingData = { channels: [], items: [] };
+
+function calcPricing(sale, cost, consumer, pack, ch) {
+  if (sale == null || sale === '') return null;
+  sale = Number(sale);
+  const vat = ch.vat_rate != null ? ch.vat_rate : 0.1;
+  const comm = ch.commission_rate != null ? ch.commission_rate : 0;
+  const supply = sale / (1 + vat) * (1 - comm);
+  const discount = consumer ? (1 - sale / consumer) : null;
+  const totalProfit = supply - (cost || 0);
+  const margin = supply ? totalProfit / supply : null;
+  const unitProfit = totalProfit / (pack || 1);
+  return { supply, discount, margin, unitProfit };
+}
+
+function marginClass(m) {
+  if (m == null) return '';
+  if (m >= 0.40) return 'mg-good';
+  if (m >= 0.20) return 'mg-mid';
+  return 'mg-low';
+}
+
+function subHtml(r) {
+  if (!r) return '<span class="text-muted">-</span>';
+  const d = r.discount != null ? Math.round(r.discount * 100) + '%' : '-';
+  const m = r.margin != null ? Math.round(r.margin * 100) + '%' : '-';
+  return `<span class="${marginClass(r.margin)}" title="공급가 ${fmt(Math.round(r.supply))} · 개당이익 ${fmt(Math.round(r.unitProfit))}">${d} · ${m}</span>`;
+}
+
+async function loadPricing() {
+  try {
+    pricingData = await api('/api/pricing');
+  } catch (e) { toast(e.message, 'error'); return; }
+  const sel = document.getElementById('pricing-group');
+  if (sel && !sel.dataset.filled) {
+    const groups = [...new Set(pricingData.items.map(it => it.group_name).filter(Boolean))];
+    sel.innerHTML = '<option value="">전체 품목군</option>' + groups.map(g => `<option value="${g}">${g}</option>`).join('');
+    if (groups.length) sel.value = groups[0];   // 기본: 첫 품목군 (전체는 너무 많음)
+    sel.dataset.filled = '1';
+  }
+  renderPricing();
+}
+
+function renderPricing() {
+  const { channels, items } = pricingData;
+  const q = (document.getElementById('pricing-search')?.value || '').trim().toLowerCase();
+  const grp = document.getElementById('pricing-group')?.value || '';
+  let head = '<tr><th>품목</th><th class="text-right">원가</th><th class="text-right">소비자가</th>';
+  channels.forEach(ch => {
+    head += `<th class="pc-ch" colspan="2">${ch.name} <span class="text-muted" style="font-weight:400">${Math.round(ch.commission_rate * 100)}%</span></th>`;
+  });
+  head += '</tr><tr><th></th><th></th><th></th>';
+  channels.forEach(() => { head += '<th class="text-right">판매가</th><th class="text-right">할인·이익률</th>'; });
+  head += '</tr>';
+  document.getElementById('pricing-thead').innerHTML = head;
+
+  const rows = items.filter(it =>
+    (!grp || it.group_name === grp) &&
+    (!q || it.name.toLowerCase().includes(q) || (it.code || '').toLowerCase().includes(q)));
+  document.getElementById('pricing-tbody').innerHTML = rows.map(it => {
+    let tds = `<td><b>${it.name}</b>${it.code ? `<br><span class="text-muted" style="font-size:11px">${it.code}</span>` : ''}</td>`
+      + `<td class="text-right">${it.cost != null ? fmt(it.cost) : '-'}</td>`
+      + `<td class="text-right">${it.consumer != null ? fmt(it.consumer) : '-'}</td>`;
+    channels.forEach(ch => {
+      const sale = it.prices[String(ch.id)];
+      const r = calcPricing(sale, it.cost, it.consumer, it.pack, ch);
+      tds += `<td class="text-right"><input class="pc-input" type="text" inputmode="numeric" value="${sale != null ? fmt(sale) : ''}" onchange="savePrice(${it.id},${ch.id},this)" /></td>`
+        + `<td class="text-right pc-sub" id="sub-${it.id}-${ch.id}">${subHtml(r)}</td>`;
+    });
+    return `<tr>${tds}</tr>`;
+  }).join('');
+}
+
+async function savePrice(itemId, chId, input) {
+  const raw = input.value.replace(/[^0-9]/g, '');
+  const val = raw === '' ? null : Number(raw);
+  const it = pricingData.items.find(x => x.id === itemId);
+  const ch = pricingData.channels.find(x => x.id === chId);
+  it.prices[String(chId)] = val;
+  const r = calcPricing(val, it.cost, it.consumer, it.pack, ch);
+  const sub = document.getElementById(`sub-${itemId}-${chId}`);
+  if (sub) sub.innerHTML = subHtml(r);
+  if (val != null) input.value = fmt(val);
+  try {
+    await api('/api/pricing/cell', { method: 'PUT', body: { item_id: itemId, channel_id: chId, sale_price: val } });
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function csvCell(v) {
+  v = v == null ? '' : String(v);
+  return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
+
+function exportPricingExcel() {
+  const { channels, items } = pricingData;
+  const head = ['품목군', '품목', '구성', '코드', '원가', '소비자가'];
+  channels.forEach(ch => head.push(`${ch.name} 판매가`, `${ch.name} 할인율`, `${ch.name} 공급가`, `${ch.name} 이익률`));
+  const lines = [head.map(csvCell).join(',')];
+  items.forEach(it => {
+    const row = [it.group_name || '', it.name, (it.pack || 1) + '개', it.code || '', it.cost ?? '', it.consumer ?? ''];
+    channels.forEach(ch => {
+      const sale = it.prices[String(ch.id)];
+      const r = calcPricing(sale, it.cost, it.consumer, it.pack, ch);
+      if (r) row.push(sale, r.discount != null ? Math.round(r.discount * 100) + '%' : '', Math.round(r.supply), Math.round(r.margin * 100) + '%');
+      else row.push('', '', '', '');
+    });
+    lines.push(row.map(csvCell).join(','));
+  });
+  const csv = '﻿' + lines.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const today = new Date().toLocaleDateString('sv-SE');  // YYYY-MM-DD
+  a.href = url;
+  a.download = `비코어랩_채널별판매가_${today}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('엑셀(CSV) 내보내기 완료');
 }
 
 // ── Users (직원 관리) ──

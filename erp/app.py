@@ -1964,6 +1964,50 @@ async def delete_event_erp(eid: int, conn=Depends(db)):
     return {"ok": True}
 
 
+# ── 채널별 가격관리 (파일럿) ──
+@app.get("/api/pricing")
+async def get_pricing(conn=Depends(db)):
+    channels = [dict(r) for r in conn.execute(
+        "SELECT id, name, commission_rate, vat_rate, sort_order FROM price_channels ORDER BY sort_order").fetchall()]
+    items = [dict(r) for r in conn.execute(
+        "SELECT id, code, name, group_name, pack, cost, consumer, sort_order FROM price_items ORDER BY sort_order").fetchall()]
+    cellmap = {}
+    for r in conn.execute("SELECT item_id, channel_id, sale_price FROM price_cells").fetchall():
+        cellmap.setdefault(r["item_id"], {})[str(r["channel_id"])] = r["sale_price"]
+    for it in items:
+        it["prices"] = cellmap.get(it["id"], {})
+    return {"channels": channels, "items": items}
+
+
+@app.put("/api/pricing/cell")
+async def update_pricing_cell(request: Request, conn=Depends(db)):
+    d = await request.json()
+    price = d.get("sale_price")
+    price = int(price) if price not in (None, "") else None
+    conn.execute(
+        "INSERT INTO price_cells (item_id, channel_id, sale_price) VALUES (?,?,?) "
+        "ON CONFLICT(item_id, channel_id) DO UPDATE SET sale_price=excluded.sale_price",
+        (d["item_id"], d["channel_id"], price))
+    conn.commit()
+    return {"ok": True}
+
+
+@app.put("/api/pricing/item/{iid}")
+async def update_pricing_item(iid: int, request: Request, conn=Depends(db)):
+    d = await request.json()
+    fields, params = [], []
+    for k in ("cost", "consumer", "name", "code", "pack"):
+        if k in d:
+            fields.append(f"{k}=?")
+            params.append(d[k])
+    if not fields:
+        raise HTTPException(400, "변경할 내용이 없습니다")
+    params.append(iid)
+    conn.execute(f"UPDATE price_items SET {', '.join(fields)} WHERE id=?", params)
+    conn.commit()
+    return {"ok": True}
+
+
 # ── 거래처 연락처 ──
 @app.get("/api/partners/{partner_id}/contacts")
 async def list_partner_contacts(partner_id: int, conn=Depends(db)):

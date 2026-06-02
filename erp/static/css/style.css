@@ -622,6 +622,16 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); }
 .row-inactive { opacity: 0.5; }
 .row-actions { display: flex; gap: 6px; white-space: nowrap; }
 
+/* 채널별 가격관리 (파일럿) */
+.mg-good { color: var(--green); font-weight: 600; }
+.mg-mid  { color: var(--amber); font-weight: 600; }
+.mg-low  { color: var(--red);   font-weight: 600; }
+.pc-input { width: 82px; text-align: right; padding: 3px 6px; border: 1px solid var(--line); border-radius: 5px; font-size: 12px; font-family: inherit; color: var(--ink); }
+.pc-input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px var(--accent-bg); }
+.pc-sub { font-size: 11px; }
+.pricing-table th.pc-ch { text-align: center; border-left: 2px solid var(--line); background: var(--line-2); }
+.pricing-table td, .pricing-table th { white-space: nowrap; }
+
 /* ── Modal ── */
 .modal-overlay {
   position: fixed;
