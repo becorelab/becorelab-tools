@@ -643,6 +643,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); }
   z-index: 100;
 }
 .modal-overlay.show { display: flex; }
+.modal.modal-wide { max-width: 940px; }
 .modal {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -718,6 +719,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); }
 .cal-dot.type-meeting { background: #b25839; }
 .cal-dot.type-restock { background: #a86a1c; }
 .cal-dot.type-etc     { background: #998c7d; }
+.cal-dot.type-holiday { background: #c0392b; }
 .calendar { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
 .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--sidebar); border-bottom: 1px solid var(--line); }
 .cal-weekdays > div { padding: 10px; text-align: center; font-size: 12px; font-weight: 600; color: var(--ink-2); }
@@ -739,6 +741,9 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); }
 .cal-event.type-meeting { background: #b25839; }
 .cal-event.type-restock { background: #a86a1c; }
 .cal-event.type-etc     { background: #998c7d; }
+.cal-event.type-holiday { background: #c0392b; font-weight: 600; }
+/* 공휴일 날짜 숫자 — 일요일처럼 빨강 표시 (today accent와 구분: 배경 없고 글자만 빨강) */
+.cal-daynum.holiday { color: var(--red); }
 .cal-more { font-size: 10px; color: var(--ink-3); padding: 0 6px; }
 
 /* ── Utilities ── */

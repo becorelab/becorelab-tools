@@ -1022,6 +1022,7 @@ async function viewOrder(id) {
     `;
     m.querySelector('.modal-footer').innerHTML = `
       <button class="btn" onclick="closeModal()">닫기</button>
+      <button class="btn" onclick="editOrder(${id})">✏️ 수정</button>
       <button class="btn" onclick="copyPO(${id})">복사</button>
       <button class="btn" onclick="downloadPOPdf(${id})">📄 PDF</button>
       <button class="btn" onclick="emailPO(${id})">이메일 발송</button>
@@ -1115,39 +1116,51 @@ function debounceLoadOrders() {
   _orderDebounceTimer = setTimeout(() => loadOrders(), 300);
 }
 
-async function newOrder() {
+async function editOrder(id) { return newOrder(id); }
+
+async function newOrder(poId = null) {
   const suppliers = await api('/api/partners?type=supplier&size=200');
   const products = await api('/api/products?size=200');
   window._allSuppliers = suppliers.items;
   window._poProducts = products.items;
+  let po = null, lines = [];
+  if (poId) {
+    const d = await api(`/api/purchase-orders/${poId}`);
+    po = d.po; lines = d.lines || [];
+  }
   const m = document.getElementById('modal');
-  m.querySelector('.modal-header span').textContent = '발주서 작성';
+  m.querySelector('.modal-header span').textContent = poId ? '발주서 수정' : '발주서 작성';
   m.querySelector('.modal-body').innerHTML = `
     <div class="form-row">
-      <div class="form-group"><label>발주일</label><input type="date" id="m-podate" value="${new Date().toISOString().slice(0,10)}" /></div>
-      <div class="form-group"><label>납품예정일</label><input type="date" id="m-podelivery" /></div>
+      <div class="form-group"><label>발주일</label><input type="date" id="m-podate" value="${po ? po.po_date : new Date().toISOString().slice(0,10)}" /></div>
+      <div class="form-group"><label>납품예정일</label><input type="date" id="m-podelivery" value="${po && po.delivery_date ? po.delivery_date : ''}" /></div>
     </div>
     <div class="form-group"><label>공급처</label>
       <div class="autocomplete-wrap">
-        <input type="text" id="m-posupplier-search" placeholder="공급처명 검색..." autocomplete="off" />
-        <input type="hidden" id="m-posupplier" />
+        <input type="text" id="m-posupplier-search" placeholder="공급처명 검색..." autocomplete="off" value="${po && po.supplier_name ? po.supplier_name.replace(/"/g,'&quot;') : ''}" />
+        <input type="hidden" id="m-posupplier" value="${po ? po.supplier_id : ''}" />
         <div class="autocomplete-list" id="supplier-autocomplete"></div>
       </div>
     </div>
-    <div class="form-group"><label>메모</label><textarea id="m-pomemo" rows="2"></textarea></div>
+    <div class="form-group"><label>메모</label><textarea id="m-pomemo" rows="2">${po && po.memo ? po.memo : ''}</textarea></div>
     <hr style="border-color:var(--line); margin:16px 0" />
     <div class="flex justify-between items-center mb-2">
       <strong>발주 품목</strong>
       <button class="btn btn-sm" onclick="addPOLine()">+ 품목 추가</button>
     </div>
     <div id="po-lines"></div>
+    <datalist id="po-products-datalist">${(window._poProducts || []).map(p => `<option value="${(p.name + ' (' + p.product_code + ')').replace(/"/g, '&quot;')}"></option>`).join('')}</datalist>
+    <div class="text-right mt-2" style="font-weight:700;font-size:15px">합계: <span id="po-total" style="color:var(--accent)">₩0</span></div>
   `;
+  m.querySelector('.modal').classList.add('modal-wide');
   initSupplierAutocomplete();
   m.querySelector('.modal-footer').innerHTML = `
     <button class="btn" onclick="closeModal()">취소</button>
-    <button class="btn btn-primary" onclick="savePO()">발주 등록</button>`;
+    <button class="btn btn-primary" onclick="savePO(${poId || 'null'})">${poId ? '수정 저장' : '발주 등록'}</button>`;
   openModal();
-  addPOLine();
+  if (lines.length) lines.forEach(l => addPOLine(l));
+  else addPOLine();
+  recalcPOTotal();
 }
 
 function initSupplierAutocomplete() {
@@ -1173,31 +1186,61 @@ function initSupplierAutocomplete() {
   input.addEventListener('blur', () => setTimeout(() => { list.style.display = 'none'; }, 200));
 }
 
-function addPOLine() {
+function addPOLine(line = null) {
   const container = document.getElementById('po-lines');
-  const idx = container.children.length;
   const div = document.createElement('div');
   div.className = 'form-row mb-2';
   div.style.alignItems = 'end';
+  let displayName = '';
+  if (line) {
+    const prod = (window._poProducts || []).find(p => p.id === line.product_id);
+    displayName = prod ? `${prod.name} (${prod.product_code})` : (line.product_name || '');
+  }
   div.innerHTML = `
-    <div class="form-group" style="flex:2"><label>품목</label>
-      <select class="po-product"><option value="">선택</option>${(window._poProducts || []).map(p => `<option value="${p.id}" data-price="${p.purchase_price}">${p.name} (${p.product_code})</option>`).join('')}</select></div>
-    <div class="form-group" style="flex:1"><label>수량</label><input type="number" class="po-qty" value="1" min="1" /></div>
-    <div class="form-group" style="flex:1"><label>단가</label><input type="number" class="po-price" value="0" /></div>
-    <button class="btn btn-sm btn-danger" onclick="this.parentElement.remove()" style="margin-bottom:16px">X</button>
+    <div class="form-group" style="flex:2.4"><label>품목 <span class="text-muted" style="font-weight:400">· 타이핑 검색</span></label>
+      <input type="text" class="po-product-search" list="po-products-datalist" placeholder="품목명·코드 입력..." autocomplete="off" value="${displayName.replace(/"/g, '&quot;')}" />
+      <input type="hidden" class="po-product-id" value="${line ? line.product_id : ''}" /></div>
+    <div class="form-group" style="flex:0.8"><label>수량</label><input type="number" class="po-qty" value="${line ? line.qty_ordered : 1}" min="1" /></div>
+    <div class="form-group" style="flex:1"><label>단가</label><input type="number" class="po-price" value="${line ? line.unit_price : 0}" /></div>
+    <div class="form-group" style="flex:1.2"><label>금액</label><input type="text" class="po-amount" value="0" readonly style="background:var(--line-2);font-weight:600" /></div>
+    <button class="btn btn-sm btn-danger" onclick="this.parentElement.remove();recalcPOTotal()" style="margin-bottom:16px">X</button>
   `;
-  div.querySelector('.po-product').addEventListener('change', function() {
-    const opt = this.options[this.selectedIndex];
-    div.querySelector('.po-price').value = opt.dataset.price || 0;
+  const search = div.querySelector('.po-product-search');
+  const hidden = div.querySelector('.po-product-id');
+  search.addEventListener('input', () => {
+    const prod = (window._poProducts || []).find(p => `${p.name} (${p.product_code})` === search.value);
+    if (prod) { hidden.value = prod.id; div.querySelector('.po-price').value = prod.purchase_price || 0; }
+    else { hidden.value = ''; }
+    recalcLine(div); recalcPOTotal();
   });
+  div.querySelector('.po-qty').addEventListener('input', () => { recalcLine(div); recalcPOTotal(); });
+  div.querySelector('.po-price').addEventListener('input', () => { recalcLine(div); recalcPOTotal(); });
   container.appendChild(div);
+  recalcLine(div);
 }
 
-async function savePO() {
+function recalcLine(div) {
+  const qty = Number(div.querySelector('.po-qty').value) || 0;
+  const price = Number(div.querySelector('.po-price').value) || 0;
+  div.querySelector('.po-amount').value = fmt(qty * price);
+}
+
+function recalcPOTotal() {
+  let total = 0;
+  document.querySelectorAll('#po-lines > div').forEach(div => {
+    const qty = Number(div.querySelector('.po-qty').value) || 0;
+    const price = Number(div.querySelector('.po-price').value) || 0;
+    total += qty * price;
+  });
+  const el = document.getElementById('po-total');
+  if (el) el.textContent = '₩' + fmt(total);
+}
+
+async function savePO(poId = null) {
   const lines = [];
   document.querySelectorAll('#po-lines > div').forEach(row => {
-    const productId = row.querySelector('.po-product').value;
-    const productName = row.querySelector('.po-product').options[row.querySelector('.po-product').selectedIndex]?.text || '';
+    const productId = row.querySelector('.po-product-id').value;
+    const productName = row.querySelector('.po-product-search').value;
     const qty = Number(row.querySelector('.po-qty').value);
     const price = Number(row.querySelector('.po-price').value);
     if (productId && qty > 0) lines.push({ product_id: Number(productId), product_name: productName, qty_ordered: qty, unit_price: price });
@@ -1206,15 +1249,21 @@ async function savePO() {
   const supplierId = document.getElementById('m-posupplier').value;
   if (!supplierId) return toast('공급처를 선택해주세요', 'error');
 
+  const body = {
+    po_date: document.getElementById('m-podate').value,
+    delivery_date: document.getElementById('m-podelivery').value,
+    supplier_id: Number(supplierId),
+    memo: document.getElementById('m-pomemo').value,
+    lines,
+  };
   try {
-    const r = await api('/api/purchase-orders', { method: 'POST', body: {
-      po_date: document.getElementById('m-podate').value,
-      delivery_date: document.getElementById('m-podelivery').value,
-      supplier_id: Number(supplierId),
-      memo: document.getElementById('m-pomemo').value,
-      lines,
-    }});
-    toast(`발주서 ${r.po_number} 등록 완료`);
+    if (poId) {
+      await api(`/api/purchase-orders/${poId}`, { method: 'PUT', body });
+      toast('발주서 수정 완료');
+    } else {
+      const r = await api('/api/purchase-orders', { method: 'POST', body });
+      toast(`발주서 ${r.po_number} 등록 완료`);
+    }
     closeModal();
     loadOrders();
   } catch (e) { toast(e.message, 'error'); }
@@ -1222,7 +1271,12 @@ async function savePO() {
 
 // ── Modal ──
 function openModal() { document.getElementById('modal').classList.add('show'); }
-function closeModal() { document.getElementById('modal').classList.remove('show'); }
+function closeModal() {
+  const ov = document.getElementById('modal');
+  ov.classList.remove('show');
+  const inner = ov.querySelector('.modal');
+  if (inner) inner.classList.remove('modal-wide');
+}
 
 // ── Pagination ──
 function renderPagination(containerId, total, size, current, callback) {
@@ -1297,6 +1351,11 @@ function renderCalendar() {
     }
   });
 
+  // 공휴일 날짜 Set (날짜 숫자 빨강 처리용)
+  const holidayDates = new Set(
+    calEvents.filter(ev => ev.event_type === 'holiday').map(ev => ev.start_date)
+  );
+
   let cells = [];
   // 앞쪽 지난달
   for (let i = startDow - 1; i >= 0; i--) cells.push({ d: prevLast - i, other: true, ym: [calYear, calMonth - 1] });
@@ -1314,10 +1373,12 @@ function renderCalendar() {
     const evs = byDate[iso] || [];
     const shown = evs.slice(0, 3);
     const more = evs.length - shown.length;
-    const dayClass = dow === 0 ? 'sun' : dow === 6 ? 'sat' : '';
+    // 공휴일이면 날짜 숫자 빨강 (일요일과 같은 색, today는 accent 배경이라 구분됨)
+    const isHoliday = holidayDates.has(iso);
+    const dayClass = (dow === 0 || isHoliday) ? 'sun' : dow === 6 ? 'sat' : '';
     return `<div class="cal-cell ${c.other ? 'other-month' : ''} ${iso === todayIso ? 'today' : ''}" onclick="editEvent(0,'${iso}')">
       <div class="cal-daynum ${dayClass}">${c.d}</div>
-      ${shown.map(ev => `<div class="cal-event type-${ev.event_type}" onclick="event.stopPropagation();${ev.readonly ? `toast('발주 입고 일정이에요 (발주 메뉴에서 관리)','warning')` : `editEvent(${ev.id})`}" title="${(ev.title || '').replace(/"/g, '')}">${ev.title}</div>`).join('')}
+      ${shown.map(ev => `<div class="cal-event type-${ev.event_type}" onclick="event.stopPropagation();${ev.event_type === 'holiday' ? `toast('${(ev.title||'').replace(/'/g,'\\'')} — 공휴일입니다 🔴','warning')` : ev.readonly ? `toast('발주 입고 일정이에요 (발주 메뉴에서 관리)','warning')` : `editEvent(${ev.id})`}" title="${(ev.title || '').replace(/"/g, '')}">${ev.title}</div>`).join('')}
       ${more > 0 ? `<div class="cal-more">+${more}개</div>` : ''}
     </div>`;
   }).join('');

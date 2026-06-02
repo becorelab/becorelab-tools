@@ -19,6 +19,77 @@ templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "t
 
 LOGISTICS_URL = "http://localhost:8082"
 
+# ── 대한민국 공휴일 데이터 (2026~2027) ──
+# 출처: superkts.com/day/holiday + 정부 임시공휴일 고시
+# 음력 기반 공휴일은 천문연 월력요항 기준으로 확인
+KR_HOLIDAYS = {
+    # 2026년
+    "2026-01-01": "신정",
+    "2026-02-16": "설날 연휴",
+    "2026-02-17": "설날",
+    "2026-02-18": "설날 연휴",
+    "2026-03-01": "3·1절",
+    "2026-03-02": "대체공휴일(3·1절)",
+    "2026-05-01": "노동절",
+    "2026-05-05": "어린이날",
+    "2026-05-24": "부처님 오신날",
+    "2026-05-25": "대체공휴일(부처님 오신날)",
+    "2026-06-03": "제9회 전국동시지방선거",
+    "2026-06-06": "현충일",
+    "2026-08-15": "광복절",
+    "2026-08-17": "대체공휴일(광복절)",
+    "2026-09-24": "추석 연휴",
+    "2026-09-25": "추석",
+    "2026-09-26": "추석 연휴",
+    "2026-10-03": "개천절",
+    "2026-10-05": "대체공휴일(개천절)",
+    "2026-10-09": "한글날",
+    "2026-12-25": "크리스마스",
+    # 2027년
+    "2027-01-01": "신정",
+    "2027-02-06": "설날 연휴",
+    "2027-02-07": "설날",
+    "2027-02-08": "설날 연휴",
+    "2027-02-09": "대체공휴일(설날)",
+    "2027-03-01": "3·1절",
+    "2027-05-01": "노동절",
+    "2027-05-03": "대체공휴일(노동절)",
+    "2027-05-05": "어린이날",
+    "2027-05-13": "부처님 오신날",
+    "2027-06-06": "현충일",
+    "2027-08-15": "광복절",
+    "2027-08-16": "대체공휴일(광복절)",
+    "2027-09-14": "추석 연휴",
+    "2027-09-15": "추석",
+    "2027-09-16": "추석 연휴",
+    "2027-10-03": "개천절",
+    "2027-10-04": "대체공휴일(개천절)",
+    "2027-10-09": "한글날",
+    "2027-10-11": "대체공휴일(한글날)",
+    "2027-12-25": "크리스마스",
+    "2027-12-27": "대체공휴일(크리스마스)",
+}
+
+
+def get_holidays_in_range(start: str, end: str) -> list:
+    """기간 내 공휴일 이벤트 목록 반환 (events 테이블에 저장하지 않고 조회 시 합성)"""
+    result = []
+    for date_str, name in KR_HOLIDAYS.items():
+        if (not start or date_str >= start) and (not end or date_str <= end):
+            result.append({
+                "id": f"holiday-{date_str}",
+                "title": f"🔴 {name}",
+                "event_type": "holiday",
+                "start_date": date_str,
+                "end_date": None,
+                "all_day": 1,
+                "memo": f"대한민국 공휴일 — {name}",
+                "source": "holiday",
+                "source_id": date_str,
+                "readonly": True,
+            })
+    return result
+
 
 # ── 의존성 ──
 def db():
@@ -1326,11 +1397,15 @@ async def create_po(request: Request, conn=Depends(db)):
 @app.put("/api/purchase-orders/{po_id}")
 async def update_po(po_id: int, request: Request, conn=Depends(db)):
     d = await request.json()
+    status = d.get("status")
+    if status is None:  # 상태 미지정 시 기존 상태 유지 (수정 시 status 날아가는 것 방지)
+        row = conn.execute("SELECT status FROM purchase_orders WHERE id=?", (po_id,)).fetchone()
+        status = row["status"] if row else "draft"
     conn.execute(
         """UPDATE purchase_orders SET po_date=?, supplier_id=?, delivery_date=?,
            status=?, memo=?, updated_at=datetime('now','localtime') WHERE id=?""",
         (d.get("po_date"), d.get("supplier_id"), d.get("delivery_date"),
-         d.get("status"), d.get("memo"), po_id),
+         status, d.get("memo"), po_id),
     )
     if "lines" in d:
         conn.execute("DELETE FROM purchase_order_lines WHERE po_id=?", (po_id,))
@@ -1372,7 +1447,7 @@ async def copy_po(po_id: int, conn=Depends(db)):
            total_amount, status, memo, created_by)
            VALUES (?,?,?,?,?,?,?,?)""",
         (new_number, today, po["supplier_id"], None, po["total_amount"], "draft",
-         f"[복사] {po['po_number']}", po.get("created_by")),
+         f"[복사] {po['po_number']}", po["created_by"]),
     )
     new_id = cur.lastrowid
     lines = conn.execute("SELECT * FROM purchase_order_lines WHERE po_id=?", (po_id,)).fetchall()
@@ -1958,18 +2033,28 @@ async def list_events(start: str = "", end: str = "", conn=Depends(db)):
     if end:
         po_where.append("po.delivery_date <= ?"); po_params.append(end)
     po_rows = conn.execute(
-        f"""SELECT po.id, po.po_number, po.delivery_date, p.name as supplier
+        f"""SELECT po.id, po.po_number, po.delivery_date, po.memo, p.name as supplier,
+            (SELECT product_name FROM purchase_order_lines WHERE po_id=po.id ORDER BY id LIMIT 1) as first_product,
+            (SELECT COUNT(*) FROM purchase_order_lines WHERE po_id=po.id) as line_count
             FROM purchase_orders po LEFT JOIN partners p ON p.id=po.supplier_id
             WHERE {' AND '.join(po_where)}""",
         po_params,
     ).fetchall()
     for po in po_rows:
+        name = po["first_product"] or po["memo"] or po["supplier"] or "발주"
+        if name.startswith("[") and "]" in name:  # [비코어랩] 류 브랜드 태그 제거
+            name = name.split("]", 1)[1].strip()
+        extra = f" 외 {po['line_count'] - 1}건" if (po["line_count"] or 0) > 1 else ""
         rows.append({
-            "id": f"po-{po['id']}", "title": f"📦 {po['supplier'] or '발주'} 입고",
+            "id": f"po-{po['id']}", "title": f"📦 {name}{extra} 입고",
             "event_type": "restock", "start_date": po["delivery_date"], "end_date": None,
-            "all_day": 1, "memo": f"발주번호 {po['po_number']}", "source": "po",
+            "all_day": 1, "memo": f"발주번호 {po['po_number']} · {po['supplier'] or ''}", "source": "po",
             "source_id": str(po["id"]), "readonly": True,
         })
+
+    # 공휴일 합성 (events 테이블엔 저장 안 함, 조회 시 생성)
+    rows.extend(get_holidays_in_range(start, end))
+
     return rows
 
 
