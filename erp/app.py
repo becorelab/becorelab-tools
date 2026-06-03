@@ -632,81 +632,60 @@ async def adjusted_sales_summary(
     total_adjusted = 0
     total_raw = 0
 
-    if settled_months:
-        ch_totals = {}
-        for ym, items in settled_months.items():
-            for item in items:
-                ch = item["channel"]
-                if ch not in ch_totals:
-                    ch_totals[ch] = 0
-                ch_totals[ch] += item["amount"]
+    # 월별·채널별: ~FULLY_SETTLED_THROUGH 는 정산만(기존동작), 이후는 정산채널+이지어드민(보정)
+    ch_map = {}
 
-        for ch, amt in sorted(ch_totals.items(), key=lambda x: -x[1]):
-            total_adjusted += amt
-            total_raw += amt
-            channels.append({
-                "channel": ch, "count": 0,
-                "raw_amount": amt, "factor": 1.0, "adjusted_amount": amt,
-                "status": "confirmed",
-            })
+    def _acc(ch, raw, adjusted, cnt, settled):
+        c = ch_map.get(ch)
+        if not c:
+            c = {"channel": ch, "count": 0, "raw_amount": 0, "adjusted_amount": 0,
+                 "factor": 1.0, "_settled": False, "_est": False}
+            ch_map[ch] = c
+        c["raw_amount"] += raw
+        c["adjusted_amount"] += adjusted
+        c["count"] += cnt
+        if settled:
+            c["_settled"] = True
+        else:
+            c["_est"] = True
 
-        unsettled_months = []
-        cur = datetime.strptime(start_ym, "%Y-%m")
-        end_dt = datetime.strptime(end_ym, "%Y-%m")
-        while cur <= end_dt:
-            ym = cur.strftime("%Y-%m")
-            if ym not in settled_months:
-                unsettled_months.append(ym)
-            cur = cur.replace(month=cur.month % 12 + 1, year=cur.year + (1 if cur.month == 12 else 0))
+    cur = datetime.strptime(start_ym, "%Y-%m")
+    end_dt = datetime.strptime(end_ym, "%Y-%m")
+    while cur <= end_dt:
+        ym = cur.strftime("%Y-%m")
+        nxt = cur.replace(year=cur.year + 1, month=1) if cur.month == 12 else cur.replace(month=cur.month + 1)
+        m_start = max(start, f"{ym}-01")
+        m_end = min(end, (nxt - timedelta(days=1)).strftime("%Y-%m-%d"))
+        use_settlement_only = (ym <= FULLY_SETTLED_THROUGH and ym in settled_months)
+        settled_ch = set()
+        for item in settled_months.get(ym, []):
+            settled_ch.add(item["channel"])
+            _acc(item["channel"], item["amount"], item["amount"], 0, True)
+        for _sc in list(settled_ch):
+            settled_ch.update(SETTLEMENT_EZADMIN_ALIAS.get(_sc, []))
+        if not use_settlement_only:
+            rows = conn.execute(
+                """SELECT channel, COUNT(*) cnt, SUM(total_amount) amount
+                   FROM sales WHERE sale_date BETWEEN ? AND ? GROUP BY channel""",
+                (m_start, m_end),
+            ).fetchall()
+            for r in rows:
+                ch = r["channel"]
+                if ch in settled_ch:
+                    continue
+                raw = r["amount"] or 0
+                factor = CHANNEL_ADJUSTMENT.get(ch, 1.0)
+                _acc(ch, raw, round(raw * factor), r["cnt"], False)
+        cur = nxt
 
-        if unsettled_months:
-            for uym in unsettled_months:
-                m_start = f"{uym}-01"
-                m_end = f"{uym}-31"
-                rows = conn.execute(
-                    """SELECT channel, COUNT(*) cnt, SUM(total_amount) amount
-                       FROM sales WHERE sale_date BETWEEN ? AND ?
-                       GROUP BY channel ORDER BY amount DESC""",
-                    (m_start, m_end),
-                ).fetchall()
-                for r in rows:
-                    ch = r["channel"]
-                    raw = r["amount"] or 0
-                    factor = CHANNEL_ADJUSTMENT.get(ch, 1.0)
-                    adjusted = round(raw * factor)
-                    total_raw += raw
-                    total_adjusted += adjusted
-                    existing = next((c for c in channels if c["channel"] == ch), None)
-                    if existing:
-                        existing["raw_amount"] += raw
-                        existing["adjusted_amount"] += adjusted
-                        existing["count"] += r["cnt"]
-                        existing["status"] = "mixed"
-                    else:
-                        channels.append({
-                            "channel": ch, "count": r["cnt"],
-                            "raw_amount": raw, "factor": factor,
-                            "adjusted_amount": adjusted, "status": "estimated",
-                        })
-    else:
-        rows = conn.execute(
-            """SELECT channel, COUNT(*) cnt, SUM(total_amount) amount
-               FROM sales WHERE sale_date BETWEEN ? AND ?
-               GROUP BY channel ORDER BY amount DESC""",
-            (start, end),
-        ).fetchall()
-        for r in rows:
-            ch = r["channel"]
-            raw = r["amount"] or 0
-            factor = CHANNEL_ADJUSTMENT.get(ch, 1.0)
-            adjusted = round(raw * factor)
-            total_raw += raw
-            total_adjusted += adjusted
-            channels.append({
-                "channel": ch, "count": r["cnt"],
-                "raw_amount": raw, "factor": factor, "adjusted_amount": adjusted,
-                "status": "estimated",
-            })
+    for ch, c in ch_map.items():
+        total_raw += c["raw_amount"]
+        total_adjusted += c["adjusted_amount"]
+        status = "confirmed" if (c["_settled"] and not c["_est"]) else ("mixed" if c["_settled"] else "estimated")
+        channels.append({
+            "channel": ch, "count": c["count"], "raw_amount": c["raw_amount"],
+            "factor": c["factor"], "adjusted_amount": c["adjusted_amount"], "status": status,
+        })
 
     channels.sort(key=lambda x: -x["adjusted_amount"])
 
@@ -1031,6 +1010,16 @@ async def start_auto_sync():
     asyncio.create_task(_auto_sync_stock())
 
 
+# 이 월(포함)까지는 "완전 정산월" = settlement_monthly만 사용 (기존 동작 보존).
+# 이후 월은 "채널별 정산" = 정산 있는 채널은 settlement, 나머지는 이지어드민+보정.
+# (로켓그로스 등 일부 채널만 정산되는 부분정산월 대응)
+FULLY_SETTLED_THROUGH = "2026-04"
+
+# 정산 채널명 ↔ 이지어드민 채널명 별칭 (정산 있으면 같은 이지어드민 채널은 중복계상 방지로 스킵)
+SETTLEMENT_EZADMIN_ALIAS = {
+    "쿠팡 그로스": ["채움컴퍼니"],
+}
+
 # ── 채널별 보정계수 (2~4월 정산 대비 분석 기반, 2026-05-30 업데이트) ──
 # 정산(VAT포함) ÷ 이지어드민 3개월 평균
 CHANNEL_ADJUSTMENT = {
@@ -1080,19 +1069,26 @@ def _calc_sales_total(conn, date_from: str, date_to: str):
         actual_end = min(date_to, m_end)
         full_month = (actual_start == m_start and actual_end == m_end)
 
+        use_settlement_only = (ym <= FULLY_SETTLED_THROUGH and ym in settled_set and full_month)
+        settled_ch = set()
         if ym in settled_set and full_month:
-            row = conn.execute(
-                "SELECT SUM(amount) as total FROM settlement_monthly WHERE year_month=?", (ym,)
-            ).fetchone()
-            if row and row["total"]:
-                total_amount += row["total"]
-                total_supply += round(row["total"] / 1.1)
-        else:
+            for r in conn.execute(
+                "SELECT channel, amount FROM settlement_monthly WHERE year_month=?", (ym,)
+            ).fetchall():
+                settled_ch.add(r["channel"])
+                total_amount += r["amount"]
+                total_supply += round(r["amount"] / 1.1)
+        for _sc in list(settled_ch):
+            settled_ch.update(SETTLEMENT_EZADMIN_ALIAS.get(_sc, []))
+        if not use_settlement_only:
+            # 부분 정산월: 정산 안 된 채널만 이지어드민+보정으로 채움
             ch_sums = conn.execute(
                 "SELECT channel, SUM(total_amount) as t, SUM(total_supply) as s FROM sales WHERE sale_date>=? AND sale_date<=? GROUP BY channel",
                 (actual_start, actual_end),
             ).fetchall()
             for r in ch_sums:
+                if r["channel"] in settled_ch:
+                    continue
                 factor = CHANNEL_ADJUSTMENT.get(r["channel"], 1.0)
                 total_amount += round(r["t"] * factor)
                 total_supply += round(r["s"] * factor)
@@ -1133,18 +1129,23 @@ def _get_summary_by_channel(conn, date_from: str, date_to: str):
         actual_end = min(date_to, m_end)
         full_month = (actual_start == m_start and actual_end == m_end)
 
+        use_settlement_only = (ym <= FULLY_SETTLED_THROUGH and ym in settled_set and full_month)
+        settled_ch = set()
         if ym in settled_set and full_month:
             rows = conn.execute(
                 "SELECT channel, amount FROM settlement_monthly WHERE year_month=?", (ym,)
             ).fetchall()
             for r in rows:
                 ch = r["channel"]
+                settled_ch.add(ch)
                 if ch not in ch_totals:
                     ch_totals[ch] = {"label": ch, "supply": 0, "tax": 0, "total": 0, "cnt": 0, "qty": 0}
                 ch_totals[ch]["total"] += r["amount"]
                 ch_totals[ch]["supply"] += round(r["amount"] / 1.1)
                 ch_totals[ch]["tax"] += r["amount"] - round(r["amount"] / 1.1)
-        else:
+        for _sc in list(settled_ch):
+            settled_ch.update(SETTLEMENT_EZADMIN_ALIAS.get(_sc, []))
+        if not use_settlement_only:
             rows = conn.execute(
                 """SELECT s.channel, COUNT(DISTINCT s.id) as cnt, SUM(s.total_supply) as supply,
                    SUM(s.total_tax) as tax, SUM(s.total_amount) as total
@@ -1154,6 +1155,8 @@ def _get_summary_by_channel(conn, date_from: str, date_to: str):
             ).fetchall()
             for r in rows:
                 ch = r["channel"]
+                if ch in settled_ch:
+                    continue
                 factor = CHANNEL_ADJUSTMENT.get(ch, 1.0)
                 if ch not in ch_totals:
                     ch_totals[ch] = {"label": ch, "supply": 0, "tax": 0, "total": 0, "cnt": 0, "qty": 0}
