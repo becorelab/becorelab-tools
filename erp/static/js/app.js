@@ -1378,7 +1378,7 @@ function renderCalendar() {
     const dayClass = (dow === 0 || isHoliday) ? 'sun' : dow === 6 ? 'sat' : '';
     return `<div class="cal-cell ${c.other ? 'other-month' : ''} ${iso === todayIso ? 'today' : ''}" onclick="editEvent(0,'${iso}')">
       <div class="cal-daynum ${dayClass}">${c.d}</div>
-      ${shown.map(ev => `<div class="cal-event type-${ev.event_type}" onclick="event.stopPropagation();${ev.event_type === 'holiday' ? `toast('${(ev.title||'').replace(/'/g,'\\'')} — 공휴일입니다 🔴','warning')` : ev.readonly ? `toast('발주 입고 일정이에요 (발주 메뉴에서 관리)','warning')` : `editEvent(${ev.id})`}" title="${(ev.title || '').replace(/"/g, '')}">${ev.title}</div>`).join('')}
+      ${shown.map(ev => `<div class="cal-event type-${ev.event_type}" onclick="event.stopPropagation();${ev.event_type === 'holiday' ? `toast('공휴일입니다 🔴','warning')` : ev.readonly ? `toast('발주 입고 일정이에요 (발주 메뉴에서 관리)','warning')` : `editEvent(${ev.id})`}" title="${(ev.title || '').replace(/"/g, '')}">${ev.title}</div>`).join('')}
       ${more > 0 ? `<div class="cal-more">+${more}개</div>` : ''}
     </div>`;
   }).join('');

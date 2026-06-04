@@ -772,7 +772,7 @@ async def sync_sales(request: Request, conn=Depends(db)):
 
                 for order in orders:
                     code = order.get("code", "")
-                    product_name = order.get("name", "")
+                    product_name = order.get("nameOpt") or order.get("name", "")
                     total_qty = order.get("qty", 0)
                     total_settlement = order.get("settlement", 0)
 
@@ -857,7 +857,7 @@ async def resync_sales(request: Request, conn=Depends(db)):
                     continue
                 for order in orders:
                     code = order.get("code", "")
-                    product_name = order.get("name", "")
+                    product_name = order.get("nameOpt") or order.get("name", "")
                     channels = order.get("channels", {})
                     product = conn.execute(
                         "SELECT id FROM products WHERE product_code=? OR ezadmin_code=?", (code, code)
@@ -897,8 +897,53 @@ async def resync_sales(request: Request, conn=Depends(db)):
 import asyncio
 import threading
 
+async def _sync_sales_day(conn, session, date):
+    """원본에서 하루치 매출을 받아 해당 날짜를 삭제 후 재삽입 (멱등). 향(nameOpt) 보존."""
+    async with session.get(f"{LOGISTICS_URL}/api/sales-daily-orders?date={date}") as resp:
+        if resp.status != 200:
+            return 0
+        data = await resp.json()
+    orders = data.get("by_option", [])
+    if not orders:
+        return 0
+    # 멱등: 해당 날짜 기존 데이터 삭제 후 재삽입 (늦게 잡히는 주문/누락일 반영)
+    conn.execute("DELETE FROM sale_lines WHERE sale_id IN (SELECT id FROM sales WHERE sale_date=?)", (date,))
+    conn.execute("DELETE FROM sales WHERE sale_date=?", (date,))
+    synced = 0
+    for order in orders:
+        code = order.get("code", "")
+        product_name = order.get("nameOpt") or order.get("name", "")  # 향 보존
+        channels = order.get("channels", {})
+        product = conn.execute("SELECT id FROM products WHERE product_code=? OR ezadmin_code=?", (code, code)).fetchone()
+        product_id = product["id"] if product else None
+        for ch_name, ch_data in channels.items():
+            ch_qty = ch_data.get("qty", 0)
+            ch_settlement = ch_data.get("settlement", 0)
+            if ch_qty == 0 and ch_settlement == 0:
+                continue
+            supply = round(ch_settlement / 1.1)
+            tax = ch_settlement - supply
+            partner = conn.execute("SELECT id FROM partners WHERE name=?", (ch_name,)).fetchone()
+            partner_id = partner["id"] if partner else None
+            cur = conn.execute(
+                """INSERT INTO sales (sale_date, partner_id, channel, channel_order_no,
+                   total_supply, total_tax, total_amount, status, recipient)
+                   VALUES (?,?,?,?,?,?,?,'confirmed',?)""",
+                (date, partner_id, ch_name, code, supply, tax, ch_settlement, product_name))
+            sale_id = cur.lastrowid
+            conn.execute(
+                """INSERT INTO sale_lines (sale_id, product_id, product_name, qty, unit_price,
+                   supply_amount, tax_amount, line_total)
+                   VALUES (?,?,?,?,?,?,?,?)""",
+                (sale_id, product_id, product_name, ch_qty,
+                 round(ch_settlement / ch_qty) if ch_qty else 0, supply, tax, ch_settlement))
+            synced += 1
+    conn.commit()
+    return synced
+
+
 async def _auto_sync_sales():
-    """매일 06:00에 전일 매출 자동 동기화"""
+    """매일 06:00에 최근 10일 매출 재동기화 (늦게 잡히는 주문 반영 + 누락일 백필)"""
     import aiohttp
     while True:
         now = datetime.now()
@@ -910,51 +955,13 @@ async def _auto_sync_sales():
 
         try:
             conn = get_db()
-            yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-            existing = conn.execute("SELECT COUNT(*) as cnt FROM sales WHERE sale_date=?", (yesterday,)).fetchone()["cnt"]
-            if existing > 0:
-                conn.close()
-                continue
-
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"{LOGISTICS_URL}/api/sales-daily-orders?date={yesterday}") as resp:
-                    if resp.status != 200:
-                        conn.close()
-                        continue
-                    data = await resp.json()
-
-                orders = data.get("by_option", [])
-                synced = 0
-                for order in orders:
-                    code = order.get("code", "")
-                    product_name = order.get("name", "")
-                    channels = order.get("channels", {})
-                    product = conn.execute("SELECT id FROM products WHERE product_code=? OR ezadmin_code=?", (code, code)).fetchone()
-                    product_id = product["id"] if product else None
-
-                    for ch_name, ch_data in channels.items():
-                        ch_qty = ch_data.get("qty", 0)
-                        ch_settlement = ch_data.get("settlement", 0)
-                        if ch_qty == 0 and ch_settlement == 0:
-                            continue
-                        supply = round(ch_settlement / 1.1)
-                        tax = ch_settlement - supply
-                        partner = conn.execute("SELECT id FROM partners WHERE name=?", (ch_name,)).fetchone()
-                        partner_id = partner["id"] if partner else None
-                        cur = conn.execute(
-                            """INSERT INTO sales (sale_date, partner_id, channel, channel_order_no,
-                               total_supply, total_tax, total_amount, status, recipient)
-                               VALUES (?,?,?,?,?,?,?,'confirmed',?)""",
-                            (yesterday, partner_id, ch_name, code, supply, tax, ch_settlement, product_name))
-                        sale_id = cur.lastrowid
-                        conn.execute(
-                            """INSERT INTO sale_lines (sale_id, product_id, product_name, qty, unit_price,
-                               supply_amount, tax_amount, line_total)
-                               VALUES (?,?,?,?,?,?,?,?)""",
-                            (sale_id, product_id, product_name, ch_qty,
-                             round(ch_settlement / ch_qty) if ch_qty else 0, supply, tax, ch_settlement))
-                        synced += 1
-                conn.commit()
+                for i in range(1, 11):  # 어제 ~ 10일 전 재동기화
+                    date = (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
+                    try:
+                        await _sync_sales_day(conn, session, date)
+                    except Exception:
+                        pass
             conn.close()
         except Exception:
             pass
@@ -1017,7 +1024,17 @@ FULLY_SETTLED_THROUGH = "2026-04"
 
 # 정산 채널명 ↔ 이지어드민 채널명 별칭 (정산 있으면 같은 이지어드민 채널은 중복계상 방지로 스킵)
 SETTLEMENT_EZADMIN_ALIAS = {
-    "쿠팡 그로스": ["채움컴퍼니"],
+    "쿠팡 그로스": ["채움컴퍼니", "비코어랩 쿠팡 채움(자동)"],
+    "쿠팡(로켓배송)": ["쿠팡 로켓배송"],
+    "스마트스토어": ["비코어랩 일비아 스스"],
+    "지마켓": ["비코어랩 G마켓"],
+    "11번가": ["비코어랩 11번가"],
+    "옥션": ["비코어랩 옥션"],
+    "오늘의집": ["비코어랩 오늘의집"],
+    "신세계몰 (에스에스지닷컴)": ["비코어랩 신세계"],
+    "GS샵": ["비코어랩 GS샵"],
+    "쿠팡": ["비코어랩 쿠팡(자동)"],
+    "에이블리": ["비코어랩 에이블리"],
 }
 
 # ── 채널별 보정계수 (2~4월 정산 대비 분석 기반, 2026-05-30 업데이트) ──
