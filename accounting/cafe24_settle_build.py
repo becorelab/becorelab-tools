@@ -1,0 +1,100 @@
+# -*- coding: utf-8 -*-
+"""카페24 5월 정산 파일 생성 (품명별 + 배송비 + 차감: 환불/쿠폰/앱할인/적립금)"""
+import openpyxl, json, re
+from collections import defaultdict
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+NAME_MAP = json.load(open('cafe24_name_map_temp.json'))
+cost = json.load(open('cost_master_2026.json'))
+# 혼합세트 원가 추가: 캡슐세제 4개(3448*4) + 캡슐표백제 2개(2769*2 or cost_master)
+cap2 = cost.get('캡슐표백제 2개') or (cost.get('캡슐표백제',2769)*2)
+cost['캡슐세제 4개+캡슐표백제 2개'] = cost.get('캡슐세제',3448)*4 + cap2
+
+def norm(s): return re.sub(r'\s+','',str(s))
+cost_n = {norm(k):v for k,v in cost.items()}
+def get_cost(p):
+    if p in cost: return cost[p]
+    if norm(p) in cost_n: return cost_n[norm(p)]
+    return None
+
+raw='/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/앱/매출 정산/26.05/05월 카페24/카페24 05월 로우데이터.xlsx'
+wb=openpyxl.load_workbook(raw, data_only=True, read_only=True); ws=wb[wb.sheetnames[0]]
+hdr=[c.value for c in next(ws.iter_rows(max_row=1))]
+def ci(n):
+    for i,h in enumerate(hdr):
+        if h and n in str(h): return i
+    return None
+i_nm=ci('주문상품명(옵션포함)'); i_opt=ci('옵션+판매가'); i_qty=ci('수량'); i_ship=ci('총 배송비')
+i_ord=ci('주문번호'); i_ref=ci('실제 환불금액'); i_cpn=ci('주문서 쿠폰 할인금액')
+i_app=ci('앱 상품할인 금액(최종)'); i_mil=ci('사용한 적립금액(최종)')
+def f(v):
+    if v in (None,'','None'): return 0.0
+    try: return float(str(v).replace(',',''))
+    except: return 0.0
+
+prod=defaultdict(lambda:[0,0,0])  # 품명 -> [수량, 매출(결제금액), 배송비]
+oship=set(); oref=set(); ocpn=set(); omil=set()
+ref=cpn=app=mil=0.0; unmapped=[]
+for row in ws.iter_rows(min_row=2, values_only=True):
+    if row[i_qty] in (None,'') and row[i_opt] in (None,''): continue
+    rawname=str(row[i_nm] or '').strip()
+    std=NAME_MAP.get(rawname)
+    o=str(row[i_ord] or '').strip()
+    if std:
+        qty=int(f(row[i_qty])); amt=f(row[i_opt])*qty
+        prod[std][0]+=qty; prod[std][1]+=amt
+        if o and o not in oship: prod[std][2]+=f(row[i_ship]); oship.add(o)
+    else:
+        unmapped.append(rawname)
+    # 차감 (주문/품목 단위 중복제거)
+    if o and o not in oref:
+        rv=f(row[i_ref])
+        if rv>0: ref+=rv; oref.add(o)
+    if o and o not in ocpn: cpn+=f(row[i_cpn]); ocpn.add(o)
+    app+=f(row[i_app])
+    if o and o not in omil:
+        mv=f(row[i_mil])
+        if mv>0: mil+=mv; omil.add(o)
+
+# 출력 파일
+out='/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/앱/매출 정산/26.05/05월 카페24/05월 카페24 정산.xlsx'
+wbo=openpyxl.Workbook(); wso=wbo.active; wso.title='카페24 5월'
+thin=Side(style='thin',color='CCCCCC'); bd=Border(left=thin,right=thin,top=thin,bottom=thin)
+hf=PatternFill('solid',fgColor='4472C4'); hfont=Font(color='FFFFFF',bold=True,size=10)
+tf=PatternFill('solid',fgColor='FFF2CC'); mf=PatternFill('solid',fgColor='FCE4D6')
+wso['A1']='카페24(자사몰) 5월 정산'; wso['A1'].font=Font(bold=True,size=13)
+wso.append([]); wso.append(['품명','수량','매출액','배송비','원가','이익'])
+for c in range(1,7):
+    cell=wso.cell(row=3,column=c); cell.fill=hf; cell.font=hfont; cell.alignment=Alignment(horizontal='center'); cell.border=bd
+r=4; t_qty=t_sales=t_ship=t_cost=t_profit=0; miss_cost=[]
+for nm,(q,s,sh) in sorted(prod.items(), key=lambda x:-x[1][1]):
+    unit=get_cost(nm); cst=unit*q if unit is not None else None
+    if cst is None: miss_cost.append(nm); cst=0
+    profit=s+sh-cst
+    wso.append([nm,q,s,sh,cst if unit is not None else '원가미상',profit])
+    t_qty+=q; t_sales+=s; t_ship+=sh; t_cost+=cst; t_profit+=profit; r+=1
+# 소계
+wso.append(['상품 소계',t_qty,t_sales,t_ship,t_cost,t_profit])
+for c in range(1,7): wso.cell(row=r,column=c).fill=tf; wso.cell(row=r,column=c).font=Font(bold=True)
+r+=1
+# 차감 행
+for label,amt in [('환불 (차감)',ref),('쿠폰 (차감)',cpn),('앱 상품할인 (차감)',app),('사용 적립금 (차감)',mil)]:
+    wso.append([label,'',-amt,'','',-amt]);
+    for c in range(1,7): wso.cell(row=r,column=c).fill=mf
+    r+=1
+# 최종
+final_sales=t_sales+t_ship-ref-cpn-app-mil
+final_profit=t_profit-ref-cpn-app-mil
+wso.append(['최종 (정산)','',final_sales,'',t_cost,final_profit])
+for c in range(1,7): wso.cell(row=r,column=c).fill=tf; wso.cell(row=r,column=c).font=Font(bold=True,size=11)
+for row in wso.iter_rows(min_row=4,max_row=r,min_col=2,max_col=6):
+    for cell in row:
+        if isinstance(cell.value,(int,float)): cell.number_format='#,##0'
+for col,w in zip('ABCDEF',[40,7,12,10,11,13]): wso.column_dimensions[col].width=w
+wso.cell(row=r+2,column=1,value='※ 매출액=결제금액(옵션+판매가×수량), 이익=매출+배송비−원가. 환불/쿠폰/앱할인/적립금은 매출·이익 모두 차감.')
+wbo.save(out)
+print(f'✅ 저장: {out}')
+print(f'   상품 {len(prod)}종 / 결제총액 {t_sales:,.0f} + 배송 {t_ship:,.0f}')
+print(f'   차감: 환불 {ref:,.0f} / 쿠폰 {cpn:,.0f} / 앱할인 {app:,.0f} / 적립금 {mil:,.0f}')
+print(f'   최종 매출 {final_sales:,.0f} / 원가 {t_cost:,.0f} / 최종 이익 {final_profit:,.0f}')
+print(f'   미매핑 {len(set(unmapped))} / 원가미상 {sorted(set(miss_cost))}')
