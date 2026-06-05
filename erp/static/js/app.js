@@ -1055,8 +1055,21 @@ async function copyPO(id) {
   } catch (e) { toast(e.message, 'error'); }
 }
 
-function downloadPOPdf(id) {
-  window.open(`/api/purchase-orders/${id}/pdf`, '_blank');
+async function downloadPOPdf(id) {
+  try {
+    const resp = await fetch(`/api/purchase-orders/${id}/pdf`);
+    if (!resp.ok) throw new Error('PDF 생성 실패 (' + resp.status + ')');
+    const blob = await resp.blob();
+    let fname = `발주서_${id}.pdf`;
+    const cd = resp.headers.get('Content-Disposition');
+    if (cd) { const m = cd.match(/filename="?([^"]+)"?/); if (m) fname = decodeURIComponent(m[1]); }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fname;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast('PDF 다운로드 완료');
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 async function emailPO(id) {
