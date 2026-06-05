@@ -1711,7 +1711,7 @@ if __name__ == "__main__":
     scheduler = BackgroundScheduler()
     scheduler.add_job(
         scheduled_scrape,
-        CronTrigger(hour=10, minute=0),
+        CronTrigger(hour=9, minute=0),
         id="daily_scrape",
         name="매일 10시 이지어드민 수집",
         misfire_grace_time=3600,

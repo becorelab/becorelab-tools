@@ -943,14 +943,14 @@ async def _sync_sales_day(conn, session, date):
 
 
 async def _auto_sync_sales():
-    """매일 06:00에 최근 10일 매출 재동기화 (늦게 잡히는 주문 반영 + 누락일 백필)"""
+    """매일 09:30에 최근 10일 매출 재동기화 (물류 9:00 수집 직후 → 전일 매출 완전 반영)"""
     import aiohttp
     while True:
         now = datetime.now()
-        tomorrow_6am = (now + timedelta(days=1)).replace(hour=6, minute=0, second=0, microsecond=0)
-        if now.hour < 6:
-            tomorrow_6am = now.replace(hour=6, minute=0, second=0, microsecond=0)
-        wait_sec = (tomorrow_6am - now).total_seconds()
+        target = (now + timedelta(days=1)).replace(hour=9, minute=30, second=0, microsecond=0)
+        if now.hour < 9 or (now.hour == 9 and now.minute < 30):
+            target = now.replace(hour=9, minute=30, second=0, microsecond=0)
+        wait_sec = (target - now).total_seconds()
         await asyncio.sleep(wait_sec)
 
         try:

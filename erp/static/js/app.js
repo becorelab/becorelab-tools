@@ -1736,9 +1736,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.getElementById('modal').addEventListener('click', e => {
-    if (e.target.classList.contains('modal-overlay')) closeModal();
-  });
+  (() => {
+    const modalEl = document.getElementById('modal');
+    let mdTarget = null;
+    modalEl.addEventListener('mousedown', e => { mdTarget = e.target; });
+    modalEl.addEventListener('click', e => {
+      // 오버레이에서 "누르고 뗀" 경우에만 닫기 (입력칸 안에서 드래그 선택 시 닫힘 방지)
+      if (e.target.classList.contains('modal-overlay') && mdTarget && mdTarget.classList.contains('modal-overlay')) closeModal();
+    });
+  })();
 
   document.getElementById('logout-btn').addEventListener('click', () => {
     currentUser = null;
