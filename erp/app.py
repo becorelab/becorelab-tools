@@ -1647,9 +1647,12 @@ async def download_po_pdf(po_id: int, conn=Depends(db)):
 @app.post("/api/purchase-orders/{po_id}/email")
 async def email_po(po_id: int, request: Request, conn=Depends(db)):
     d = await request.json()
-    to_email = d.get("to")
-    if not to_email:
+    _to = d.get("to")
+    to_list = [e for e in (_to if isinstance(_to, list) else [_to]) if e]
+    if not to_list:
         raise HTTPException(400, "수신 이메일을 입력해주세요")
+    cc_req = d.get("cc")
+    cc_req = [e for e in cc_req if e] if isinstance(cc_req, list) else None
     po_row = conn.execute(
         """SELECT po.*, sup.name as supplier_name, sup.phone as supplier_phone, sup.email as supplier_email
            FROM purchase_orders po LEFT JOIN partners sup ON sup.id=po.supplier_id WHERE po.id=?""",
@@ -1780,9 +1783,13 @@ async def email_po(po_id: int, request: Request, conn=Depends(db)):
     msg = MIMEText(body, "html", "utf-8")
     msg["Subject"] = f"[비코어랩] 발주서 {po['po_number']}"
     msg["From"] = "info@becorelab.kr"
-    msg["To"] = to_email
+    msg["To"] = ", ".join(to_list)
 
-    cc_emails = [c["email"] for c in cc_list if c["contact_type"] == "cc" and c["email"]]
+    if cc_req is not None:
+        cc_emails = cc_req
+    else:
+        cc_emails = [c["email"] for c in cc_list if c["contact_type"] == "cc" and c["email"]]
+    cc_emails = [e for e in cc_emails if e not in to_list]  # To 중복 제거
     if cc_emails:
         msg["Cc"] = ", ".join(cc_emails)
 
@@ -1798,7 +1805,7 @@ async def email_po(po_id: int, request: Request, conn=Depends(db)):
             raise HTTPException(500, "메일 비밀번호 미설정 — config.py에 NAVERWORKS_PASSWORD를 넣어주세요 (네이버웍스 SMTP 앱 비밀번호)")
         smtp = smtplib.SMTP_SSL("smtp.worksmobile.com", 465)  # 네이버웍스는 465 SSL (587 STARTTLS 아님)
         smtp.login("info@becorelab.kr", mail_pw)
-        all_recipients = [to_email] + cc_emails
+        all_recipients = to_list + cc_emails
         smtp.sendmail("info@becorelab.kr", all_recipients, msg.as_string())
         smtp.quit()
     except smtplib.SMTPException as e:
@@ -1806,7 +1813,7 @@ async def email_po(po_id: int, request: Request, conn=Depends(db)):
 
     conn.execute("UPDATE purchase_orders SET email_sent_at=datetime('now','localtime') WHERE id=?", (po_id,))
     conn.commit()
-    return {"ok": True, "to": to_email, "cc": cc_emails}
+    return {"ok": True, "to": to_list, "cc": cc_emails}
 
 
 # ── 입고 ──

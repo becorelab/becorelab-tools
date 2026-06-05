@@ -982,13 +982,13 @@ async function loadOrders(page = 1) {
         <td>${o.supplier_name || '-'}</td>
         <td class="text-muted" style="font-size:11.5px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${items}">${shortItems || '-'}</td>
         <td>${o.delivery_date || '-'}</td>
-        <td class="text-right number">${fmt(o.total_amount)}</td>
+        <td class="text-right number">${fmt(Math.round(o.total_amount * 1.1))}</td>
         <td><span class="badge badge-${badgeMap[o.status]}">${statusMap[o.status]}</span></td>
       </tr>`;
     }).join('') : '<tr><td colspan="7" class="text-center text-muted" style="padding:40px">발주 데이터가 없습니다</td></tr>';
     document.getElementById('orders-info').textContent = `총 ${d.total}건`;
     const sumEl = document.getElementById('orders-sum');
-    if (sumEl) sumEl.textContent = `합계 ₩${fmt(d.sum_amount)}`;
+    if (sumEl) sumEl.textContent = `합계 ₩${fmt(Math.round(d.sum_amount * 1.1))} (VAT포함)`;
     renderPagination('orders-paging', d.total, 30, page, p => loadOrders(p));
   } catch (e) { toast(e.message, 'error'); }
 }
@@ -997,6 +997,9 @@ async function viewOrder(id) {
   try {
     const d = await api(`/api/purchase-orders/${id}`);
     const statusMap = { draft: '작성중', confirmed: '확정', partial: '부분입고', completed: '완료', cancelled: '취소' };
+    const poSupply = d.lines.reduce((s, l) => s + (l.amount || 0), 0);
+    const poTax = Math.round(poSupply * 0.1);
+    const poTotal = poSupply + poTax;
     const m = document.getElementById('modal');
     m.querySelector('.modal-header span').textContent = `발주서 ${d.po.po_number}`;
     m.querySelector('.modal-body').innerHTML = `
@@ -1009,15 +1012,17 @@ async function viewOrder(id) {
         <div><span class="text-muted">상태</span><br><strong>${statusMap[d.po.status]}</strong></div>
       </div>
       <table class="mt-2">
-        <thead><tr><th>품목</th><th class="text-right">발주량</th><th class="text-right">입고량</th><th class="text-right">단가</th><th class="text-right">금액</th></tr></thead>
+        <thead><tr><th>품목</th><th class="text-right">발주량</th><th class="text-right">입고량</th><th class="text-right">단가</th><th class="text-right">공급가액</th><th class="text-right">부가세</th></tr></thead>
         <tbody>${d.lines.map(l => `
           <tr><td>${l.product_name || l.product_code}</td>
           <td class="text-right number">${fmt(l.qty_ordered)}</td>
           <td class="text-right number">${fmt(l.qty_received)}</td>
           <td class="text-right number">${fmt(l.unit_price)}</td>
-          <td class="text-right number">${fmt(l.amount)}</td></tr>
+          <td class="text-right number">${fmt(l.amount)}</td>
+          <td class="text-right number">${fmt(Math.round((l.amount || 0) * 0.1))}</td></tr>
         `).join('')}</tbody>
       </table>
+      <div class="text-right mt-2" style="font-size:13px;line-height:1.9">공급가액 ₩${fmt(poSupply)}<br>부가세(10%) ₩${fmt(poTax)}<br><span style="font-weight:700;font-size:15px">합계(VAT 포함) <span style="color:var(--accent)">₩${fmt(poTotal)}</span></span></div>
       ${d.po.memo ? `<div class="mt-2"><span class="text-muted">메모</span><br>${d.po.memo}</div>` : ''}
     `;
     m.querySelector('.modal-footer').innerHTML = `
@@ -1102,10 +1107,11 @@ async function sendPOEmail(id) {
   const toList = [...checked].map(c => c.value);
   if (custom) toList.push(custom);
   if (!toList.length) return toast('수신 이메일을 선택하세요', 'error');
+  const ccList = [...document.querySelectorAll('.email-cc:checked')].map(c => c.value);
 
   try {
-    await api(`/api/purchase-orders/${id}/email`, { method: 'POST', body: { to: toList[0] } });
-    toast(`발주서 발송 완료`);
+    await api(`/api/purchase-orders/${id}/email`, { method: 'POST', body: { to: toList, cc: ccList } });
+    toast(`발주서 발송 완료 (수신 ${toList.length}명${ccList.length ? ' · 참조 ' + ccList.length : ''})`);
     closeModal();
   } catch (e) { toast(e.message, 'error'); }
 }
@@ -1150,7 +1156,7 @@ async function newOrder(poId = null) {
     </div>
     <div id="po-lines"></div>
     <datalist id="po-products-datalist">${(window._poProducts || []).map(p => `<option value="${(p.name + ' (' + p.product_code + ')').replace(/"/g, '&quot;')}"></option>`).join('')}</datalist>
-    <div class="text-right mt-2" style="font-weight:700;font-size:15px">합계: <span id="po-total" style="color:var(--accent)">₩0</span></div>
+    <div class="text-right mt-2" style="font-size:13px;line-height:1.9">공급가액 <span id="po-supply">₩0</span><br>부가세(10%) <span id="po-tax">₩0</span><br><span style="font-weight:700;font-size:15px">합계(VAT 포함) <span id="po-total" style="color:var(--accent)">₩0</span></span></div>
   `;
   m.querySelector('.modal').classList.add('modal-wide');
   initSupplierAutocomplete();
@@ -1226,14 +1232,19 @@ function recalcLine(div) {
 }
 
 function recalcPOTotal() {
-  let total = 0;
+  let supply = 0;
   document.querySelectorAll('#po-lines > div').forEach(div => {
     const qty = Number(div.querySelector('.po-qty').value) || 0;
     const price = Number(div.querySelector('.po-price').value) || 0;
-    total += qty * price;
+    supply += qty * price;
   });
+  const tax = Math.round(supply * 0.1);
+  const sEl = document.getElementById('po-supply');
+  const tEl = document.getElementById('po-tax');
   const el = document.getElementById('po-total');
-  if (el) el.textContent = '₩' + fmt(total);
+  if (sEl) sEl.textContent = '₩' + fmt(supply);
+  if (tEl) tEl.textContent = '₩' + fmt(tax);
+  if (el) el.textContent = '₩' + fmt(supply + tax);
 }
 
 async function savePO(poId = null) {
