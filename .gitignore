@@ -91,3 +91,4 @@ automation/coupang_ad_config.py
 channeltalk-cs/all_chats.json
 automation/cookies_gross.json
 gross_session_cookies.json
+automation/logs/gross_*.json
