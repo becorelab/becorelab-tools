@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>경쟁사 레이더 · 비코어랩</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="/static/css/style.css?v=20260610a">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">🛰️ 경쟁사 레이더 <small>Competitor Radar</small></div>
+  <div class="spacer"></div>
+  <button class="btn btn-sm" id="btnSnapshot">🔄 전체 수집</button>
+  <button class="btn btn-primary btn-sm" id="btnAdd">+ 제품 추가</button>
+</div>
+
+<div class="wrap">
+  <!-- 요약 -->
+  <div class="summary" id="summary"></div>
+
+  <!-- 변동 알림 -->
+  <div class="section">
+    <div class="section-head">
+      <h2>🔔 최근 변동</h2>
+      <span class="count" id="alertCount">0</span>
+      <div class="spacer"></div>
+      <button class="btn btn-ghost btn-sm" id="btnSeen">모두 읽음</button>
+    </div>
+    <div class="alerts" id="alerts"></div>
+  </div>
+
+  <!-- 제품 -->
+  <div class="section">
+    <div class="section-head">
+      <h2>📡 추적 제품</h2>
+      <span class="count" id="prodCount">0</span>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<!-- 제품 추가 모달 -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-head"><h3>+ 추적 제품 추가</h3><button class="x" data-close>&times;</button></div>
+    <div class="modal-body">
+      <label class="field"><span>플랫폼</span>
+        <select id="f_platform">
+          <option value="coupang">쿠팡 (소싱콕 연동)</option>
+          <option value="naver">네이버쇼핑</option>
+        </select>
+      </label>
+      <label class="field"><span>별칭 <span class="hint">— 대시보드 표시명</span></span>
+        <input type="text" id="f_label" placeholder="예: 스너글 섬유탈취제 본품"></label>
+      <label class="field"><span>검색 키워드 <span class="hint">— 수집에 쓰는 키워드(쿠팡=스캔 키워드)</span></span>
+        <input type="text" id="f_keyword" placeholder="예: 섬유탈취제"></label>
+      <label class="field"><span>상품명 매칭어 <span class="hint">— 결과에서 이 단어로 제품 식별(부분일치)</span></span>
+        <input type="text" id="f_match" placeholder="예: 스너글 허거블"></label>
+      <label class="field"><span>상품 URL <span class="hint">— (선택) 쿠팡 productId 자동 인식</span></span>
+        <input type="text" id="f_url" placeholder="https://www.coupang.com/vp/products/..."></label>
+      <label class="field"><span>브랜드 <span class="hint">(선택)</span></span>
+        <input type="text" id="f_brand" placeholder="예: 스너글"></label>
+      <label class="field" style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="f_mine" style="width:auto;">
+        <span style="margin:0;">우리(일비아) 제품으로 표시</span></label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" data-close>취소</button>
+      <button class="btn btn-primary" id="btnSave">추가하고 수집</button>
+    </div>
+  </div>
+</div>
+
+<!-- 상세 모달 -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal wide">
+    <div class="modal-head"><h3 id="d_title">제품 상세</h3>
+      <button class="btn btn-sm" id="d_reviews">⭐ 평점·옵션 분석</button>
+      <button class="x" data-close>&times;</button></div>
+    <div class="modal-body" id="d_body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost btn-sm" id="d_delete" style="margin-right:auto;color:var(--red);">제품 삭제</button>
+      <button class="btn" data-close>닫기</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+<script src="/static/js/app.js?v=20260610b"></script>
+</body>
+</html>

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 WING_BASE = 'https://wing.coupang.com'
 WING_ID = 'becorelab'
-WING_PW = 'becolab@2026'
+WING_PW = 'becolab2026!!'
 HELPSTORE_BASE = 'https://helpstore.shop'
 HELPSTORE_ID = 'becorelab'
 HELPSTORE_PW = 'qlzhdjfoq2023!!'
@@ -122,7 +122,8 @@ def _is_context_alive():
     try:
         if not _ctx or not _page:
             return False
-        _page.url
+        _ = _page.url
+        _ = _ctx.pages   # 컨텍스트 실제 생존 검증 (죽으면 예외→False). _page.url은 캐시값 반환해 죽은 ctx를 못 잡음
         return True
     except:
         return False
@@ -190,11 +191,22 @@ def _do_full_login():
     """윙 로그인 → 헬프스토어 로그인 → 준비 완료"""
     global _logged_in, _wing_ok
 
+    # TargetClosedError 방지: 컨텍스트 죽어있으면 완전 리셋 후 재시작
+    if not _is_context_alive():
+        logger.info('컨텍스트 비정상 — 브라우저 강제 리셋 후 재시작')
+        _reset_browser()
     _start_browser()
 
     # 1) 쿠팡윙 로그인
     logger.info('쿠팡윙 로그인 시도...')
-    _page.goto(WING_BASE, wait_until='domcontentloaded', timeout=20000)
+    try:
+        _page.goto(WING_BASE, wait_until='domcontentloaded', timeout=20000)
+    except Exception as goto_err:
+        # goto 자체가 TargetClosedError면 브라우저를 완전 재시작
+        logger.warning(f'goto 실패 ({goto_err}) — 브라우저 완전 재시작')
+        _reset_browser()
+        _start_browser()
+        _page.goto(WING_BASE, wait_until='domcontentloaded', timeout=20000)
     _page.wait_for_timeout(3000)
 
     url = _page.url
@@ -211,8 +223,8 @@ def _do_full_login():
             logger.info('쿠팡윙 로그인 성공!')
         except Exception as e:
             logger.warning(f'윙 자동 로그인 실패: {e}')
-            # 수동 대기
-            for i in range(120):
+            # 수동 대기 (최대 10초만 — 서버환경에서 사람이 로그인 불가)
+            for i in range(10):
                 _page.wait_for_timeout(1000)
                 if 'wing.coupang.com' in _page.url and '/login' not in _page.url:
                     _wing_ok = True
@@ -222,35 +234,48 @@ def _do_full_login():
         logger.info('쿠팡윙 이미 로그인됨')
 
     if not _wing_ok:
-        return {'success': False, 'message': '쿠팡윙 로그인 실패'}
+        logger.warning('쿠팡윙 로그인 실패 — 헬프스토어 전용 모드로 계속 진행')
 
     # 2) 헬프스토어 로그인
     logger.info('헬프스토어 로그인 시도...')
-    _page.goto(f'{HELPSTORE_BASE}/login', wait_until='domcontentloaded', timeout=15000)
-    _page.wait_for_timeout(2000)
+    try:
+        _page.goto(f'{HELPSTORE_BASE}/login', wait_until='domcontentloaded', timeout=15000)
+        _page.wait_for_timeout(2000)
 
-    url = _page.url
-    if '/login' in url:
-        try:
-            _page.locator('#loginId').fill(HELPSTORE_ID)
-            _page.wait_for_timeout(300)
-            _page.locator('#loginPw').fill(HELPSTORE_PW)
-            _page.wait_for_timeout(300)
-            _page.locator('#btnLogin').click()
-            _page.wait_for_timeout(3000)
-            logger.info('헬프스토어 로그인 성공!')
-        except Exception as e:
-            logger.warning(f'헬프스토어 로그인 실패: {e}')
+        url = _page.url
+        if '/login' in url:
+            try:
+                _page.locator('#loginId').fill(HELPSTORE_ID)
+                _page.wait_for_timeout(300)
+                _page.locator('#loginPw').fill(HELPSTORE_PW)
+                _page.wait_for_timeout(300)
+                _page.locator('#btnLogin').click()
+                _page.wait_for_timeout(3000)
+                logger.info('헬프스토어 로그인 성공!')
+            except Exception as e:
+                logger.warning(f'헬프스토어 로그인 실패: {e}')
+    except Exception as e:
+        logger.warning(f'헬프스토어 페이지 이동 실패: {e}')
 
     # 3) 쿠팡 분석 페이지로 이동
-    _page.goto(COUPANG_PAGE, wait_until='domcontentloaded', timeout=15000)
-    _page.wait_for_timeout(2000)
+    try:
+        _page.goto(COUPANG_PAGE, wait_until='domcontentloaded', timeout=15000)
+        _page.wait_for_timeout(2000)
+    except Exception as e:
+        logger.warning(f'쿠팡 분석 페이지 이동 실패: {e}')
+        return {'success': False, 'message': f'쿠팡 분석 페이지 접근 불가: {e}'}
 
     _logged_in = True
     # 브라우저 최소화
-    _page.evaluate('window.resizeTo(1,1); window.moveTo(-2000,-2000)')
+    try:
+        _page.evaluate('window.resizeTo(1,1); window.moveTo(-2000,-2000)')
+    except:
+        pass
 
-    return {'success': True, 'message': '로그인 완료! (윙 + 헬프스토어)'}
+    if _wing_ok:
+        return {'success': True, 'message': '로그인 완료! (윙 + 헬프스토어)'}
+    else:
+        return {'success': True, 'message': '헬프스토어 로그인 완료 (윙 세션 없음 — 헬프스토어 전용)'}
 
 
 def _do_search(keyword):
