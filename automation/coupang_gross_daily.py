@@ -105,6 +105,28 @@ def upsert(date_str, rows):
         n+=1
     conn.commit(); conn.close(); return n
 
+def sync_to_sales(date_str):
+    """gross_daily_sales(해당일) → ERP sales 일별 집계 반영 (매출 화면에 보이게).
+    채널='비코어랩 쿠팡 채움(자동)'(partner 90) 자리에 그로스 GMV 채움. 멱등."""
+    conn = sqlite3.connect(ERP_DB, timeout=30)
+    g = conn.execute("SELECT option_id,item_name,units_sold,gmv FROM gross_daily_sales WHERE sale_date=?", (date_str,)).fetchall()
+    if not g:
+        conn.close(); return 0
+    gmv_sum = round(sum(r[3] for r in g))
+    supply = round(gmv_sum/1.1); tax = gmv_sum - supply
+    CH = '비코어랩 쿠팡 채움(자동)'
+    # 기존 그 채널 해당일 row 삭제(0원 자동분 + 이전 그로스분) → 멱등
+    conn.execute("DELETE FROM sales WHERE channel=? AND sale_date=?", (CH, date_str))
+    cur = conn.execute("""INSERT INTO sales
+        (sale_date,partner_id,channel,channel_order_no,total_supply,total_tax,total_amount,status,source)
+        VALUES (?,?,?,?,?,?,?, 'confirmed','wing_gross')""",
+        (date_str, 90, CH, f"GROSS-{date_str}", supply, tax, gmv_sum))
+    sid = cur.lastrowid
+    for oid,name,units,gmv in g:
+        conn.execute("INSERT INTO sale_lines (sale_id,product_name,qty,line_total) VALUES (?,?,?,?)",
+                     (sid, name, units, round(gmv)))
+    conn.commit(); conn.close(); return gmv_sum
+
 def main():
     if len(sys.argv)>1 and sys.argv[1].count('-')==2:
         date_str = sys.argv[1]
@@ -120,6 +142,8 @@ def main():
         print("  (판매 없음)"); return
     n = upsert(date_str, rows)
     print(f"  ✅ {n}개 옵션 → gross_daily_sales 적재. GMV합 {sum(r[3] for r in rows):,}원")
+    sv = sync_to_sales(date_str)
+    print(f"  ✅ ERP sales 반영: {sv:,}원 (매출 화면에 그로스 표시)")
 
 if __name__ == "__main__":
     main()

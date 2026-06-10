@@ -438,16 +438,18 @@ async def list_sales(
     w = " AND ".join(where)
 
     if group == "channel":
+        # 검색 기간 전체를 채널별로 합산 (날짜 무시)
         total = conn.execute(
-            f"SELECT COUNT(DISTINCT s.sale_date || s.channel) as cnt FROM sales s WHERE {w}", params
+            f"SELECT COUNT(DISTINCT s.channel) as cnt FROM sales s WHERE {w}", params
         ).fetchone()["cnt"]
         rows = conn.execute(
-            f"""SELECT s.sale_date, s.channel, COUNT(*) as item_count,
+            f"""SELECT s.channel, COUNT(*) as item_count,
+                MIN(s.sale_date) as date_from, MAX(s.sale_date) as date_to,
                 SUM(s.total_supply) as total_supply, SUM(s.total_tax) as total_tax,
                 SUM(s.total_amount) as total_amount
                 FROM sales s WHERE {w}
-                GROUP BY s.sale_date, s.channel
-                ORDER BY s.sale_date DESC, total_amount DESC
+                GROUP BY s.channel
+                ORDER BY total_amount DESC
                 LIMIT ? OFFSET ?""",
             params + [size, (page - 1) * size],
         ).fetchall()

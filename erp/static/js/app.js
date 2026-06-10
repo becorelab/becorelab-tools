@@ -782,17 +782,16 @@ async function loadSales(page = 1) {
     const tbody = document.getElementById('sales-tbody');
 
     if (d.grouped) {
-      thead.innerHTML = '<tr><th>매출일</th><th>채널</th><th class="text-right">건수</th><th class="text-right">공급가</th><th class="text-right">세액</th><th class="text-right">합계</th></tr>';
+      thead.innerHTML = '<tr><th>채널</th><th class="text-right">건수</th><th class="text-right">공급가</th><th class="text-right">세액</th><th class="text-right">합계</th></tr>';
       tbody.innerHTML = d.items.length ? d.items.map(s => `
         <tr>
-          <td>${s.sale_date}</td>
           <td><strong>${s.channel || '-'}</strong></td>
           <td class="text-right number">${s.item_count}건</td>
           <td class="text-right number">${fmt(s.total_supply)}</td>
           <td class="text-right number">${fmt(s.total_tax)}</td>
           <td class="text-right number"><strong>${fmt(s.total_amount)}</strong></td>
         </tr>
-      `).join('') : '<tr><td colspan="6" class="text-center text-muted" style="padding:40px">데이터 없음</td></tr>';
+      `).join('') : '<tr><td colspan="5" class="text-center text-muted" style="padding:40px">데이터 없음</td></tr>';
     } else {
       thead.innerHTML = '<tr><th>매출일</th><th>채널</th><th>품목</th><th class="text-right">공급가</th><th class="text-right">세액</th><th class="text-right">합계</th><th>상태</th></tr>';
       tbody.innerHTML = d.items.length ? d.items.map(s => `
