@@ -114,7 +114,7 @@ def sync_to_sales(date_str):
         conn.close(); return 0
     gmv_sum = round(sum(r[3] for r in g))
     supply = round(gmv_sum/1.1); tax = gmv_sum - supply
-    CH = '비코어랩 쿠팡 채움(자동)'
+    CH = '비코어랩 쿠팡 그로스'
     # 기존 그 채널 해당일 row 삭제(0원 자동분 + 이전 그로스분) → 멱등
     conn.execute("DELETE FROM sales WHERE channel=? AND sale_date=?", (CH, date_str))
     cur = conn.execute("""INSERT INTO sales
