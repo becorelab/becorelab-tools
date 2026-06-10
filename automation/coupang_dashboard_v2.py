@@ -2,7 +2,7 @@
 """쿠팡 광고 대시보드 v2 — 구글시트 자동 업데이트
 
 대상 시트: 🚀 쿠팡 광고 대시보드
-시트 ID: 1RqEKC5KT0O_aZWnsDH4UdX3grfYSpg68hqyJteRVmBw
+시트 ID: 1bmN5H7lB-kIr9Oo5vqUokXanTM0O7xeCMgHoP24WAJg
 
 워크시트:
 - 비코어랩 요약 / 비코어랩 캠페인별 / 비코어랩 검색/비검색
@@ -36,7 +36,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 # ── 설정 ──────────────────────────────────────────────────────
-SHEET_ID = "1RqEKC5KT0O_aZWnsDH4UdX3grfYSpg68hqyJteRVmBw"
+SHEET_ID = "1bmN5H7lB-kIr9Oo5vqUokXanTM0O7xeCMgHoP24WAJg"
 MGMT_SHEET_ID = "1bmN5H7lB-kIr9Oo5vqUokXanTM0O7xeCMgHoP24WAJg"
 SA_KEY = "/Users/macmini_ky/ClaudeAITeam/sourcing/analyzer/becorelab-tools-firebase-adminsdk-fbsvc-4af6f0c5ac.json"
 DATA_DIR = "/Users/macmini_ky/ClaudeAITeam/marketing/coupang_data"

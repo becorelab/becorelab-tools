@@ -14,7 +14,7 @@ import time
 
 # ── 설정 ──────────────────────────────────────────────────────
 SA_KEY = "/Users/macmini_ky/ClaudeAITeam/sourcing/analyzer/becorelab-tools-firebase-adminsdk-fbsvc-4af6f0c5ac.json"
-SHEET_ID = "1RqEKC5KT0O_aZWnsDH4UdX3grfYSpg68hqyJteRVmBw"
+SHEET_ID = "1bmN5H7lB-kIr9Oo5vqUokXanTM0O7xeCMgHoP24WAJg"
 
 # 정렬 대상 워크시트 (키워드 TOP 제외 — 날짜 컬럼 아님)
 SORT_WORKSHEETS = [
