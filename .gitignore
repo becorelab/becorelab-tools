@@ -94,3 +94,10 @@ gross_session_cookies.json
 automation/logs/gross_*.json
 sourcing/review_output/
 price_tracker/history/
+supplyhub_session_cookies.json
+
+# --- 2026-06-11 추가: 세션/쿠키/탐색데이터 제외 ---
+marketing/coupang_data/downloads/cookies.json
+erp/.browser_profile/
+sourcing/.review_profile/
+erp/ecount_*.json

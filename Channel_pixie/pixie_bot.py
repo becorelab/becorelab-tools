@@ -38,19 +38,19 @@ TEAM_BOTS = {
 SOUL_PATH = os.path.join(os.path.dirname(__file__), "SOUL.md")
 GROUP_LOG_PATH = os.path.join(os.path.dirname(__file__), "group_chats.json")
 
-# API 설정 (GLM-5 우선, DeepSeek 폴백)
+# API 설정 (DeepSeek 우선, GLM-5 폴백)
 APIS = [
-    {
-        "name": "GLM-5",
-        "url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-        "key": "7a9a6a01e9184c4f8021441a0256cb41.cz4L0OJ0uAqcT3QZ",
-        "model": "glm-4-plus",
-    },
     {
         "name": "DeepSeek",
         "url": "https://api.deepseek.com/chat/completions",
         "key": "sk-b2ea74046efa48648527ec9d5f2ac366",
         "model": "deepseek-chat",
+    },
+    {
+        "name": "GLM-5",
+        "url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        "key": "7a9a6a01e9184c4f8021441a0256cb41.cz4L0OJ0uAqcT3QZ",
+        "model": "glm-4-plus",
     },
 ]
 
@@ -98,7 +98,7 @@ def save_group_whitelist():
 
 
 async def call_api(messages):
-    """GLM-5 먼저 시도, 실패하면 DeepSeek 폴백"""
+    """DeepSeek 먼저 시도, 실패하면 GLM-5 폴백"""
     global current_api
     for api in APIS:
         try:

@@ -23,7 +23,7 @@ def items_to_daily(items):
     daily = defaultdict(lambda: {'supply':0.0,'tax':0.0})
     for r in items:
         gubun = r.get('구분') or r.get('구분 ') or ''
-        t = str(r.get('입고/반출시각','') or '')[:10].replace('/','-')
+        t = str(r.get('입고/반출시각') or r.get('입고/반출일자') or '')[:10].replace('/','-')
         if not re.match(r'\d{4}-\d{2}-\d{2}', t): continue
         sign = 1 if '발주' in gubun else -1
         daily[t]['supply'] += num(r.get('총공급가액')) * sign

@@ -1,0 +1,814 @@
+{
+  "results": [
+    {
+      "segments": {
+        "day": "2026-05-04"
+      },
+      "metrics": {
+        "impressions": 32376,
+        "clicks": 66,
+        "grossCostMicros": 96551759475,
+        "conversions": 15,
+        "conversionsValueMicros": 434680000000,
+        "lastClickConversions": 15,
+        "lastClickConversionsValueMicros": 434680000000,
+        "dataDrivenConversions": 15.0,
+        "dataDrivenConversionsValueMicros": 434680000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 215980000000,
+        "ctr": 0.2,
+        "averageCpcMicros": 1462905447,
+        "averageCpmMicros": 2982201615,
+        "conversionRate": 22.73,
+        "conversionsValuePerCost": 450.2,
+        "costPerConversionMicros": 6436783965,
+        "purchasedConversionsValuePerCost": 223.69,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-05"
+      },
+      "metrics": {
+        "impressions": 32779,
+        "clicks": 80,
+        "grossCostMicros": 124576703431,
+        "conversions": 32,
+        "conversionsValueMicros": 1500580000000,
+        "lastClickConversions": 31,
+        "lastClickConversionsValueMicros": 1478980000000,
+        "dataDrivenConversions": 30.999959999999998,
+        "dataDrivenConversionsValueMicros": 1478979994000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 270780000000,
+        "ctr": 0.24,
+        "averageCpcMicros": 1557208793,
+        "averageCpmMicros": 3800503476,
+        "conversionRate": 40.0,
+        "conversionsValuePerCost": 1204.54,
+        "costPerConversionMicros": 3893021982,
+        "purchasedConversionsValuePerCost": 217.36,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-06"
+      },
+      "metrics": {
+        "impressions": 40687,
+        "clicks": 84,
+        "grossCostMicros": 108454683327,
+        "conversions": 41,
+        "conversionsValueMicros": 1595180000000,
+        "lastClickConversions": 36,
+        "lastClickConversionsValueMicros": 1484940000000,
+        "dataDrivenConversions": 35.99993,
+        "dataDrivenConversionsValueMicros": 1484939994000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 445580000000,
+        "ctr": 0.21,
+        "averageCpcMicros": 1291127182,
+        "averageCpmMicros": 2665585650,
+        "conversionRate": 48.81,
+        "conversionsValuePerCost": 1470.83,
+        "costPerConversionMicros": 2645236179,
+        "purchasedConversionsValuePerCost": 410.84,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-07"
+      },
+      "metrics": {
+        "impressions": 44348,
+        "clicks": 95,
+        "grossCostMicros": 97134487550,
+        "conversions": 32,
+        "conversionsValueMicros": 1422100000000,
+        "lastClickConversions": 25,
+        "lastClickConversionsValueMicros": 1030420000000,
+        "dataDrivenConversions": 24.999899999999997,
+        "dataDrivenConversionsValueMicros": 1030419988000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 343700000000,
+        "ctr": 0.21,
+        "averageCpcMicros": 1022468290,
+        "averageCpmMicros": 2190278875,
+        "conversionRate": 33.68,
+        "conversionsValuePerCost": 1464.05,
+        "costPerConversionMicros": 3035452736,
+        "purchasedConversionsValuePerCost": 353.84,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-08"
+      },
+      "metrics": {
+        "impressions": 44053,
+        "clicks": 78,
+        "grossCostMicros": 88029914283,
+        "conversions": 19,
+        "conversionsValueMicros": 802440000000,
+        "lastClickConversions": 19,
+        "lastClickConversionsValueMicros": 802440000000,
+        "dataDrivenConversions": 19.0,
+        "dataDrivenConversionsValueMicros": 802440000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 198140000000,
+        "ctr": 0.18,
+        "averageCpcMicros": 1128588645,
+        "averageCpmMicros": 1998272860,
+        "conversionRate": 24.36,
+        "conversionsValuePerCost": 911.55,
+        "costPerConversionMicros": 4633153383,
+        "purchasedConversionsValuePerCost": 225.08,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-09"
+      },
+      "metrics": {
+        "impressions": 36963,
+        "clicks": 73,
+        "grossCostMicros": 92991519331,
+        "conversions": 24,
+        "conversionsValueMicros": 894360000000,
+        "lastClickConversions": 24,
+        "lastClickConversionsValueMicros": 894360000000,
+        "dataDrivenConversions": 24.0,
+        "dataDrivenConversionsValueMicros": 894360000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 344260000000,
+        "ctr": 0.2,
+        "averageCpcMicros": 1273856429,
+        "averageCpmMicros": 2515800106,
+        "conversionRate": 32.88,
+        "conversionsValuePerCost": 961.77,
+        "costPerConversionMicros": 3874646639,
+        "purchasedConversionsValuePerCost": 370.21,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-10"
+      },
+      "metrics": {
+        "impressions": 41106,
+        "clicks": 92,
+        "grossCostMicros": 106293403078,
+        "conversions": 31,
+        "conversionsValueMicros": 901900000000,
+        "lastClickConversions": 29,
+        "lastClickConversionsValueMicros": 836460000000,
+        "dataDrivenConversions": 28.999950000000002,
+        "dataDrivenConversionsValueMicros": 836459997000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 300600000000,
+        "ctr": 0.22,
+        "averageCpcMicros": 1155363077,
+        "averageCpmMicros": 2585836692,
+        "conversionRate": 33.7,
+        "conversionsValuePerCost": 848.5,
+        "costPerConversionMicros": 3428819454,
+        "purchasedConversionsValuePerCost": 282.8,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-11"
+      },
+      "metrics": {
+        "impressions": 42782,
+        "clicks": 91,
+        "grossCostMicros": 96406178642,
+        "conversions": 32,
+        "conversionsValueMicros": 1770360000000,
+        "lastClickConversions": 30,
+        "lastClickConversionsValueMicros": 1596780000000,
+        "dataDrivenConversions": 29.99994,
+        "dataDrivenConversionsValueMicros": 1596779996000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 355560000000,
+        "ctr": 0.21,
+        "averageCpcMicros": 1059408557,
+        "averageCpmMicros": 2253428513,
+        "conversionRate": 35.16,
+        "conversionsValuePerCost": 1836.36,
+        "costPerConversionMicros": 3012693083,
+        "purchasedConversionsValuePerCost": 368.81,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-12"
+      },
+      "metrics": {
+        "impressions": 32657,
+        "clicks": 76,
+        "grossCostMicros": 82371054434,
+        "conversions": 39,
+        "conversionsValueMicros": 1533840000000,
+        "lastClickConversions": 36,
+        "lastClickConversionsValueMicros": 1451080000000,
+        "dataDrivenConversions": 35.999829999999996,
+        "dataDrivenConversionsValueMicros": 1451079980000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 585540000000,
+        "ctr": 0.23,
+        "averageCpcMicros": 1083829664,
+        "averageCpmMicros": 2522309288,
+        "conversionRate": 51.32,
+        "conversionsValuePerCost": 1862.11,
+        "costPerConversionMicros": 2112078319,
+        "purchasedConversionsValuePerCost": 710.86,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-13"
+      },
+      "metrics": {
+        "impressions": 39448,
+        "clicks": 79,
+        "grossCostMicros": 98404944815,
+        "conversions": 18,
+        "conversionsValueMicros": 685700000000,
+        "lastClickConversions": 17,
+        "lastClickConversionsValueMicros": 652820000000,
+        "dataDrivenConversions": 17.0,
+        "dataDrivenConversionsValueMicros": 652820000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 255300000000,
+        "ctr": 0.2,
+        "averageCpcMicros": 1245632213,
+        "averageCpmMicros": 2494548388,
+        "conversionRate": 22.78,
+        "conversionsValuePerCost": 696.81,
+        "costPerConversionMicros": 5466941379,
+        "purchasedConversionsValuePerCost": 259.44,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-14"
+      },
+      "metrics": {
+        "impressions": 33756,
+        "clicks": 66,
+        "grossCostMicros": 64597599292,
+        "conversions": 21,
+        "conversionsValueMicros": 848840000000,
+        "lastClickConversions": 20,
+        "lastClickConversionsValueMicros": 821340000000,
+        "dataDrivenConversions": 20.0,
+        "dataDrivenConversionsValueMicros": 821340000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 220540000000,
+        "ctr": 0.2,
+        "averageCpcMicros": 978751504,
+        "averageCpmMicros": 1913662735,
+        "conversionRate": 31.82,
+        "conversionsValuePerCost": 1314.04,
+        "costPerConversionMicros": 3076076157,
+        "purchasedConversionsValuePerCost": 341.41,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-15"
+      },
+      "metrics": {
+        "impressions": 25321,
+        "clicks": 64,
+        "grossCostMicros": 76712110780,
+        "conversions": 15,
+        "conversionsValueMicros": 439360000000,
+        "lastClickConversions": 14,
+        "lastClickConversionsValueMicros": 406640000000,
+        "dataDrivenConversions": 13.99997,
+        "dataDrivenConversionsValueMicros": 406639998000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 274660000000,
+        "ctr": 0.25,
+        "averageCpcMicros": 1198626731,
+        "averageCpmMicros": 3029584565,
+        "conversionRate": 23.44,
+        "conversionsValuePerCost": 572.74,
+        "costPerConversionMicros": 5114140719,
+        "purchasedConversionsValuePerCost": 358.04,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-16"
+      },
+      "metrics": {
+        "impressions": 24242,
+        "clicks": 79,
+        "grossCostMicros": 74493177517,
+        "conversions": 22,
+        "conversionsValueMicros": 969980000000,
+        "lastClickConversions": 21,
+        "lastClickConversionsValueMicros": 943160000000,
+        "dataDrivenConversions": 20.999950000000002,
+        "dataDrivenConversionsValueMicros": 943159996000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 289680000000,
+        "ctr": 0.33,
+        "averageCpcMicros": 942951614,
+        "averageCpmMicros": 3072897348,
+        "conversionRate": 27.85,
+        "conversionsValuePerCost": 1302.11,
+        "costPerConversionMicros": 3386053524,
+        "purchasedConversionsValuePerCost": 388.87,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-17"
+      },
+      "metrics": {
+        "impressions": 30253,
+        "clicks": 104,
+        "grossCostMicros": 101068264597,
+        "conversions": 18,
+        "conversionsValueMicros": 599060000000,
+        "lastClickConversions": 17,
+        "lastClickConversionsValueMicros": 566340000000,
+        "dataDrivenConversions": 17.0,
+        "dataDrivenConversionsValueMicros": 566340000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 339860000000,
+        "ctr": 0.34,
+        "averageCpcMicros": 971810237,
+        "averageCpmMicros": 3340768340,
+        "conversionRate": 17.31,
+        "conversionsValuePerCost": 592.73,
+        "costPerConversionMicros": 5614903589,
+        "purchasedConversionsValuePerCost": 336.27,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-18"
+      },
+      "metrics": {
+        "impressions": 29937,
+        "clicks": 86,
+        "grossCostMicros": 79008090627,
+        "conversions": 32,
+        "conversionsValueMicros": 1220680000000,
+        "lastClickConversions": 30,
+        "lastClickConversionsValueMicros": 1107280000000,
+        "dataDrivenConversions": 30.0,
+        "dataDrivenConversionsValueMicros": 1107280000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 192780000000,
+        "ctr": 0.29,
+        "averageCpcMicros": 918698728,
+        "averageCpmMicros": 2639145226,
+        "conversionRate": 37.21,
+        "conversionsValuePerCost": 1545.01,
+        "costPerConversionMicros": 2469002832,
+        "purchasedConversionsValuePerCost": 244.0,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-19"
+      },
+      "metrics": {
+        "impressions": 35420,
+        "clicks": 93,
+        "grossCostMicros": 93852785079,
+        "conversions": 23,
+        "conversionsValueMicros": 1374520000000,
+        "lastClickConversions": 22,
+        "lastClickConversionsValueMicros": 1147720000000,
+        "dataDrivenConversions": 21.99999,
+        "dataDrivenConversionsValueMicros": 1147719997000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 382120000000,
+        "ctr": 0.26,
+        "averageCpcMicros": 1009169732,
+        "averageCpmMicros": 2649711606,
+        "conversionRate": 24.73,
+        "conversionsValuePerCost": 1464.55,
+        "costPerConversionMicros": 4080555873,
+        "purchasedConversionsValuePerCost": 407.15,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-20"
+      },
+      "metrics": {
+        "impressions": 36501,
+        "clicks": 85,
+        "grossCostMicros": 82172578070,
+        "conversions": 25,
+        "conversionsValueMicros": 1039090000000,
+        "lastClickConversions": 25,
+        "lastClickConversionsValueMicros": 1039090000000,
+        "dataDrivenConversions": 25.0,
+        "dataDrivenConversionsValueMicros": 1039090000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 217190000000,
+        "ctr": 0.23,
+        "averageCpcMicros": 966736213,
+        "averageCpmMicros": 2251241831,
+        "conversionRate": 29.41,
+        "conversionsValuePerCost": 1264.52,
+        "costPerConversionMicros": 3286903123,
+        "purchasedConversionsValuePerCost": 264.31,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-21"
+      },
+      "metrics": {
+        "impressions": 33559,
+        "clicks": 83,
+        "grossCostMicros": 72762546964,
+        "conversions": 35,
+        "conversionsValueMicros": 1104700000000,
+        "lastClickConversions": 25,
+        "lastClickConversionsValueMicros": 789720000000,
+        "dataDrivenConversions": 24.99988,
+        "dataDrivenConversionsValueMicros": 789719998000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 357300000000,
+        "ctr": 0.25,
+        "averageCpcMicros": 876657192,
+        "averageCpmMicros": 2168197710,
+        "conversionRate": 42.17,
+        "conversionsValuePerCost": 1518.23,
+        "costPerConversionMicros": 2078929913,
+        "purchasedConversionsValuePerCost": 491.05,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-22"
+      },
+      "metrics": {
+        "impressions": 30304,
+        "clicks": 64,
+        "grossCostMicros": 61298805046,
+        "conversions": 21,
+        "conversionsValueMicros": 628000000000,
+        "lastClickConversions": 17,
+        "lastClickConversionsValueMicros": 525220000000,
+        "dataDrivenConversions": 16.99991,
+        "dataDrivenConversionsValueMicros": 525219991000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 185600000000,
+        "ctr": 0.21,
+        "averageCpcMicros": 957793829,
+        "averageCpmMicros": 2022795837,
+        "conversionRate": 32.81,
+        "conversionsValuePerCost": 1024.49,
+        "costPerConversionMicros": 2918990716,
+        "purchasedConversionsValuePerCost": 302.78,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-23"
+      },
+      "metrics": {
+        "impressions": 25252,
+        "clicks": 74,
+        "grossCostMicros": 73576357387,
+        "conversions": 15,
+        "conversionsValueMicros": 557780000000,
+        "lastClickConversions": 14,
+        "lastClickConversionsValueMicros": 507980000000,
+        "dataDrivenConversions": 14.0,
+        "dataDrivenConversionsValueMicros": 507980000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 128480000000,
+        "ctr": 0.29,
+        "averageCpcMicros": 994275100,
+        "averageCpmMicros": 2913684357,
+        "conversionRate": 20.27,
+        "conversionsValuePerCost": 758.1,
+        "costPerConversionMicros": 4905090492,
+        "purchasedConversionsValuePerCost": 174.62,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-24"
+      },
+      "metrics": {
+        "impressions": 26712,
+        "clicks": 70,
+        "grossCostMicros": 68053083063,
+        "conversions": 24,
+        "conversionsValueMicros": 1004700000000,
+        "lastClickConversions": 24,
+        "lastClickConversionsValueMicros": 1004700000000,
+        "dataDrivenConversions": 23.99998,
+        "dataDrivenConversionsValueMicros": 1004699998000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 193500000000,
+        "ctr": 0.26,
+        "averageCpcMicros": 972186901,
+        "averageCpmMicros": 2547659594,
+        "conversionRate": 34.29,
+        "conversionsValuePerCost": 1476.35,
+        "costPerConversionMicros": 2835545128,
+        "purchasedConversionsValuePerCost": 284.34,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-25"
+      },
+      "metrics": {
+        "impressions": 30403,
+        "clicks": 95,
+        "grossCostMicros": 89822109734,
+        "conversions": 46,
+        "conversionsValueMicros": 1792330000000,
+        "lastClickConversions": 46,
+        "lastClickConversionsValueMicros": 1792330000000,
+        "dataDrivenConversions": 45.99998,
+        "dataDrivenConversionsValueMicros": 1792329998000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 793130000000,
+        "ctr": 0.31,
+        "averageCpcMicros": 945495892,
+        "averageCpmMicros": 2954383111,
+        "conversionRate": 48.42,
+        "conversionsValuePerCost": 1995.42,
+        "costPerConversionMicros": 1952654559,
+        "purchasedConversionsValuePerCost": 883.0,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-26"
+      },
+      "metrics": {
+        "impressions": 34535,
+        "clicks": 102,
+        "grossCostMicros": 90930252266,
+        "conversions": 25,
+        "conversionsValueMicros": 868010000000,
+        "lastClickConversions": 21,
+        "lastClickConversionsValueMicros": 723890000000,
+        "dataDrivenConversions": 20.99998,
+        "dataDrivenConversionsValueMicros": 723889997000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 294510000000,
+        "ctr": 0.3,
+        "averageCpcMicros": 891473061,
+        "averageCpmMicros": 2632988338,
+        "conversionRate": 24.51,
+        "conversionsValuePerCost": 954.59,
+        "costPerConversionMicros": 3637210091,
+        "purchasedConversionsValuePerCost": 323.89,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-27"
+      },
+      "metrics": {
+        "impressions": 38984,
+        "clicks": 86,
+        "grossCostMicros": 92133119869,
+        "conversions": 30,
+        "conversionsValueMicros": 1414540000000,
+        "lastClickConversions": 29,
+        "lastClickConversionsValueMicros": 1339840000000,
+        "dataDrivenConversions": 29.0,
+        "dataDrivenConversionsValueMicros": 1339840000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 197440000000,
+        "ctr": 0.22,
+        "averageCpcMicros": 1071315347,
+        "averageCpmMicros": 2363357271,
+        "conversionRate": 34.88,
+        "conversionsValuePerCost": 1535.32,
+        "costPerConversionMicros": 3071103996,
+        "purchasedConversionsValuePerCost": 214.3,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-28"
+      },
+      "metrics": {
+        "impressions": 33307,
+        "clicks": 100,
+        "grossCostMicros": 92809853522,
+        "conversions": 26,
+        "conversionsValueMicros": 1051420000000,
+        "lastClickConversions": 25,
+        "lastClickConversionsValueMicros": 1018540000000,
+        "dataDrivenConversions": 25.0,
+        "dataDrivenConversionsValueMicros": 1018540000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 290720000000,
+        "ctr": 0.3,
+        "averageCpcMicros": 928098535,
+        "averageCpmMicros": 2786496938,
+        "conversionRate": 26.0,
+        "conversionsValuePerCost": 1132.88,
+        "costPerConversionMicros": 3569609751,
+        "purchasedConversionsValuePerCost": 313.24,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-29"
+      },
+      "metrics": {
+        "impressions": 33787,
+        "clicks": 76,
+        "grossCostMicros": 71598688775,
+        "conversions": 21,
+        "conversionsValueMicros": 973500000000,
+        "lastClickConversions": 17,
+        "lastClickConversionsValueMicros": 729700000000,
+        "dataDrivenConversions": 16.99998,
+        "dataDrivenConversionsValueMicros": 729699998000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 238600000000,
+        "ctr": 0.22,
+        "averageCpcMicros": 942088010,
+        "averageCpmMicros": 2119119448,
+        "conversionRate": 27.63,
+        "conversionsValuePerCost": 1359.66,
+        "costPerConversionMicros": 3409461370,
+        "purchasedConversionsValuePerCost": 333.25,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-30"
+      },
+      "metrics": {
+        "impressions": 28132,
+        "clicks": 90,
+        "grossCostMicros": 88064588924,
+        "conversions": 35,
+        "conversionsValueMicros": 1346640000000,
+        "lastClickConversions": 33,
+        "lastClickConversionsValueMicros": 1276120000000,
+        "dataDrivenConversions": 33.0,
+        "dataDrivenConversionsValueMicros": 1276120000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 297740000000,
+        "ctr": 0.32,
+        "averageCpcMicros": 978495432,
+        "averageCpmMicros": 3130406261,
+        "conversionRate": 38.89,
+        "conversionsValuePerCost": 1529.15,
+        "costPerConversionMicros": 2516131112,
+        "purchasedConversionsValuePerCost": 338.09,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-05-31"
+      },
+      "metrics": {
+        "impressions": 27561,
+        "clicks": 98,
+        "grossCostMicros": 97879520635,
+        "conversions": 33,
+        "conversionsValueMicros": 1153360000000,
+        "lastClickConversions": 30,
+        "lastClickConversionsValueMicros": 1078060000000,
+        "dataDrivenConversions": 29.99996,
+        "dataDrivenConversionsValueMicros": 1078059998000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 417460000000,
+        "ctr": 0.36,
+        "averageCpcMicros": 998770619,
+        "averageCpmMicros": 3551377694,
+        "conversionRate": 33.67,
+        "conversionsValuePerCost": 1178.35,
+        "costPerConversionMicros": 2966046080,
+        "purchasedConversionsValuePerCost": 426.5,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-06-01"
+      },
+      "metrics": {
+        "impressions": 34872,
+        "clicks": 106,
+        "grossCostMicros": 104851235606,
+        "conversions": 49,
+        "conversionsValueMicros": 2055300000000,
+        "lastClickConversions": 42,
+        "lastClickConversionsValueMicros": 1661880000000,
+        "dataDrivenConversions": 42.0,
+        "dataDrivenConversionsValueMicros": 1661880000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 492800000000,
+        "ctr": 0.3,
+        "averageCpcMicros": 989162600,
+        "averageCpmMicros": 3006745687,
+        "conversionRate": 46.23,
+        "conversionsValuePerCost": 1960.21,
+        "costPerConversionMicros": 2139821135,
+        "purchasedConversionsValuePerCost": 470.0,
+        "averageCpvMicros": 0
+      }
+    },
+    {
+      "segments": {
+        "day": "2026-06-02"
+      },
+      "metrics": {
+        "impressions": 36706,
+        "clicks": 95,
+        "grossCostMicros": 87514699146,
+        "conversions": 27,
+        "conversionsValueMicros": 1025640000000,
+        "lastClickConversions": 26,
+        "lastClickConversionsValueMicros": 976140000000,
+        "dataDrivenConversions": 26.0,
+        "dataDrivenConversionsValueMicros": 976140000000,
+        "videoViews": 0,
+        "videoViewsGrossCostMicros": 0,
+        "purchasedConversionsValueMicros": 273740000000,
+        "ctr": 0.26,
+        "averageCpcMicros": 921207359,
+        "averageCpmMicros": 2384206918,
+        "conversionRate": 28.42,
+        "conversionsValuePerCost": 1171.96,
+        "costPerConversionMicros": 3241285154,
+        "purchasedConversionsValuePerCost": 312.79,
+        "averageCpvMicros": 0
+      }
+    }
+  ]
+}

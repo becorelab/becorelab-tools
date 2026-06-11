@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>비코어랩 ERP</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="/static/css/style.css?v=20260602d" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- Login -->
+<div id="login-screen" class="login-wrap">
+  <!-- Left: Brand Panel -->
+  <div class="login-brand">
+    <div class="login-brand-logo">
+      <div class="logo-icon">b</div>
+      <div>
+        <div class="logo-text">becorelab</div>
+        <div class="logo-sub">Enterprise Resource Planning</div>
+      </div>
+    </div>
+
+    <div class="login-brand-content">
+      <h1>거래처·재고·매출,<br>한 화면에서.</h1>
+      <p>소규모 이커머스의 운영을 위한 ERP.<br>일비아(iLBiA) 생활용품 라인의 거래처, 품목, 재고, 매출, 발주를 한 곳에서 관리하세요.</p>
+      <div class="login-stats">
+        <div>
+          <div class="login-stat-value" id="login-stat-partners">-</div>
+          <div class="login-stat-label">거래처</div>
+        </div>
+        <div>
+          <div class="login-stat-value" id="login-stat-products">-</div>
+          <div class="login-stat-label">품목</div>
+        </div>
+        <div>
+          <div class="login-stat-value" id="login-stat-channels">6</div>
+          <div class="login-stat-label">판매 채널</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-brand-footer">© 2026 BECORELAB · v1.0</div>
+  </div>
+
+  <!-- Right: Login Form -->
+  <div class="login-form-panel">
+    <div class="login-label">BECORELAB</div>
+    <h2>로그인</h2>
+    <div class="login-subtitle">비코어랩 ERP 시스템에 로그인하세요.</div>
+
+    <form class="login-form" id="login-form" onsubmit="return false;">
+      <div class="form-group">
+        <label>아이디 <span class="required">*</span></label>
+        <input type="text" id="login-user" placeholder="아이디" autofocus />
+      </div>
+      <div class="form-group">
+        <label>비밀번호 <span class="required">*</span></label>
+        <input type="password" id="login-pass" placeholder="••••••••" />
+      </div>
+      <div class="login-error" id="login-error"></div>
+      <div class="login-options">
+        <label><input type="checkbox" checked /> 로그인 상태 유지</label>
+      </div>
+      <button type="submit" class="login-submit" id="login-btn">
+        로그인
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </form>
+
+    <div class="login-footer">
+      시스템 문의: <b>support@becorelab.com</b>
+    </div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app" class="hidden" style="display:contents">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">BECORELAB <span>ERP</span></div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-title">Overview</div>
+      <a class="nav-item active" data-page="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        대시보드
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">마스터</div>
+      <a class="nav-item" data-page="partners">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        거래처
+      </a>
+      <a class="nav-item" data-page="products">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        품목
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">운영</div>
+      <a class="nav-item" data-page="stock">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4M4 7l8 4M4 7v10l8 4m0-10v10"/></svg>
+        재고
+        <span class="badge" id="nav-lowstock" style="display:none"></span>
+      </a>
+      <a class="nav-item" data-page="sales">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        매출
+      </a>
+      <a class="nav-item" data-page="orders">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        발주
+      </a>
+      <a class="nav-item" data-page="pricing">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        기준판매가
+      </a>
+      <a class="nav-item" data-page="calendar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        일정관리
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">설정</div>
+      <a class="nav-item" data-page="users">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        사용자
+      </a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <span id="user-name">관리자</span> · <span class="text-muted">v1.0</span>
+    <button class="btn-logout" id="logout-btn" title="로그아웃">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<div class="main">
+  <header class="header">
+    <span id="page-title" class="header-title">대시보드</span>
+    <div class="header-actions">
+      <span class="text-muted" style="font-size:13px" id="current-time"></span>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Dashboard -->
+    <div id="page-dashboard" class="page">
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon orange">💰</div>
+          <div class="card-label">오늘 매출</div>
+          <div class="card-value" id="dash-today-sales" style="font-size:22px">-</div>
+        </div>
+        <div class="card">
+          <div class="card-icon blue">📊</div>
+          <div class="card-label">이번달 매출</div>
+          <div class="card-value" id="dash-month-sales" style="font-size:22px">-</div>
+        </div>
+        <div class="card">
+          <div class="card-icon red">⚠️</div>
+          <div class="card-label">재고부족</div>
+          <div class="card-value" id="dash-lowstock">-</div>
+        </div>
+        <div class="card">
+          <div class="card-icon green">📋</div>
+          <div class="card-label">진행중 발주</div>
+          <div class="card-value" id="dash-pending-po">-</div>
+        </div>
+      </div>
+      <div class="dash-charts">
+        <div class="chart-card chart-card-wide">
+          <div class="chart-card-header">
+            <span class="chart-card-title">매출 추이 (최근 30일)</span>
+          </div>
+          <div class="chart-card-body"><canvas id="chart-trend"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-card-title">이번달 채널별 매출</span>
+          </div>
+          <div class="chart-card-body chart-card-body-donut"><canvas id="chart-channels"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-card" style="margin-top:14px">
+        <div class="chart-card-header">
+          <span class="chart-card-title">이번달 거래처별 매출</span>
+        </div>
+        <div class="chart-card-body" style="padding:0">
+          <table>
+            <thead><tr><th>#</th><th>거래처</th><th class="text-right">건수</th><th class="text-right">매출액</th><th>비중</th></tr></thead>
+            <tbody id="dash-top-products"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Partners -->
+    <div id="page-partners" class="page hidden">
+      <div class="page-header">
+        <h2></h2>
+        <button class="btn btn-primary" onclick="editPartner(0)">+ 거래처 등록</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input type="search" id="partner-search" placeholder="이름, 코드, 사업자번호 검색..." class="search-box" />
+          <span class="text-muted" id="partners-info"></span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>코드</th><th>거래처명</th><th>유형</th><th>사업자번호</th><th>대표자</th><th>연락처</th><th>관리</th></tr></thead>
+            <tbody id="partners-tbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><div id="partners-paging"></div></div>
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div id="page-products" class="page hidden">
+      <div class="page-header">
+        <h2></h2>
+        <button class="btn btn-primary" onclick="editProduct(0)">+ 품목 등록</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input type="search" id="product-search" placeholder="품목명, 코드 검색..." class="search-box" />
+          <span class="text-muted" id="products-info"></span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>코드</th><th>품목명</th><th>규격</th><th>단위</th><th class="text-right">재고</th><th class="text-right">매입가</th><th class="text-right">판매가</th><th>관리</th></tr></thead>
+            <tbody id="products-tbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><div id="products-paging"></div></div>
+      </div>
+    </div>
+
+    <!-- Stock -->
+    <div id="page-stock" class="page hidden">
+      <div class="page-header">
+        <h2></h2>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-success" onclick="syncStock()">이지어드민 동기화</button>
+        </div>
+      </div>
+      <div id="stock-dashboard" class="stock-dashboard"></div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input type="search" id="stock-search" placeholder="품목명, 코드 검색..." class="search-box" />
+          <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="stock-alert" onchange="loadStock()" /> 부족만
+          </label>
+          <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="stock-hide-zero" onchange="loadStock()" /> 품절 숨기기
+          </label>
+          <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="stock-show-material" onchange="loadStock()" /> 부자재 포함
+          </label>
+          <span class="text-muted" id="stock-info"></span>
+        </div>
+        <div id="stock-bulk-bar" class="bulk-bar hidden">
+          <span id="stock-bulk-count">0건 선택</span>
+          <button class="btn btn-sm" onclick="bulkStockAction('discontinue')">⛔ 일괄 단종</button>
+          <button class="btn btn-sm" onclick="bulkStockAction('activate')">🔄 일괄 판매재개</button>
+          <button class="btn btn-sm" style="color:var(--red)" onclick="bulkStockAction('delete')">🗑️ 일괄 삭제</button>
+          <button class="btn btn-sm" onclick="clearStockSelection()">선택 해제</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th style="width:36px"><input type="checkbox" id="stock-check-all" onchange="toggleStockCheckAll(this)" /></th><th>코드</th><th>품목명</th><th class="text-right">현재고</th><th>재고수준</th><th class="text-right">일평균출고</th><th class="text-right">예상소진</th><th>상태</th><th>수불부</th></tr></thead>
+            <tbody id="stock-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sales -->
+    <div id="page-sales" class="page hidden">
+      <div class="page-header">
+        <h2></h2>
+        <button class="btn btn-success" onclick="syncSales()">매출 동기화</button>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item active" data-sales-tab="list" onclick="switchSalesTab('list')">전체 내역</div>
+        <div class="tab-item" data-sales-tab="summary" onclick="switchSalesTab('summary')">요약 분석</div>
+      </div>
+      <!-- Sales List Tab -->
+      <div id="sales-tab-list">
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <input type="date" id="sales-from" onchange="loadSales()" style="width:150px" />
+            <span class="text-muted">~</span>
+            <input type="date" id="sales-to" onchange="loadSales()" style="width:150px" />
+            <button class="btn btn-sm" onclick="setDateRange('yesterday','sales')">어제</button>
+            <button class="btn btn-sm" onclick="setDateRange('7days','sales')">7일</button>
+            <button class="btn btn-sm" onclick="setDateRange('thisMonth','sales')">이번달</button>
+            <button class="btn btn-sm" onclick="setDateRange('lastMonth','sales')">지난달</button>
+            <select id="sales-channel" onchange="loadSales()" style="width:180px">
+              <option value="">전체 채널</option>
+            </select>
+            <input type="search" id="sales-search" placeholder="품목명 검색..." style="width:160px" onkeydown="if(event.key==='Enter')loadSales()" />
+            <button class="btn btn-sm btn-primary" onclick="loadSales()">조회</button>
+            <button class="btn btn-sm" id="sales-group-toggle" onclick="salesGrouped=!salesGrouped;loadSales()">합산 보기</button>
+            <span class="text-muted" id="sales-info"></span>
+            <span style="margin-left:auto;font-weight:700;color:var(--accent)" id="sales-sum"></span>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead id="sales-thead"><tr><th>매출일</th><th>채널</th><th>품목</th><th class="text-right">공급가</th><th class="text-right">세액</th><th class="text-right">합계</th><th>상태</th></tr></thead>
+              <tbody id="sales-tbody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer"><div id="sales-paging"></div></div>
+        </div>
+      </div>
+      <!-- Sales Summary Tab -->
+      <div id="sales-tab-summary" class="hidden">
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <input type="date" id="summary-from" style="width:150px" />
+            <span class="text-muted">~</span>
+            <input type="date" id="summary-to" style="width:150px" />
+            <button class="btn btn-sm" onclick="setDateRange('yesterday','summary')">어제</button>
+            <button class="btn btn-sm" onclick="setDateRange('7days','summary')">7일</button>
+            <button class="btn btn-sm" onclick="setDateRange('thisMonth','summary')">이번달</button>
+            <button class="btn btn-sm" onclick="setDateRange('lastMonth','summary')">지난달</button>
+            <select id="summary-group" style="width:140px">
+              <option value="daily">일별</option>
+              <option value="weekly">주별</option>
+              <option value="channel">채널별</option>
+              <option value="product">품목별</option>
+            </select>
+            <select id="summary-channel" style="width:180px">
+              <option value="">전체 채널</option>
+            </select>
+            <input type="search" id="summary-search" placeholder="검색..." style="width:140px" onkeydown="if(event.key==='Enter')loadSalesSummary()" />
+            <button class="btn btn-sm btn-primary" onclick="loadSalesSummary()">조회</button>
+            <span style="margin-left:auto;font-weight:700;color:var(--accent)" id="summary-total"></span>
+          </div>
+          <div class="chart-card-body" style="height:260px;padding:12px 18px"><canvas id="chart-sales-summary"></canvas></div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>구분</th><th class="text-right">수량/건수</th><th class="text-right">공급가</th><th class="text-right">세액</th><th class="text-right">합계</th></tr></thead>
+              <tbody id="summary-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchase Orders -->
+    <div id="page-orders" class="page hidden">
+      <div class="page-header">
+        <h2></h2>
+        <button class="btn btn-primary" onclick="newOrder()">+ 발주서 작성</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input type="date" id="order-from" onchange="loadOrders()" style="width:150px" />
+          <span class="text-muted">~</span>
+          <input type="date" id="order-to" onchange="loadOrders()" style="width:150px" />
+          <input type="search" id="order-search" placeholder="거래처명, 발주번호 검색..." oninput="debounceLoadOrders()" style="width:200px" />
+          <select id="order-status" onchange="loadOrders()" style="width:130px">
+            <option value="">전체 상태</option>
+            <option value="draft">작성중</option>
+            <option value="confirmed">확정</option>
+            <option value="partial">부분입고</option>
+            <option value="completed">완료</option>
+          </select>
+          <select id="order-sort" onchange="loadOrders()" style="width:130px">
+            <option value="date_desc">최신순</option>
+            <option value="date_asc">오래된순</option>
+            <option value="amount_desc">금액 높은순</option>
+            <option value="amount_asc">금액 낮은순</option>
+            <option value="supplier">공급처순</option>
+          </select>
+          <span class="text-muted" id="orders-info"></span>
+          <span style="margin-left:auto;font-weight:700;color:var(--accent)" id="orders-sum"></span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>발주번호</th><th>발주일</th><th>공급처</th><th>품목</th><th>납품예정일</th><th class="text-right">금액</th><th>상태</th></tr></thead>
+            <tbody id="orders-tbody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><div id="orders-paging"></div></div>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div id="page-calendar" class="page hidden">
+      <div class="page-header">
+        <div class="cal-nav">
+          <button class="btn btn-sm" onclick="calMove(-1)">‹</button>
+          <h2 id="cal-title" style="margin:0 4px;min-width:140px;text-align:center"></h2>
+          <button class="btn btn-sm" onclick="calMove(1)">›</button>
+          <button class="btn btn-sm" onclick="calToday()">오늘</button>
+        </div>
+        <div class="cal-legend">
+          <span class="cal-dot type-leave"></span>연차
+          <span class="cal-dot type-meeting"></span>미팅
+          <span class="cal-dot type-restock"></span>재입고(발주)
+          <span class="cal-dot type-etc"></span>기타
+        </div>
+        <button class="btn btn-primary" onclick="editEvent(0)">+ 일정 추가</button>
+      </div>
+      <div class="calendar">
+        <div class="cal-weekdays">
+          <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+    </div>
+
+    <!-- Users -->
+    <div id="page-users" class="page hidden">
+      <div class="page-header">
+        <h2></h2>
+        <button class="btn btn-primary" onclick="editUser(0)">+ 직원 추가</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <span class="text-muted">퇴사자는 <b>삭제 대신 "비활성화"</b> 하세요 — 로그인은 즉시 차단되고 과거 기록은 보존됩니다.</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>ID</th><th>아이디</th><th>이름</th><th>이메일</th><th>권한</th><th>상태</th><th>관리</th></tr></thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing (기준판매가) -->
+    <div id="page-pricing" class="page hidden">
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <select id="pricing-group" onchange="renderPricing()" style="width:220px"></select>
+          <input type="search" id="pricing-search" placeholder="품목·코드 검색..." class="search-box" oninput="renderPricing()" />
+          <button class="btn btn-sm btn-success" onclick="exportPricingExcel()">📥 엑셀 내보내기</button>
+          <span class="text-muted" style="margin-left:auto">판매가만 고치면 자동 계산 · 셀에 마우스 올리면 공급가·개당이익 (수수료 6% 기준)</span>
+        </div>
+        <div class="table-scroll">
+          <table class="pricing-table">
+            <thead id="pricing-thead"></thead>
+            <tbody id="pricing-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header"><span></span><button class="btn-icon" onclick="closeModal()" style="font-size:18px">&times;</button></div>
+    <div class="modal-body"></div>
+    <div class="modal-footer"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toasts"></div>
+
+<script src="/static/js/app.js?v=20260602d"></script>
+<script>
+setInterval(() => {
+  const el = document.getElementById('current-time');
+  if (el) el.textContent = new Date().toLocaleString('ko-KR', { month:'numeric', day:'numeric', weekday:'short', hour:'2-digit', minute:'2-digit' });
+}, 1000);
+</script>
+</body>
+</html>
