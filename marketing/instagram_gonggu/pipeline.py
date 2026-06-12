@@ -35,6 +35,12 @@ from crawler import InstaCrawler
 from screener import screen_account
 from templates import generate_dm
 from dm_sender import DMSender, get_dm_count_today
+sys.path.insert(0, "/Users/macmini_ky/ClaudeAITeam/automation")
+try:
+    from alert import alert
+except Exception:
+    def alert(*a, **k):
+        pass
 
 # ── 구글 시트 설정 ───────────────────────────────────────────
 import gspread
@@ -201,6 +207,7 @@ def cmd_crawl():
     crawler = InstaCrawler()
     if not crawler.login():
         print("[ERROR] instagrapi 로그인 실패")
+        alert("인스타 공구", "인스타 로그인이 안 돼서 셀러 수집·DM을 못 하고 있어요 😢 IP가 막혔거나 세션이 풀린 것 같아요. 저녁에 하치랑 같이 봐요!", "critical")
         return
 
     raw_accounts = crawler.crawl_hashtags()

@@ -10,6 +10,11 @@ from collections import defaultdict
 from datetime import date, timedelta
 sys.path.insert(0, "/Users/macmini_ky/ClaudeAITeam/logistics")
 sys.path.insert(0, "/Users/macmini_ky/ClaudeAITeam/automation")
+try:
+    from alert import alert
+except Exception:
+    def alert(*a, **k):
+        pass
 from supplyhub_scraper import scrape_supplyhub
 from rocket_sales_sync import upsert
 
@@ -37,7 +42,9 @@ def main():
     print(f"[로켓 일별] 입고상세 수집: {first} ~ {yesterday}")
     res = scrape_supplyhub(first, yesterday)
     if not res:
-        print("  ❌ supplyhub 수집 실패(Akamai 403 등) — 오늘 스킵"); sys.exit(1)
+        print("  ❌ supplyhub 수집 실패(Akamai 403 등) — 오늘 스킵")
+        alert("로켓 매출", "로켓배송 매출을 가져오려는데 쿠팡이 막아서 오늘은 못 가져왔어요 😢 서플라이허브 세션이 풀린 것 같아요. supplyhub_relogin.py로 재로그인만 해주시면 하치가 바로 채워드릴게요!", "critical")
+        sys.exit(1)
     items = res.get('items', [])
     if not items:
         print("  (입고 데이터 없음)"); return

@@ -15,6 +15,11 @@
 import json, time, sys, sqlite3, os
 from datetime import datetime, timedelta
 from playwright.sync_api import sync_playwright
+try:
+    from alert import alert
+except Exception:
+    def alert(*a, **k):
+        pass
 
 CDP_URL = "http://127.0.0.1:9222"
 SALES_URL = "https://wing.coupang.com/tenants/business-insight/sales-analysis"
@@ -166,15 +171,19 @@ def main():
             print(f"  ⚠️ {e} → 무인 재로그인 시도")
             from gross_auto_relogin import auto_relogin
             if not auto_relogin():
-                print("  ❌ 무인 재로그인 실패 — gross_relogin.sh 수동 필요"); sys.exit(1)
+                print("  ❌ 무인 재로그인 실패 — gross_relogin.sh 수동 필요")
+                alert("그로스 매출", "그로스가 로그인이 완전히 풀려서 자동복구도 실패했어요 😢 gross_relogin.sh로 재로그인 한 번만 해주시면 하치가 바로 매출 채워드릴게요!", "critical")
+                sys.exit(1)
             try:
                 rows = fetch_options_for(date_str)
             except Exception as e2:
-                print(f"  ❌ 재시도 실패: {e2}"); sys.exit(1)
+                print(f"  ❌ 재시도 실패: {e2}")
+                alert("그로스 매출", f"재로그인은 됐는데 그 다음 수집이 또 막혔어요 ㅠㅠ 저녁에 하치랑 같이 봐요! ({str(e2)[:50]})", "critical")
+                sys.exit(1)
         else:
-            print(f"  ❌ 수집 실패: {e}"); sys.exit(1)
+            alert("그로스 매출", f"그로스 매출을 가져오다 문제가 생겼어요 😢 ({str(e)[:50]}) 저녁에 하치가 확인할게요!", "critical"); print(f"  ❌ 수집 실패: {e}"); sys.exit(1)
     except Exception as e:
-        print(f"  ❌ 수집 실패: {e}"); sys.exit(1)
+        alert("그로스 매출", f"그로스 매출을 가져오다 문제가 생겼어요 😢 ({str(e)[:50]}) 저녁에 하치가 확인할게요!", "critical"); print(f"  ❌ 수집 실패: {e}"); sys.exit(1)
     print(f"  옵션 {len(rows)}개 수집")
     if not rows:
         print("  (판매 없음)"); return
