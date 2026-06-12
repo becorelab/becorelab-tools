@@ -104,7 +104,9 @@ def upsert(date_str, rows):
               commission=excluded.commission, est_profit=excluded.est_profit, updated_at=excluded.updated_at""",
             (date_str,oid,name,units,gmv,orders,wh,ship,comm,profit))
         n+=1
-    conn.commit(); conn.close(); return n
+    conn.commit(); conn.close()
+    sync_to_sales(date_str)   # 원천 적재 직후 통합(sales) 동기화 — 백필/일별 어느 경로든 자동
+    return n
 
 def sync_to_sales(date_str):
     """gross_daily_sales(해당일) → ERP sales 일별 집계 반영 (매출 화면에 보이게).
@@ -116,7 +118,11 @@ def sync_to_sales(date_str):
     gmv_sum = round(sum(r[3] for r in g))
     supply = round(gmv_sum/1.1); tax = gmv_sum - supply
     CH = '비코어랩 쿠팡 그로스'
-    # 기존 그 채널 해당일 row 삭제(0원 자동분 + 이전 그로스분) → 멱등
+    # 기존 그 채널 해당일 row 삭제 — 자식 sale_lines 먼저 삭제(고아 방지) → 멱등
+    old_ids = [r[0] for r in conn.execute(
+        "SELECT id FROM sales WHERE channel=? AND sale_date=?", (CH, date_str)).fetchall()]
+    if old_ids:
+        conn.executemany("DELETE FROM sale_lines WHERE sale_id=?", [(i,) for i in old_ids])
     conn.execute("DELETE FROM sales WHERE channel=? AND sale_date=?", (CH, date_str))
     cur = conn.execute("""INSERT INTO sales
         (sale_date,partner_id,channel,channel_order_no,total_supply,total_tax,total_amount,status,source)
@@ -127,6 +133,25 @@ def sync_to_sales(date_str):
         conn.execute("INSERT INTO sale_lines (sale_id,product_name,qty,line_total) VALUES (?,?,?,?)",
                      (sid, name, units, round(gmv)))
     conn.commit(); conn.close(); return gmv_sum
+
+def reconcile_sales():
+    """gross_daily_sales(원천) ↔ sales(통합) 전체 정합성 자동 보정.
+    원천엔 있는데 통합에 없거나 금액이 다른 날을 모두 재동기화 → 자가 치유.
+    어떤 이유로 구멍이 생겨도 매일 크론에서 자동 복구됨."""
+    conn = sqlite3.connect(ERP_DB, timeout=30)
+    CH = '비코어랩 쿠팡 그로스'
+    src = dict(conn.execute(
+        "SELECT sale_date, ROUND(SUM(gmv)) FROM gross_daily_sales GROUP BY sale_date").fetchall())
+    dst = dict(conn.execute(
+        "SELECT sale_date, ROUND(SUM(total_amount)) FROM sales WHERE channel=? GROUP BY sale_date",
+        (CH,)).fetchall())
+    conn.close()
+    fixed = []
+    for d, amt in sorted(src.items()):
+        if dst.get(d) != amt:   # 통합에 없거나 금액 불일치 → 재동기화
+            sync_to_sales(d)
+            fixed.append(d)
+    return fixed
 
 def main():
     if len(sys.argv)>1 and sys.argv[1].count('-')==2:
@@ -153,10 +178,13 @@ def main():
     print(f"  옵션 {len(rows)}개 수집")
     if not rows:
         print("  (판매 없음)"); return
-    n = upsert(date_str, rows)
-    print(f"  ✅ {n}개 옵션 → gross_daily_sales 적재. GMV합 {sum(r[3] for r in rows):,}원")
-    sv = sync_to_sales(date_str)
-    print(f"  ✅ ERP sales 반영: {sv:,}원 (매출 화면에 그로스 표시)")
+    n = upsert(date_str, rows)   # 원천 적재 + 통합 sales 자동 동기화(upsert 내장)
+    print(f"  ✅ {n}개 옵션 → gross_daily_sales 적재 + ERP sales 동기화. GMV합 {sum(r[3] for r in rows):,}원")
+    fixed = reconcile_sales()    # 과거 구멍/불일치 자동 복구 (자가 치유)
+    if fixed:
+        print(f"  🔧 정합성 보정: {len(fixed)}일 재동기화 ({fixed[0]}~{fixed[-1]})")
+    else:
+        print("  ✅ ERP 정합성 OK (구멍 없음)")
 
 if __name__ == "__main__":
     main()
