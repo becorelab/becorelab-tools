@@ -7,8 +7,9 @@
 - 옵션별 GMV(주문일 기준)/판매량/주문수 → 물류비 단가표 + 수수료 → ERP gross_daily_sales(멱등)
 - 수집 성공 시 쿠키 재백업(세션 갱신분 저장)
 
-※ 백업쿠키도 만료되면(서버측 세션 종료) 대표님 재로그인 필요:
-   automation/gross_relogin.sh 실행 → 헤드풀 크롬 떠서 로그인 → 쿠키 백업 → 헤드리스 복귀
+※ 백업쿠키도 만료되면(서버측 세션 종료) gross_auto_relogin.py가 stealth 브라우저로
+   무인 재로그인 → 백업쿠키 갱신 → 1회 재시도 (2026-06-12 추가, 대표님 손 불필요)
+   그래도 실패하면 최후 수단: automation/gross_relogin.sh (헤드풀 수동 로그인)
 ※ 정확한 정산(프로모션 면제/저가할인)은 월정산 파일로 보정.
 """
 import json, time, sys, sqlite3, os
@@ -135,6 +136,18 @@ def main():
     print(f"[{datetime.now():%Y-%m-%d %H:%M}] 그로스 일별 수집: {date_str}")
     try:
         rows = fetch_options_for(date_str)
+    except RuntimeError as e:
+        if "세션 만료" in str(e):
+            print(f"  ⚠️ {e} → 무인 재로그인 시도")
+            from gross_auto_relogin import auto_relogin
+            if not auto_relogin():
+                print("  ❌ 무인 재로그인 실패 — gross_relogin.sh 수동 필요"); sys.exit(1)
+            try:
+                rows = fetch_options_for(date_str)
+            except Exception as e2:
+                print(f"  ❌ 재시도 실패: {e2}"); sys.exit(1)
+        else:
+            print(f"  ❌ 수집 실패: {e}"); sys.exit(1)
     except Exception as e:
         print(f"  ❌ 수집 실패: {e}"); sys.exit(1)
     print(f"  옵션 {len(rows)}개 수집")
