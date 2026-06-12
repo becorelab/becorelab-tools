@@ -253,7 +253,7 @@ def _run_scan_cdp(scan_id: int, keyword: str):
         revenue_concentration=round(opp_score.top1_share * 100, 1),
         revenue_equality=round(opp_score.sellers_over_3m_rate * 100, 1),
         new_product_rate=round(opp_score.new_product_rate * 100, 1),
-        ad_dependency=round(opp_score.ad_dependency, 1),
+        ad_dependency=round(opp_score.avg_new_product_weight, 1),
         recommended_keyword=opp_score.recommended_keyword,
     )
 
@@ -263,7 +263,7 @@ def _run_scan_cdp(scan_id: int, keyword: str):
         f'  상품: {len(result.products)}개 | 유입키워드: {len(result.inflow_keywords)}개\n'
         f'  상위10 평균매출: {opp_score.top10_avg_revenue:,}원\n'
         f'  1위점유율: {opp_score.top1_share*100:.1f}% | 매출균등도: {opp_score.revenue_equality*100:.1f}%\n'
-        f'  신상품진입률: {opp_score.new_product_rate*100:.1f}% | 광고의존도: {opp_score.ad_dependency:.1f}%\n'
+        f'  신상품진입률: {opp_score.new_product_rate*100:.1f}% | 신상품가중치: {opp_score.avg_new_product_weight:.1f}\n'
         f'  추천키워드: {opp_score.recommended_keyword}'
     )
     _scan_progress.pop(scan_id, None)
@@ -1351,7 +1351,7 @@ def _run_scan_import(scan_id: int, keyword: str, raw_products: list):
                 revenue_concentration=round(opp_score.top1_share * 100, 1),
                 revenue_equality=round(opp_score.sellers_over_3m_rate * 100, 1),
                 new_product_rate=round(opp_score.new_product_rate * 100, 1),
-                ad_dependency=round(opp_score.ad_dependency, 1),
+                ad_dependency=round(opp_score.avg_new_product_weight, 1),
                 recommended_keyword=opp_score.recommended_keyword,
             )
 

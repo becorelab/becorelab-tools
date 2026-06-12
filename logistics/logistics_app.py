@@ -15,7 +15,7 @@ import subprocess
 import tempfile
 import threading
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -316,9 +316,10 @@ def scheduled_supplyhub():
 
 def _save_supplyhub_to_firestore(result):
     """서플라이허브 데이터를 Firestore에 저장"""
-    if not db:
+    if not _firestore_ok:
         log.warning("Firestore 미연결, 서플라이허브 저장 생략")
         return
+    db = fdb.db()
     target_date = result["date"]
     doc_ref = db.collection("supplyhub_daily").document(target_date)
     doc_ref.set({
@@ -1638,8 +1639,9 @@ def api_supplyhub_data():
     date_from = request.args.get("date_from", "")
     date_to = request.args.get("date_to", date_from)
 
-    if not db:
+    if not _firestore_ok:
         return jsonify({"error": "Firestore 미연결"}), 500
+    db = fdb.db()
 
     all_items = []
     total_unit = 0

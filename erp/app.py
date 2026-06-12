@@ -125,7 +125,7 @@ async def login(request: Request, conn=Depends(db)):
 async def dashboard(conn=Depends(db)):
     partners = conn.execute("SELECT COUNT(*) as cnt FROM partners WHERE is_active=1").fetchone()["cnt"]
     products = conn.execute("SELECT COUNT(*) as cnt FROM products WHERE is_active=1").fetchone()["cnt"]
-    low_stock = conn.execute("SELECT COUNT(*) as cnt FROM stock WHERE qty_on_hand <= 10").fetchone()["cnt"]
+    low_stock = conn.execute("SELECT COUNT(*) as cnt FROM stock s JOIN products p ON p.id=s.product_id WHERE s.qty_on_hand <= p.safety_stock AND p.is_active=1").fetchone()["cnt"]
 
     today = datetime.now().strftime("%Y-%m-%d")
     month_start = datetime.now().strftime("%Y-%m-01")
@@ -545,7 +545,6 @@ async def sales_summary(
                 WHERE {w} GROUP BY sl.product_name ORDER BY total DESC""",
             params,
         ).fetchall()
-    elif group_by == "product":
         grand_total, _ = _calc_sales_total(conn, date_from, date_to)
         return {"items": [dict(r) for r in rows], "grand_total": grand_total}
     elif group_by == "weekly":
