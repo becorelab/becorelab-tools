@@ -90,7 +90,7 @@ function cardHTML(p) {
       </div>
     </div>
     ${p.ranking ? `<div class="pc-metric-label">${p.platform === 'coupang' ? '쿠팡' : '네이버'} 순위 ${p.ranking}위 ${p.rank_change ? deltaTag(p.rank_change, true) : ''}</div>` : ''}
-    <canvas class="spark" id="spark${p.id}"></canvas>`
+    <div class="spark"><canvas id="spark${p.id}"></canvas></div>`
     : `<div class="pc-empty">아직 수집 데이터가 없어요. '전체 수집'을 눌러 첫 스냅샷을 찍어보세요.</div>`;
   return `
     <div class="product-card ${p.is_mine ? 'mine' : ''}" data-id="${p.id}">

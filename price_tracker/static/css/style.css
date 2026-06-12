@@ -82,7 +82,7 @@ body {
 .alert-empty { color:var(--ink-3); font-size:13px; padding:18px; text-align:center; }
 
 /* 제품 그리드 */
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px; align-items:start; }
 .product-card {
   background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
   padding:16px; cursor:pointer; transition:var(--transition); position:relative;
@@ -100,7 +100,8 @@ body {
 .delta.down { color:var(--green); background:var(--green-bg); }
 .delta.up { color:var(--red); background:var(--red-bg); }
 .delta.flat { color:var(--ink-3); background:var(--line-2); }
-.spark { height:38px; width:100%; margin-top:4px; }
+.spark { height:38px; width:100%; margin-top:4px; position:relative; }
+.spark canvas { width:100% !important; height:100% !important; display:block; }
 .pc-foot { display:flex; align-items:center; gap:8px; margin-top:10px; }
 .pc-empty { font-size:12px; color:var(--ink-3); padding:6px 0; }
 
