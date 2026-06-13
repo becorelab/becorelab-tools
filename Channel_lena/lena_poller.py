@@ -20,7 +20,18 @@ LENA_DIR = Path(r"C:\Users\User\ClaudeAITeam\Channel_lena")
 STATE_FILE = LENA_DIR / "poller_state.json"
 LOG_FILE = LENA_DIR / "poller.log"
 
-LENA_BOT_TOKEN = "8663458998:AAEEnXYWJhq98o2PfoBuqVxbe7JOUvJZYxc"
+def _load_env(path=os.path.join(os.path.dirname(__file__), ".env")):
+    """시크릿은 Channel_lena/.env(gitignore)에서 로드 — 코드에 평문 토큰 없음"""
+    if os.path.exists(path):
+        for _l in open(path, encoding="utf-8"):
+            _l = _l.strip()
+            if "=" in _l and not _l.startswith("#"):
+                _k, _v = _l.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
+
+_load_env()
+LENA_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 BOSS_CHAT_ID = "8708718261"
 
 QUIET_START_HOUR = 22

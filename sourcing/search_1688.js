@@ -2,10 +2,24 @@ const https = require("https");
 const fs = require("fs");
 const path = require("path");
 
+function loadEnv(envPath = path.join(__dirname, ".env")) {
+  if (!fs.existsSync(envPath)) return;
+  for (const line of fs.readFileSync(envPath, "utf8").split("\n")) {
+    const l = line.trim();
+    if (!l || l.startsWith("#") || !l.includes("=")) continue;
+    const idx = l.indexOf("=");
+    const k = l.slice(0, idx).trim();
+    const v = l.slice(idx + 1).trim();
+    if (!(k in process.env)) process.env[k] = v;
+  }
+}
+
+loadEnv();
+
 const BASE_URL = "openapi.elim.asia";
 const TOKEN_CACHE = path.join(__dirname, ".elimapi_token.json");
-const EMAIL = "info@becorelab.kr";
-const PASSWORD = "becolab@2026!!";
+const EMAIL = process.env.ELIMAPI_EMAIL || "";
+const PASSWORD = process.env.ELIMAPI_PASSWORD || "";
 
 function postJson(urlPath, body, token) {
   return new Promise((resolve, reject) => {

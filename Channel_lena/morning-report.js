@@ -6,8 +6,25 @@
 
 const https = require('https');
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
-const BOT_TOKEN = '8621050278:AAE56VUp5v7X9TDrK27ykX_POsYNqDvwO6U';
+// 시크릿은 .env(gitignore)에서 로드 — 코드에 평문 토큰 없음
+function loadEnv(p) {
+  try {
+    fs.readFileSync(p, 'utf8').split('\n').forEach(l => {
+      l = l.trim();
+      const i = l.indexOf('=');
+      if (i > 0 && !l.startsWith('#')) {
+        const k = l.slice(0, i).trim();
+        if (!process.env[k]) process.env[k] = l.slice(i + 1).trim();
+      }
+    });
+  } catch (e) {}
+}
+loadEnv(path.join(__dirname, '.env'));
+
+const BOT_TOKEN = process.env.DOORI_BOT_TOKEN || '';
 const CHAT_ID = '8708718261';
 const LOGISTICS_BASE = 'http://localhost:8082';
 

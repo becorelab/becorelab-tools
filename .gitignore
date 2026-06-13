@@ -41,6 +41,9 @@ sourcing/analyzer/.env
 # Firebase 서비스 계정 키 (절대 커밋 금지)
 *-firebase-adminsdk-*.json
 
+# 크리덴셜 폴더 (naverworks.json 등 평문 시크릿 — 절대 커밋 금지)
+**/credentials/
+
 # 텔레그램/디스코드 봇 (토큰 하드코딩 — 절대 커밋 금지)
 pixie-bot/
 lena-bot/

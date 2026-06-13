@@ -6,12 +6,25 @@ fastDetail.min.js에서 발견한 API 엔드포인트 테스트
 - fast/excel
 """
 
+import os
 import requests
 import json
 import re
 
+
+def _load_env(path=os.path.join(os.path.dirname(__file__), ".env")):
+    if os.path.exists(path):
+        for _l in open(path, encoding="utf-8"):
+            _l = _l.strip()
+            if "=" in _l and not _l.startswith("#"):
+                _k, _v = _l.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
+
+_load_env()
+
 BASE = 'https://helpstore.shop'
-LOGIN_DATA = {'loginId': 'becorelab', 'loginPw': 'qlzhdjfoq2023!!'}
+LOGIN_DATA = {'loginId': os.environ.get("HELPSTORE_ID", ""), 'loginPw': os.environ.get("HELPSTORE_PW", "")}
 
 def login():
     session = requests.Session()

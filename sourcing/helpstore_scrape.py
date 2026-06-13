@@ -1,6 +1,22 @@
+import os
 import asyncio
 import json
 from playwright.async_api import async_playwright
+
+
+def _load_env(path=os.path.join(os.path.dirname(__file__), ".env")):
+    if os.path.exists(path):
+        for _l in open(path, encoding="utf-8"):
+            _l = _l.strip()
+            if "=" in _l and not _l.startswith("#"):
+                _k, _v = _l.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
+
+_load_env()
+
+HELPSTORE_ID = os.environ.get("HELPSTORE_ID", "")
+HELPSTORE_PW = os.environ.get("HELPSTORE_PW", "")
 
 async def main():
     async with async_playwright() as p:
@@ -11,8 +27,8 @@ async def main():
         # 1. 로그인
         await page.goto('https://helpstore.shop/login')
         await page.wait_for_load_state('networkidle')
-        await page.fill('#loginId', 'becorelab')
-        await page.fill('#loginPw', 'qlzhdjfoq2023!!')
+        await page.fill('#loginId', HELPSTORE_ID)
+        await page.fill('#loginPw', HELPSTORE_PW)
         await page.click('#btnLogin')
         await page.wait_for_load_state('networkidle')
         await asyncio.sleep(2)

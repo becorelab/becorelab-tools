@@ -9,6 +9,18 @@ import sys
 # 프로젝트 루트를 path에 추가 (다른 import보다 먼저 실행)
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+
+def _load_env(path=os.path.join(os.path.dirname(__file__), ".env")):
+    if os.path.exists(path):
+        for _l in open(path, encoding="utf-8"):
+            _l = _l.strip()
+            if "=" in _l and not _l.startswith("#"):
+                _k, _v = _l.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
+
+_load_env()
+
 import json
 import re
 import threading
@@ -49,7 +61,7 @@ def get_helpstore():
     if helpstore_api is None:
         helpstore_api = HelpstoreAPI()
     return helpstore_api
-app.config['SECRET_KEY'] = 'becorelab-sourcing-analyzer-2026'
+app.config['SECRET_KEY'] = os.environ.get("FLASK_SECRET_KEY", "")
 
 
 # ─────────────────────────────────────────────

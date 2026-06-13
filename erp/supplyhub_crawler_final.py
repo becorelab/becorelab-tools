@@ -15,6 +15,18 @@ from html import unescape
 
 from curl_cffi import requests as cf_requests
 
+
+def _load_env(path=os.path.join(os.path.dirname(__file__), ".env")):
+    if os.path.exists(path):
+        for _l in open(path, encoding="utf-8"):
+            _l = _l.strip()
+            if "=" in _l and not _l.startswith("#"):
+                _k, _v = _l.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
+
+_load_env()
+
 OUTPUT_PATH = "/Users/macmini_ky/ClaudeAITeam/erp/supplyhub_data.json"
 SCREENSHOT_DIR = "/Users/macmini_ky/ClaudeAITeam/erp/screenshots"
 os.makedirs(SCREENSHOT_DIR, exist_ok=True)
@@ -68,8 +80,8 @@ def login_with_retry(max_retries=3):
         # 4) 로그인 POST (allow_redirects=False → 수동 리다이렉트)
         print("  2) 로그인 POST...")
         resp2 = session.post(action_url, data={
-            "username": "becorelab",
-            "password": "becolab2026!!",
+            "username": os.environ.get("SUPPLYHUB_ID", ""),
+            "password": os.environ.get("SUPPLYHUB_PW", ""),
             "credentialId": "",
         }, headers={
             "Content-Type": "application/x-www-form-urlencoded",

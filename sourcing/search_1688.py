@@ -10,10 +10,22 @@ import urllib.request
 import urllib.parse
 from pathlib import Path
 
+
+def _load_env(path=os.path.join(os.path.dirname(__file__), ".env")):
+    if os.path.exists(path):
+        for _l in open(path, encoding="utf-8"):
+            _l = _l.strip()
+            if "=" in _l and not _l.startswith("#"):
+                _k, _v = _l.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
+
+_load_env()
+
 BASE_URL = "https://openapi.elim.asia"
 
-ELIMAPI_EMAIL = os.environ.get("ELIMAPI_EMAIL", "info@becorelab.kr")
-ELIMAPI_PASSWORD = os.environ.get("ELIMAPI_PASSWORD", "becolab@2026!!")
+ELIMAPI_EMAIL = os.environ.get("ELIMAPI_EMAIL", "")
+ELIMAPI_PASSWORD = os.environ.get("ELIMAPI_PASSWORD", "")
 
 SORT_OPTIONS = {
     "sales": "SALE_QTY_DESC",

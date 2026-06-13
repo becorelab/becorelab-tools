@@ -2,13 +2,26 @@
 헬프스토어 Deep Analysis - ranking 테이블 HTML 구조 + keyword_analyze 페이지 API 파악
 """
 
+import os
 import requests
 import json
 import re
 from bs4 import BeautifulSoup
 
+
+def _load_env(path=os.path.join(os.path.dirname(__file__), ".env")):
+    if os.path.exists(path):
+        for _l in open(path, encoding="utf-8"):
+            _l = _l.strip()
+            if "=" in _l and not _l.startswith("#"):
+                _k, _v = _l.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
+
+_load_env()
+
 BASE = 'https://helpstore.shop'
-LOGIN_DATA = {'loginId': 'becorelab', 'loginPw': 'qlzhdjfoq2023!!'}
+LOGIN_DATA = {'loginId': os.environ.get("HELPSTORE_ID", ""), 'loginPw': os.environ.get("HELPSTORE_PW", "")}
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',

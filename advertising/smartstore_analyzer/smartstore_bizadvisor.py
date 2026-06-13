@@ -21,9 +21,21 @@ import argparse
 from datetime import datetime, timedelta
 from playwright.sync_api import sync_playwright
 
+
+def _load_env(path=os.path.join(os.path.dirname(__file__), ".env")):
+    if os.path.exists(path):
+        for _l in open(path, encoding="utf-8"):
+            _l = _l.strip()
+            if "=" in _l and not _l.startswith("#"):
+                _k, _v = _l.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
+
+_load_env()
+
 # ── 설정 ──────────────────────────────────────────────────────────────────────
-SMARTSTORE_ID = "info@becorelab.kr"
-SMARTSTORE_PW = "becolab@2024"
+SMARTSTORE_ID = os.environ.get("SMARTSTORE_ID", "")
+SMARTSTORE_PW = os.environ.get("SMARTSTORE_PW", "")
 SITE_ID = "s_321cd73103c6f"  # ILBIA 통합 매니저
 
 # API 베이스

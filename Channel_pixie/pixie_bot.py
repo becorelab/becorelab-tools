@@ -22,8 +22,20 @@ from group_chat_state import (
     append_group_message, get_group_context,
 )
 
+# 시크릿은 Channel_pixie/.env(gitignore)에서 로드 — 코드에 평문 토큰 없음
+def _load_env(path=os.path.join(os.path.dirname(__file__), ".env")):
+    if os.path.exists(path):
+        for _l in open(path, encoding="utf-8"):
+            _l = _l.strip()
+            if "=" in _l and not _l.startswith("#"):
+                _k, _v = _l.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
+
+_load_env()
+
 # 설정
-BOT_TOKEN = "8709975512:AAER3eggX0bKUzuAEFKwNv4p-obnffGFpfg"
+BOT_TOKEN = os.environ.get("PIXIE_BOT_TOKEN", "")
 BOT_USERNAME = "pixie0402_bot"
 BOT_NAME = "미오"
 ALLOWED_USERS = [8708718261]
@@ -43,13 +55,13 @@ APIS = [
     {
         "name": "DeepSeek",
         "url": "https://api.deepseek.com/chat/completions",
-        "key": "sk-b2ea74046efa48648527ec9d5f2ac366",
+        "key": os.environ.get("DEEPSEEK_API_KEY", ""),
         "model": "deepseek-chat",
     },
     {
         "name": "GLM-5",
         "url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-        "key": "7a9a6a01e9184c4f8021441a0256cb41.cz4L0OJ0uAqcT3QZ",
+        "key": os.environ.get("GLM_API_KEY", ""),
         "model": "glm-4-plus",
     },
 ]

@@ -12,14 +12,26 @@ import threading
 import queue
 import glob
 
+
+def _load_env(path=os.path.join(os.path.dirname(__file__), ".env")):
+    if os.path.exists(path):
+        for _l in open(path, encoding="utf-8"):
+            _l = _l.strip()
+            if "=" in _l and not _l.startswith("#"):
+                _k, _v = _l.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
+
+_load_env()
+
 logger = logging.getLogger(__name__)
 
 WING_BASE = 'https://wing.coupang.com'
-WING_ID = 'becorelab'
-WING_PW = 'becolab2026!!'
+WING_ID = os.environ.get("WING_ID", "")
+WING_PW = os.environ.get("WING_PW", "")
 HELPSTORE_BASE = 'https://helpstore.shop'
-HELPSTORE_ID = 'becorelab'
-HELPSTORE_PW = 'qlzhdjfoq2023!!'
+HELPSTORE_ID = os.environ.get("HELPSTORE_ID", "")
+HELPSTORE_PW = os.environ.get("HELPSTORE_PW", "")
 COUPANG_PAGE = f'{HELPSTORE_BASE}/keyword/keyword_analyze_coupang/'
 
 STATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.wing_profile')

@@ -1,9 +1,21 @@
 """메타 광고 API MCP 도구 — 직접 조회 + 캠페인 관리"""
+import os
 import json as _json
 import httpx
 
-# config는 automation 폴더에 있으므로 여기서 직접 정의
-META_ACCESS_TOKEN = "EAA8FG3lEZC18BRF9zom757dImMO9LwK5hF2Deja0tez1GTnHPoaZAZCuAFPLN7EZArT5UOozqcIcjBt8ngFmvs0ls3YKcosOx0JVmHbkYKRQ7ROio2wio7ZA0PuzgYotDrZAxPNtb9uuRq0S64yfncvj4Hf49uAorOZA0Gqy0mhH0ed99ic45hlFA58cFKJS9wxeAZDZD"
+
+# 시크릿은 automation/.env(gitignore)에서 로드 — 코드에 평문 토큰 없음
+def _load_env(path="/Users/macmini_ky/ClaudeAITeam/automation/.env"):
+    if os.path.exists(path):
+        for line in open(path, encoding="utf-8"):
+            line = line.strip()
+            if "=" in line and not line.startswith("#"):
+                k, v = line.split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip())
+
+
+_load_env()
+META_ACCESS_TOKEN = os.environ.get("META_ACCESS_TOKEN", "")
 META_API_VERSION = "v21.0"
 META_BASE = f"https://graph.facebook.com/{META_API_VERSION}"
 AD_ACCOUNTS = {

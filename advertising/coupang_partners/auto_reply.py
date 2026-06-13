@@ -116,8 +116,19 @@ def classify_reply(reply_body: str) -> dict:
         return {"category": "question", "confidence": 0.0, "summary": text[:100]}
 
 
-DOORI_TOKEN = "8621050278:AAE56VUp5v7X9TDrK27ykX_POsYNqDvwO6U"
-DOORI_CHAT_ID = "8708718261"
+def _load_env(path=os.path.join(os.path.dirname(__file__), ".env")):
+    if os.path.exists(path):
+        for _l in open(path, encoding="utf-8"):
+            _l = _l.strip()
+            if "=" in _l and not _l.startswith("#"):
+                _k, _v = _l.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
+
+_load_env()
+
+DOORI_TOKEN = os.environ.get("DOORI_BOT_TOKEN", "")
+DOORI_CHAT_ID = os.environ.get("DOORI_CHAT_ID", "")
 
 
 def _notify_doori(message: str):

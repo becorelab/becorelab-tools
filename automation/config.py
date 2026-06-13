@@ -6,6 +6,19 @@ from datetime import datetime, timedelta
 PROJECT_ROOT = "/Users/macmini_ky/ClaudeAITeam"
 PYTHON_EXE = "/usr/bin/python3"
 
+
+# 시크릿은 automation/.env(gitignore)에서 로드 — 코드에 평문 토큰 없음
+def _load_env(path=os.path.join(PROJECT_ROOT, "automation", ".env")):
+    if os.path.exists(path):
+        for line in open(path, encoding="utf-8"):
+            line = line.strip()
+            if "=" in line and not line.startswith("#"):
+                k, v = line.split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip())
+
+
+_load_env()
+
 # 서버 정보
 SERVICES = {
     "logistics": {
@@ -35,15 +48,15 @@ SERVICES = {
     },
 }
 
-# 텔레그램 (두리 봇으로 보고)
-TELEGRAM_BOT_TOKEN = "8621050278:AAE56VUp5v7X9TDrK27ykX_POsYNqDvwO6U"
-TELEGRAM_CHAT_ID = "8708718261"
+# 텔레그램 (두리 봇으로 보고) — .env에서 로드
+TELEGRAM_BOT_TOKEN = os.environ.get("DOORI_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.environ.get("DOORI_CHAT_ID", "")
 
-# API 키
-DEEPSEEK_API_KEY = "sk-b2ea74046efa48648527ec9d5f2ac366"
+# API 키 — .env에서 로드
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 
-# 메타 광고 API
-META_ACCESS_TOKEN = "EAA8FG3lEZC18BRF9zom757dImMO9LwK5hF2Deja0tez1GTnHPoaZAZCuAFPLN7EZArT5UOozqcIcjBt8ngFmvs0ls3YKcosOx0JVmHbkYKRQ7ROio2wio7ZA0PuzgYotDrZAxPNtb9uuRq0S64yfncvj4Hf49uAorOZA0Gqy0mhH0ed99ic45hlFA58cFKJS9wxeAZDZD"
+# 메타 광고 API — .env에서 로드
+META_ACCESS_TOKEN = os.environ.get("META_ACCESS_TOKEN", "")
 META_AD_ACCOUNTS = {
     "ilbia": "act_939432264476274",
     "laundry": "act_1374146073384332",
