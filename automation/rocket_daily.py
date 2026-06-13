@@ -37,7 +37,8 @@ def items_to_daily(items):
 
 def main():
     today = date.today()
-    first = today.replace(day=1).isoformat()
+    # 최근 40일 항상 수집 → 세션 끊겨 빠진 날도 다음 성공 때 자동 복구(멱등 upsert), 월경계 구멍 방지
+    first = (today - timedelta(days=40)).isoformat()
     yesterday = (today - timedelta(days=1)).isoformat()
     print(f"[로켓 일별] 입고상세 수집: {first} ~ {yesterday}")
     res = scrape_supplyhub(first, yesterday)
