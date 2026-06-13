@@ -49,16 +49,24 @@ def register(mcp, client, base_url):
 
     @mcp.tool()
     async def logistics_sales_monthly(month: str = "") -> str:
-        """월간 누적 매출을 가져옵니다.
-        month: YYYY-MM 형식 (생략하면 이번 달)"""
-        params = {}
-        if month:
-            params["month"] = month
+        """월간 누적 매출(채널별)을 ERP에서 가져옵니다. month: YYYY-MM (생략하면 이번 달).
+        ERP(8085) sales 테이블 기준 — 로켓·그로스 포함 통합 매출(보정계수 적용). 단일 진실원천."""
+        import calendar
+        from datetime import datetime
+        if not month:
+            month = datetime.now().strftime("%Y-%m")
         try:
-            resp = await client.get(f"{base_url}/api/sales-monthly", params=params)
+            y, m = map(int, month.split("-"))
+            last = calendar.monthrange(y, m)[1]
+            erp_base = base_url.replace(":8082", ":8085")
+            resp = await client.get(
+                f"{erp_base}/api/sales/summary",
+                params={"group_by": "channel",
+                        "date_from": f"{month}-01", "date_to": f"{month}-{last:02d}"},
+            )
             return resp.text
         except Exception as e:
-            return f"[오류] 물류서버 연결 실패: {e}"
+            return f"[오류] ERP 매출 조회 실패: {e}"
 
     @mcp.tool()
     async def logistics_sales_daily(date: str = "", days: int = 7) -> str:
