@@ -26,6 +26,29 @@ _load_env()
 
 logger = logging.getLogger(__name__)
 
+# 통합 장애 알림 (automation/alert) — 스크래퍼가 조용히 깨질 때 두리 텔레그램으로
+import sys as _sys, time as _time
+_sys.path.insert(0, "/Users/macmini_ky/ClaudeAITeam/automation")
+try:
+    from alert import alert as _alert
+except Exception:
+    def _alert(*a, **k):
+        return False
+
+_last_scraper_alert = {}  # {키: 마지막알림시각} — 동일 알림 1시간 1회(폭주 방지)
+
+
+def _scraper_alert(key, message, level="warn"):
+    """취약 스크래퍼 알림 — 같은 종류 알림은 1시간 1회만 전송(폭주 방지)."""
+    now = _time.time()
+    if now - _last_scraper_alert.get(key, 0) > 3600:
+        _last_scraper_alert[key] = now
+        try:
+            _alert("소싱 스크래퍼", message, level)
+        except Exception:
+            pass
+
+
 WING_BASE = 'https://wing.coupang.com'
 WING_ID = os.environ.get("WING_ID", "")
 WING_PW = os.environ.get("WING_PW", "")
@@ -321,6 +344,12 @@ def _do_search(keyword):
 
     # extension/page로 리다이렉트 되면 확장 미감지
     if '/extension/page' in _page.url:
+        _scraper_alert(
+            "wing_ext",
+            "소싱 윙 스크래퍼가 헬프스토어 확장을 못 찾고 있어요 😢 "
+            "크롬에서 확장이 꺼졌거나 윙 로그인이 풀린 것 같아요. 확인 부탁드려요!",
+            "critical",
+        )
         raise Exception('헬프스토어 확장 프로그램이 감지되지 않습니다')
 
     # 키워드 입력 + 검색
@@ -328,9 +357,21 @@ def _do_search(keyword):
     search_input.fill('')
     search_input.type(keyword, delay=30)
     _page.wait_for_timeout(300)
+
+    # ★ fallback 오염 방지: 검색 클릭 전에 이전 검색 결과 li를 DOM에서 제거.
+    #   이전엔 주석만 있고 제거 코드가 없어, wait_for_selector가 잔존 li를
+    #   즉시 잡아 엉뚱한 이전 상품을 반환했음(예: 섬유향수→헤어집게핀).
+    #   비워두면 아래 wait_for_selector가 '새로 생성된' 결과만 기다린다.
+    try:
+        _page.evaluate(
+            "() => document.querySelectorAll("
+            "'.keyword_analyze_coupang .listProducts li').forEach(el => el.remove())"
+        )
+    except Exception:
+        pass
     _page.locator('#btnSearch').click()
 
-    # 결과 로딩 대기 (DOM 비운 후 새 결과가 나타날 때까지)
+    # 결과 로딩 대기 (위에서 DOM을 비웠으므로 새 결과가 나타날 때까지 정확히 대기)
     try:
         _page.wait_for_selector(
             '.keyword_analyze_coupang .listProducts li',
@@ -342,6 +383,12 @@ def _do_search(keyword):
         logger.warning(f'상품 로딩 타임아웃: {keyword}')
         # extension/page 리다이렉트 확인
         if '/extension/page' in _page.url:
+            _scraper_alert(
+                "wing_ext",
+                "소싱 윙 스크래퍼가 헬프스토어 확장/윙 로그인 문제로 멈췄어요 😢 "
+                "확장 상태랑 윙 로그인 확인 부탁드려요!",
+                "critical",
+            )
             raise Exception('확장 프로그램 또는 쿠팡윙 로그인 문제')
         return []
 
