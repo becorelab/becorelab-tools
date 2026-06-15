@@ -1040,7 +1040,7 @@ async function confirmPO(id) {
   try {
     await api(`/api/purchase-orders/${id}/status`, { method: 'PUT', body: { status: 'confirmed' } });
     toast('발주가 확정되었습니다');
-    closeModal();
+    await viewOrder(id);   // 모달 유지 — 확정 상태로 갱신해 다시 표시 (X로만 닫힘)
     loadOrders(ordersPage);
   } catch (e) { toast(e.message, 'error'); }
 }
@@ -1049,7 +1049,7 @@ async function copyPO(id) {
   try {
     const r = await api(`/api/purchase-orders/${id}/copy`, { method: 'POST' });
     toast(`발주서 복사 완료: ${r.po_number}`);
-    closeModal();
+    await viewOrder(r.id);   // 모달 유지 — 복사된 새 발주서로 전환 (X로만 닫힘)
     loadOrders();
   } catch (e) { toast(e.message, 'error'); }
 }
@@ -1215,7 +1215,7 @@ function addPOLine(line = null) {
     displayName = prod ? `${prod.name} (${prod.product_code})` : (line.product_name || '');
   }
   div.innerHTML = `
-    <div class="form-group" style="flex:2.4"><label>품목 <span class="text-muted" style="font-weight:400">· 타이핑 검색</span></label>
+    <div class="form-group" style="flex:2.4"><label>품목 <span class="text-muted" style="font-weight:400">· 타이핑 검색 (새 품목명 직접 입력 가능)</span></label>
       <input type="text" class="po-product-search" list="po-products-datalist" placeholder="품목명·코드 입력..." autocomplete="off" value="${displayName.replace(/"/g, '&quot;')}" />
       <input type="hidden" class="po-product-id" value="${line ? line.product_id : ''}" /></div>
     <div class="form-group" style="flex:0.8"><label>수량</label><input type="number" class="po-qty" value="${line ? line.qty_ordered : 1}" min="1" /></div>
@@ -1266,7 +1266,9 @@ async function savePO(poId = null) {
     const productName = row.querySelector('.po-product-search').value;
     const qty = Number(row.querySelector('.po-qty').value);
     const price = Number(row.querySelector('.po-price').value);
-    if (productId && qty > 0) lines.push({ product_id: Number(productId), product_name: productName, qty_ordered: qty, unit_price: price });
+    // 등록 품목(product_id) 또는 자유 입력 품목명(product_name) 둘 중 하나만 있으면 발주 라인에 포함
+    // → "바이올렛 머스크 9차"처럼 매번 품목 등록 없이 발주서에 쓰는 대로 저장됨
+    if ((productId || productName.trim()) && qty > 0) lines.push({ product_id: productId ? Number(productId) : null, product_name: productName.trim(), qty_ordered: qty, unit_price: price });
   });
   if (!lines.length) return toast('품목을 추가해주세요', 'error');
   const supplierId = document.getElementById('m-posupplier').value;
@@ -1283,11 +1285,12 @@ async function savePO(poId = null) {
     if (poId) {
       await api(`/api/purchase-orders/${poId}`, { method: 'PUT', body });
       toast('발주서 수정 완료');
+      await viewOrder(poId);   // 모달 유지 — 저장 후 상세로 갱신 (X로만 닫힘)
     } else {
       const r = await api('/api/purchase-orders', { method: 'POST', body });
       toast(`발주서 ${r.po_number} 등록 완료`);
+      await viewOrder(r.id);   // 모달 유지 — 새 발주서 상세로 (X로만 닫힘)
     }
-    closeModal();
     loadOrders();
   } catch (e) { toast(e.message, 'error'); }
 }
