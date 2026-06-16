@@ -29,7 +29,7 @@ except ImportError:
 
 BASE_URL = "https://supplier.coupang.com"
 DETAIL_URL = f"{BASE_URL}/scm/receive/detail"
-CDP_URL = "http://127.0.0.1:9222"
+CDP_URL = "http://127.0.0.1:9223"  # 서플라이허브 전용 크롬. 9222는 그로스/윙(채움 계정)과 공유 → SSO 계정 충돌로 becorelab 세션이 깨짐. 전용 격리로 세션 보존.
 COOKIE_BACKUP = "/Users/macmini_ky/ClaudeAITeam/automation/supplyhub_session_cookies.json"
 # coupang 도메인 쿠키 주입하되, 상주 크롬의 Akamai 신뢰 쿠키(_abck/bm_* 등)는 보호(미주입)
 AKAMAI_PREFIXES = ("_abck", "bm_", "ak_bmsc")
