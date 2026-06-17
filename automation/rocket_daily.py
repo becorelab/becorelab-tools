@@ -3,7 +3,7 @@
 흐름: supplyhub_scraper.scrape_supplyhub(이번달1일~어제) → 입고상세 items
      → 날짜별 발주(+)/반출(-) 공급가+세액 집계 → ERP sales 반영
 launchd: 매일 1회 (그로스 광고크론처럼 빈도 낮춰 Akamai 회피)
-※ supplyhub_login이 403(Akamai)이면 그날 스킵. 잦은 재시도 금지(계정잠김).
+※ 서플라이허브 세션 만료/403(Akamai)이면 그날 스킵. 잦은 재시도 금지(계정잠김). 재로그인은 relogin.py로.
 """
 import sys, re
 from collections import defaultdict

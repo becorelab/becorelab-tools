@@ -13,7 +13,6 @@ import os
 import re
 import time
 from datetime import date, timedelta, datetime
-from html import unescape
 
 log = logging.getLogger("supplyhub")
 
@@ -62,67 +61,9 @@ def _session_ok(page):
         return False
 
 
-def supplyhub_login():
-    """curl_cffi로 서플라이허브 로그인, 세션 쿠키 반환"""
-    from curl_cffi import requests as cf_requests
-
-    session = cf_requests.Session(impersonate="chrome131")
-
-    resp0 = session.get(BASE_URL, allow_redirects=False, timeout=30)
-    redirect_url = resp0.headers.get("Location", "")
-
-    if redirect_url:
-        resp1 = session.get(redirect_url, allow_redirects=True, timeout=30)
-    else:
-        resp1 = session.get(BASE_URL, allow_redirects=True, timeout=30)
-
-    login_html = resp1.text
-    login_url = resp1.url
-
-    kc_match = re.search(r'"loginAction"\s*:\s*"([^"]+)"', login_html)
-    if not kc_match:
-        log.error("서플라이허브 loginAction 못 찾음")
-        return None
-
-    action_url = unescape(kc_match.group(1))
-
-    resp2 = session.post(action_url, data={
-        "username": SUPPLYHUB_ID,
-        "password": SUPPLYHUB_PW,
-        "credentialId": "",
-    }, headers={
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Origin": "https://xauth.coupang.com",
-        "Referer": login_url,
-    }, allow_redirects=False, timeout=30)
-
-    while resp2.status_code in (301, 302, 303, 307):
-        redir = resp2.headers.get("Location", "")
-        if not redir:
-            break
-        if redir.startswith("/"):
-            base = re.match(r'(https?://[^/]+)', resp2.url or action_url)
-            if base:
-                redir = base.group(1) + redir
-        resp2 = session.get(redir, allow_redirects=False, timeout=30)
-
-    if resp2.status_code == 200:
-        cookies = []
-        for cookie in session.cookies.jar:
-            c = {
-                "name": cookie.name,
-                "value": cookie.value,
-                "domain": cookie.domain or ".coupang.com",
-                "path": cookie.path or "/",
-            }
-            if cookie.secure:
-                c["secure"] = True
-            cookies.append(c)
-        log.info(f"서플라이허브 로그인 성공, 쿠키 {len(cookies)}개")
-        return cookies
-
-    log.error(f"서플라이허브 로그인 실패: {resp2.status_code}")
-    return None
+# ⚰️ supplyhub_login() (curl_cffi 직접 로그인)은 Akamai 403으로 은퇴·제거됨 (2026-06-17).
+#    현 정상 경로: 9223 전용크롬 세션 재활용 → 백업쿠키 주입 → relogin.py 1회 로그인.
+#    curl 로그인은 403 연타→계정잠김 위험이라 부활 금지.
 
 
 def scrape_supplyhub(target_date=None, date_end=None, progress=None):
