@@ -27,6 +27,19 @@ _arg_kw = sys.argv[1] if len(sys.argv) > 1 else ""
 KEYWORDS = [k.strip() for k in _arg_kw.split(",") if k.strip()] or DEFAULT_KEYWORDS
 TOPN = int(sys.argv[2]) if len(sys.argv) > 2 else 30
 
+# '신발 탈취제' 키워드가 신발 제품 자체(크록스 클로그·아디다스 운동화 등)를 노이즈로 끌어옴.
+# 화이트리스트(탈취류 단어 없으면 제외)는 정상품(피톤치드·제습제·BAS 등) 누락 위험이 커서,
+# '신발/의류 제품 단어가 있으면서 + 탈취류 힌트가 전혀 없을 때'만 제외 → 부작용 없이 노이즈만 거름.
+SHOE_NOISE = ["크록스", "클로그", "운동화", "슬리퍼", "스니커즈", "아디다스", "나이키",
+              "구두", "샌들", "로퍼", "부츠", "바야밴드", "스니커"]
+DEODOR_HINT = ["탈취", "냄새", "제거", "디퓨저", "방향", "향수", "퍼퓸", "미스트", "데오",
+               "캔들", "룸스프레이", "워셔", "리프레", "제습", "방취", "항균", "편백", "피톤"]
+
+
+def is_product_noise(name):
+    n = (name or "").replace(" ", "")
+    return any(t in n for t in SHOE_NOISE) and not any(t in n for t in DEODOR_HINT)
+
 DIR = os.path.dirname(os.path.abspath(__file__))
 SNAPDIR = os.path.join(DIR, "snapshots")
 os.makedirs(SNAPDIR, exist_ok=True)
@@ -69,14 +82,25 @@ def total_stock(pid):
         return None, 0
 
 
+# 재고 차분(전일대비 감소=판매)으로 추적할 때 신호대잡음비(SNR) 컷오프.
+# 6/12~6/17 실측: 0~1만 구간 변화율 0.224%(신호) vs 1만~5만 0.036%(노이즈 바닥과 동일).
+# 1만 초과는 셀러 임의값(라운드 큰 숫자)이라 미세변동이 판매신호와 구분 안 됨 → 추적 코어에서 제외.
+CORE_STOCK_MAX = 10000
+
+
 def stock_grade(stock):
-    """재고 신뢰 등급 — 판매 추정에 쓸 수 있는지."""
+    """재고 신뢰 등급 — 판매 추정에 쓸 수 있는지.
+    1만 이하만 차분이 판매신호로 유효(추적코어). 그 이상은 셀러 임의값/노이즈."""
     if stock == "무제한":
         return "추적불가·무제한"
     if stock is None:
         return "추적불가·미상"
     if isinstance(stock, int):
-        return "추적불가·품절(0)" if stock == 0 else "신뢰·유한재고"
+        if stock == 0:
+            return "추적불가·품절(0)"
+        if stock <= CORE_STOCK_MAX:
+            return "추적코어·유한재고"
+        return "참고·대량재고(추적제외)"
     return "추적불가·미상"
 
 
@@ -93,6 +117,10 @@ def snapshot(date_str):
             pid = p.get("id")
             if not pid:
                 continue
+            name = str(p.get("name", ""))
+            if is_product_noise(name):  # 신발 제품 자체(크록스/운동화 등) — 탈취제 아님
+                print(f"  🚫 노이즈 제외: {name[:40]}")
+                continue
             if pid in seen:  # 다른 키워드에서 이미 본 상품 → 키워드만 추가, 재고 재조회 안 함
                 if kw not in seen[pid]["keywords"]:
                     seen[pid]["keywords"].append(kw)
@@ -104,7 +132,7 @@ def snapshot(date_str):
             price = p.get("price") or {}
             seen[pid] = {
                 "id": pid,
-                "name": str(p.get("name", ""))[:50],
+                "name": name[:50],
                 "seller": (p.get("moment") or {}).get("sellerName", ""),
                 "keywords": [kw],
                 "bestRank": rank,
@@ -139,7 +167,7 @@ def main():
     with open(path, "w", encoding="utf-8") as fp:
         json.dump(snap, fp, ensure_ascii=False, indent=2)
 
-    n_core = sum(1 for r in snap["rows"] if r["stockGrade"].startswith("신뢰"))
+    n_core = sum(1 for r in snap["rows"] if r["stockGrade"].startswith("추적코어"))
     print(f"\n📡 카카오 선물하기 추적 — {KEYWORDS} TOP{TOPN}  ({today})")
     print(f"   상품 {len(snap['rows'])}개 · 재고추정 신뢰 {n_core}개 (나머지는 찜·리뷰로 추세 판단)")
     print(f"{'순위':<4}{'브랜드':<13}{'가격':>8}{'찜':>7}{'리뷰':>6}{'총재고':>10}{'판매추정':>10}{'찜Δ':>6}  등급")
@@ -168,7 +196,7 @@ def main():
     if not prev:
         print("\n첫 스냅샷(고도화) — 내일부터 판매추정·찜Δ 표시.")
     else:
-        print(f"\n전일({prev['date']}) 대비 증분. '신뢰·유한재고' 등급만 판매추정 신뢰도가 높아요.")
+        print(f"\n전일({prev['date']}) 대비 증분. '추적코어·유한재고'(재고 1만↓) 등급만 판매추정 신뢰도가 높아요.")
     print(f"저장: {path}")
 
 
