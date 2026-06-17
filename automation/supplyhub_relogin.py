@@ -106,13 +106,19 @@ def main():
         print(f"👉 뜬 크롬에서 becorelab 계정으로 로그인하세요. "
               f"(쿠키 DB 자동 감지, 최대 {LOGIN_WAIT_SEC//60}분)", flush=True)
 
-        # 2) 쿠키 DB 폴링 — 시작 이후 새로 생성된 세션쿠키만 감지 (이전 잔존 쿠키 무시)
-        start_chrome_epoch = (start + 11644473600) * 1000000  # unix → chrome utc
+        # 2) 쿠키 DB 폴링 — supplierHubSessionId '값이 바뀌면'(=대표님이 새로 로그인) 감지.
+        #    (이전: creation_utc 시각 비교 → 잔존쿠키/타이밍에 감지 실패하던 버그. 값 변화로 견고화)
+        def _sess_val():
+            for r in _db_rows():
+                if r[1] == SESSION_COOKIE:
+                    return r[3] or r[2]  # value 또는 encrypted_value (세션마다 다름)
+            return None
+        before = _sess_val()
         ok = False
         while time.time() - start < LOGIN_WAIT_SEC:
             time.sleep(5)
-            if any(r[1] == SESSION_COOKIE and r[10] > start_chrome_epoch
-                   for r in _db_rows()):
+            cur = _sess_val()
+            if cur and cur != before:
                 ok = True
                 break
         if not ok:
@@ -134,11 +140,21 @@ def main():
         vp = ctx.new_page()
         vp.goto(DETAIL_URL, wait_until="domcontentloaded", timeout=60000)
         time.sleep(6)
-        if _session_ok(vp):
-            print("✅ 상주 크롬 세션 검증 OK — 이제 매일 8시 크론 무인 작동해요.", flush=True)
+        sess_ok = _session_ok(vp)
+        if sess_ok:
+            print("✅ 전용 크롬(9223) 세션 검증 OK", flush=True)
         else:
-            print("⚠️ 상주 크롬 검증 실패 — 수확 쿠키 불완전 가능성. 재로그인 시도 필요.", flush=True)
-        vp.close()  # 탭만 닫기 — 상주 크롬 유지
+            print("⚠️ 검증 실패 — 수확 쿠키 불완전 가능성. 재로그인 필요.", flush=True)
+        vp.close()  # 탭만 닫기 — 전용 크롬 유지
+
+    # 4) 로그인+주입 성공 시 곧바로 로켓 매출 수집 (1클릭 자동화 — 세션 살아있을 때 즉시)
+    if sess_ok:
+        import subprocess
+        print("⏳ 로켓 매출 수집 시작 (로그인 직후 즉시)...", flush=True)
+        subprocess.run([sys.executable,
+                        os.path.join(os.path.dirname(__file__), "rocket_daily.py")])
+    else:
+        print("로켓 수집 건너뜀 (세션 검증 실패) — 잠시 후 다시 로그인해 주세요.", flush=True)
 
 
 if __name__ == "__main__":

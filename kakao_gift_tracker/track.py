@@ -16,9 +16,11 @@ BASE = "https://gift.kakao.com/a"
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148"
 H = {"User-Agent": UA, "Accept": "application/json"}
 
-# 에어밤 = 고체 탈취제. 직접 경쟁 시장만 집중 추적(인접 카테고리는 노이즈라 제외).
-# 신뢰 재고 상품이 부족하면 인접 키워드(섬유 탈취제 등) 추가 고려.
-DEFAULT_KEYWORDS = ["고체 탈취제"]
+# 탈취제 카테고리 전반 — 신뢰상품(추적가능 유한재고) 풀 확대용.
+# 각 상품에 'keywords' 태그가 붙어 '고체 탈취제'(에어밤 직접경쟁)만 따로 필터 가능.
+# 넓게 모아서 → 재고가 현실적이고 차분이 일관된 '신뢰도 높은' 상품을 추려 집중 추적하는 게 목표.
+# 차단 리스크 고려해 4개로 시작 — 안정되면 늘리기.
+DEFAULT_KEYWORDS = ["고체 탈취제", "섬유 탈취제", "차량용 탈취제", "신발 탈취제"]
 REQUEST_DELAY = 0.3  # API 호출 간 간격(차단 완화)
 
 _arg_kw = sys.argv[1] if len(sys.argv) > 1 else ""
