@@ -39,12 +39,15 @@ def auto_relogin(account_key="chaewoom"):
                 print("  [재로그인] ❌ Akamai 차단")
                 return False
             ok = False
-            for attempt in range(3):
+            BACKOFF = [0, 30, 45, 60, 90]  # 새벽/간헐 Akamai 차단 대응 — 점증 백오프로 끈질기게
+            for attempt in range(5):
                 if attempt:
-                    print(f"  [재로그인] 재시도 {attempt+1}/3 — 30초 대기")
-                    time.sleep(30)
+                    print(f"  [재로그인] 재시도 {attempt+1}/5 — {BACKOFF[attempt]}초 대기")
+                    time.sleep(BACKOFF[attempt])
                     pg.goto(WING_AUTH_URL, wait_until="domcontentloaded", timeout=60000)
                     time.sleep(3)
+                    if "Access Denied" in pg.inner_text('body'):  # 일시 차단이면 다음 재시도로
+                        continue
                 try:
                     pg.wait_for_selector('input[name="username"]', timeout=20000)
                 except Exception:
