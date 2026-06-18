@@ -29,7 +29,9 @@ TMP_PROFILE = "/Users/macmini_ky/ChromeSupplyhubTmp"
 COOKIE_DB = f"{TMP_PROFILE}/Default/Cookies"
 COOKIE_DB_COPY = "/tmp/supplyhub_relogin_cookies.db"
 LOGIN_WAIT_SEC = 3600
-SESSION_COOKIE = "supplierHubSessionId"  # 이게 생기면 로그인 완료
+SESSION_COOKIE = "sh_at"  # 서플라이허브 액세스토큰. 쿠팡이 supplierHubSessionId→sh_at/shSessionIdNew로
+# 쿠키체계 변경(2026-06-18 확인). sh_at는 로그인마다 갱신돼 '값 변화' 감지에 적합. supplierHubSessionId는
+# 잔재로 안 바뀌어 영영 감지 실패하던 버그 → sh_at로 교체.
 
 
 def _aes_key():
@@ -113,14 +115,21 @@ def main():
                 if r[1] == SESSION_COOKIE:
                     return r[3] or r[2]  # value 또는 encrypted_value (세션마다 다름)
             return None
-        before = _sess_val()
-        ok = False
-        while time.time() - start < LOGIN_WAIT_SEC:
-            time.sleep(5)
-            cur = _sess_val()
-            if cur and cur != before:
-                ok = True
-                break
+        # 임시 프로필에 유효 세션이 이미 살아있으면(잔존 로그인) 폴링 생략하고 즉시 수확.
+        # ('값 변화' 폴링은 이미 로그인된 상태에선 값이 안 바뀌어 감지 못 하던 함정 — 2026-06-18 케이스)
+        time.sleep(3)
+        if _session_ok(pg):
+            print("✅ 이미 로그인된 유효 세션 감지 — 폴링 생략, 즉시 수확", flush=True)
+            ok = True
+        else:
+            before = _sess_val()
+            ok = False
+            while time.time() - start < LOGIN_WAIT_SEC:
+                time.sleep(5)
+                cur = _sess_val()
+                if cur and cur != before:
+                    ok = True
+                    break
         if not ok:
             print("❌ 로그인 감지 실패(시간초과). 다시 실행해 주세요.", flush=True)
             b.close()
