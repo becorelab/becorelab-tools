@@ -15,6 +15,7 @@
 사용: python3 automation/supplyhub_relogin.py
 """
 import json
+import os
 import shutil
 import sqlite3
 import sys

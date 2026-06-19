@@ -19,3 +19,7 @@
 - [ ] 발주서 이메일 전송 (AWS SES/SendGrid)
 - [ ] 발주서 PDF 생성
 - [ ] 이카운트 API Key 갱신 — 만료일 2026-06-02
+
+## 보안 (2026-06-14 시크릿 .env 분리 후속)
+- [ ] 깃 추적된 로그/덤프 정리 — `*.err` 로그 2개 + `sourcing/helpstore_api_responses.json`이 git 추적 중이라 커밋에 딸려감. `.gitignore`에 `*.err` 추가 + `git rm --cached`로 추적 해제 (2026-06-14)
+- [ ] 과거 깃 히스토리 평문 시크릿 — config.py/supplyhub/meta_ads/coupang_partners가 과거 커밋에 평문 보유. becorelab-tools 비공개라 위험 낮으나, 정석은 노출 시크릿 로테이션(메타 토큰·딥시크 키·각종 비번 재발급) (2026-06-14)
