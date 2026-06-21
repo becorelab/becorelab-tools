@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard',sans-serif}
+.page{max-width:780px;margin:0 auto}
+/* ── 피에브 p03 히어로 정밀 재현 ── */
+.hero{
+  position:relative;
+  /* 어두운 브라운 그라데 (피에브 무드) */
+  background:radial-gradient(120% 80% at 50% 0%, #6f5840 0%, #4a3a2a 45%, #382a1d 100%);
+  padding:78px 40px 90px;
+  text-align:center;
+  overflow:hidden;
+}
+/* 상단 은은한 광택 */
+.hero::before{
+  content:"";position:absolute;top:-40%;left:-10%;width:120%;height:80%;
+  background:radial-gradient(closest-side, rgba(255,245,225,.18), transparent 70%);
+  pointer-events:none;
+}
+.hero .logo{
+  font-family:'Cormorant Garamond',serif;font-weight:500;
+  font-size:54px;letter-spacing:3px;color:#EAD9B8;line-height:1;
+  position:relative;
+}
+.hero .logo .acc{font-style:italic}
+.hero .sub-en{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:17px;letter-spacing:.5px;color:#D8C8AE;
+  margin-top:22px;line-height:1.7;font-weight:400;position:relative;
+}
+.hero .stage{
+  position:relative;margin:50px auto 0;width:100%;
+}
+.hero .stage img{
+  width:78%;margin:0 auto;display:block;border-radius:6px;
+  /* 바닥 반사 그림자 */
+  filter:drop-shadow(0 30px 40px rgba(0,0,0,.45));
+}
+/* 바닥 빛 */
+.hero .floor{
+  position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);
+  width:70%;height:60px;
+  background:radial-gradient(closest-side, rgba(234,217,184,.22), transparent 75%);
+  filter:blur(8px);
+}
+.hero .title-en{
+  font-family:'Cormorant Garamond',serif;font-weight:500;letter-spacing:6px;
+  font-size:26px;color:#EFE3CB;margin-top:58px;position:relative;
+}
+.hero .title-ko{
+  font-size:13px;letter-spacing:5px;color:#B7A88B;margin-top:8px;position:relative;
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <section class="hero">
+    <div class="logo">iLBi<span class="acc">A</span></div>
+    <p class="sub-en">Fill your space with calm linen scent,<br>and let everyday odor quietly fade away.</p>
+    <div class="stage">
+      <img src="images/s4_package.png" alt="에어밤">
+      <div class="floor"></div>
+    </div>
+    <div class="title-en">AIR BALM</div>
+    <div class="title-ko">에어밤 고체 탈취제 · 린넨</div>
+  </section>
+</div>
+</body>
+</html>

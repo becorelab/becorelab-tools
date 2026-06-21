@@ -104,3 +104,6 @@ marketing/coupang_data/downloads/cookies.json
 erp/.browser_profile/
 sourcing/.review_profile/
 erp/ecount_*.json
+
+# 쿠팡 OpenAPI 키 (민감)
+automation/coupang_openapi_config.py

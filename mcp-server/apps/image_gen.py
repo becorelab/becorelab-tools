@@ -7,6 +7,13 @@ import time
 import httpx
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+if not GEMINI_API_KEY:
+    _envp = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+    if os.path.exists(_envp):
+        for _line in open(_envp, encoding="utf-8"):
+            if _line.startswith("GEMINI_API_KEY="):
+                GEMINI_API_KEY = _line.split("=", 1)[1].strip()
+                break
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "generated_images")
 
 

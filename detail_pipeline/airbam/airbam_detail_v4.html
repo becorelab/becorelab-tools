@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iLBiA AIR BALM — 에어밤 고체 탈취제</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Gothic+A1:wght@400;500;700;800;900&family=Noto+Serif+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== 제품별 토큰 (이것만 교체) — 에어밤 = 베이지 + 골드 + 세이지 ===== */
+:root{
+  --bg:#F5F0E8;        /* 베이스 베이지 */
+  --bg-warm:#ECE3D6;   /* 웜 샌드 */
+  --bg-deep:#E3D8C6;   /* 딥 베이지 */
+  --gold:#B0925E;      /* 골드 포인트 */
+  --gold-d:#937A4C;
+  --sage:#83917A;      /* 세이지 (신뢰) */
+  --sage-d:#6E7B66;
+  --ink:#3A332B;       /* 본문 */
+  --sub:#8A7E6F;       /* 서브 */
+  --line:#DDD2C0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard',sans-serif;color:var(--ink);background:#fff;line-height:1.75;-webkit-font-smoothing:antialiased}
+.page{max-width:780px;margin:0 auto;overflow:hidden;background:var(--bg)}
+img{display:block;width:100%}
+.serif{font-family:'Cormorant Garamond',serif}
+.serif-k{font-family:'Noto Serif KR',serif}
+
+/* ── 섹션마다 반복되는 상단 헤더 바 (피에브 시그니처) ── */
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:13px 26px;background:var(--sage);color:#F3EFE7}
+.topbar .en{font-size:12px;letter-spacing:1.2px;font-style:italic;opacity:.92;font-family:'Cormorant Garamond',serif;font-size:14px}
+.topbar .bd{font-size:11.5px;letter-spacing:2.5px;font-weight:600}
+
+.sec{padding:64px 36px}
+.bg-cream{background:var(--bg)}
+.bg-warm{background:var(--bg-warm)}
+.bg-deep{background:var(--bg-deep)}
+.bg-white{background:#fff}
+
+.eyebrow{font-family:'Cormorant Garamond',serif;font-size:19px;font-style:italic;color:var(--gold);text-align:center;letter-spacing:1px;margin-bottom:10px}
+h2.h{font-family:'Gothic A1',sans-serif;font-size:37px;font-weight:900;text-align:center;line-height:1.34;letter-spacing:-1.2px;color:var(--ink)}
+h2.h .g{color:var(--gold)}
+.hl{background:linear-gradient(transparent 56%, #E7D2A6 56%);padding:0 4px}
+.lead{font-size:15.5px;color:var(--sub);text-align:center;margin-top:16px;line-height:1.8}
+.note{font-size:11.5px;color:#A99C8A;text-align:center;margin-top:14px}
+.center{text-align:center}
+.divider{height:54px}
+
+/* 가격 카드 (피에브 p02) */
+.pricecard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px;display:grid;grid-template-columns:120px 1fr;gap:18px;align-items:center;position:relative}
+.pricecard.best{border:2px solid var(--gold);box-shadow:0 12px 30px rgba(176,146,94,.15)}
+.pricecard .thumb{border-radius:12px;overflow:hidden;background:var(--bg-warm)}
+.pricecard .thumb img{aspect-ratio:1/1;object-fit:cover}
+.pricecard .badge-best{position:absolute;top:-11px;left:22px;background:var(--gold);color:#fff;font-size:11px;font-weight:700;letter-spacing:1px;padding:4px 12px;border-radius:20px}
+.pricecard .info .qty{font-size:18px;font-weight:800}
+.pricecard .info .qty small{font-weight:500;color:var(--sub);font-size:12.5px;display:block;margin-top:2px}
+.ptable{margin-top:12px;font-size:13px}
+.ptable .r{display:flex;justify-content:space-between;padding:3px 0;color:var(--sub)}
+.ptable .r .strike{text-decoration:line-through;color:#B5A892}
+.ptable .r.final{margin-top:6px;padding:9px 12px;background:var(--sage);color:#fff;border-radius:8px;font-weight:800;font-size:15px}
+.dch{display:inline-block;background:var(--gold);color:#fff;font-weight:800;font-size:16px;padding:6px 10px;border-radius:8px;position:absolute;top:22px;right:22px}
+
+/* 향노트 3분할 */
+.notes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;margin-top:30px;background:#fff;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.notes .n{padding:22px 10px;text-align:center;border-right:1px solid var(--line)}
+.notes .n:last-child{border-right:none}
+.notes .n .l{font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:1px;color:var(--gold);font-weight:600}
+.notes .n .v{font-size:15px;font-weight:700;margin-top:6px}
+
+/* 인증 뱃지 */
+.badges{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:28px}
+.badges .b{text-align:center}
+.badges .b .ic{width:58px;height:58px;border-radius:50%;background:#fff;border:1.5px solid var(--gold);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 8px;font-family:'Cormorant Garamond',serif;font-weight:600}
+.badges .b .t{font-size:11px;color:var(--sub);font-weight:600;line-height:1.4}
+
+/* 만족도 바 */
+.stats{margin-top:26px}
+.stat{margin-bottom:18px}
+.stat .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.stat .top .en{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--gold);font-size:14px}
+.stat .top .num{font-size:22px;font-weight:800;color:var(--ink)}
+.stat .top .ko{font-size:14px;font-weight:600}
+.stat .bar{height:9px;background:#E5DBC9;border-radius:6px;overflow:hidden}
+.stat .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--sage),var(--gold));border-radius:6px}
+.bignum{text-align:center;margin:20px 0}
+.bignum .n{font-size:88px;color:var(--gold);line-height:1;font-family:'Black Han Sans',sans-serif}
+.bignum .s{font-size:14px;color:var(--sub);margin-top:6px}
+
+/* STEP */
+.steps{margin-top:28px}
+.steps .st{display:grid;grid-template-columns:64px 1fr;gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:13px;padding:18px;margin-bottom:12px}
+.steps .st .no{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:var(--gold);text-align:center}
+.steps .st .tx b{display:block;font-size:13px;color:var(--gold);letter-spacing:1px;margin-bottom:3px}
+.steps .st .tx{font-size:14.5px;color:var(--sub)}
+
+/* 스펙표 */
+.spec{margin-top:24px;width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.spec th{background:var(--bg-warm);text-align:left;padding:13px 18px;width:32%;font-weight:700;border-bottom:1px solid var(--line)}
+.spec td{padding:13px 18px;color:var(--sub);border-bottom:1px solid var(--line)}
+.spec tr:last-child th,.spec tr:last-child td{border-bottom:none}
+
+/* FAQ */
+.faq{margin-top:24px}
+.faq .fi{background:#fff;border:1px solid var(--line);border-radius:13px;padding:20px 22px;margin-bottom:12px}
+.faq .q{font-weight:800;color:var(--sage-d);font-size:15px;margin-bottom:7px}
+.faq .a{font-size:14px;color:var(--sub)}
+
+/* full bleed */
+.fb{margin:0 -36px}
+.fb img{width:100%}
+.ribbon{text-align:center;font-size:13px;letter-spacing:3px;color:var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;margin:8px 0}
+
+.ph{background:repeating-linear-gradient(45deg,#E7DDCB,#E7DDCB 11px,#E1D6C2 11px,#E1D6C2 22px);border-radius:13px;min-height:190px;display:flex;align-items:center;justify-content:center;text-align:center;color:#9d917e;font-size:12.5px;font-weight:600;padding:20px;line-height:1.7}
+.disc{font-size:11px;color:#A99C8A;line-height:1.7;padding:34px 36px;background:var(--bg-deep)}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 1. 히어로 (브랜드) -->
+  <section class="sec bg-deep center" style="padding-top:72px">
+    <div class="serif" style="font-size:40px;color:var(--gold);letter-spacing:2px">iLBiA</div>
+    <div class="serif" style="font-size:17px;color:var(--sub);letter-spacing:3px;margin-top:2px">AIR BALM</div>
+    <p class="serif-k" style="font-size:15px;color:var(--sub);margin-top:22px;line-height:1.9">머무는 공간마다 은은한 린넨 향으로,<br>생활취 없는 편안한 하루를</p>
+    <div class="fb" style="margin-top:30px"><img src="images/s4_package.png" alt="에어밤 패키지"></div>
+    <div class="serif" style="font-size:22px;color:var(--ink);letter-spacing:2px;margin-top:24px">AIR BALM</div>
+    <div class="serif-k" style="font-size:13px;color:var(--sub);letter-spacing:2px;margin-top:4px">에어밤 고체 탈취제 · 린넨</div>
+  </section>
+
+  <!-- 2. 컨셉 + 무드 -->
+  <div class="topbar"><span class="en">Stop covering up the odor</span><span class="bd">iLBiA AIR BALM</span></div>
+  <section class="sec bg-cream center">
+    <div class="ribbon">⟡ ⟡ ⟡</div>
+    <h2 class="h serif-k">생활취는 사라지고<br><span class="g">린넨 향</span>만 남기는</h2>
+    <p class="lead">강한 향으로 덮는 게 아니라, 냄새의 결을 가다듬는 방식.<br>꺼내두기만 하면 공간의 공기가 달라집니다.</p>
+    <div class="fb" style="margin-top:28px"><img src="images/s6_scent_linen.png" alt="린넨 향 무드"></div>
+  </section>
+
+  <!-- 3. 문제 → 원리 -->
+  <div class="topbar"><span class="en">Not masking, but capturing</span><span class="bd">iLBiA AIR BALM</span></div>
+  <section class="sec bg-warm">
+    <p class="eyebrow">The Real Problem</p>
+    <h2 class="h">덮으면 그때뿐,<br><span class="hl">생활취</span>는 다시 돌아옵니다</h2>
+    <p class="lead">화장실·옷장·신발장에 스민 냄새는 향으로 가려도 며칠이면 돌아와요.<br>핵심은 <b style="color:var(--gold)">냄새 분자를 붙잡는 것</b>입니다.</p>
+    <div class="fb" style="margin-top:26px;border-radius:14px;overflow:hidden"><img src="images/s3_formula.png" alt="제형" style="border-radius:14px"></div>
+    <p class="note">* 사용 환경에 따라 체감에 차이가 있을 수 있습니다.</p>
+  </section>
+
+  <!-- 4. 인증 · 안전 (반려동물/아이) -->
+  <div class="topbar"><span class="en">Safe for all the family</span><span class="bd">iLBiA AIR BALM</span></div>
+  <section class="sec bg-cream center">
+    <p class="eyebrow">Certification</p>
+    <h2 class="h">아이도, 반려동물도<br>함께 쓰는 공간이니까</h2>
+    <div class="fb" style="margin-top:26px"><img src="images/s9_family.png" alt="가족 안심"></div>
+    <div class="badges">
+      <div class="b"><div class="ic">✓</div><div class="t">유해물질<br>저감 설계</div></div>
+      <div class="b"><div class="ic">🐾</div><div class="t">반려동물<br>가정 사용</div></div>
+      <div class="b"><div class="ic">👶</div><div class="t">아이 있는<br>집도 안심</div></div>
+      <div class="b"><div class="ic">🌿</div><div class="t">은은한<br>저자극 향</div></div>
+    </div>
+    <div class="ph" style="margin-top:24px">🤖 실사 필요 — 공인 시험성적서 스캔본 (테스트 단계 플레이스홀더)</div>
+  </section>
+
+  <!-- 5. 만족도 (테스트 수치) -->
+  <div class="topbar"><span class="en">Recommendation</span><span class="bd">iLBiA AIR BALM</span></div>
+  <section class="sec bg-deep">
+    <p class="eyebrow">Why people love it</p>
+    <h2 class="h">"꺼내두기만 했는데<br>공기가 <span class="g">달라졌어요</span>"</h2>
+    <div class="bignum"><div class="n">98<span style="font-size:28px">%</span></div><div class="s">사용 후 재구매 의향 *테스트 응답 기준</div></div>
+    <div class="stats">
+      <div class="stat"><div class="top"><span class="ko">탈취 체감 만족도</span><span class="num">97%</span></div><div class="bar"><i style="width:97%"></i></div></div>
+      <div class="stat"><div class="top"><span class="ko">린넨 향 만족도</span><span class="num">96%</span></div><div class="bar"><i style="width:96%"></i></div></div>
+      <div class="stat"><div class="top"><span class="ko">인테리어 분위기</span><span class="num">95%</span></div><div class="bar"><i style="width:95%"></i></div></div>
+    </div>
+    <p class="note">* 테스트 단계 예시 수치입니다.</p>
+  </section>
+
+  <!-- 6. 향 노트 -->
+  <div class="topbar"><span class="en">Signature scent · Linen</span><span class="bd">iLBiA AIR BALM</span></div>
+  <section class="sec bg-cream center">
+    <p class="eyebrow">Scent Note</p>
+    <h2 class="h">갓 세탁한 <span class="g">린넨 향</span></h2>
+    <p class="lead">탈취제에서 가장 사랑받는 향, 코튼·린넨 계열.<br>인공적이지 않은 은은한 청결감을 남깁니다.</p>
+    <div class="notes">
+      <div class="n"><div class="l">TOP</div><div class="v">코튼 플라워</div></div>
+      <div class="n"><div class="l">MIDDLE</div><div class="v">린넨</div></div>
+      <div class="n"><div class="l">BASE</div><div class="v">화이트 머스크</div></div>
+    </div>
+    <div class="fb" style="margin-top:28px"><img src="images/s6_scent_cotton.png" alt="코튼 향"></div>
+  </section>
+
+  <!-- 7. 디자인 · 공간 -->
+  <div class="topbar"><span class="en">From the scent to the atmosphere</span><span class="bd">iLBiA AIR BALM</span></div>
+  <section class="sec bg-warm center">
+    <p class="eyebrow">Interior Object</p>
+    <h2 class="h">숨기지 않아도 되는<br><span class="g">디자인</span></h2>
+    <p class="lead">어디에 둬도 인테리어를 해치지 않습니다.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px">
+      <div style="border-radius:13px;overflow:hidden"><img src="images/s7_space_dresser.png" alt="드레서"></div>
+      <div style="border-radius:13px;overflow:hidden"><img src="images/s7_space_bedroom.png" alt="침실"></div>
+    </div>
+  </section>
+
+  <!-- 8. 사용법 -->
+  <div class="topbar"><span class="en">How to use</span><span class="bd">iLBiA AIR BALM</span></div>
+  <section class="sec bg-cream">
+    <p class="eyebrow">Easy 3 Step</p>
+    <h2 class="h">사용은 <span class="g">3초</span></h2>
+    <div class="steps">
+      <div class="st"><div class="no">01</div><div class="tx"><b>OPEN</b>커버를 돌려 엽니다.</div></div>
+      <div class="st"><div class="no">02</div><div class="tx"><b>PLACE</b>냄새가 신경 쓰이는 공간에 둡니다.</div></div>
+      <div class="st"><div class="no">03</div><div class="tx"><b>ENJOY</b>린넨 향이 천천히 퍼집니다.</div></div>
+    </div>
+    <div class="fb" style="margin-top:22px;border-radius:14px;overflow:hidden"><img src="images/s5_howto.png" alt="사용법" style="border-radius:14px"></div>
+  </section>
+
+  <!-- 9. 가격 / 세트 (피에브 p02 구조) -->
+  <div class="topbar"><span class="en">Only official store</span><span class="bd">iLBiA AIR BALM</span></div>
+  <section class="sec bg-deep">
+    <p class="eyebrow">Best Price</p>
+    <h2 class="h">공간 따라 <span class="g">세트</span>로</h2>
+    <p class="lead">탈취제는 한 곳보다 여러 곳에 둘 때 효과적이에요.</p>
+
+    <div style="margin-top:30px">
+      <div class="pricecard best">
+        <span class="badge-best">BEST · 집 전체</span>
+        <span class="dch">기획가</span>
+        <div class="thumb"><img src="images/s10_cta.png" alt="3개 세트"></div>
+        <div class="info">
+          <div class="qty">에어밤 3개 세트<small>화장실 · 옷장 · 침실</small></div>
+          <div class="ptable">
+            <div class="r"><span>정상가</span><span class="strike">56,700원</span></div>
+            <div class="r final"><span>3개 세트가</span><span>기획전 특가</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pricecard">
+        <span class="dch">+홀더</span>
+        <div class="thumb"><img src="images/s2_product.png" alt="홀더 세트"></div>
+        <div class="info">
+          <div class="qty">홀더 세트<small>에어밤 + 가죽 홀더 · 선물용</small></div>
+          <div class="ptable">
+            <div class="r"><span>에어밤 18,900 + 홀더 12,000</span><span>30,900원</span></div>
+            <div class="r final"><span>홀더 세트가</span><span>특가 적용</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pricecard">
+        <div class="thumb"><img src="images/s4_package.png" alt="단품"></div>
+        <div class="info">
+          <div class="qty">단품 1개<small>에어밤 270g · 린넨향</small></div>
+          <div class="ptable">
+            <div class="r final"><span>단품가</span><span>18,900원</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. 스펙 + FAQ -->
+  <div class="topbar"><span class="en">Product info</span><span class="bd">iLBiA AIR BALM</span></div>
+  <section class="sec bg-cream">
+    <p class="eyebrow">Specification</p>
+    <h2 class="h">제품 정보</h2>
+    <table class="spec">
+      <tr><th>제품명</th><td>iLBiA 에어밤 (고체 탈취제)</td></tr>
+      <tr><th>향</th><td>린넨 (코튼/린넨 계열)</td></tr>
+      <tr><th>용량</th><td>270g</td></tr>
+      <tr><th>사용 공간</th><td>화장실 · 옷장 · 신발장 · 침실 · 거실</td></tr>
+      <tr><th>제조원산지</th><td>대한민국</td></tr>
+    </table>
+    <p class="eyebrow" style="margin-top:48px">FAQ</p>
+    <h2 class="h">자주 묻는 질문</h2>
+    <div class="faq">
+      <div class="fi"><div class="q">Q. 얼마나 오래 가나요?</div><div class="a">개봉 후 은은한 향과 탈취가 오래 지속됩니다. 향이 약해지면 표면을 살짝 긁어주세요.</div></div>
+      <div class="fi"><div class="q">Q. 향이 강하진 않나요?</div><div class="a">인공적이지 않은 은은한 린넨 향으로, 좁은 공간에서도 부담 없습니다.</div></div>
+      <div class="fi"><div class="q">Q. 어디에 두는 게 좋나요?</div><div class="a">화장실·옷장·신발장을 추천해요. 여러 곳에 함께 두면 더 좋습니다.</div></div>
+    </div>
+  </section>
+
+  <div class="disc">[상품 정보 고시] 품명: iLBiA 에어밤 · 향: 린넨 · 용량: 270g · 제조원산지: 대한민국 · 직사광선을 피하고 어린이 손이 닿지 않는 곳에 보관하세요. 본 페이지는 테스트용 시안입니다.</div>
+
+</div>
+</body>
+</html>

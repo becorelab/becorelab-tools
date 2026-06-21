@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iLBiA AIR BALM — 쿠팡 상세페이지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+<style>
+  /* =============================================
+     제품별 컬러 토큰 — 이 변수만 교체하면 새 제품 테마 완성
+     // 제품별 변경: 이 변수만 교체
+     에어밤 = 베이지/크림/웜 팔레트
+     오모모 = #FAF8F4 배경 + #EEF5EE 서브 + #F5A623 포인트
+     ============================================= */
+  :root {
+    --c-bg:        #F7F3EE;  /* 메인 배경: 웜 크림 베이지 */
+    --c-bg-alt:    #EDE7DD;  /* 서브 배경: 웜 샌드 */
+    --c-bg-dark:   #D4C9BA;  /* 다크 배경: 따뜻한 그레이베이지 */
+    --c-primary:   #8B7355;  /* 포인트: 소프트 브라운 탠 */
+    --c-accent:    #A8906F;  /* 강조: 웜 탠 골드 */
+    --c-text:      #2C2520;  /* 본문 텍스트: 따뜻한 다크 */
+    --c-sub:       #7A6E64;  /* 서브 텍스트: 미디엄 웜그레이 */
+    --c-white:     #FDFAF6;  /* 순백: 아이보리 화이트 */
+    --c-badge:     #EBE0D0;  /* 배지 배경 */
+    --c-border:    #CFC4B5;  /* 테두리 */
+  }
+
+  /* ---- 기본 리셋 ---- */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #E8E2DA;
+    color: var(--c-text);
+    line-height: 1.6;
+  }
+
+  /* ---- 쿠팡 상세 래퍼 (max 780px) ---- */
+  .detail-wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    background: var(--c-white);
+    overflow: hidden;
+  }
+
+  /* ---- 공통 섹션 패딩 ---- */
+  .section {
+    padding: 60px 28px;
+  }
+  .section-alt {
+    background: var(--c-bg);
+    padding: 60px 28px;
+  }
+  .section-dark {
+    background: var(--c-bg-alt);
+    padding: 60px 28px;
+  }
+
+  /* ---- 영문 소제목 (섹션 레이블) ---- */
+  .en-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--c-sub);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 400;
+  }
+
+  /* ---- 헤드라인 ---- */
+  .headline-xl {
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1.35;
+    color: var(--c-text);
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  .headline-lg {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--c-text);
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+  }
+  .headline-md {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--c-text);
+    margin-bottom: 12px;
+  }
+
+  /* ---- 본문 ---- */
+  .body-text {
+    font-size: 14px;
+    color: var(--c-sub);
+    line-height: 1.8;
+    font-weight: 400;
+  }
+  .body-strong {
+    font-size: 14px;
+    color: var(--c-text);
+    line-height: 1.8;
+    font-weight: 500;
+  }
+
+  /* ---- 강조 텍스트 ---- */
+  .accent { color: var(--c-accent); }
+  .primary { color: var(--c-primary); }
+  em.key { font-style: normal; color: var(--c-primary); font-weight: 700; }
+
+  /* ---- 이미지 ---- */
+  .full-img {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+  }
+  .full-img-tall {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    max-height: 520px;
+  }
+
+  /* ---- 구분선 ---- */
+  .divider {
+    width: 40px;
+    height: 2px;
+    background: var(--c-accent);
+    margin: 20px 0;
+  }
+  .divider-center {
+    width: 40px;
+    height: 2px;
+    background: var(--c-accent);
+    margin: 20px auto;
+  }
+
+  /* ---- 텍스트 중앙 ---- */
+  .text-center { text-align: center; }
+
+  /* ---- 배지 ---- */
+  .badge {
+    display: inline-block;
+    background: var(--c-badge);
+    border: 1px solid var(--c-border);
+    color: var(--c-primary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 5px 12px;
+    border-radius: 2px;
+    margin: 4px 4px 4px 0;
+  }
+
+  /* ---- 스펙 테이블 ---- */
+  .spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 20px;
+  }
+  .spec-table th,
+  .spec-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--c-border);
+    text-align: left;
+  }
+  .spec-table th {
+    background: var(--c-bg-alt);
+    color: var(--c-primary);
+    font-weight: 700;
+    width: 38%;
+  }
+  .spec-table td {
+    color: var(--c-text);
+    font-weight: 500;
+  }
+
+  /* ---- 아이콘 박스 (문제 리스트) ---- */
+  .icon-list {
+    list-style: none;
+    margin-top: 20px;
+  }
+  .icon-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--c-border);
+    font-size: 14px;
+    color: var(--c-text);
+  }
+  .icon-list li:last-child { border-bottom: none; }
+  .icon-list .ico {
+    font-size: 18px;
+    line-height: 1.2;
+    flex-shrink: 0;
+  }
+
+  /* ---- 타임라인 (효과 체감) ---- */
+  .timeline {
+    margin-top: 28px;
+    position: relative;
+    padding-left: 30px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--c-border);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 28px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--c-accent);
+    border: 2px solid var(--c-white);
+    box-shadow: 0 0 0 2px var(--c-accent);
+  }
+  .timeline-day {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--c-accent);
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .timeline-desc {
+    font-size: 13px;
+    color: var(--c-text);
+    line-height: 1.7;
+  }
+
+  /* ---- 성분 인포 카드 ---- */
+  .ingredient-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .ingredient-card {
+    background: var(--c-bg);
+    border: 1px solid var(--c-border);
+    border-radius: 4px;
+    padding: 16px 14px;
+  }
+  .ingredient-card .name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--c-primary);
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+  }
+  .ingredient-card .desc {
+    font-size: 11px;
+    color: var(--c-sub);
+    line-height: 1.6;
+  }
+
+  /* ---- STEP 가이드 ---- */
+  .steps {
+    margin-top: 28px;
+  }
+  .step-item {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--c-border);
+  }
+  .step-item:last-child { border-bottom: none; margin-bottom: 0; }
+  .step-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--c-primary);
+    color: var(--c-white);
+    font-size: 15px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-content .step-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--c-text);
+    margin-bottom: 4px;
+  }
+  .step-content .step-desc {
+    font-size: 12px;
+    color: var(--c-sub);
+    line-height: 1.7;
+  }
+
+  /* ---- 공간 그리드 ---- */
+  .space-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-top: 20px;
+  }
+  .space-card {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--c-bg-alt);
+  }
+  .space-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .space-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(44, 37, 32, 0.55);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    padding: 7px 0;
+    letter-spacing: 0.05em;
+  }
+
+  /* ---- 세트 구성표 ---- */
+  .set-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 20px;
+  }
+  .set-table th {
+    background: var(--c-primary);
+    color: var(--c-white);
+    padding: 12px 10px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+  .set-table td {
+    padding: 14px 10px;
+    border-bottom: 1px solid var(--c-border);
+    text-align: center;
+    color: var(--c-text);
+    vertical-align: middle;
+  }
+  .set-table tr:last-child td { border-bottom: none; }
+  .set-table .price {
+    font-weight: 900;
+    color: var(--c-primary);
+    font-size: 15px;
+  }
+  .set-table .rec-badge {
+    display: inline-block;
+    background: var(--c-accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-left: 4px;
+  }
+  .set-table .placeholder-price {
+    color: var(--c-sub);
+    font-size: 12px;
+  }
+
+  /* ---- 신뢰 뱃지 그리드 ---- */
+  .trust-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .trust-card {
+    background: var(--c-white);
+    border: 1px solid var(--c-border);
+    border-radius: 4px;
+    padding: 16px 10px;
+    text-align: center;
+  }
+  .trust-card .t-ico { font-size: 22px; margin-bottom: 8px; }
+  .trust-card .t-title { font-size: 11px; font-weight: 700; color: var(--c-primary); margin-bottom: 4px; }
+  .trust-card .t-desc { font-size: 10px; color: var(--c-sub); line-height: 1.5; }
+
+  /* ---- 플레이스홀더 박스 ---- */
+  .placeholder-box {
+    width: 100%;
+    background: #D8D2CB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+  }
+  .placeholder-box .ph-inner {
+    max-width: 360px;
+  }
+  .placeholder-box .ph-label {
+    font-size: 13px;
+    color: #6B6259;
+    line-height: 1.7;
+    font-weight: 500;
+  }
+  .placeholder-box-tall {
+    height: 420px;
+  }
+
+  /* ---- CTA 버튼 ---- */
+  .cta-btn {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    border: none;
+    cursor: pointer;
+    margin-top: 16px;
+    border-radius: 2px;
+  }
+  .cta-primary {
+    background: var(--c-primary);
+    color: var(--c-white);
+  }
+  .cta-outline {
+    background: transparent;
+    color: var(--c-primary);
+    border: 2px solid var(--c-primary);
+  }
+
+  /* ---- 섹션 헤더 영역 ---- */
+  .section-header { margin-bottom: 28px; }
+  .section-header.center { text-align: center; }
+
+  /* ---- 구분 띠 ---- */
+  .accent-band {
+    background: var(--c-primary);
+    padding: 20px 28px;
+    text-align: center;
+    color: var(--c-white);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  /* ---- 2컬럼 레이아웃 ---- */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: center;
+    margin-top: 20px;
+  }
+
+  /* ---- FAQ ---- */
+  .faq-list { margin-top: 20px; }
+  .faq-item { padding: 18px 0; border-bottom: 1px solid var(--c-border); }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--c-text);
+    margin-bottom: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .faq-q::before {
+    content: 'Q.';
+    color: var(--c-accent);
+    flex-shrink: 0;
+    font-weight: 900;
+  }
+  .faq-a {
+    font-size: 12px;
+    color: var(--c-sub);
+    line-height: 1.8;
+    padding-left: 22px;
+  }
+
+</style>
+</head>
+
+<body>
+<div class="detail-wrap">
+
+  <!-- =============================================
+       SECTION 1 | 후킹 배너 — 문제제기
+       매칭 이미지: 00.상세페이지 문제제기
+       ============================================= -->
+  <section style="background: var(--c-bg-dark);">
+    <img src="images/s1_problem.png" class="full-img-tall" alt="생활취 문제제기 — 화장실 공간">
+    <div style="padding: 40px 28px 48px;">
+      <span class="en-label">The Problem / 문제제기</span>
+      <h1 class="headline-xl">
+        혹시, <em class="key">생활취</em> 있으세요?<br>
+        우리 집 냄새는<br>사는 사람만 모릅니다.
+      </h1>
+      <div class="divider"></div>
+      <p class="body-text">
+        요리 기름 냄새, 환기 못 한 침실, 쾨쾨한 옷장…<br>
+        합치면 <strong style="color: var(--c-text);">생활취</strong>.
+        손님은 알고 나만 모르던 그 냄새.
+      </p>
+      <ul class="icon-list" style="margin-top: 28px;">
+        <li><span class="ico">🚿</span><span>환기가 안 되는 화장실 — 하수구 냄새가 올라올 때</span></li>
+        <li><span class="ico">🛏️</span><span>아침에 일어난 침실 — 자고 난 냄새가 베어 있을 때</span></li>
+        <li><span class="ico">👕</span><span>오래 닫혀 있던 옷장 — 열면 나는 쾨쾨함</span></li>
+        <li><span class="ico">🐾</span><span>반려동물 있는 공간 — 나만 익숙해져 모르는 냄새</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================================
+       SECTION 2 | 제품 소개 (뷰티샷)
+       매칭 이미지: 01.용기 이미지
+       ============================================= -->
+  <section class="section">
+    <div class="section-header center">
+      <span class="en-label">Product Introduction</span>
+      <h2 class="headline-xl text-center">
+        에어밤.<br>
+        <em class="key">두면 끝나는</em> 탈취제.
+      </h2>
+      <div class="divider-center"></div>
+      <p class="body-text text-center">
+        뿌리고, 걸고, 닦을 필요 없어요.<br>
+        열어서 두기만 하면 알아서 공기를 바꿉니다.
+      </p>
+    </div>
+    <img src="images/s2_product.png" class="full-img" alt="iLBiA AIR BALM 제품컷" style="border-radius: 4px;">
+    <div style="margin-top: 24px; display: flex; flex-wrap: wrap; gap: 6px;">
+      <span class="badge">고체형 탈취제</span>
+      <span class="badge">270g 대용량</span>
+      <span class="badge">파우더리 린넨향</span>
+      <span class="badge">커버→거치대 변환</span>
+      <span class="badge">CMIT/MIT/OIT 불검출</span>
+    </div>
+  </section>
+
+  <!-- =============================================
+       SECTION 3 | 효과 체감 — 경쟁사 페인포인트 정면 돌파
+       매칭 이미지: 07.탈취제 제형 + 플레이스홀더
+       ============================================= -->
+  <section class="section-alt">
+    <div class="section-header">
+      <span class="en-label">Deodorizing Effect</span>
+      <h2 class="headline-lg">
+        탈취가 됐는지<br>어떻게 알아요?<br>
+        <em class="key">냄새나던 공간이 이렇게 바뀝니다.</em>
+      </h2>
+      <div class="divider"></div>
+      <p class="body-text">
+        "향은 좋은데 탈취가 안 된다"는 리뷰,<br>
+        에어밤은 처음부터 다르게 설계했습니다.
+      </p>
+    </div>
+
+    <img src="images/s3_formula.png" class="full-img" alt="탈취제 제형 — 사이클로덱스트린" style="border-radius: 4px; margin-bottom: 28px;">
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-day">DAY 1 — 첫날</div>
+        <div class="timeline-desc">파우더리 린넨 향이 퍼지며<br>공기가 달라지는 느낌이 납니다.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-day">DAY 3 — 3일 후</div>
+        <div class="timeline-desc">냄새 원인 분자를 <strong>사이클로덱스트린</strong>이<br>포집·중화하기 시작합니다.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-day">DAY 7 — 1주일 후</div>
+        <div class="timeline-desc">들어가는 순간 냄새가 나지 않는다는 걸<br>분명하게 느낍니다.</div>
+      </div>
+    </div>
+
+    <!-- 플레이스홀더: Before/After 비교 인포그래픽 -->
+    <div class="placeholder-box" style="margin-top: 28px; border-radius: 4px;">
+      <div class="ph-inner">
+        <div style="font-size: 28px; margin-bottom: 12px;">🤖</div>
+        <p class="ph-label">나노바나나 생성 예정:<br>Before(냄새 파동 표현 공간) / After(깨끗한 공기 시각화)<br>과장 없이 심플한 비교 인포그래픽</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px; background: var(--c-white); border: 1px solid var(--c-border); border-radius: 4px; padding: 18px 16px; text-align: center;">
+      <div style="font-size: 32px; font-weight: 900; color: var(--c-primary); letter-spacing: -0.02em;">99%</div>
+      <div style="font-size: 12px; color: var(--c-sub); margin-top: 4px;">탈취 성능 인증 [성적서 기관명 확정 후 표기]</div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       SECTION 4 | 성분·스펙·안전성
+       매칭 이미지: 02.패키지
+       ============================================= -->
+  <section class="section">
+    <div class="section-header">
+      <span class="en-label">Ingredients & Spec</span>
+      <h2 class="headline-lg">
+        탈취 원리는 간단합니다.<br>
+        <em class="key">나쁜 냄새 분자를 잡아두고,</em><br>
+        좋은 향을 남깁니다.
+      </h2>
+      <div class="divider"></div>
+    </div>
+
+    <img src="images/s4_package.png" class="full-img" alt="iLBiA AIR BALM 패키지 — Powdery Linen 270g" style="border-radius: 4px; margin-bottom: 28px;">
+
+    <div class="ingredient-cards">
+      <div class="ingredient-card">
+        <div class="name">사이클로덱스트린</div>
+        <div class="desc">고리형 분자구조로 냄새 원인 분자를 포집·중화. 탈취의 핵심 성분.</div>
+      </div>
+      <div class="ingredient-card">
+        <div class="name">에탄올</div>
+        <div class="desc">자연 건조, 잔류 없음. 아이·반려동물 공간에도 안전한 휘발성 용매.</div>
+      </div>
+      <div class="ingredient-card">
+        <div class="name">정제수</div>
+        <div class="desc">불순물 제거된 순수한 물. 성분 안정성의 기반.</div>
+      </div>
+      <div class="ingredient-card">
+        <div class="name">젤란검</div>
+        <div class="desc">천연 다당류 유래 겔화제. 고체 형태 유지 + 서서히 향기 방출.</div>
+      </div>
+    </div>
+
+    <table class="spec-table" style="margin-top: 24px;">
+      <tr><th>용량</th><td>270g</td></tr>
+      <tr><th>지속 기간</th><td>30~90일 (공간 크기에 따라 상이)</td></tr>
+      <tr><th>향</th><td>파우더리 린넨 (Powdery Linen)</td></tr>
+      <tr><th>탈취 인증</th><td>99% 탈취 [시험기관 확정 예정]</td></tr>
+      <tr><th>안전성</th><td>CMIT / MIT / OIT 불검출</td></tr>
+      <tr><th>브랜드</th><td>iLBiA (일비아) | 주식회사 비코어랩</td></tr>
+    </table>
+  </section>
+
+  <!-- 포인트 띠 -->
+  <div class="accent-band">
+    열기만 하면 됩니다. 그게 전부입니다.
+  </div>
+
+  <!-- =============================================
+       SECTION 5 | 사용 방법 (How to Use)
+       매칭 이미지: 01.용기 (커버 분리 컷)
+       ============================================= -->
+  <section class="section-alt">
+    <div class="section-header center">
+      <span class="en-label">How to Use</span>
+      <h2 class="headline-lg text-center">
+        여는 것만으로<br><em class="key">충분합니다.</em>
+      </h2>
+      <div class="divider-center"></div>
+    </div>
+
+    <img src="images/s5_howto.png" class="full-img" alt="에어밤 커버 분리 — 거치대 변환" style="border-radius: 4px; margin-bottom: 28px;">
+
+    <div class="steps">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">상단 커버를 엽니다</div>
+          <div class="step-desc">커버를 돌려 열면 자동으로 거치대로 변환됩니다.<br>별도 도구 필요 없음.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">원하는 공간에 둡니다</div>
+          <div class="step-desc">화장실 세면대, 침실 협탁, 옷장 선반 등<br>냄새가 신경 쓰이는 곳에 그냥 놓아두세요.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">[옵션] 가죽 홀더로 걸어두기</div>
+          <div class="step-desc">홀더를 사용하면 옷장·현관 선반에 걸 수 있어<br>인테리어 오브제로도 활용 가능합니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="body-text" style="margin-top: 20px; text-align: center; font-style: italic;">
+      이게 전부입니다. 뿌리거나 닦거나 교체할 필요 없어요.
+    </p>
+  </section>
+
+  <!-- =============================================
+       SECTION 6 | 향 소개
+       매칭 이미지: 09.향기연상 (코튼/린넨)
+       ============================================= -->
+  <section class="section" style="background: var(--c-bg);">
+    <div class="section-header center">
+      <span class="en-label">Scent Story</span>
+      <h2 class="headline-lg text-center">
+        갓 건조된 린넨 냄새.<br>
+        집이 <em class="key">빨래 냄새 나는 집</em>이 됩니다.
+      </h2>
+      <div class="divider-center"></div>
+      <p class="body-text text-center">
+        화학적 방향제 향이 아니라,<br>
+        볕에 말린 깨끗한 섬유의 향입니다.<br>
+        은은하게, 그러나 <strong style="color: var(--c-text);">분명히.</strong>
+      </p>
+    </div>
+
+    <img src="images/s6_scent_cotton.png" class="full-img" alt="향기연상 — 코튼 플라워" style="border-radius: 4px; margin-bottom: 16px;">
+    <img src="images/s6_scent_linen.png" class="full-img" alt="향기연상 — 린넨·코튼 소재" style="border-radius: 4px;">
+
+    <div style="margin-top: 28px; background: var(--c-white); border: 1px solid var(--c-border); border-radius: 4px; padding: 20px;">
+      <div class="body-strong" style="margin-bottom: 10px;">파우더리 린넨 — 향 프로파일</div>
+      <ul style="list-style: none; font-size: 13px; color: var(--c-sub); line-height: 2;">
+        <li>✦ 탑 노트: 클린 코튼, 라이트 머스크</li>
+        <li>✦ 미들 노트: 파우더리 린넨, 프리지아</li>
+        <li>✦ 베이스 노트: 화이트 우드, 소프트 앰버</li>
+      </ul>
+      <p class="body-text" style="margin-top: 12px;">
+        코튼·린넨 계열 선호 고객의 50.6%가 선택하는 향 프로파일.<br>
+        BAS 대비 뚜렷한 향 만족도.
+      </p>
+    </div>
+  </section>
+
+  <!-- =============================================
+       SECTION 7 | 디자인·거치 연출 — 숨기지 않아도 되는 탈취제
+       매칭 이미지: 10.공간 연출
+       ============================================= -->
+  <section class="section-dark">
+    <div class="section-header center">
+      <span class="en-label">Design & Display</span>
+      <h2 class="headline-lg text-center">
+        탈취제를 숨기던 시대는 끝났습니다.<br>
+        <em class="key">꺼내 두고 싶어지는</em> 탈취제.
+      </h2>
+      <div class="divider-center"></div>
+      <p class="body-text text-center">
+        상단 커버가 거치대가 됩니다.<br>
+        가죽 홀더로 걸어두면 공간의 오브제가 됩니다.
+      </p>
+    </div>
+
+    <div class="space-grid">
+      <div class="space-card">
+        <img src="images/s7_space_dresser.png" alt="드레서 위 에어밤 연출">
+        <div class="space-label">드레스룸·화장대</div>
+      </div>
+      <div class="space-card">
+        <img src="images/s7_space_bedroom.png" alt="침실 협탁 에어밤 연출">
+        <div class="space-label">침실 협탁</div>
+      </div>
+      <!-- 플레이스홀더 2칸 -->
+      <div class="space-card" style="background: var(--c-bg-dark); display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div class="ph-inner">
+          <div style="font-size: 20px; margin-bottom: 6px;">🤖</div>
+          <p style="font-size: 10px; color: #6B6259; text-align: center; line-height: 1.5;">나노바나나 생성 예정:<br>화장실 세면대 위<br>커버오픈 거치 컷</p>
+        </div>
+      </div>
+      <div class="space-card" style="background: var(--c-bg-dark); display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div class="ph-inner">
+          <div style="font-size: 20px; margin-bottom: 6px;">🤖</div>
+          <p style="font-size: 10px; color: #6B6259; text-align: center; line-height: 1.5;">나노바나나 생성 예정:<br>현관 신발장<br>가죽홀더 걸이 컷</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       SECTION 8 | 멀티배치 & 세트 소개 — AOV 높이기
+       플레이스홀더 (3공간 그리드 배너)
+       ============================================= -->
+  <section class="section-alt">
+    <div class="section-header center">
+      <span class="en-label">Multi-Place & Set</span>
+      <h2 class="headline-lg text-center">
+        생활취는<br>한 공간에만 있지 않으니까.
+      </h2>
+      <div class="divider-center"></div>
+      <p class="body-text text-center">
+        3곳에 두면 집 전체가 달라집니다.
+      </p>
+    </div>
+
+    <!-- 플레이스홀더: 3공간 그리드 배너 -->
+    <div class="placeholder-box placeholder-box-tall" style="border-radius: 4px; margin-bottom: 28px;">
+      <div class="ph-inner">
+        <div style="font-size: 28px; margin-bottom: 12px;">🤖</div>
+        <p class="ph-label">나노바나나 생성 예정:<br>화장실 / 옷장 / 침실에 에어밤 1개씩 놓인 컷을<br>3분할 구성한 배너 이미지</p>
+      </div>
+    </div>
+
+    <div style="background: var(--c-white); border: 1px solid var(--c-border); border-radius: 4px; padding: 20px;">
+      <div class="body-strong" style="margin-bottom: 16px; text-align: center;">에어밤 3-Pack 추천 조합</div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; gap: 14px; align-items: flex-start; padding-bottom: 12px; border-bottom: 1px solid var(--c-border);">
+          <span style="font-size: 22px;">🚿</span>
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--c-text);">① 화장실</div>
+            <div style="font-size: 12px; color: var(--c-sub);">하수구·생활악취 1순위 공간. 30일 기준 교체 추천.</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 14px; align-items: flex-start; padding-bottom: 12px; border-bottom: 1px solid var(--c-border);">
+          <span style="font-size: 22px;">🛏️</span>
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--c-text);">② 침실 / 아이방</div>
+            <div style="font-size: 12px; color: var(--c-sub);">수면 공간, 땀냄새·사춘기 냄새. 50~60일 지속.</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 14px; align-items: flex-start;">
+          <span style="font-size: 22px;">👗</span>
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--c-text);">③ 옷장 / 신발장</div>
+            <div style="font-size: 12px; color: var(--c-sub);">밀폐 공간 쾨쾨함. 홀더로 걸어두기 추천. 최대 90일.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       SECTION 9 | 신뢰 레이어 — 아이·반려동물 안심
+       매칭 이미지: 08.반려동물 아이
+       ============================================= -->
+  <section class="section">
+    <div class="section-header center">
+      <span class="en-label">Safety & Trust</span>
+      <h2 class="headline-lg text-center">
+        아이 방, 반려동물 공간에도<br>
+        <em class="key">안심하고 두세요.</em>
+      </h2>
+      <div class="divider-center"></div>
+      <p class="body-text text-center">
+        유해 성분 불검출 확인 완료.
+      </p>
+    </div>
+
+    <img src="images/s9_family.png" class="full-img" alt="아이·반려동물 공간 — 에어밤 신뢰 연출" style="border-radius: 4px; margin-bottom: 28px;">
+
+    <div class="trust-grid">
+      <div class="trust-card">
+        <div class="t-ico">🧪</div>
+        <div class="t-title">CMIT 불검출</div>
+        <div class="t-desc">유해 보존제 미함유 확인</div>
+      </div>
+      <div class="trust-card">
+        <div class="t-ico">🌿</div>
+        <div class="t-title">MIT 불검출</div>
+        <div class="t-desc">알레르기 유발 성분 없음</div>
+      </div>
+      <div class="trust-card">
+        <div class="t-ico">✅</div>
+        <div class="t-title">OIT 불검출</div>
+        <div class="t-desc">공인 성적서 기반 인증</div>
+      </div>
+    </div>
+
+    <!-- 플레이스홀더: 인증서 이미지 -->
+    <div class="placeholder-box" style="margin-top: 20px; border-radius: 4px;">
+      <div class="ph-inner">
+        <div style="font-size: 24px; margin-bottom: 10px;">📄</div>
+        <p class="ph-label">실사 필수 — 성적서 원본 스캔 예정:<br>CMIT/MIT/OIT 불검출 공인 시험성적서<br>(발행기관명·날짜 확정 후 업로드)</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; background: var(--c-bg); border-radius: 4px; padding: 16px;">
+      <ul class="icon-list">
+        <li><span class="ico">💧</span><span>고체형 — 흘리거나 튀지 않아 아이·반려동물 접근 시 안전</span></li>
+        <li><span class="ico">💨</span><span>에탄올 기반 — 자연 건조, 피부·바닥 잔류 없음</span></li>
+        <li><span class="ico">🏠</span><span>밀폐 공간 미세 향 방출 — 과도한 향 자극 없음</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================================
+       SECTION 10 | CTA — 구매 유도
+       매칭 이미지: 02.패키지
+       ============================================= -->
+  <section style="background: var(--c-bg-alt); padding: 60px 28px;">
+    <div class="section-header center">
+      <span class="en-label">Purchase / CTA</span>
+      <h2 class="headline-xl text-center">
+        지금 두면,<br>
+        <em class="key">내일 집이 달라집니다.</em>
+      </h2>
+      <div class="divider-center"></div>
+    </div>
+
+    <img src="images/s10_cta.png" class="full-img" alt="에어밤 패키지 CTA" style="border-radius: 4px; margin-bottom: 28px;">
+
+    <table class="set-table">
+      <thead>
+        <tr>
+          <th>구성</th>
+          <th>내용</th>
+          <th>가격</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>단품</td>
+          <td style="font-size: 12px; color: var(--c-sub);">에어밤 1개<br>(270g, 린넨향)</td>
+          <td><span class="price">18,900원</span></td>
+        </tr>
+        <tr>
+          <td>세트<span class="rec-badge">추천</span></td>
+          <td style="font-size: 12px; color: var(--c-sub);">에어밤 3개<br>(화장실+침실+옷장)</td>
+          <td><span class="placeholder-price">기획전 특가<br>확정 예정</span></td>
+        </tr>
+        <tr>
+          <td>홀더 세트</td>
+          <td style="font-size: 12px; color: var(--c-sub);">에어밤 + 가죽 홀더<br>(선물·인테리어 추천)</td>
+          <td><span class="price" style="font-size: 13px;">30,900원</span><br><span style="font-size: 10px; color: var(--c-sub);">(홀더 12,000원 별도)</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 선물 CTA -->
+    <div style="margin-top: 24px; background: var(--c-white); border: 1px solid var(--c-border); border-radius: 4px; padding: 20px; text-align: center;">
+      <div style="font-size: 20px; margin-bottom: 10px;">🎁</div>
+      <div class="headline-md">선물로도 좋습니다.</div>
+      <p class="body-text" style="margin-top: 8px;">
+        집들이 · 생일 · 감사 선물<br>
+        "뭘 사줘야 할지 모를 때" 1순위.
+      </p>
+    </div>
+
+    <!-- 플레이스홀더: 선물 포장 이미지 -->
+    <div class="placeholder-box" style="margin-top: 16px; border-radius: 4px;">
+      <div class="ph-inner">
+        <div style="font-size: 24px; margin-bottom: 10px;">🤖</div>
+        <p class="ph-label">나노바나나 생성 예정:<br>크라프트 박스에 에어밤 담긴 선물 세트,<br>리본, 웜 베이지 배경 이미지</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       BONUS | FAQ
+       ============================================= -->
+  <section class="section">
+    <div class="section-header">
+      <span class="en-label">FAQ</span>
+      <h2 class="headline-md">자주 묻는 질문</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">효과를 언제부터 느낄 수 있나요?</div>
+        <div class="faq-a">대부분 첫날부터 향을 느끼실 수 있고, 탈취 효과는 3~7일 사용 후 뚜렷하게 체감하시는 분들이 많습니다. 공간의 크기와 환기 빈도에 따라 차이가 있을 수 있어요.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">아이·반려동물이 만져도 괜찮나요?</div>
+        <div class="faq-a">CMIT/MIT/OIT 불검출 확인 제품으로, 고체 형태라 흘리거나 튈 염려가 없습니다. 다만 어린 아이나 반려동물이 직접 입으로 물거나 섭취하지 않도록 손이 닿지 않는 선반 위에 두시는 것을 권장합니다.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">얼마나 오래 사용할 수 있나요?</div>
+        <div class="faq-a">공간 크기에 따라 30~90일 지속됩니다. 화장실처럼 작고 밀폐된 공간은 약 30일, 넓은 침실이나 드레스룸은 60~90일 정도 사용하실 수 있습니다.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">가죽 홀더는 별도 구매인가요?</div>
+        <div class="faq-a">네, 가죽 홀더는 12,000원에 별도 판매됩니다. 에어밤 단품과 함께 구성된 홀더 세트(30,900원)도 구매하실 수 있어요. 옷장이나 현관 걸이형으로 활용하실 때 유용합니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 법적 표기 -->
+  <section style="background: var(--c-bg-dark); padding: 30px 28px;">
+    <p style="font-size: 10px; color: var(--c-sub); line-height: 1.8;">
+      <strong>iLBiA AIR BALM — 고체 탈취제</strong><br>
+      제조원: (주)비코어랩 / 브랜드: iLBiA (일비아)<br>
+      용량: 270g | 향: Powdery Linen<br>
+      주요 성분: 사이클로덱스트린, 에탄올, 정제수, 젤란검<br>
+      안전성: CMIT/MIT/OIT 불검출 [성적서 발행기관 확정 후 표기]<br>
+      ※ 본 페이지의 탈취 성능 수치(99%)는 공인 시험 성적서 기준입니다. 사용 환경에 따라 효과가 달라질 수 있습니다.<br>
+      ※ 눈에 들어갔을 경우 즉시 물로 씻어내세요. 어린이 손에 닿지 않는 곳에 보관하세요.
+    </p>
+  </section>
+
+</div><!-- /.detail-wrap -->
+</body>
+</html>

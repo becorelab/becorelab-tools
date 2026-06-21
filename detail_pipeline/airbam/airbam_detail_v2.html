@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iLBiA AIR BALM 상세</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+/* ===== 제품별 변경: 이 토큰만 교체하면 테마 전환 ===== */
+:root{
+  --bg:#F7F3EE;          /* 크림 베이스 */
+  --bg-warm:#EDE7DD;     /* 웜 샌드 */
+  --bg-problem:#E5E0D8;  /* 문제 회색베이지 */
+  --point:#C17A52;       /* 포인트 = 시나몬/테라코타 */
+  --point-soft:#E3C5B0;  /* 포인트 연하게 */
+  --sage:#7E8B6E;        /* 신뢰 = 세이지그린 */
+  --sage-soft:#DDE2D4;   /* 세이지 연하게 */
+  --text:#2C2520;        /* 본문 */
+  --sub:#7A6E64;         /* 서브 */
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard',sans-serif;color:var(--text);background:#fff;line-height:1.7;-webkit-font-smoothing:antialiased}
+.page{max-width:780px;margin:0 auto;overflow:hidden}
+img{display:block;width:100%}
+.sec{padding:72px 40px;position:relative}
+.sec-cream{background:var(--bg)}
+.sec-warm{background:var(--bg-warm)}
+.sec-problem{background:var(--bg-problem)}
+.sec-sage{background:var(--sage);color:#fff}
+.sec-white{background:#fff}
+.eyebrow{font-size:14px;letter-spacing:3px;color:var(--point);font-weight:700;margin-bottom:14px;text-align:center}
+.eyebrow.sage{color:var(--sage)}
+h2.head{font-size:30px;font-weight:800;line-height:1.4;text-align:center;letter-spacing:-.5px}
+h2.head .pt{color:var(--point)}
+h2.head .ul{border-bottom:3px solid var(--point);padding-bottom:2px}
+.lead{font-size:16px;color:var(--sub);text-align:center;margin-top:18px}
+.tiny{font-size:13px;color:var(--sub);text-align:center;letter-spacing:1px}
+.brand{font-size:22px;font-weight:800;letter-spacing:1px;text-align:center}
+/* full-bleed 이미지 + 오버레이 */
+.fb{position:relative;margin:0 -40px}
+.fb img{width:100%}
+.fb .ov{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;color:#fff;padding:0 30px;text-shadow:0 2px 16px rgba(0,0,0,.35)}
+.fb .ov h2{font-size:28px;font-weight:800;line-height:1.45}
+/* 그리드 */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:32px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:32px}
+.card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.05)}
+.card img{aspect-ratio:1/1;object-fit:cover}
+.card .cap{padding:14px 16px;font-size:14px;color:var(--sub);text-align:center;font-weight:600}
+.ph{background:repeating-linear-gradient(45deg,#e9e3da,#e9e3da 12px,#e3ddd2 12px,#e3ddd2 24px);border-radius:14px;min-height:200px;display:flex;align-items:center;justify-content:center;text-align:center;color:#9a8f80;font-size:13px;font-weight:600;padding:20px;line-height:1.6}
+/* Q 카드 */
+.qcard{background:var(--sage-soft);border-radius:16px;padding:30px 28px;margin-top:30px;text-align:center}
+.qcard .q{display:inline-block;background:var(--sage);color:#fff;width:30px;height:30px;line-height:30px;border-radius:50%;font-weight:800;margin-bottom:14px}
+.qcard p{font-size:17px;font-weight:700;color:var(--text)}
+/* 비교표 VS */
+.vs{margin-top:34px;border-radius:16px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.07)}
+.vs .vshead{display:grid;grid-template-columns:1fr 56px 1fr}
+.vs .vshead>div{padding:16px;text-align:center;font-weight:800;font-size:15px}
+.vs .vshead .l{background:#cfc8bd;color:#5d564c}
+.vs .vshead .m{background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px}
+.vs .vshead .r{background:var(--point);color:#fff}
+.vs .row{display:grid;grid-template-columns:1fr 56px 1fr;border-bottom:1px solid #eee;background:#fff}
+.vs .row>div{padding:15px 14px;font-size:13.5px;text-align:center}
+.vs .row .lc{color:var(--sub)}
+.vs .row .mc{background:#f6f3ee;color:#bbb;display:flex;align-items:center;justify-content:center}
+.vs .row .rc{color:var(--text);font-weight:700}
+.vs .row:last-child{border-bottom:none}
+/* 체크리스트 */
+.checks{margin-top:26px}
+.checks li{list-style:none;display:flex;align-items:center;gap:12px;padding:13px 18px;background:#fff;border-radius:12px;margin-bottom:10px;font-weight:700;font-size:15px;box-shadow:0 3px 12px rgba(0,0,0,.04)}
+.checks li::before{content:"✓";display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:var(--point);color:#fff;border-radius:50%;font-size:14px;flex:0 0 26px}
+/* 타임라인 */
+.tl{margin-top:30px;display:flex;flex-direction:column;gap:0}
+.tl .step{display:grid;grid-template-columns:64px 1fr;gap:18px;align-items:start;padding:18px 0}
+.tl .when{background:var(--point);color:#fff;border-radius:12px;padding:10px 6px;text-align:center;font-weight:800;font-size:13px;line-height:1.3}
+.tl .what{font-size:15px;color:var(--text);padding-top:4px}
+.tl .what b{color:var(--point)}
+/* STEP 사용법 */
+.steps{margin-top:30px}
+.steps .st{display:grid;grid-template-columns:90px 1fr;gap:20px;align-items:center;background:#fff;border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:0 3px 12px rgba(0,0,0,.04)}
+.steps .st .no{background:var(--bg-warm);color:var(--point);font-weight:800;border-radius:10px;text-align:center;padding:16px 0;font-size:14px}
+.steps .st .tx b{display:block;color:var(--point);font-size:14px;margin-bottom:4px}
+.steps .st .tx{font-size:14.5px;color:var(--sub)}
+/* 아이콘 배지 */
+.badges{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px 10px;margin-top:30px}
+.badge{text-align:center}
+.badge .ic{width:62px;height:62px;border-radius:50%;background:#fff;border:2px solid var(--point-soft);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 10px}
+.badge .bt{font-size:12.5px;font-weight:700;color:var(--text);line-height:1.4}
+/* 스펙표 */
+.spec{margin-top:28px;width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:12px;overflow:hidden}
+.spec th{background:var(--bg-warm);color:var(--text);text-align:left;padding:14px 18px;width:34%;font-weight:700;border-bottom:1px solid #efeae2}
+.spec td{padding:14px 18px;color:var(--sub);border-bottom:1px solid #efeae2}
+.spec tr:last-child th,.spec tr:last-child td{border-bottom:none}
+/* FAQ */
+.faq{margin-top:26px}
+.faq .fi{background:#fff;border-radius:14px;padding:22px 24px;margin-bottom:14px}
+.faq .fq{font-weight:800;color:var(--sage);font-size:16px;margin-bottom:8px}
+.faq .fa{font-size:14.5px;color:var(--sub)}
+.tip{background:var(--point-soft);color:#6b4226;border-radius:10px;padding:12px 16px;font-size:13.5px;font-weight:700;margin-top:10px}
+/* CTA 가격 */
+.price{margin-top:30px;display:flex;flex-direction:column;gap:12px}
+.po{display:flex;justify-content:space-between;align-items:center;background:#fff;border:2px solid #eee;border-radius:14px;padding:18px 22px}
+.po.best{border-color:var(--point);box-shadow:0 8px 24px rgba(193,122,82,.16)}
+.po .pn{font-weight:800;font-size:15px}
+.po .pn small{display:block;color:var(--sub);font-weight:500;font-size:12.5px;margin-top:3px}
+.po .pp{font-weight:800;font-size:18px;color:var(--point);white-space:nowrap}
+.divider{height:48px}
+.center{text-align:center}
+.mt8{margin-top:8px}.mt24{margin-top:24px}
+.disc{font-size:11.5px;color:#a99e90;line-height:1.7;padding:40px;background:var(--bg-warm)}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 1. 인트로 후킹 -->
+  <section class="sec sec-cream center">
+    <p class="tiny">iLBiA AIR BALM</p>
+    <p class="lead" style="margin-top:20px">탈취제를 바꿔도 그때뿐,<br>며칠 지나면 또 그 냄새.</p>
+    <h2 class="head" style="margin-top:24px">냄새의 진짜 원인은<br><span class="ul pt">'생활취'</span> 였습니다</h2>
+  </section>
+
+  <!-- 2. 문제 풀블리드 -->
+  <section class="sec sec-white" style="padding-bottom:0">
+    <div class="fb">
+      <img src="images/s1_problem.png" alt="화장실 생활취">
+      <div class="ov"><h2>샤워를 해도, 환기를 해도<br>스며든 냄새는 남습니다</h2></div>
+    </div>
+  </section>
+
+  <!-- 3. 핵심 카피 + 브랜드 -->
+  <section class="sec sec-cream center">
+    <p class="lead">답은 더 센 향이 아니었습니다.</p>
+    <h2 class="head mt8">그냥 <span class="pt">꺼내두는 것</span>,<br>그거면 충분했습니다</h2>
+    <p class="brand" style="margin-top:26px">iLBiA AIR BALM</p>
+    <p class="tiny mt8">꺼내놓는 공기</p>
+  </section>
+
+  <!-- 4. 공감 그리드 2x2 -->
+  <section class="sec sec-cream">
+    <h2 class="head">이런 냄새, <span class="pt">매일</span> 겪고 계시죠</h2>
+    <div class="grid2">
+      <div class="card"><img src="images/s1_problem.png" alt="화장실"><div class="cap">환기해도 도는 화장실 냄새</div></div>
+      <div class="ph">🤖 나노바나나 생성 예정<br>옷장 열 때 훅 끼치는<br>쾨쾨한 냄새 (인물/상황컷)</div>
+      <div class="ph">🤖 나노바나나 생성 예정<br>현관 신발장 냄새<br>(상황컷)</div>
+      <div class="ph">🤖 나노바나나 생성 예정<br>밴 줄 모르는 방 안 냄새<br>(상황컷)</div>
+    </div>
+  </section>
+
+  <!-- 5. 문제제기 회색 + Q카드 -->
+  <section class="sec sec-problem center">
+    <p class="eyebrow">THE REAL PROBLEM</p>
+    <h2 class="head">문제는 '<span class="pt">생활취</span>'</h2>
+    <p class="lead">생활취는 한 곳이 아니라 집 곳곳에 스며듭니다.<br>화장실·옷장·신발장·침실… 향만 덮으면 잠깐, 곧 돌아옵니다.</p>
+    <div class="qcard">
+      <span class="q">Q</span>
+      <p>향만 강한 제품은<br>왜 며칠 못 갈까요?</p>
+    </div>
+  </section>
+
+  <!-- 6. 비교 VS -->
+  <section class="sec sec-cream">
+    <h2 class="head"><span class="pt">향</span> vs <span class="pt">향 + 탈취</span></h2>
+    <p class="lead">향으로 덮는 제품과, 냄새 분자를 잡는 제품은 다릅니다.</p>
+    <div class="vs">
+      <div class="vshead"><div class="l">향만 강한 방향제</div><div class="m">VS</div><div class="r">에어밤</div></div>
+      <div class="row"><div class="lc">향으로 덮음</div><div class="mc">방식</div><div class="rc">냄새 분자를 포집</div></div>
+      <div class="row"><div class="lc">며칠이면 약해짐</div><div class="mc">지속</div><div class="rc">은은하게 오래</div></div>
+      <div class="row"><div class="lc">섞이면 더 불쾌</div><div class="mc">생활취</div><div class="rc">근본부터 줄임</div></div>
+      <div class="row"><div class="lc">뿌리는 번거로움</div><div class="mc">사용</div><div class="rc">꺼내두기만</div></div>
+    </div>
+  </section>
+
+  <!-- 7. 솔루션 풀블리드 배너 (세이지) -->
+  <section class="sec sec-sage center">
+    <h2 class="head" style="color:#fff">꺼내두면,<br>공기가 바뀝니다</h2>
+    <p class="lead" style="color:#f0f3ec">자기 전, 외출 전, 그냥 한 번 열어두세요.<br>린넨 향이 천천히 퍼지며 생활취를 잡습니다.</p>
+  </section>
+
+  <!-- 8. 제품 히어로 -->
+  <section class="sec sec-white center">
+    <img src="images/s2_product.png" alt="에어밤 제품" style="border-radius:18px">
+    <h2 class="head mt24">갓 세탁한 <span class="pt">린넨 향</span>,<br>넉넉한 270g</h2>
+    <img src="images/s4_package.png" alt="패키지" style="border-radius:18px;margin-top:22px">
+  </section>
+
+  <!-- 9. 효과 체감 타임라인 -->
+  <section class="sec sec-cream">
+    <p class="eyebrow">HOW IT WORKS</p>
+    <h2 class="head">하루하루 <span class="pt">옅어지는</span> 냄새</h2>
+    <div class="tl">
+      <div class="step"><div class="when">개봉<br>직후</div><div class="what"><b>린넨 향</b>이 퍼지며 공간의 첫인상이 바뀝니다</div></div>
+      <div class="step"><div class="when">3~7일</div><div class="what">향에 익숙해질 때쯤, <b>생활취가 옅어진</b> 걸 느낍니다</div></div>
+      <div class="step"><div class="when">지속</div><div class="what">은은한 향과 탈취가 <b>오래</b> 이어집니다</div></div>
+    </div>
+  </section>
+
+  <!-- 10. POINT 01 성분/원리 -->
+  <section class="sec sec-warm">
+    <p class="eyebrow">POINT 01</p>
+    <h2 class="head">덮는 게 아니라,<br><span class="pt">잡는</span> 원리</h2>
+    <img src="images/s3_formula.png" alt="제형" style="border-radius:16px;margin-top:26px">
+    <p class="lead mt24">냄새 분자를 끌어안는 구조로, 향으로 가리는 게 아니라 생활취 자체를 줄여줍니다.</p>
+  </section>
+
+  <!-- 11. POINT 02 향 + 체크 -->
+  <section class="sec sec-cream">
+    <p class="eyebrow">POINT 02</p>
+    <h2 class="head">왜 <span class="pt">린넨 향</span>일까요</h2>
+    <p class="lead">탈취제에서 가장 사랑받는 향, 갓 마른 빨래 냄새.</p>
+    <div class="grid2" style="margin-top:24px">
+      <div class="card"><img src="images/s6_scent_linen.png" alt="린넨"><div class="cap">갓 세탁한 린넨</div></div>
+      <div class="card"><img src="images/s6_scent_cotton.png" alt="코튼"><div class="cap">포근한 코튼 플라워</div></div>
+    </div>
+    <ul class="checks" style="margin-top:24px">
+      <li>호불호 적은 국민 향, 코튼·린넨 계열</li>
+      <li>인공적이지 않은 은은한 발향</li>
+      <li>가족 누구나 부담 없는 청결감</li>
+    </ul>
+  </section>
+
+  <!-- 12. POINT 03 디자인/공간 -->
+  <section class="sec sec-warm">
+    <p class="eyebrow">POINT 03</p>
+    <h2 class="head">숨기지 않아도 되는<br><span class="pt">디자인</span></h2>
+    <p class="lead">어디에 둬도 인테리어를 해치지 않습니다.</p>
+    <div class="grid2" style="margin-top:24px">
+      <div class="card"><img src="images/s7_space_dresser.png" alt="드레서"><div class="cap">드레서 위에</div></div>
+      <div class="card"><img src="images/s7_space_bedroom.png" alt="침실"><div class="cap">침대 옆 협탁에</div></div>
+    </div>
+  </section>
+
+  <!-- 13. 멀티배치 3공간 -->
+  <section class="sec sec-cream">
+    <h2 class="head">한 개보다 <span class="pt">세 곳</span></h2>
+    <p class="lead">생활취가 가장 신경 쓰이는 세 공간에 함께 두세요.</p>
+    <div class="grid3">
+      <div class="card"><div class="ph" style="min-height:130px;border-radius:0">🤖 화장실</div><div class="cap">화장실</div></div>
+      <div class="card"><div class="ph" style="min-height:130px;border-radius:0">🤖 옷장</div><div class="cap">옷장·드레스룸</div></div>
+      <div class="card"><div class="ph" style="min-height:130px;border-radius:0">🤖 침실</div><div class="cap">침실</div></div>
+    </div>
+  </section>
+
+  <!-- 14. 신뢰 -->
+  <section class="sec sec-sage">
+    <p class="eyebrow sage" style="color:#eef2e8">SAFETY</p>
+    <h2 class="head" style="color:#fff">아이도, 반려동물도<br>함께 쓰는 공간이니까</h2>
+    <div style="margin:26px -40px 0"><img src="images/s9_family.png" alt="가족"></div>
+    <div class="badges" style="margin-top:30px">
+      <div class="badge"><div class="ic" style="background:#fff">🧴</div><div class="bt" style="color:#fff">유해물질<br>시험 완료</div></div>
+      <div class="badge"><div class="ic" style="background:#fff">🐶</div><div class="bt" style="color:#fff">반려동물<br>가정 사용</div></div>
+      <div class="badge"><div class="ic" style="background:#fff">👶</div><div class="bt" style="color:#fff">아이 있는<br>집도 안심</div></div>
+    </div>
+    <div class="ph" style="margin-top:24px;background:rgba(255,255,255,.15);color:#eef2e8">🤖 실사 필요: 공인 시험성적서 스캔본</div>
+  </section>
+
+  <!-- 15. 사용법 STEP -->
+  <section class="sec sec-cream">
+    <p class="eyebrow">HOW TO USE</p>
+    <h2 class="head">사용은 <span class="pt">3초</span></h2>
+    <div class="steps">
+      <div class="st"><div class="no">STEP<br>01</div><div class="tx"><b>STEP 01</b>커버를 돌려 엽니다.</div></div>
+      <div class="st"><div class="no">STEP<br>02</div><div class="tx"><b>STEP 02</b>냄새가 신경 쓰이는 공간에 둡니다.</div></div>
+      <div class="st"><div class="no">STEP<br>03</div><div class="tx"><b>STEP 03</b>끝. 린넨 향이 천천히 퍼집니다.</div></div>
+    </div>
+    <img src="images/s5_howto.png" alt="사용법" style="border-radius:16px;margin-top:20px">
+  </section>
+
+  <!-- 16. 스펙 -->
+  <section class="sec sec-warm">
+    <p class="eyebrow">PRODUCT</p>
+    <h2 class="head">제품 정보</h2>
+    <table class="spec">
+      <tr><th>제품명</th><td>iLBiA 에어밤 (고체 탈취제)</td></tr>
+      <tr><th>향</th><td>린넨 (코튼/린넨 계열)</td></tr>
+      <tr><th>용량</th><td>270g</td></tr>
+      <tr><th>사용 공간</th><td>화장실·옷장·신발장·침실·거실 등</td></tr>
+      <tr><th>제조원산지</th><td>대한민국</td></tr>
+    </table>
+  </section>
+
+  <!-- 17. FAQ -->
+  <section class="sec sec-sage">
+    <p class="eyebrow sage" style="color:#eef2e8">FAQ</p>
+    <h2 class="head" style="color:#fff">자주 묻는 질문</h2>
+    <div class="faq">
+      <div class="fi"><div class="fq">Q. 얼마나 오래 가나요?</div><div class="fa">사용 환경에 따라 다르지만, 개봉 후 은은한 향과 탈취가 오래 지속됩니다.</div><div class="tip">💡 향이 약해지면 표면을 살짝 긁어주면 발향이 살아나요</div></div>
+      <div class="fi"><div class="fq">Q. 향이 너무 강하진 않나요?</div><div class="fa">인공적이지 않은 은은한 린넨 향으로, 좁은 공간에서도 부담 없습니다.</div></div>
+      <div class="fi"><div class="fq">Q. 어디에 두는 게 좋나요?</div><div class="fa">냄새가 가장 신경 쓰이는 화장실·옷장·신발장을 추천합니다. 여러 곳에 함께 두면 더 좋아요.</div></div>
+    </div>
+  </section>
+
+  <!-- 18. 가격 CTA -->
+  <section class="sec sec-cream center">
+    <img src="images/s10_cta.png" alt="제품" style="border-radius:18px">
+    <h2 class="head mt24">오늘, <span class="pt">공기</span>를 바꿔보세요</h2>
+    <div class="price">
+      <div class="po"><div class="pn">단품<small>에어밤 1개 (270g)</small></div><div class="pp">18,900원</div></div>
+      <div class="po best"><div class="pn">홀더 세트<small>에어밤 + 가죽 홀더 · 선물용</small></div><div class="pp">+12,000원</div></div>
+      <div class="po"><div class="pn">3개 세트<small>화장실·옷장·침실</small></div><div class="pp">기획전가</div></div>
+    </div>
+  </section>
+
+  <!-- 19. 표시사항 -->
+  <div class="disc">
+    [상품 정보 고시] 품명: iLBiA 에어밤 / 향: 린넨 / 용량: 270g / 제조원산지: 대한민국 / 사용 시 직사광선을 피하고 어린이 손이 닿지 않는 곳에 보관하세요. 본 페이지는 테스트용 시안입니다.
+  </div>
+
+</div>
+</body>
+</html>
