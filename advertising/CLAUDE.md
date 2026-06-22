@@ -362,6 +362,21 @@ IC→구매: 결제 UX, 가격 비교 이탈
 - 대표님이 직접 기록하는 캠페인 변경사항 (일자/계정/캠페인/예산변경/ROAS변경/코멘트)
 - 2025.08~현재까지 전체 이력 있음. 분석 시 ROAS 변경 맥락 확인용으로 참조
 
+## 🛠️ 재사용 도구 (스킬) — 매번 새로 짜지 말 것
+반복 작업은 `advertising/`에 도구화돼 있음. 한 줄 실행, `--help`로 옵션 확인. **도구가 안 맞으면 즉시 고치고 재사용(예: 품목 분류) — 코드 새로 짜지 말 것.**
+
+| 도구 | 용도 | 예시 |
+|:--|:--|:--|
+| `log_ad_change.py` | 광고변경사항 시트 기록 (좌정렬·중복감지·삽입위치 내장) | `--account 채움컴퍼니 --campaign "260619_얼룩 — 캠페인 OFF" --comment "사유"` <br>(예산/ROAS 변경 시 `--budget "30,000원" --roas "270.00"`) |
+| `meta_insights.py` | 메타 광고 조회 (캠페인/소재/오디언스/지면/일별) | `--level ad`(소재) / `--level age`(연령성별) / `--level placement`(지면) / `--date last_7d --daily`(일별추이) / `--campaign 식세기` |
+| `coupang_ad_summary.py` | 쿠팡 광고 품목별 요약 (전송폴더 xlsx) | `--account rocket`(비코어랩) / `--account gross --date 20260621`(채움) / `--by-option 코튼`(옵션ID별) |
+| `meta_vs_cafe24.py` | 메타 광고비 vs 카페24 실매출 → 실질ROAS (픽셀 누락 보정) | `--days 7`(기본) / `--days 14` / `--include-today` |
+
+- 메타 토큰 = `automation/.env`에서 자동 로드 / 계정 `ilbia`(기본)·`washing`
+- 쿠팡 전송폴더 = `mac window file transfer/` / `rocket`=A00290275(비코어랩)·`gross`=A00940134(채움)
+- ⚠️ 쿠팡은 GMV(판매가) ROAS — 정산마진은 더 낮음 (도구 출력에도 명시됨)
+- 카페24 실매출 = `erp.db` sales 테이블 (이지어드민 자동수집 09:30/10:00, **카페24 직접 API 아님**). 어제·당일치는 동기화 지연 가능 — 누락일은 도구가 자동 경고·합산 제외. 메타 픽셀이 자사몰 전환 ~10% 놓쳐서 실질ROAS가 픽셀ROAS보다 높음
+
 ## 참조 자료 (필요할 때 Read)
 - `expert_insights.md` — 마케팅 전문가 60명+ 인사이트 (쿠팡/네이버/메타/오픈마켓/바이럴/상세페이지)
 - 네이버 검색광고 MCP 도구 10개 (`../mcp-server/` 참고)
