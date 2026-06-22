@@ -52,6 +52,7 @@ def main():
     ap.add_argument('--account', default='rocket', choices=list(ACCT))
     ap.add_argument('--date', default='', help='YYYYMMDD (기본 최신)')
     ap.add_argument('--by-option', default='', help='해당 품목키워드를 옵션ID별로 분해')
+    ap.add_argument('--by-campaign', action='store_true', help='캠페인별 집계')
     a = ap.parse_args()
 
     code = ACCT[a.account]
@@ -70,6 +71,7 @@ def main():
 
     c_prod = col(df, '광고집행 상품명', '상품명')
     c_opt = col(df, '광고집행 옵션ID', '옵션ID')
+    c_camp = col(df, '캠페인명', '캠페인')
     c_imp = col(df, '노출수')
     c_clk = col(df, '클릭수')
     c_cost = col(df, '광고비')
@@ -79,7 +81,12 @@ def main():
         print('❌ 컬럼 매칭 실패. 보고서 포맷 확인:', list(df.columns))
         sys.exit(3)
 
-    keyfn = (lambda r: str(r[c_opt])) if a.by_option else (lambda r: cat(r[c_prod]))
+    if a.by_campaign and c_camp:
+        keyfn = lambda r: str(r[c_camp]); title = '캠페인별'; width = 30
+    elif a.by_option:
+        keyfn = lambda r: str(r[c_opt]); title = f'옵션별({a.by_option})'; width = 18
+    else:
+        keyfn = lambda r: cat(r[c_prod]); title = '품목별'; width = 18
     agg = {}
     for _, r in df.iterrows():
         if a.by_option and a.by_option not in str(r[c_prod]):
@@ -89,15 +96,14 @@ def main():
         x['노출'] += r[c_imp]; x['클릭'] += r[c_clk]; x['광고비'] += r[c_cost]
         x['주문'] += r[c_ord]; x['매출'] += r[c_rev]
 
-    title = f'옵션별({a.by_option})' if a.by_option else '품목별'
     print(f'=== 쿠팡 {a.account}({code}) {title} — {fname} ===')
-    print(f'{"항목":<18} 광고비 클릭 주문 GMV매출 ROAS CVR')
+    print(f'{"항목":<{width}} 광고비 클릭 주문 GMV매출 ROAS CVR')
     for k, x in sorted(agg.items(), key=lambda i: -i[1]['광고비']):
         if x['광고비'] < 300:
             continue
         roas = round(x['매출'] / x['광고비'] * 100) if x['광고비'] else 0
         cvr = round(x['주문'] / x['클릭'] * 100, 1) if x['클릭'] else 0
-        print(f'{k[:18]:<18} {int(x["광고비"]):>7,} {int(x["클릭"]):>4} {int(x["주문"]):>3} {int(x["매출"]):>9,} {roas:>4}% {cvr:>4}%')
+        print(f'{k[:width]:<{width}} {int(x["광고비"]):>7,} {int(x["클릭"]):>4} {int(x["주문"]):>3} {int(x["매출"]):>9,} {roas:>4}% {cvr:>4}%')
     print('※ GMV(판매가) ROAS — 정산마진은 더 낮음')
 
 
