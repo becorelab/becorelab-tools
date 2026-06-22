@@ -21,7 +21,7 @@ import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
 
-XFER = '/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/앱/mac window file transfer'
+XFER = '/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/mac window file transfer'  # 2026-06-22 '앱/'에서 이동
 ACCT = {'rocket': 'A00290275', 'gross': 'A00940134'}
 
 

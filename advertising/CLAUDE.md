@@ -373,7 +373,7 @@ IC→구매: 결제 UX, 가격 비교 이탈
 | `meta_vs_cafe24.py` | 메타 광고비 vs 카페24 실매출 → 실질ROAS (픽셀 누락 보정) | `--days 7`(기본) / `--days 14` / `--include-today` |
 
 - 메타 토큰 = `automation/.env`에서 자동 로드 / 계정 `ilbia`(기본)·`washing`
-- 쿠팡 전송폴더 = `mac window file transfer/` / `rocket`=A00290275(비코어랩)·`gross`=A00940134(채움)
+- 쿠팡 전송폴더 = `내 드라이브/Claude AI work space/mac window file transfer/` (⚠️ 2026-06-22 `앱/`에서 이동, 구 경로 삭제됨) / `rocket`=A00290275(비코어랩)·`gross`=A00940134(채움)
 - ⚠️ 쿠팡은 GMV(판매가) ROAS — 정산마진은 더 낮음 (도구 출력에도 명시됨)
 - 카페24 실매출 = `erp.db` sales 테이블 (이지어드민 자동수집 09:30/10:00, **카페24 직접 API 아님**). 어제·당일치는 동기화 지연 가능 — 누락일은 도구가 자동 경고·합산 제외. 메타 픽셀이 자사몰 전환 ~10% 놓쳐서 실질ROAS가 픽셀ROAS보다 높음
 
