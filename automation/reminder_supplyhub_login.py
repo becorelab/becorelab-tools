@@ -27,7 +27,29 @@ MSG = (
 )
 
 
+def _session_expired():
+    """세션 만료 여부 판단. ①최근 20h 내 로그인(쿠키 갱신) 있으면 살아있음 ②없으면 아침 크론 결과로."""
+    import time
+    cookies = Path(os.path.expanduser("~/ClaudeAITeam/automation/supplyhub_session_cookies.json"))
+    if cookies.exists() and (time.time() - cookies.stat().st_mtime) < 20 * 3600:
+        return False  # 최근 로그인 = 세션 살아있음 → 알림 불필요
+    log = Path(os.path.expanduser("~/ClaudeAITeam/automation/logs/rocket_daily.log"))
+    if not log.exists():
+        return True
+    last = None
+    for line in log.read_text(encoding="utf-8", errors="ignore").splitlines():
+        if "ERP sales 반영" in line:
+            last = "ok"
+        elif "수집 실패" in line or "재로그인 필요" in line:
+            last = "fail"
+    return last != "ok"
+
+
 def main():
+    # 세션이 살아있으면(아침 수집 성공) 굳이 매일 알림 보내지 않음
+    if not _session_expired():
+        print("세션 정상 — 퇴근 알림 스킵")
+        return
     token = _get_token()
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     data = json.dumps({"chat_id": OWNER_CHAT_ID, "text": MSG}).encode("utf-8")
