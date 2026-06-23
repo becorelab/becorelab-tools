@@ -169,6 +169,16 @@ def explode_products(name, opt, q):
                 add("건조기시트(베이비크림)", cnt)
             else:
                 note = "미분류 퍼퓸시트: " + name[:40]
+        elif "건조기시트40매" in opt:  # 9,900원 특가 건조기시트 단품 (옵션에 향)
+            tag = name + opt
+            if "코튼" in tag:
+                add("건조기시트(코튼블루)", 1)
+            elif "바이올렛" in tag:
+                add("건조기시트(바이올렛)", 1)
+            elif "베이비" in tag:
+                add("건조기시트(베이비크림)", 1)
+            else:
+                note = "미분류 특가시트: " + tag[:40]
         elif "베이비크림 1박스" in name:
             add("건조기시트(베이비크림)", 1)
         elif "코튼블루 1박스" in name:
