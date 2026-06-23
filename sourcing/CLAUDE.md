@@ -109,6 +109,57 @@
 - `POST /api/autoscan/explore` — 카테고리 기반 자동 탐색
 - `GET /api/opportunities` — GO 판정된 기회 상품 목록
 
+## 🛠 우리 툴 사용법 (리뷰분석 · 소싱 · 마케팅) — 소싱 하치 필독
+
+> 비코어랩이 직접 만든 툴 모음. 소싱 판단의 핵심 무기. **새 상품 검토 시 이 순서대로**: ①시장스캔 → ②리뷰분석(페인포인트) → ③1688/알리바바 소싱 → ④RFQ 견적.
+
+### 📊 리뷰 분석툴 (★ 소싱·상품기획·상세페이지의 핵심)
+경쟁사 리뷰에서 **JTBD·불만(페인포인트)·만족포인트·브랜드 포지셔닝**을 자동 추출. "팔리는 빈자리"를 찾는 무기.
+
+**A. MCP 빠른 분석 (권장 — 한 번에)**
+- `sourcing_reviews_start(keyword)` → 쿠팡 상위 상품 리뷰 수집+분석 시작
+- `sourcing_reviews(scan_id)` → 분석 결과 조회 (불만 TOP / 만족 TOP / 향·옵션 분포 / 브랜드맵)
+- `sourcing_reviews_chat(scan_id, question)` → "이 카테고리 빈자리는?" 후속 질문
+
+**B. 스크립트 직접 수집** (`sourcing/`)
+- 쿠팡: `coupang_reviews.py` (소싱앱 API, Wing 경유 — Akamai 우회)
+- 네이버: `collect_naver_deodorizer_reviews.py` (Playwright stealth)
+- 통합: `collect_all_reviews.py` (6개 카테고리 일괄)
+- 분석: `analyze_reviews.py` (JSON→JTBD/불만/만족/포지셔닝), `analyze_option_mix.py` (1개입 vs 다구성 옵션분포)
+
+**C. 결과 위치**
+- 원본: `sourcing/review_output/{카테고리}/{상품ID}.json`
+- 정리본: 옵시디언 `Product Lab/리뷰 분석/{상품}.md`
+- 📌 실전 사례: 고체탈취제 23,774건 분석 → "향만 좋은 곳 vs 탈취만 강한 곳 사이 빈자리" 도출 → 에어밤 포지셔닝 근거
+
+### 🔍 시장 스캔 & 소싱 (1688/알리바바)
+**시장 기회 판단 (MCP)**
+- `sourcing_scan_and_wait(keyword)` — 쿠팡 시장 스캔(기회점수) 시작+대기+결과 한 번에 (권장)
+- `sourcing_scans` → 기존 스캔 확인 (새로 돌리기 전 필수!) → `sourcing_scan_detail(scan_id)` 상세
+- `sourcing_opportunities(status=go)` — GO 판정 기회상품 목록
+- `sourcing_detail_analysis(scan_id)` — 가격대/시장구조/원가 추정 + `sourcing_detail_chat`으로 후속질문
+
+**1688/알리바바 (스크립트)**
+- `find_1688.py` — 1688 제품 상세 조회 (Elimapi)
+- `compare_1688.py` — 유사 제품 비교 → 구글시트 업로드
+- `alibaba_search.py` — 알리바바 검색 (대표님 크롬 쿠키 빌림, 화면 밖 브라우저)
+- `cdp_1688_detail.py` / `chat_1688.py` — CDP로 1688 상세 읽기 / 판매자 채팅
+
+**RFQ 견적 (MCP)**
+- `sourcing_rfq_generate` → 견적요청서 자동 작성 → `sourcing_rfq_publish` 발행 → `sourcing_rfq_compare` 여러 견적 비교
+- 💡 "단가만 보지 마라" — MOQ·리드타임·QC·소통 종합 (아래 인사이트 5번 참고)
+
+### 📢 마케팅 툴 (소싱 판단 보조용 조회만)
+- `naver_ad_keyword_tool` / `naver_ad_estimate` — 네이버 키워드 검색량·경쟁도·입찰가 (수요 검증에 유용)
+- `meta_ad_insights` / `meta_ad_campaigns` — 메타 광고 성과 참고
+- ⚠️ **광고 집행·수정은 광고 하치 담당.** 소싱 하치는 시장조사용 **조회**만 (실제 캠페인 변경 금지)
+
+### 🤖 자동 탐색 (지속 소싱)
+- `sourcing_autoscan_start` / `sourcing_autoscan_results` — 시드 키워드에서 연관 키워드 자동 발굴
+- 골드박스: `goldbox_auto_scan` / `goldbox_products` — 쿠팡 골드박스 기회 모니터링
+
+---
+
 ## 실행 환경
 - Python 3.9+ (맥미니: system python 3.9)
 - venv: `../../.venv/` (ClaudeAITeam 루트의 공유 venv)
