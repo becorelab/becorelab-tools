@@ -137,6 +137,10 @@ def explode_products(name, opt, q):
             add("하트 식세기세제", 3)
         elif "하트 식세기 세제 60" in name:
             add("하트 식세기세제", 1)
+        # 식세기세제 60개입 단품 — 상품명 "60개입, N개" 수량 파싱 (없으면 1)
+        elif ("식기세척기" in name or "식세기" in name) and "60개입" in name:
+            m = re.search(r"60개입,?\s*(\d+)개", name)
+            add("하트 식세기세제", int(m.group(1)) if m else 1)
         elif "식기세척기" in name and "2개" in name:
             add("하트 식세기세제", 2)
         elif "식기세척기" in name and "1개" in name:
