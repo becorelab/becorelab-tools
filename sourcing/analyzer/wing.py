@@ -365,7 +365,7 @@ def _do_search(keyword):
     try:
         _page.evaluate(
             "() => document.querySelectorAll("
-            "'.keyword_analyze_coupang .listProducts li').forEach(el => el.remove())"
+            "'.listProducts li').forEach(el => el.remove())"
         )
     except Exception:
         pass
@@ -374,7 +374,7 @@ def _do_search(keyword):
     # 결과 로딩 대기 (위에서 DOM을 비웠으므로 새 결과가 나타날 때까지 정확히 대기)
     try:
         _page.wait_for_selector(
-            '.keyword_analyze_coupang .listProducts li',
+            '.listProducts li',
             timeout=45000
         )
         logger.info(f'상품 리스트 로딩 완료: {keyword}')
@@ -392,17 +392,48 @@ def _do_search(keyword):
             raise Exception('확장 프로그램 또는 쿠팡윙 로그인 문제')
         return []
 
-    # 윙 데이터(판매량/매출) 로딩 대기 — dl.type2 안에 판매량 데이터가 채워질 때까지
+    # 1차 리스트(상위 노출 20개) 로딩 대기
     try:
         _page.wait_for_selector(
-            '.keyword_analyze_coupang .listProducts li dl.type2 dd',
+            '.listProducts li dl dd',
             timeout=30000
         )
-        logger.info('판매량 데이터 로딩 감지')
+        logger.info('1차 상품 리스트 로딩 감지')
     except:
-        logger.warning('판매량 데이터 로딩 타임아웃 — 기본 데이터만 사용')
+        logger.warning('1차 리스트 로딩 타임아웃')
 
-    _page.wait_for_timeout(5000)  # 모든 상품 데이터 안정화 대기
+    # ★ 헬프스토어 레이아웃 변경(2026-06) 대응:
+    #   판매량·판매금액이 채워진 2번째 리스트(상위 40개 판매순)는 페이지를
+    #   끝까지 스크롤해야 lazy-load 된다. 스크롤 안 하면 1번째 리스트만 보이고
+    #   판매량이 '조회하기' 버튼 상태라 전 상품이 스킵 → 빈 결과가 된다.
+    for _ in range(10):
+        _page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
+        _page.wait_for_timeout(1200)
+    # 판매량이 '숫자'로 채워진 li가 나타날 때까지 대기 (조회하기 버튼 아닌 실제 데이터)
+    try:
+        _page.wait_for_function(
+            '''() => {
+                const lis = document.querySelectorAll('.listProducts li');
+                for (const li of lis) {
+                    const dts = li.querySelectorAll('dt');
+                    const dds = li.querySelectorAll('dd');
+                    for (let k = 0; k < dts.length; k++) {
+                        if (dts[k].innerText.trim() === '판매량') {
+                            const v = dds[k] ? dds[k].innerText.trim() : '';
+                            if (/^[0-9][0-9,]*$/.test(v)) return true;
+                        }
+                    }
+                }
+                return false;
+            }''',
+            timeout=30000
+        )
+        logger.info('판매량 데이터(2차 리스트) 로딩 완료')
+    except:
+        logger.warning('판매량 데이터 로딩 타임아웃 — 스크롤 후에도 미확인')
+
+    _page.evaluate('window.scrollTo(0, 0)')
+    _page.wait_for_timeout(2000)  # 안정화
 
     # DOM에서 상품 데이터 파싱
     # type1: 가격, 리뷰(점수)
@@ -421,8 +452,12 @@ def _do_search(keyword):
         }
 
         const products = [];
-        document.querySelectorAll('.keyword_analyze_coupang .listProducts li').forEach((li, i) => {
-            const p = { ranking: i + 1, price: 0, reviews: 0, clicks: 0, sales: 0, cvr: 0, revenue: 0, adWeight: 0, ctr: 0 };
+        // 헬프스토어 2026-06 레이아웃: 판매량/판매금액이 채워진 리스트와
+        // '조회하기' 버튼만 있는 리스트가 공존한다. 두 리스트를 모두 순회하되
+        // dl 클래스(type1/type2)에 의존하지 않고 li 안의 모든 dt/dd를 라벨로 매칭.
+        // (판매량이 0인 항목은 호출부에서 스킵되므로 '조회하기' 리스트는 자동 제외)
+        document.querySelectorAll('.listProducts li').forEach((li) => {
+            const p = { price: 0, reviews: 0, clicks: 0, sales: 0, cvr: 0, revenue: 0, adWeight: 0, ctr: 0 };
 
             // 상품명 + URL
             const a = li.querySelector('strong a');
@@ -432,50 +467,27 @@ def _do_search(keyword):
             const sp = li.querySelector(':scope > span');
             if (sp) p.category = sp.innerText.trim();
 
-            // type1: 가격, 리뷰
-            const dl1 = li.querySelector('dl.type1');
-            if (dl1) {
-                let dt = '';
-                for (const c of dl1.children) {
-                    if (c.tagName === 'DT') dt = c.innerText.trim();
-                    else if (c.tagName === 'DD') {
-                        const raw = c.innerText.trim();
-                        if (dt === '가격') p.price = parseNum(raw);
-                        else if (dt === '리뷰') p.reviews = parseNum(raw);
-                        else if (dt === '브랜드') p.brand = raw;
-                        else if (dt === '제조사') p.manufacturer = raw;
-                        else if (dt === '판매량') p.sales = parseNum(raw);
-                        else if (dt.includes('판매금액')) p.revenue = parseNum(raw);
-                        else if (dt === '클릭수') p.clicks = parseNum(raw);
-                        else if (dt === '전환율') p.cvr = parseFloat2(raw);
-                        dt = '';
-                    }
-                }
-            }
-
-            // type2: 노출증가, 클릭수, 클릭율, 광고비중
-            const dl2 = li.querySelector('dl.type2');
-            if (dl2) {
-                let dt = '';
-                for (const c of dl2.children) {
-                    if (c.tagName === 'DT') dt = c.innerText.trim();
-                    else if (c.tagName === 'DD') {
-                        const raw = c.innerText.trim();
-                        if (dt === '클릭수') p.clicks = parseNum(raw);
-                        else if (dt === '클릭율') p.ctr = parseFloat2(raw);
-                        else if (dt === '광고비중') p.adWeight = parseFloat2(raw);
-                        else if (dt === '판매량') p.sales = parseNum(raw);
-                        else if (dt.includes('판매금액')) p.revenue = parseNum(raw);
-                        else if (dt === '전환율') p.cvr = parseFloat2(raw);
-                        else if (dt === '리뷰') p.reviews = parseNum(raw);
-                        dt = '';
-                    }
-                }
+            // li 안의 모든 dt/dd를 순서대로 매칭 (dl 구조 무관)
+            const dts = li.querySelectorAll('dt');
+            const dds = li.querySelectorAll('dd');
+            for (let k = 0; k < dts.length; k++) {
+                const dt = dts[k].innerText.trim();
+                const raw = dds[k] ? dds[k].innerText.trim() : '';
+                if (dt === '가격') p.price = parseNum(raw);
+                else if (dt === '리뷰') p.reviews = parseNum(raw);
+                else if (dt === '브랜드') p.brand = raw;
+                else if (dt === '제조사') p.manufacturer = raw;
+                else if (dt === '판매량' || dt === '6개월판매량') p.sales = parseNum(raw);
+                else if (dt.includes('판매금액')) p.revenue = parseNum(raw);
+                else if (dt === '클릭수') p.clicks = parseNum(raw);
+                else if (dt === '전환율') p.cvr = parseFloat2(raw);
+                else if (dt === '클릭율') p.ctr = parseFloat2(raw);
+                else if (dt === '광고비중') p.adWeight = parseFloat2(raw);
             }
 
             // 카테고리 코드
             const kwBtn = li.querySelector('.btnShowKeyword');
-            if (kwBtn) p.categoryCode = kwBtn.getAttribute('data-category-id') || '';
+            if (kwBtn) p.categoryCode = kwBtn.getAttribute('data-category-id') || kwBtn.getAttribute('data-id') || '';
 
             products.push(p);
         });
@@ -483,13 +495,18 @@ def _do_search(keyword):
     }''')
 
     # CoupangProduct 변환 — 판매량 데이터가 있는 상품만 (랭킹순 40개)
-    # 상위 노출 상품 (노출증가/광고비중만 있는 것)은 제외
+    # 상위 노출 상품 (노출증가/광고비중만 있는 것 = '조회하기' 버튼 리스트)은 제외
     products = []
     rank = 0
+    seen = set()  # 두 리스트를 함께 순회하므로 같은 상품 중복 방지
     for rp in products_data:
         # 판매량 또는 매출 데이터가 없으면 상위 노출 상품 → 스킵
         if rp.get('sales', 0) == 0 and rp.get('revenue', 0) == 0:
             continue
+        dedup_key = rp.get('url', '') or rp.get('name', '')
+        if dedup_key and dedup_key in seen:
+            continue
+        seen.add(dedup_key)
         rank += 1
         sales = rp.get('sales', 0)
         price = rp.get('price', 0)
@@ -1032,9 +1049,14 @@ def _do_coupang_keywords(keyword: str) -> dict:
 
 
 def _debug_first_li():
-    """디버그: 페이지의 모든 listProducts 섹션 확인"""
+    """디버그: 검색 후 상품 리스트 컨테이너를 자동 탐지하고 첫 li 구조를 덤프.
+    헬프스토어 레이아웃 변경 대응용 — 옛 .listProducts 클래스에 의존하지 않는다."""
+    global _page
     if not _page:
-        return 'no page'
+        # 앱 재시작 등으로 페이지가 없으면 로그인부터 복구
+        _do_full_login()
+    if not _page:
+        return 'no page (login failed)'
     if 'keyword_analyze_coupang' not in _page.url:
         _page.goto(COUPANG_PAGE, wait_until='domcontentloaded', timeout=15000)
         _page.wait_for_timeout(2000)
@@ -1042,24 +1064,38 @@ def _debug_first_li():
     _page.locator('#keyword').fill('')
     _page.locator('#keyword').type('남자 깔창', delay=30)
     _page.locator('#btnSearch').click()
-    try:
-        _page.wait_for_selector('.listProducts li', timeout=45000)
-    except:
-        pass
-    _page.wait_for_timeout(10000)
+    # 셀렉터에 의존하지 않고 충분히 대기 (확장 API + WebSocket 완료)
+    _page.wait_for_timeout(18000)
 
-    return _page.evaluate('''() => {
-        const result = [];
-        // 모든 .listProducts 찾기
-        document.querySelectorAll('.listProducts').forEach((list, idx) => {
-            const parent = list.parentElement;
-            const parentId = parent ? (parent.id || parent.className || parent.tagName) : 'unknown';
-            const lis = list.querySelectorAll('li');
-            const firstLi = lis[0];
-            let sample = firstLi ? firstLi.outerHTML.substring(0, 800) : 'empty';
-            result.push(`\\n=== LIST #${idx} (parent: ${parentId}, items: ${lis.length}) ===\\n${sample}`);
+    # 페이지 하단까지 스크롤 → lazy-load로 판매량/판매금액이 채워지는지 확인
+    for _ in range(10):
+        _page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
+        _page.wait_for_timeout(1500)
+    _page.evaluate('window.scrollTo(0, 0)')
+    _page.wait_for_timeout(1500)
+
+    return _page.evaluate(r'''() => {
+        const out = [];
+        const alert = document.querySelector('#alertpopup');
+        out.push('차단팝업: ' + (alert && getComputedStyle(alert).display !== 'none'
+            ? ('보임 → ' + ((document.querySelector('#alertmsg') || {}).innerText || '')) : '없음'));
+        const lists = document.querySelectorAll('.listProducts');
+        out.push('listProducts 컨테이너 개수: ' + lists.length);
+        lists.forEach((ul, idx) => {
+            const lis = ul.querySelectorAll(':scope > li');
+            const parent = ul.parentElement;
+            const pcls = parent ? (parent.className || parent.id || parent.tagName) : '';
+            out.push(`\n##### LIST #${idx} (부모:${pcls}) 직속li=${lis.length}`);
+            const probe = [...new Set([0, Math.floor(lis.length / 2), lis.length - 1])].filter(i => i >= 0);
+            probe.forEach(i => {
+                const li = lis[i]; if (!li) return;
+                const dts = [...li.querySelectorAll('dt')].map(d => d.innerText.trim());
+                const dds = [...li.querySelectorAll('dd')].map(d => d.innerText.trim());
+                const hasBtn = !!li.querySelector('.btnInquirySalesW');
+                out.push(`  li[${i}] 조회버튼=${hasBtn}\n     dt=${JSON.stringify(dts)}\n     dd=${JSON.stringify(dds)}`);
+            });
         });
-        return result.join('\\n');
+        return out.join('\n');
     }''')
 
 
