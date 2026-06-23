@@ -29,6 +29,36 @@ if os.path.exists(_env_path):
                 GEMINI_API_KEY = _line.split('=', 1)[1].strip()
 
 
+def _call_claude(prompt: str, max_tokens: int = 4000) -> str:
+    """Claude Messages REST API 호출 (리뷰 정성분석).
+    anthropic 패키지 의존 없이 requests로 직접 호출 (앱이 system python 3.9로 구동됨)."""
+    if not ANTHROPIC_API_KEY:
+        return ''
+    try:
+        res = requests.post(
+            'https://api.anthropic.com/v1/messages',
+            headers={
+                'x-api-key': ANTHROPIC_API_KEY,
+                'anthropic-version': '2023-06-01',
+                'content-type': 'application/json',
+            },
+            json={
+                'model': 'claude-sonnet-4-6',
+                'max_tokens': max_tokens,
+                'messages': [{'role': 'user', 'content': prompt}],
+            },
+            timeout=120,
+        )
+        if res.ok:
+            parts = res.json().get('content', [])
+            return ''.join(b.get('text', '') for b in parts if b.get('type') == 'text')
+        logger.error(f'Claude API 에러: {res.status_code} {res.text[:200]}')
+        return ''
+    except Exception as e:
+        logger.error(f'Claude API 호출 실패: {e}')
+        return ''
+
+
 def _call_gemini(prompt: str, max_tokens: int = 4000) -> str:
     """Gemini 2.5 Flash API 호출 (무료 티어, 503/429 자동 재시도)"""
     import time as _time
@@ -264,17 +294,22 @@ def analyze_reviews_claude(reviews: list, keyword: str, api_key: str = '') -> di
 
 JSON만 답해주세요."""
 
-    try:
-        content = _call_gemini(prompt, max_tokens=4000)
-        if content:
-            json_match = re.search(r'\{[\s\S]*\}', content)
-            if json_match:
-                analysis = json.loads(json_match.group())
-                analysis['_source'] = 'gemini'
-                return analysis
+    # Claude 우선 (ANTHROPIC_API_KEY), 실패 시 Gemini, 둘 다 실패 시 basic
+    for source, caller in (('claude', _call_claude), ('gemini', _call_gemini)):
+        try:
+            content = caller(prompt, max_tokens=4000)
+            if content:
+                json_match = re.search(r'\{[\s\S]*\}', content)
+                if json_match:
+                    analysis = json.loads(json_match.group())
+                    analysis['_source'] = source
+                    # basic 통계(평점분포 등)도 병합해서 함께 제공
+                    basic = analyze_reviews_basic(reviews, keyword)
+                    for k, v in basic.items():
+                        analysis.setdefault(k, v)
+                    return analysis
+        except Exception as e:
+            logger.error(f'{source} 분석 실패: {e}')
 
-    except Exception as e:
-        logger.error(f'Gemini API 호출 실패: {e}')
-
-    # 실패 시 기본 분석으로 폴백
+    # 모두 실패 시 기본 분석으로 폴백
     return analyze_reviews_basic(reviews, keyword)

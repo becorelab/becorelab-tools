@@ -1675,6 +1675,47 @@ def api_reviews_import():
     })
 
 
+def _collect_reviews_wing(products, max_per_product: int = 99999, max_products: int = 20) -> list:
+    """Wing persistent context(로그인 세션) 경유로 쿠팡 리뷰 수집.
+    생짜 CDP(_collect_reviews_direct)는 쿠팡 Akamai에 'Access Denied' 당하므로,
+    쿠팡윙이 신뢰하는 컨텍스트의 /next-api·HTML 엔드포인트로 우회한다.
+
+    상위 판매 상품 max_products개의 '전체 리뷰'를 수집한다(별점별 페이지네이션).
+    Akamai 차단 회피를 위해 상품 간 딜레이를 둔다."""
+    import time as _t
+    from analyzer.wing import _send as wing_send
+    all_reviews = []
+    targets = products[:max_products]
+    for idx, p in enumerate(targets):
+        url = p.get('product_url', '')
+        if not url:
+            continue
+        pname = p.get('product_name', '')[:20]
+        try:
+            result = wing_send('collect_all_reviews', {
+                'product_url': url,
+                'max_reviews': max_per_product,
+            }, timeout=900)
+            if isinstance(result, dict):
+                revs = result.get('reviews', []) or []
+            elif isinstance(result, list):
+                revs = result
+            else:
+                revs = []
+            for r in revs:
+                if isinstance(r, dict):
+                    r.setdefault('productName', pname)
+            all_reviews.extend([r for r in revs if isinstance(r, dict)])
+            print(f'[REVIEW] ({idx+1}/{len(targets)}) {pname} → {len(revs)}개 (누적 {len(all_reviews)})')
+        except Exception as e:
+            print(f'[REVIEW] 수집 실패: {pname} — {e}')
+        # 상품 간 딜레이 (봇 감지 회피)
+        if idx < len(targets) - 1:
+            _t.sleep(2.5)
+    print(f'[REVIEW] 총 {len(all_reviews)}개 수집 완료 (Wing 경유, 상품 {len(targets)}개)')
+    return all_reviews
+
+
 def _run_review_analysis(scan_id: int, api_key: str = ''):
     """리뷰 수집 → 분석 백그라운드"""
     with app.app_context():
@@ -1685,15 +1726,20 @@ def _run_review_analysis(scan_id: int, api_key: str = ''):
                 return
 
             keyword = scan['keyword']
-            products = fdb.get_products(scan_id)[:10]
+            # 상위 판매 상품순 정렬 후 상위 N개의 '전체 리뷰' 수집
+            products = fdb.get_products(scan_id)
+            products = sorted(products, key=lambda x: (x.get('sales_monthly') or 0), reverse=True)
 
             if not products:
                 _review_state[scan_id] = {'status': 'error', 'reviews': [], 'analysis': {'error': '상품 데이터 없음'}}
                 return
 
-            # 리뷰 수집 — Playwright 직접 수집
+            # 리뷰 수집 — Wing 경유(Akamai 우회). 실패 시 생짜 CDP로 폴백.
             _review_state[scan_id]['status'] = 'collecting'
-            all_reviews = _collect_reviews_direct(products)
+            all_reviews = _collect_reviews_wing(products)
+            if not all_reviews:
+                print('[REVIEW] Wing 경유 0개 — 생짜 CDP 폴백 시도')
+                all_reviews = _collect_reviews_direct(products)
             _review_state[scan_id]['reviews'] = all_reviews
             print(f'[REVIEW] 총 {len(all_reviews)}개 리뷰 수집 완료')
 
