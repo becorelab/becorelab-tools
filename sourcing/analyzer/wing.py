@@ -538,6 +538,9 @@ def _do_collect_reviews(product_url: str, max_reviews: int = 30) -> list:
     import re as _re
     if not _ctx:
         _start_browser()
+    # 로그인 세션이 없으면 쿠팡 Akamai가 차단(Access Denied)하므로 로그인 보장
+    if not _logged_in:
+        _do_full_login()
 
     pid_match = _re.search(r'products/(\d+)', product_url)
     if not pid_match:
@@ -602,6 +605,9 @@ def _do_collect_all_reviews(product_url: str, max_reviews: int = 9999) -> dict:
     import re as _re
     if not _ctx:
         _start_browser()
+    # 로그인 세션이 없으면 쿠팡 Akamai가 차단(Access Denied)하므로 로그인 보장
+    if not _logged_in:
+        _do_full_login()
 
     pid_match = _re.search(r'products/(\d+)', product_url)
     if not pid_match:

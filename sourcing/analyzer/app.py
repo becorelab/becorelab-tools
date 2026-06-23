@@ -1675,7 +1675,7 @@ def api_reviews_import():
     })
 
 
-def _collect_reviews_wing(products, max_per_product: int = 99999, max_products: int = 20) -> list:
+def _collect_reviews_wing(products, max_per_product: int = 3000, max_products: int = 20) -> list:
     """Wing persistent context(로그인 세션) 경유로 쿠팡 리뷰 수집.
     생짜 CDP(_collect_reviews_direct)는 쿠팡 Akamai에 'Access Denied' 당하므로,
     쿠팡윙이 신뢰하는 컨텍스트의 /next-api·HTML 엔드포인트로 우회한다.
