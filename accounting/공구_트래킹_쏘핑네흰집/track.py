@@ -44,8 +44,8 @@ PRODUCT_ORDER = [
 # 과거 자사몰 공구 실적 (고객결제 GMV 기준, 정산서에서 산출 — 고정값)
 # (주문수, 세트수량, 매출GMV)
 PAST_GONGU = {
-    "25년10월 (자사몰, 4일)": {"기간": 4, "전체": (445, 1064, 19516400), "Day1": (164, 403, 7284600), "Day2": (102, 241, 4484200)},
-    "26년02월 (자사몰, 5일)": {"기간": 5, "전체": (368, 779, 16676400), "Day1": (145, 337, 6939300), "Day2": (64, 119, 2741500)},
+    "25년10월 (자사몰, 4일)": {"기간": 4, "전체": (445, 1064, 19516400), "Day1": (164, 403, 7284600), "Day2": (102, 241, 4484200), "Day3": (58, 142, 2686200)},
+    "26년02월 (자사몰, 5일)": {"기간": 5, "전체": (368, 779, 16676400), "Day1": (145, 337, 6939300), "Day2": (64, 119, 2741500), "Day3": (64, 138, 3035400)},
 }
 SOPING_FEE = 0.28  # 쏘핑 인플루언서 공구 수수료 (자사몰·스토어 동일)
 
@@ -63,8 +63,8 @@ def compute_compare(master):
         return (orders, sets, int(gmv))
 
     d2 = days[1] if len(days) > 1 else None
+    d3 = days[2] if len(days) > 2 else None
     day1_recs = [r for r in recs if (r["결제일"] or "")[:10] == d1]
-    day2_recs = [r for r in recs if d2 and (r["결제일"] or "")[:10] == d2]
     store_label = f"26년06월 (스토어, {len(days)}일·진행중)"
     out = {
         "store_label": store_label,
@@ -72,7 +72,11 @@ def compute_compare(master):
         "Day1": {**{k: v["Day1"] for k, v in PAST_GONGU.items()}, store_label: metrics(day1_recs)},
     }
     if d2:
-        out["Day2"] = {**{k: v["Day2"] for k, v in PAST_GONGU.items()}, store_label: metrics(day2_recs)}
+        recs2 = [r for r in recs if (r["결제일"] or "")[:10] == d2]
+        out["Day2"] = {**{k: v["Day2"] for k, v in PAST_GONGU.items()}, store_label: metrics(recs2)}
+    if d3:
+        recs3 = [r for r in recs if (r["결제일"] or "")[:10] == d3]
+        out["Day3"] = {**{k: v["Day3"] for k, v in PAST_GONGU.items()}, store_label: metrics(recs3)}
     return out
 
 
@@ -378,6 +382,8 @@ def write_xlsx(day, hour, sku, prod_total, tot, cmp):
     cmp_block("◆ 1일차(Day1) 비교", cmp["Day1"])
     if "Day2" in cmp:
         cmp_block("◆ 2일차(Day2) 비교", cmp["Day2"])
+    if "Day3" in cmp:
+        cmp_block("◆ 3일차(Day3) 비교", cmp["Day3"])
     cmp_block("◆ 전체/누적 비교", cmp["전체"])
     for col in cs.columns:
         w = max((len(str(x.value)) for x in col if x.value is not None), default=10)
