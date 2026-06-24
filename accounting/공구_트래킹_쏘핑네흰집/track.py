@@ -44,8 +44,8 @@ PRODUCT_ORDER = [
 # 과거 자사몰 공구 실적 (고객결제 GMV 기준, 정산서에서 산출 — 고정값)
 # (주문수, 세트수량, 매출GMV)
 PAST_GONGU = {
-    "25년10월 (자사몰, 4일)": {"기간": 4, "전체": (445, 1064, 19516400), "Day1": (164, 403, 7284600)},
-    "26년02월 (자사몰, 5일)": {"기간": 5, "전체": (368, 779, 16676400), "Day1": (145, 337, 6939300)},
+    "25년10월 (자사몰, 4일)": {"기간": 4, "전체": (445, 1064, 19516400), "Day1": (164, 403, 7284600), "Day2": (102, 241, 4484200)},
+    "26년02월 (자사몰, 5일)": {"기간": 5, "전체": (368, 779, 16676400), "Day1": (145, 337, 6939300), "Day2": (64, 119, 2741500)},
 }
 SOPING_FEE = 0.28  # 쏘핑 인플루언서 공구 수수료 (자사몰·스토어 동일)
 
@@ -62,13 +62,18 @@ def compute_compare(master):
         sets = sum(r["수량"] for r in rs)
         return (orders, sets, int(gmv))
 
+    d2 = days[1] if len(days) > 1 else None
     day1_recs = [r for r in recs if (r["결제일"] or "")[:10] == d1]
+    day2_recs = [r for r in recs if d2 and (r["결제일"] or "")[:10] == d2]
     store_label = f"26년06월 (스토어, {len(days)}일·진행중)"
-    return {
+    out = {
         "store_label": store_label,
         "전체": {**{k: v["전체"] for k, v in PAST_GONGU.items()}, store_label: metrics(recs)},
         "Day1": {**{k: v["Day1"] for k, v in PAST_GONGU.items()}, store_label: metrics(day1_recs)},
     }
+    if d2:
+        out["Day2"] = {**{k: v["Day2"] for k, v in PAST_GONGU.items()}, store_label: metrics(day2_recs)}
+    return out
 
 
 def decrypt(path, pw):
@@ -232,11 +237,14 @@ def ingest(path, pw, master):
 
 def build_report(master):
     """master 전체에서 일별/시간대별/제품별 집계."""
-    day = defaultdict(lambda: dict(cnt=0, qty=0, amt=0, settle=0, prod=defaultdict(int)))
+    # 공구 매출 분리: 주문번호 그룹에 '단독 공구' 상품이 있으면 그 주문 전체가 공구 매출(추가구성 포함)
+    gongu_ord = {r.get("주문번호") for r in master.values() if "단독 공구" in r["상품명"]}
+
+    day = defaultdict(lambda: dict(cnt=0, qty=0, amt=0, settle=0, gongu=0, base=0, prod=defaultdict(int)))
     hour = defaultdict(lambda: dict(cnt=0, qty=0, amt=0, settle=0))
     sku = defaultdict(lambda: [0, 0, 0, 0])  # (상품,옵션) -> [건수,수량,주문금액,정산예정]
     prod_total = defaultdict(int)
-    tot = dict(cnt=0, qty=0, amt=0, settle=0)
+    tot = dict(cnt=0, qty=0, amt=0, settle=0, gongu=0, base=0)
     notes = set()
 
     for oid, rec in master.items():
@@ -244,13 +252,16 @@ def build_report(master):
         d = pay[:10] if pay else "(미상)"
         h = pay[11:13] if len(pay) >= 13 else "??"
         q = rec["수량"]; amt = rec["주문금액"]; st = rec["정산예정"]
+        gkey = "gongu" if rec.get("주문번호") in gongu_ord else "base"
 
         for bucket, key in ((day, d), (hour, f"{d} {h}시")):
             bucket[key]["cnt"] += 1; bucket[key]["qty"] += q
             bucket[key]["amt"] += amt; bucket[key]["settle"] += st
+        day[d][gkey] += amt
         s = sku[(rec["상품명"], rec["옵션"])]
         s[0] += 1; s[1] += q; s[2] += amt; s[3] += st
         tot["cnt"] += 1; tot["qty"] += q; tot["amt"] += amt; tot["settle"] += st
+        tot[gkey] += amt
 
         pmap, note = explode_products(rec["상품명"], rec["옵션"], q)
         if note:
@@ -266,10 +277,10 @@ def write_csvs(day, hour, prod_total):
     days = sorted(day)
     with open(DAY_CSV, "w", encoding="utf-8-sig", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["일자", "주문건수", "수량(세트)", "주문금액", "정산예정"])
+        w.writerow(["일자", "주문건수", "수량(세트)", "주문금액", "정산예정", "공구매출", "기본매출"])
         for d in days:
             v = day[d]
-            w.writerow([d, v["cnt"], v["qty"], v["amt"], v["settle"]])
+            w.writerow([d, v["cnt"], v["qty"], v["amt"], v["settle"], v["gongu"], v["base"]])
     with open(DAYPROD_CSV, "w", encoding="utf-8-sig", newline="") as f:
         w = csv.writer(f)
         w.writerow(["일자"] + PRODUCT_ORDER + ["건조기시트합계"])
@@ -330,7 +341,9 @@ def write_xlsx(day, hour, sku, prod_total, tot, cmp):
         ["집계 시각", datetime.now().strftime("%Y-%m-%d %H:%M")],
         ["누적 주문건수", tot["cnt"]],
         ["총 수량(세트)", tot["qty"]],
-        ["총 주문금액", tot["amt"]],
+        ["총 주문금액(전체)", tot["amt"]],
+        ["└ 공구 매출(쏘핑 상품+추가구성)", tot["gongu"]],
+        ["└ 기본 매출(공구 외 단품주문)", tot["base"]],
         ["정산예정금액", tot["settle"]],
         ["건조기시트 합계(개)", dryer],
     ], num_cols=[2])
@@ -363,6 +376,8 @@ def write_xlsx(day, hour, sku, prod_total, tot, cmp):
         cs.append([])
 
     cmp_block("◆ 1일차(Day1) 비교", cmp["Day1"])
+    if "Day2" in cmp:
+        cmp_block("◆ 2일차(Day2) 비교", cmp["Day2"])
     cmp_block("◆ 전체/누적 비교", cmp["전체"])
     for col in cs.columns:
         w = max((len(str(x.value)) for x in col if x.value is not None), default=10)
@@ -371,10 +386,11 @@ def write_xlsx(day, hour, sku, prod_total, tot, cmp):
         for c in row:
             c.alignment = left
 
-    # 2) 일별 매출
-    sheet("일별매출", ["일자", "주문건수", "수량(세트)", "주문금액", "정산예정"],
-          [[d, day[d]["cnt"], day[d]["qty"], day[d]["amt"], day[d]["settle"]] for d in sorted(day)],
-          num_cols=[4, 5])
+    # 2) 일별 매출 (공구/기본 구분)
+    sheet("일별매출", ["일자", "주문건수", "수량(세트)", "주문금액(전체)", "정산예정", "공구매출", "기본매출"],
+          [[d, day[d]["cnt"], day[d]["qty"], day[d]["amt"], day[d]["settle"], day[d]["gongu"], day[d]["base"]]
+           for d in sorted(day)],
+          num_cols=[4, 5, 6, 7])
 
     # 3) 일별 제품수량 (재고용)
     sheet("일별제품수량", ["일자"] + PRODUCT_ORDER + ["건조기시트합계"],
@@ -412,6 +428,8 @@ def report(master):
     print(f"📊 쏘핑네흰집 X 일비아 공구 트래킹 (누적 주문 {tot['cnt']}건)")
     print("=" * 52)
     print(f"총 수량 {tot['qty']}세트 / 주문금액 {fmt(tot['amt'])}원 / 정산예정 {fmt(tot['settle'])}원")
+    print(f"  ├ 공구 매출(쏘핑+추가구성): {fmt(tot['gongu'])}원")
+    print(f"  └ 기본 매출(공구 외 단품)  : {fmt(tot['base'])}원")
 
     print("\n[일별 추이]")
     print(f"  {'일자':<12}{'건수':>5}{'수량':>6}{'주문금액':>12}{'정산예정':>12}")
