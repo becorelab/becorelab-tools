@@ -107,3 +107,7 @@ erp/ecount_*.json
 
 # 쿠팡 OpenAPI 키 (민감)
 automation/coupang_openapi_config.py
+
+# 1688 Elimapi 토큰 (민감)
+sourcing/.elimapi_token.json
+sourcing/1688_find_result.json
