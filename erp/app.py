@@ -322,6 +322,10 @@ async def list_stock(q: str = "", alert_only: bool = False, show_material: bool 
             p.lead_time_days, p.moq, p.barcode, p.ecount_code, p.is_discontinued,
             s.qty_on_hand, s.qty_reserved, s.qty_available, s.pending_inbound,
             s.last_synced_at,
+            (SELECT MIN(po.delivery_date) FROM purchase_order_lines pol
+             JOIN purchase_orders po ON po.id=pol.po_id
+             WHERE pol.product_id=p.id AND po.status IN ('confirmed','partial')
+             AND po.delivery_date IS NOT NULL) as next_inbound_date,
             COALESCE((SELECT SUM(sl.qty) FROM sale_lines sl JOIN sales sa ON sa.id=sl.sale_id
              WHERE sl.product_id=p.id AND sa.status='confirmed'
              AND sa.sale_date >= date('now', '-30 days', 'localtime')), 0) / 30.0 as avg_daily_out

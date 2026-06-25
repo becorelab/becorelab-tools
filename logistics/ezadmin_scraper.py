@@ -347,14 +347,17 @@ def scrape_inventory(page, progress=None):
     return {item["code"]: {"stock": item["stock"], "updated": today_str} for item in inventory}
 
 
-def scrape_outbound(page, days=90, progress=None):
+def scrape_outbound(page, days=90, progress=None, collect_inbound=False):
     """재고수불부 (I500) — 상품별 일자별 (출고+배송) 수량 수집
-    컬럼 매핑 (검증 완료):
+    컬럼 매핑 (검증 완료 2026-06-25):
       grid1_product_id = 상품코드
       grid1_crdate = 일자
       grid1_stockout = 출고 (로켓배송 직송)
       grid1_trans = 배송 (일반 배송)
+      grid1_stockin = 입고 (collect_inbound=True 시 함께 수집)
+      grid1_supply_name = 공급처
     판매량 = 출고 + 배송
+    collect_inbound=True 면 (출고집계, 입고집계) 튜플을 반환. 기본은 출고집계만 반환(기존 호환).
     """
     if progress:
         progress("scraping_outbound")
@@ -405,6 +408,7 @@ def scrape_outbound(page, days=90, progress=None):
     SHIP_COL = "grid1_trans"
 
     all_data = []
+    all_inbound = []
     max_pages = 50
 
     for pg in range(max_pages):
@@ -415,38 +419,53 @@ def scrape_outbound(page, days=90, progress=None):
                 if (!tbl) return [];
                 const rows = [...tbl.querySelectorAll('tr')];
                 const data = [];
+                const inbound = [];
                 rows.forEach(tr => {
                     const codeCell = tr.querySelector('td[aria-describedby="grid1_product_id"]');
                     const nameCell = tr.querySelector('td[aria-describedby="grid1_name"]');
                     const dateCell = tr.querySelector('td[aria-describedby="grid1_crdate"]');
                     const outCell = tr.querySelector('td[aria-describedby="grid1_stockout"]');
                     const shipCell = tr.querySelector('td[aria-describedby="grid1_trans"]');
+                    const inCell = tr.querySelector('td[aria-describedby="grid1_stockin"]');
+                    const supCell = tr.querySelector('td[aria-describedby="grid1_supply_name"]');
                     if (!codeCell || !dateCell) return;
                     const code = codeCell.textContent.trim();
                     const name = nameCell ? nameCell.textContent.trim() : '';
                     const d = dateCell.textContent.trim().substring(0, 10);
                     const outQty = outCell ? (parseInt(outCell.textContent.trim().replace(/,/g, '')) || 0) : 0;
                     const shipQty = shipCell ? (parseInt(shipCell.textContent.trim().replace(/,/g, '')) || 0) : 0;
+                    const inQty = inCell ? (parseInt(inCell.textContent.trim().replace(/,/g, '')) || 0) : 0;
+                    const supplier = supCell ? supCell.textContent.trim() : '';
                     const totalQty = outQty + shipQty;
-                    if (code && code.length > 2 && d.length === 10 && totalQty > 0) {
-                        data.push({code, name, date: d, qty: totalQty, out: outQty, ship: shipQty});
+                    if (code && code.length > 2 && d.length === 10) {
+                        if (totalQty > 0) {
+                            data.push({code, name, date: d, qty: totalQty, out: outQty, ship: shipQty});
+                        }
+                        if (inQty > 0) {
+                            inbound.push({code, name, date: d, qty: inQty, supplier});
+                        }
                     }
                 });
-                return data;
+                return {out: data, inb: inbound};
             })()
             """
         )
 
-        if not page_data:
+        page_out = (page_data or {}).get("out", [])
+        page_inb = (page_data or {}).get("inb", [])
+        if not page_out and not page_inb:
             if pg == 0:
                 log.warning("I500 첫 페이지 데이터 없음 — 날짜 설정 실패 가능성")
             break
 
-        all_data.extend(page_data)
+        all_data.extend(page_out)
+        all_inbound.extend(page_inb)
 
         if pg == 0:
-            for item in page_data[:3]:
-                log.info(f"  샘플: {item['code']} {item['date']} 출고={item['out']} 배송={item['ship']} 합계={item['qty']}")
+            for item in page_out[:3]:
+                log.info(f"  샘플(출고): {item['code']} {item['date']} 출고={item['out']} 배송={item['ship']} 합계={item['qty']}")
+            for item in page_inb[:3]:
+                log.info(f"  샘플(입고): {item['code']} {item['date']} 입고={item['qty']} 공급처={item.get('supplier','')}")
 
         if not go_next_page(page):
             log.info(f"페이지 {pg+1} — 마지막 도달 ({len(all_data)}건)")
@@ -482,6 +501,22 @@ def scrape_outbound(page, days=90, progress=None):
     for code, total in ranked:
         name = name_map.get(code, "?")
         log.info(f"  {code} [{name}]: 총 {total}개 ({total/max(days,1):.1f}개/일)")
+
+    if collect_inbound:
+        # 입고 날짜+상품코드별 집계 (공급처/상품명 유지)
+        in_agg = {}
+        for o in all_inbound:
+            key = f"{o['date']}|{o['code']}"
+            if key in in_agg:
+                in_agg[key]["qty"] += o["qty"]
+            else:
+                in_agg[key] = {
+                    "date": o["date"], "code": o["code"], "qty": o["qty"],
+                    "name": o.get("name", ""), "supplier": o.get("supplier", ""),
+                }
+        inbound_result = list(in_agg.values())
+        log.info(f"입고 집계 {len(inbound_result)}건 (원시 {len(all_inbound)}건)")
+        return result, inbound_result
 
     return result
 
@@ -686,7 +721,7 @@ def fetch_all_data(progress=None, sales_target_date=None):
             clear_popups(page)
 
             inventory = scrape_inventory(page, progress=progress)
-            orders = scrape_outbound(page, days=90, progress=progress)
+            orders, inbound = scrape_outbound(page, days=90, progress=progress, collect_inbound=True)
             sales = scrape_sales(page, target_date=sales_target_date, progress=progress)
 
             if progress:
@@ -695,6 +730,7 @@ def fetch_all_data(progress=None, sales_target_date=None):
             return {
                 "inventory": inventory,
                 "orders": orders,
+                "inbound": inbound,
                 "sales": sales,
             }
         except Exception as e:

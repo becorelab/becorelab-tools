@@ -103,6 +103,7 @@ def save_cache(result):
         "timestamp": datetime.now().isoformat(),
         "inventory": result["inventory"],
         "orders": result["orders"],
+        "inbound": result.get("inbound", []),
         "sales": result.get("sales"),
     }
     # 1. 로컬 캐시 저장

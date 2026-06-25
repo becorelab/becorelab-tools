@@ -406,6 +406,8 @@ async function deleteProduct(id, name) {
 }
 
 // ── Stock ──
+let lastStockClassified = null;
+let stockSort = { key: null, dir: 1 };
 async function loadStock() {
   const q = document.getElementById('stock-search')?.value || '';
   const alertOnly = document.getElementById('stock-alert')?.checked || false;
@@ -495,13 +497,34 @@ async function loadStock() {
             <span class="stock-dash-count stock-dash-count-inbound">${pendingInbound.length}</span>
           </div>
           <div class="stock-dash-body">
-            ${renderCardItems(pendingInbound, s => `<span class="stock-dash-badge stock-dash-badge-inbound">+${fmt(s.pending_inbound)}</span>`, '<span style="color:var(--ink-3)">예정 없음</span>')}
+            ${renderCardItems(pendingInbound, s => `<span class="stock-dash-badge stock-dash-badge-inbound">+${fmt(s.pending_inbound)}${s.next_inbound_date ? ' <span style="font-weight:400;opacity:.85">' + s.next_inbound_date.slice(5) + '</span>' : ''}</span>`, '<span style="color:var(--ink-3)">예정 없음</span>')}
           </div>
         </div>`;
     }
 
-    const tbody = document.getElementById('stock-tbody');
-    tbody.innerHTML = classified.map(s => {
+    lastStockClassified = classified;
+    renderStockTable();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function sortStock(key) {
+  if (stockSort.key === key) stockSort.dir *= -1;
+  else { stockSort.key = key; stockSort.dir = 1; }
+  renderStockTable();
+}
+
+function renderStockTable() {
+  if (!lastStockClassified) return;
+  let rows = lastStockClassified.slice();
+  if (stockSort.key === 'name') rows.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko') * stockSort.dir);
+  else if (stockSort.key === 'qty') rows.sort((a, b) => ((a.qty ?? 0) - (b.qty ?? 0)) * stockSort.dir);
+  const arrow = stockSort.dir > 0 ? '▲' : '▼';
+  const indName = document.getElementById('sort-ind-name'); if (indName) indName.textContent = stockSort.key === 'name' ? arrow : '';
+  const indQty = document.getElementById('sort-ind-qty'); if (indQty) indQty.textContent = stockSort.key === 'qty' ? arrow : '';
+
+  const maxQty = Math.max(...rows.map(s => s.qty_on_hand ?? 0), 1);
+  const tbody = document.getElementById('stock-tbody');
+  tbody.innerHTML = rows.map(s => {
       const barPct = Math.min((s.qty / maxQty) * 100, 100);
       const safePct = s.safe > 0 ? Math.min((s.safe / maxQty) * 100, 100) : 0;
 
@@ -526,6 +549,17 @@ async function loadStock() {
         else depletionText = `${s.days}일`;
       } else depletionText = '<span class="text-muted">-</span>';
 
+      let inboundText = '<span class="text-muted">-</span>';
+      if (s.next_inbound_date) {
+        const _today = new Date(); _today.setHours(0, 0, 0, 0);
+        const _eta = new Date(s.next_inbound_date + 'T00:00:00');
+        const _dday = Math.round((_eta - _today) / 86400000);
+        const _lbl = _dday === 0 ? '오늘' : (_dday > 0 ? 'D-' + _dday : 'D+' + (-_dday));
+        const _clr = _dday < 0 ? 'var(--red)' : (_dday <= 3 ? 'var(--green)' : 'var(--ink-2)');
+        const _ddayTxt = _dday < 0 ? `지연 ${-_dday}일` : _lbl;
+        inboundText = `<span style="white-space:nowrap;color:${_clr}">📦 ${s.next_inbound_date.slice(5)} <span style="font-size:11px;opacity:.85">${_ddayTxt}</span></span>`;
+      }
+
       const qtyColor = s.status === 'out' ? 'var(--red)' : s.status === 'danger' || s.status === 'low' ? 'var(--amber)' : 'var(--ink)';
 
       const discBadge = s.is_discontinued ? ' <span class="badge" style="background:var(--ink-4);color:var(--ink-2);font-size:10px">단종</span>' : '';
@@ -544,12 +578,12 @@ async function loadStock() {
         </td>
         <td onclick="viewStockDetail(${s.id})" class="text-right number">${s.avgDaily > 0 ? s.avgDaily.toFixed(1) : '-'}</td>
         <td onclick="viewStockDetail(${s.id})" class="text-right">${depletionText}</td>
+        <td onclick="viewStockDetail(${s.id})" class="text-right">${inboundText}</td>
         <td onclick="viewStockDetail(${s.id})">${badge}</td>
         <td><button class="btn btn-sm" onclick="event.stopPropagation();viewStockLedger(${s.id},'${(s.name||'').replace(/'/g,"\\'")}')">수불부</button></td>
       </tr>`;
     }).join('');
-    document.getElementById('stock-info').textContent = `총 ${items.length}건`;
-  } catch (e) { toast(e.message, 'error'); }
+  document.getElementById('stock-info').textContent = `총 ${rows.length}건`;
 }
 
 function toggleStockCheckAll(el) {
