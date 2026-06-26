@@ -368,9 +368,10 @@ IC→구매: 결제 UX, 가격 비교 이탈
 | 도구 | 용도 | 예시 |
 |:--|:--|:--|
 | `log_ad_change.py` | 광고변경사항 시트 기록 (좌정렬·중복감지·삽입위치 내장) | `--account 채움컴퍼니 --campaign "260619_얼룩 — 캠페인 OFF" --comment "사유"` <br>(예산/ROAS 변경 시 `--budget "30,000원" --roas "270.00"`) |
-| `meta_insights.py` | 메타 광고 조회 (캠페인/소재/오디언스/지면/일별) | `--level ad`(소재) / `--level age`(연령성별) / `--level placement`(지면) / `--date last_7d --daily`(일별추이) / `--campaign 식세기` |
+| `meta_insights.py` | 메타 광고 조회 (캠페인/소재/오디언스/지면/일별 + Step4 퍼널·교차) | `--level ad`(소재) / `--level age` / `--level placement` / `--level cross`(소재×오디언스 ROAS, 고효율 조합) / `--funnel`(클릭→ATC→IC→구매 누수율) / `--date last_7d --daily` / `--campaign 식세기` <br>※메타 API상 ROAS+3차원 동시 불가 → 교차는 소재×오디언스 2D |
 | `coupang_ad_summary.py` | 쿠팡 광고 품목별 요약 (전송폴더 xlsx) | `--account rocket`(비코어랩) / `--account gross --date 20260621`(채움) / `--by-option 코튼`(옵션ID별) |
 | `meta_vs_cafe24.py` | 메타 광고비 vs 카페24 실매출 → 실질ROAS (픽셀 누락 보정) | `--days 7`(기본) / `--days 14` / `--include-today` |
+| `coupang_step4.py` | 쿠팡 Step4 심화: 퍼널(노출→클릭→주문)·직접/간접(거품검출)·키워드4분면(제외/증액추천)·교차전환맵 | `--account rocket --item 코튼 --bep 313 --days 7`(여러날 합산=제외 신뢰도↑, **권장**) / `--mode keyword\|funnel\|direct\|crossmap` <br>키워드4분면: 클릭5+ & ROAS<BEP×0.6 = 제외후보 / ROAS>BEP & 클릭적음 = 증액후보 |
 
 - 메타 토큰 = `automation/.env`에서 자동 로드 / 계정 `ilbia`(기본)·`washing`
 - 쿠팡 전송폴더 = `내 드라이브/Claude AI work space/mac window file transfer/` (⚠️ 2026-06-22 `앱/`에서 이동, 구 경로 삭제됨) / `rocket`=A00290275(비코어랩)·`gross`=A00940134(채움)
