@@ -44,10 +44,17 @@ PRODUCT_ORDER = [
 # 과거 자사몰 공구 실적 (고객결제 GMV 기준, 정산서에서 산출 — 고정값)
 # (주문수, 세트수량, 매출GMV)
 PAST_GONGU = {
-    "25년10월 (자사몰, 4일)": {"기간": 4, "전체": (445, 1064, 19516400), "Day1": (164, 403, 7284600), "Day2": (102, 241, 4484200), "Day3": (58, 142, 2686200)},
-    "26년02월 (자사몰, 5일)": {"기간": 5, "전체": (368, 779, 16676400), "Day1": (145, 337, 6939300), "Day2": (64, 119, 2741500), "Day3": (64, 138, 3035400)},
+    "25년10월 (자사몰, 4일)": {"기간": 4, "전체": (445, 1064, 19516400), "Day1": (164, 403, 7284600), "Day2": (102, 241, 4484200), "Day3": (58, 142, 2686200), "Day4": (121, 278, 5061400)},
+    "26년02월 (자사몰, 5일)": {"기간": 5, "전체": (368, 779, 16676400), "Day1": (145, 337, 6939300), "Day2": (64, 119, 2741500), "Day3": (64, 138, 3035400), "Day4": (94, 182, 3909600)},
 }
 SOPING_FEE = 0.28  # 쏘핑 인플루언서 공구 수수료 (자사몰·스토어 동일)
+
+# 제품 원가 단가 (로켓 5월 정산 기준, 채널 무관 동일)
+COST = {
+    "캡슐세제": 3448, "하트 식세기세제": 2714, "캡슐표백제": 2769,
+    "건조기시트(코튼블루)": 3932, "건조기시트(바이올렛)": 3932, "건조기시트(베이비크림)": 3932,
+    "얼룩제거제": 3199, "섬유탈취제": 2737, "샘플키트": 0,
+}
 
 
 def compute_compare(master):
@@ -77,6 +84,10 @@ def compute_compare(master):
     if d3:
         recs3 = [r for r in recs if (r["결제일"] or "")[:10] == d3]
         out["Day3"] = {**{k: v["Day3"] for k, v in PAST_GONGU.items()}, store_label: metrics(recs3)}
+    d4 = days[3] if len(days) > 3 else None
+    if d4:
+        recs4 = [r for r in recs if (r["결제일"] or "")[:10] == d4]
+        out["Day4"] = {**{k: v["Day4"] for k, v in PAST_GONGU.items()}, store_label: metrics(recs4)}
     return out
 
 
@@ -248,7 +259,8 @@ def build_report(master):
     hour = defaultdict(lambda: dict(cnt=0, qty=0, amt=0, settle=0))
     sku = defaultdict(lambda: [0, 0, 0, 0])  # (상품,옵션) -> [건수,수량,주문금액,정산예정]
     prod_total = defaultdict(int)
-    tot = dict(cnt=0, qty=0, amt=0, settle=0, gongu=0, base=0)
+    tot = dict(cnt=0, qty=0, amt=0, settle=0, gongu=0, base=0, gongu_st=0, base_st=0,
+               gongu_cost=0, base_cost=0)
     notes = set()
 
     for oid, rec in master.items():
@@ -266,6 +278,7 @@ def build_report(master):
         s[0] += 1; s[1] += q; s[2] += amt; s[3] += st
         tot["cnt"] += 1; tot["qty"] += q; tot["amt"] += amt; tot["settle"] += st
         tot[gkey] += amt
+        tot[gkey + "_st"] += st
 
         pmap, note = explode_products(rec["상품명"], rec["옵션"], q)
         if note:
@@ -273,6 +286,7 @@ def build_report(master):
         for p, n in pmap.items():
             prod_total[p] += n
             day[d]["prod"][p] += n
+            tot[gkey + "_cost"] += n * COST.get(p, 0)
 
     return day, hour, sku, prod_total, tot, notes
 
@@ -352,6 +366,32 @@ def write_xlsx(day, hour, sku, prod_total, tot, cmp):
         ["건조기시트 합계(개)", dryer],
     ], num_cols=[2])
 
+    # 1.4) 최종정산 (공구/자연 분리 + 쏘핑 수수료 28%는 공구 매출에만)
+    soping = round(tot["gongu"] * SOPING_FEE)
+    sheet("최종정산", ["항목", "금액"], [
+        ["■ 공구 매출 (쏘핑 상품+추가구성)", None],
+        ["  고객결제 GMV", tot["gongu"]],
+        ["  네이버 정산예정(수수료 후)", tot["gongu_st"]],
+        [f"  쏘핑 수수료 {int(SOPING_FEE*100)}%", -soping],
+        ["  → 공구 실수령", tot["gongu_st"] - soping],
+        ["", None],
+        ["■ 자연(기본) 매출 (쏘핑 수수료 없음)", None],
+        ["  고객결제 GMV", tot["base"]],
+        ["  → 기본 실수령(네이버 후)", tot["base_st"]],
+        ["", None],
+        ["■ 합계", None],
+        ["  전체 GMV", tot["amt"]],
+        ["  공구 수수료(쏘핑)", soping],
+        ["  최종 실수령(공구+기본)", tot["gongu_st"] - soping + tot["base_st"]],
+        ["", None],
+        ["■ 실마진 (실수령 − 원가)  ※광고비 제외", None],
+        ["  공구 원가", tot["gongu_cost"]],
+        ["  공구 실마진", tot["gongu_st"] - soping - tot["gongu_cost"]],
+        ["  자연 원가", tot["base_cost"]],
+        ["  자연 실마진", tot["base_st"] - tot["base_cost"]],
+        ["  ▶ 전체 실마진", tot["gongu_st"] - soping - tot["gongu_cost"] + tot["base_st"] - tot["base_cost"]],
+    ], num_cols=[2])
+
     # 1.5) 공구비교 (Day1 + 전체/누적, 과거 자사몰 vs 현재 스토어)
     cs = wb.create_sheet("공구비교")
 
@@ -384,6 +424,8 @@ def write_xlsx(day, hour, sku, prod_total, tot, cmp):
         cmp_block("◆ 2일차(Day2) 비교", cmp["Day2"])
     if "Day3" in cmp:
         cmp_block("◆ 3일차(Day3) 비교", cmp["Day3"])
+    if "Day4" in cmp:
+        cmp_block("◆ 4일차(Day4·마지막날) 비교", cmp["Day4"])
     cmp_block("◆ 전체/누적 비교", cmp["전체"])
     for col in cs.columns:
         w = max((len(str(x.value)) for x in col if x.value is not None), default=10)
