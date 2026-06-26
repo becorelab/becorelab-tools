@@ -33,6 +33,32 @@ SHEET_KEY = '1bmN5H7lB-kIr9Oo5vqUokXanTM0O7xeCMgHoP24WAJg'
 TAB = '광고변경사항'
 SA = '/Users/macmini_ky/ClaudeAITeam/sourcing/analyzer/becorelab-tools-firebase-adminsdk-fbsvc-4af6f0c5ac.json'
 
+# 캠페인별 배경색 (대표님 시트 색 규칙, 2026-06-27 확립). 순서=우선순위(구체적 먼저)
+CAMP_COLORS = [
+    ('캡슐표백제', (0.7058824, 0.36862746, 0.019607844)),  # 브라운
+    ('세이랩',     (0.4, 0.78, 0.70)),                       # 청록(신규)
+    ('얼룩',       (0.71, 0.84, 0.66)),                      # 초록
+    ('베이비',     (1.0, 0.99, 0.80)),                       # 연노랑
+    ('바이올렛',   (0.87, 0.58, 0.81)),                      # 분홍
+    ('입테이프',   (1.0, 0.6, 1.0)), ('입벌림', (1.0, 0.6, 1.0)),  # 핑크
+    ('코튼',       (0.76, 0.86, 0.96)),                      # 파랑
+    ('260413',     (0.96, 0.8, 0.8)),                        # 살구 (채움 AI스마트)
+    ('2024',       (1.0, 0.85, 0.4)),                        # 노랑 (비코어랩 로켓 스마트)
+    ('섬유탈취',   (0.29, 0.53, 0.91)),                      # 파랑
+    ('하트',       (0.92, 0.6, 0.6)), ('식세기', (0.92, 0.6, 0.6)),  # 빨강 (로켓 식세기)
+]
+
+
+def camp_color(campaign, account):
+    """캠페인/계정명으로 배경색 매칭. 메타(별도 시트)·미매칭은 None(색 안 칠함)."""
+    if '메타' in (account or ''):
+        return None  # 메타는 별도 시트 관리 — 이 시트에선 색 안 입힘
+    s = (campaign or '') + ' ' + (account or '')
+    for kw, rgb in CAMP_COLORS:
+        if kw in s:
+            return {'red': rgb[0], 'green': rgb[1], 'blue': rgb[2]}
+    return None
+
 
 def main():
     ap = argparse.ArgumentParser(description='광고변경사항 시트 한 줄 기록')
@@ -74,17 +100,19 @@ def main():
     new = ['', a.date, a.account, a.campaign, '', a.budget, '', a.roas, a.comment]
     ws.insert_row(new, data_row, value_input_option='USER_ENTERED')
 
-    # 새 행 서식: 바로 아래(기존 최신) 행의 서식(배경색 등) 복사 + 좌정렬
-    body = {'requests': [
-        {'copyPaste': {
-            'source': {'sheetId': ws.id, 'startRowIndex': data_row, 'endRowIndex': data_row + 1, 'startColumnIndex': 0, 'endColumnIndex': 9},
-            'destination': {'sheetId': ws.id, 'startRowIndex': data_row - 1, 'endRowIndex': data_row, 'startColumnIndex': 0, 'endColumnIndex': 9},
-            'pasteType': 'PASTE_FORMAT'}},
-        {'repeatCell': {
-            'range': {'sheetId': ws.id, 'startRowIndex': data_row - 1, 'endRowIndex': data_row},
-            'cell': {'userEnteredFormat': {'horizontalAlignment': 'LEFT'}},
-            'fields': 'userEnteredFormat.horizontalAlignment'}}]}
-    sh.batch_update(body)
+    # 새 행 서식: 좌정렬 + 캠페인별 배경색 자동 적용 (메타·미매칭은 색 안 입힘)
+    reqs = [{'repeatCell': {
+        'range': {'sheetId': ws.id, 'startRowIndex': data_row - 1, 'endRowIndex': data_row},
+        'cell': {'userEnteredFormat': {'horizontalAlignment': 'LEFT'}},
+        'fields': 'userEnteredFormat.horizontalAlignment'}}]
+    color = camp_color(a.campaign, a.account)
+    if color:
+        reqs.append({'repeatCell': {
+            'range': {'sheetId': ws.id, 'startRowIndex': data_row - 1, 'endRowIndex': data_row, 'startColumnIndex': 1, 'endColumnIndex': 9},
+            'cell': {'userEnteredFormat': {'backgroundColor': color}},
+            'fields': 'userEnteredFormat.backgroundColor'}})
+    sh.batch_update({'requests': reqs})
+    print(f'   🎨 색: {"캠페인 매칭 적용" if color else "미매칭 → 흰색(수동 지정 필요)"}')
 
     print(f'✅ 기록 완료 (row {data_row})')
     print(f'   {a.date} | {a.account} | {a.campaign}')
