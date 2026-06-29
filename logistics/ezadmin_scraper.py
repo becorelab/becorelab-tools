@@ -4,6 +4,7 @@
 - 로그인 + 보안코드 자동인식 + 재고현황(I100) + 재고수불부(I500) 출고량 수집
 """
 import logging
+import re
 import time
 import os
 import base64
@@ -592,6 +593,25 @@ def scrape_sales(page, target_date=None, date_end=None, progress=None):
     page.wait_for_timeout(6000)
     clear_popups(page)
 
+    # 그리드 로딩 안정화 대기 (2026-06-29): 공동구매 등 주문이 폭발한 날은 그리드 로딩이 느려
+    # 고정 대기로는 로딩 전에 읽어 0건/빈 order_id(과대)가 발생함(6/22·6/25 사례).
+    # 행 수가 더 안 늘고 안정될 때까지 polling 대기(최대 ~30초).
+    prev_cnt, stable = -1, 0
+    for _ in range(15):
+        cnt = page.evaluate(
+            "() => { const t=document.getElementById('grid1')||document.querySelector('.ui-jqgrid-btable');"
+            " return t ? t.querySelectorAll('tr.jqgrow').length : 0; }"
+        )
+        if cnt > 0 and cnt == prev_cnt:
+            stable += 1
+            if stable >= 2:  # 2회 연속 동일 = 로딩 완료
+                break
+        else:
+            stable = 0
+        prev_cnt = cnt
+        page.wait_for_timeout(2000)
+    log.info(f"그리드 로딩 안정화: {prev_cnt}행")
+
     # 전체 데이터 수집 (페이지네이션)
     all_data = []
     max_pages = 20
@@ -612,6 +632,7 @@ def scrape_sales(page, target_date=None, date_end=None, progress=None):
                     const parseNum = v => parseInt((v || '0').replace(/,/g, '')) || 0;
 
                     const shop = get('shop_id');
+                    const orderId = get('order_id');
                     const dt = get('collect_date');
                     const code = get('product_id');
                     const name = get('name');
@@ -625,7 +646,7 @@ def scrape_sales(page, target_date=None, date_end=None, progress=None):
 
                     if (code) {
                         data.push({
-                            shop, date: dt, code, name, nameOpt,
+                            shop, orderId, date: dt, code, name, nameOpt,
                             option, orderQty, productQty,
                             amount, settlement, stock
                         });
@@ -656,6 +677,38 @@ def scrape_sales(page, target_date=None, date_end=None, progress=None):
         clear_popups(page)
 
     log.info(f"확장주문검색2 총 {len(all_data)}건 수집")
+
+    # ── DS00 그리드 중복행 제거 + 주문일 보정 (2026-06-29 검증) ──
+    # DS00은 한 주문×상품을 4~7배 중복 출력함. (채널,주문번호)로 묶어 첫행만 쓰면
+    # 멀티상품 주문의 나머지 상품 금액을 통째로 버려 -33% 과소가 됨.
+    # → 완전동일행(주문번호+상품+옵션+금액+수량)만 제거해 상품행은 보존.
+    #   검증: 완전동일행 dedup + 정산금액(supply) = 스스 -3% / 카페24 +4% (정답지 일치)
+    # 날짜도 collect_date(발주일=수집일, 주말 뭉침) → 주문일(order_id 앞 8자리)로 교정.
+    seen = set()
+    deduped = []
+    for row in all_data:
+        key = (row.get("orderId", ""), row["code"], row["option"],
+               row["amount"], row["settlement"], row["orderQty"], row["productQty"])
+        if key in seen:
+            continue
+        seen.add(key)
+        m = re.match(r"(\d{8})", str(row.get("orderId", "")))
+        if m:
+            row["date"] = f"{m.group(1)[:4]}-{m.group(1)[4:6]}-{m.group(1)[6:8]}"
+        deduped.append(row)
+    log.info(f"DS00 중복행 제거: {len(all_data)} → {len(deduped)}행 (그리드 4~7배 반복 제거)")
+    all_data = deduped
+
+    # order_id 빈값 방어 (2026-06-29): order_id가 비면 주문일 보정이 안 돼 발주일(collect_date)로
+    # 폴백 → 여러 날 주문이 한 날로 뭉쳐 과대해짐(실제 6/22가 383행·676만으로 부풀었음).
+    # 빈값 비율이 높으면 그리드 수집 자체가 불완전한 것이므로 그날 수집을 무효화한다.
+    # (빈 결과 → 멱등 저장이 기존 데이터 보존 → 과대 데이터 유입 차단, 다음 수집 때 정상화)
+    empty_oid = sum(1 for r in all_data if not r.get("orderId"))
+    if all_data and empty_oid / len(all_data) > 0.2:
+        log.warning(f"⚠️ DS00 order_id 빈 행 {empty_oid}/{len(all_data)} "
+                    f"({empty_oid / len(all_data) * 100:.0f}%) — 주문일 보정 불가, "
+                    f"{target_date} 수집 무효화(과대 방지)")
+        all_data = []
 
     # 채널별 집계
     channel_summary = {}
@@ -700,12 +753,13 @@ def scrape_sales(page, target_date=None, date_end=None, progress=None):
     }
 
 
-def fetch_all_data(progress=None, sales_target_date=None):
+def fetch_all_data(progress=None, sales_target_date=None, sales_days=1):
     """전체 데이터 수집 오케스트레이션
-    
+
     Args:
         progress: 진행 상황 콜백 함수
-        sales_target_date: 매출 수집 타겟 날짜 (YYYY-MM-DD)
+        sales_target_date: 매출 수집 타겟 날짜 (YYYY-MM-DD). 지정 시 그 1일만.
+        sales_days: 매출 롤링 재수집 일수 (sales_target_date 없을 때만). 어제부터 N일치.
     """
     if progress:
         progress("starting")
@@ -722,7 +776,18 @@ def fetch_all_data(progress=None, sales_target_date=None):
 
             inventory = scrape_inventory(page, progress=progress)
             orders, inbound = scrape_outbound(page, days=90, progress=progress, collect_inbound=True)
-            sales = scrape_sales(page, target_date=sales_target_date, progress=progress)
+
+            # 매출: 롤링 재수집 — 취소/환불/지연주문은 며칠에 걸쳐 발생하므로
+            # 최근 sales_days일을 매번 다시 긁어 덮어써야 오차가 누적되지 않음.
+            # (로그인 1번 세션 내에서 날짜만 바꿔 반복 → 캡챠 추가 없음)
+            sales_history = []
+            if sales_target_date is not None:
+                sales_history.append(scrape_sales(page, target_date=sales_target_date, progress=progress))
+            else:
+                for i in range(1, sales_days + 1):
+                    ds = (date.today() - timedelta(days=i)).isoformat()
+                    sales_history.append(scrape_sales(page, target_date=ds, progress=progress))
+            sales = sales_history[0] if sales_history else None
 
             if progress:
                 progress("done")
@@ -732,6 +797,7 @@ def fetch_all_data(progress=None, sales_target_date=None):
                 "orders": orders,
                 "inbound": inbound,
                 "sales": sales,
+                "sales_history": sales_history,
             }
         except Exception as e:
             log.error(f"데이터 수집 오류: {e}")

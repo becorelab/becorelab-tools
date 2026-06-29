@@ -348,6 +348,24 @@ async def stock_summary(conn=Depends(db)):
     return {"normal": normal, "low": low, "out_of_stock": out, "total": normal + low + out, "discontinued": disc}
 
 
+@app.get("/api/stock/outbound")
+async def stock_outbound(preset: str = "", start: str = "", end: str = ""):
+    """재고수불부 기간별 출고량 — 물류서버 outbound-history 프록시"""
+    import aiohttp
+    params = {}
+    if preset:
+        params["preset"] = preset
+    if start:
+        params["start"] = start
+    if end:
+        params["end"] = end
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"{LOGISTICS_URL}/api/outbound-history", params=params) as resp:
+            if resp.status != 200:
+                raise HTTPException(502, "물류서버 연결 실패")
+            return await resp.json()
+
+
 @app.post("/api/stock/sync")
 async def sync_stock(conn=Depends(db)):
     """이지어드민 캐시 데이터로 재고 동기화"""
@@ -827,22 +845,16 @@ async def sync_sales(request: Request, conn=Depends(db)):
 
 @app.post("/api/sales/resync")
 async def resync_sales(request: Request, conn=Depends(db)):
-    """특정 기간 매출 삭제 후 재동기화"""
+    """특정 기간 매출 재동기화 (날짜별 멱등: 원본에 데이터 있는 날만 삭제 후 재입력).
+    ⚠️ 과거엔 기간을 통째로 먼저 삭제했는데, 그러면 물류서버가 일시 장애로 빈응답일 때
+    그 날짜 매출이 0으로 날아갔음. → 날짜별로 '원본 데이터 있을 때만' 삭제하도록 변경.
+    덕분에 최근 7일 등 넓은 윈도우로 매일 돌려도 안전 (취소/환불/지연주문 매일 보정)."""
     import aiohttp
     body = await request.json() if request.headers.get("content-type") == "application/json" else {}
     date_from = body.get("date_from", "2026-01-01")
     date_to = body.get("date_to", datetime.now().strftime("%Y-%m-%d"))
 
-    deleted_sales = conn.execute(
-        "SELECT COUNT(*) as cnt FROM sales WHERE sale_date BETWEEN ? AND ?", (date_from, date_to)
-    ).fetchone()["cnt"]
-    conn.execute(
-        "DELETE FROM sale_lines WHERE sale_id IN (SELECT id FROM sales WHERE sale_date BETWEEN ? AND ?)",
-        (date_from, date_to),
-    )
-    conn.execute("DELETE FROM sales WHERE sale_date BETWEEN ? AND ?", (date_from, date_to))
-    conn.commit()
-
+    deleted_total = 0
     synced_total = 0
     errors = []
     current = datetime.strptime(date_from, "%Y-%m-%d")
@@ -859,7 +871,22 @@ async def resync_sales(request: Request, conn=Depends(db)):
                     data = await resp.json()
                 orders = data.get("by_option", [])
                 if not orders:
+                    continue  # 빈응답 → 기존 데이터 보존 (삭제 안 함)
+                # ⚠️ 이지어드민이 제공하는 채널만 삭제/재입력 — 로켓1P(쿠팡 로켓배송)·그로스 등
+                # 다른 소스로 별도 적재한 매출은 보존해야 함. 과거엔 sale_date 전체를 삭제해
+                # 로켓·그로스 매출이 날아가는 버그가 있었음(2026-06-29).
+                ez_channels = {ch for o in orders for ch in o.get("channels", {})}
+                if not ez_channels:
                     continue
+                ph = ",".join("?" * len(ez_channels))
+                params = [date, *ez_channels]
+                deleted_total += conn.execute(
+                    f"SELECT COUNT(*) as cnt FROM sales WHERE sale_date=? AND channel IN ({ph})", params
+                ).fetchone()["cnt"]
+                conn.execute(
+                    f"DELETE FROM sale_lines WHERE sale_id IN "
+                    f"(SELECT id FROM sales WHERE sale_date=? AND channel IN ({ph}))", params)
+                conn.execute(f"DELETE FROM sales WHERE sale_date=? AND channel IN ({ph})", params)
                 for order in orders:
                     code = order.get("code", "")
                     product_name = order.get("nameOpt") or order.get("name", "")
@@ -894,7 +921,7 @@ async def resync_sales(request: Request, conn=Depends(db)):
             except Exception as e:
                 errors.append(f"{date}: {str(e)}")
 
-    return {"deleted": deleted_sales, "synced": synced_total, "date_from": date_from, "date_to": date_to,
+    return {"deleted": deleted_total, "synced": synced_total, "date_from": date_from, "date_to": date_to,
             "errors": errors[:5]}
 
 
@@ -911,9 +938,17 @@ async def _sync_sales_day(conn, session, date):
     orders = data.get("by_option", [])
     if not orders:
         return 0
-    # 멱등: 해당 날짜 기존 데이터 삭제 후 재삽입 (늦게 잡히는 주문/누락일 반영)
-    conn.execute("DELETE FROM sale_lines WHERE sale_id IN (SELECT id FROM sales WHERE sale_date=?)", (date,))
-    conn.execute("DELETE FROM sales WHERE sale_date=?", (date,))
+    # 멱등: 이지어드민이 제공하는 채널만 삭제 후 재삽입 (로켓1P·그로스 등 타 소스 보존).
+    # ⚠️ 과거엔 sale_date 전체를 삭제해 로켓·그로스 매출이 날아갔음(2026-06-29).
+    ez_channels = {ch for o in orders for ch in o.get("channels", {})}
+    if not ez_channels:
+        return 0
+    ph = ",".join("?" * len(ez_channels))
+    params = [date, *ez_channels]
+    conn.execute(
+        f"DELETE FROM sale_lines WHERE sale_id IN "
+        f"(SELECT id FROM sales WHERE sale_date=? AND channel IN ({ph}))", params)
+    conn.execute(f"DELETE FROM sales WHERE sale_date=? AND channel IN ({ph})", params)
     synced = 0
     for order in orders:
         code = order.get("code", "")
@@ -1042,21 +1077,16 @@ SETTLEMENT_EZADMIN_ALIAS = {
     "에이블리": ["비코어랩 에이블리"],
 }
 
-# ── 채널별 보정계수 (2~4월 정산 대비 분석 기반, 2026-05-30 업데이트) ──
-# 정산(VAT포함) ÷ 이지어드민 3개월 평균
-CHANNEL_ADJUSTMENT = {
-    "비코어랩 카페24 일비아": 0.86,  # ERP가 배송비·취소 포함하여 높음
-    "비코어랩 일비아 스스": 1.11,
-    "비코어랩 11번가": 1.04,
-    "비코어랩 G마켓": 2.32,
-    "비코어랩 옥션": 1.57,
-    "비코어랩 신세계": 0.87,
-    "비코어랩 GS샵": 0.89,
-    "비코어랩 오늘의집": 1.0,  # 불안정(0.39~2.37), 보정 의미 없음
-    "비코어랩 에이블리": 1.0,
-    "비코어랩 텐바이텐": 1.0,
-    "쿠팡 로켓배송": 1.0,
-}
+# ── 채널별 보정계수 (DEPRECATED 2026-06-29) ──
+# [폐기 이유] 과거엔 이지어드민 집계가 부정확(DS00 그리드 4~7배 중복 합산·발주일 기준·
+#   취소 미반영)해서, 정산 대비 평균계수를 사후에 곱해 땜질했음.
+#   2026-06-29 scrape_sales를 "완전동일행 dedup + 정산금액(supply) + 주문일(order_id 8자리)"
+#   로 교정 → 주력채널 집계가 정산과 ±4% 일치(스스 -3%/카페24 +4%). 여기에 계수까지 곱하면
+#   이중집계가 됨. 그래서 전부 1.0(무보정)으로 비움. (정산 확정월은 settlement_monthly 사용)
+# ⚠️ 계수가 컸던 채널(G마켓 2.32·옥션 1.57·11번가 1.04↑·신세계 0.87)은 이지어드민의
+#   "구조적 과소/과대 수집"을 가려온 것 → 계수 제거 시 그 편차가 노출됨. 수집 자체 점검 필요(별도).
+# 기존값 보존: 카페24 0.86 / 스스 1.11 / 11번가 1.04 / G마켓 2.32 / 옥션 1.57 / 신세계 0.87 / GS샵 0.89
+CHANNEL_ADJUSTMENT = {}  # .get(ch, 1.0) → 전 채널 무보정
 
 
 def _calc_sales_total(conn, date_from: str, date_to: str):

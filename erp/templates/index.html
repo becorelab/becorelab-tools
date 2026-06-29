@@ -266,6 +266,15 @@
           <label style="font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer">
             <input type="checkbox" id="stock-show-material" onchange="loadStock()" /> 부자재 포함
           </label>
+          <span style="width:1px;height:20px;background:var(--ink-4)"></span>
+          <span style="font-size:13px;color:var(--ink-2)">기간 출고량:</span>
+          <button class="btn btn-sm" id="ob-preset-this_month" onclick="setOutboundPreset('this_month')">이번달</button>
+          <button class="btn btn-sm" id="ob-preset-last_month" onclick="setOutboundPreset('last_month')">저번달</button>
+          <button class="btn btn-sm" id="ob-preset-last_week" onclick="setOutboundPreset('last_week')">최근 1주</button>
+          <input type="date" id="ob-start" style="width:140px" />
+          <span class="text-muted">~</span>
+          <input type="date" id="ob-end" style="width:140px" />
+          <button class="btn btn-sm" onclick="setOutboundRange()">조회</button>
           <span class="text-muted" id="stock-info"></span>
         </div>
         <div id="stock-bulk-bar" class="bulk-bar hidden">
@@ -277,7 +286,7 @@
         </div>
         <div class="table-scroll">
           <table>
-            <thead><tr><th style="width:36px"><input type="checkbox" id="stock-check-all" onchange="toggleStockCheckAll(this)" /></th><th>코드</th><th onclick="sortStock('name')" style="cursor:pointer" title="클릭: 가나다순 정렬">품목명 <span id="sort-ind-name" class="sort-ind"></span></th><th class="text-right" onclick="sortStock('qty')" style="cursor:pointer" title="클릭: 재고순 정렬">현재고 <span id="sort-ind-qty" class="sort-ind"></span></th><th>재고수준</th><th class="text-right">일평균출고</th><th class="text-right">예상소진</th><th>입고예정</th><th>상태</th><th>수불부</th></tr></thead>
+            <thead><tr><th style="width:36px"><input type="checkbox" id="stock-check-all" onchange="toggleStockCheckAll(this)" /></th><th>코드</th><th onclick="sortStock('name')" style="cursor:pointer" title="클릭: 가나다순 정렬">품목명 <span id="sort-ind-name" class="sort-ind"></span></th><th class="text-right" onclick="sortStock('qty')" style="cursor:pointer" title="클릭: 재고순 정렬">현재고 <span id="sort-ind-qty" class="sort-ind"></span></th><th>재고수준</th><th class="text-right">일평균출고</th><th class="text-right" id="stock-outbound-th">기간 출고량</th><th class="text-right">예상소진</th><th>입고예정</th><th>상태</th><th>수불부</th></tr></thead>
             <tbody id="stock-tbody"></tbody>
           </table>
         </div>

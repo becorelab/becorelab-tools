@@ -408,6 +408,46 @@ async function deleteProduct(id, name) {
 // ── Stock ──
 let lastStockClassified = null;
 let stockSort = { key: null, dir: 1 };
+let outboundMap = {};          // code → 기간 출고량
+let outboundLabel = '기간 출고량';
+let outboundParams = { preset: 'this_month' };  // 기본값: 이번달
+
+async function loadOutbound() {
+  const qs = new URLSearchParams(outboundParams).toString();
+  try {
+    const data = await api(`/api/stock/outbound?${qs}`);
+    outboundMap = {};
+    (data.items || []).forEach(it => { outboundMap[String(it.code)] = it.qty; });
+    const presetLabels = { this_month: '이번달', last_month: '저번달', last_week: '최근 1주' };
+    outboundLabel = outboundParams.preset ? presetLabels[outboundParams.preset] || '기간' : '지정기간';
+    const th = document.getElementById('stock-outbound-th');
+    if (th) th.innerHTML = `기간 출고량<br><span style="font-size:11px;font-weight:400;color:var(--ink-3)">${outboundLabel} (${data.start}~${data.end})</span>`;
+    // 프리셋 버튼 활성화 표시
+    ['this_month', 'last_month', 'last_week'].forEach(p => {
+      const b = document.getElementById('ob-preset-' + p);
+      if (b) b.classList.toggle('btn-primary', outboundParams.preset === p);
+    });
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function setOutboundPreset(preset) {
+  outboundParams = { preset };
+  document.getElementById('ob-start').value = '';
+  document.getElementById('ob-end').value = '';
+  loadOutbound().then(renderStockTable);
+}
+
+function setOutboundRange() {
+  const start = document.getElementById('ob-start').value;
+  const end = document.getElementById('ob-end').value;
+  if (!start || !end) { toast('시작일과 종료일을 모두 선택해주세요', 'error'); return; }
+  outboundParams = { start, end };
+  ['this_month', 'last_month', 'last_week'].forEach(p => {
+    const b = document.getElementById('ob-preset-' + p); if (b) b.classList.remove('btn-primary');
+  });
+  loadOutbound().then(renderStockTable);
+}
+
 async function loadStock() {
   const q = document.getElementById('stock-search')?.value || '';
   const alertOnly = document.getElementById('stock-alert')?.checked || false;
@@ -417,6 +457,7 @@ async function loadStock() {
     const [items_raw, summary] = await Promise.all([
       api(`/api/stock?q=${encodeURIComponent(q)}&alert_only=${alertOnly}&show_material=${showMaterial}`),
       api('/api/stock/summary'),
+      loadOutbound(),
     ]);
     let items = items_raw;
     if (hideZero) items = items.filter(s => (s.qty_on_hand ?? 0) > 0);
@@ -564,6 +605,8 @@ function renderStockTable() {
 
       const discBadge = s.is_discontinued ? ' <span class="badge" style="background:var(--ink-4);color:var(--ink-2);font-size:10px">단종</span>' : '';
 
+      const obQty = outboundMap[String(s.ezadmin_code)] ?? outboundMap[String(s.product_code)] ?? 0;
+
       return `
       <tr style="cursor:pointer">
         <td onclick="event.stopPropagation()"><input type="checkbox" class="stock-check" value="${s.id}" onchange="updateStockBulkBar()" /></td>
@@ -577,6 +620,7 @@ function renderStockTable() {
           </div>
         </td>
         <td onclick="viewStockDetail(${s.id})" class="text-right number">${s.avgDaily > 0 ? s.avgDaily.toFixed(1) : '-'}</td>
+        <td onclick="viewStockDetail(${s.id})" class="text-right number">${obQty > 0 ? fmt(obQty) : '<span class="text-muted">-</span>'}</td>
         <td onclick="viewStockDetail(${s.id})" class="text-right">${depletionText}</td>
         <td onclick="viewStockDetail(${s.id})" class="text-right">${inboundText}</td>
         <td onclick="viewStockDetail(${s.id})">${badge}</td>

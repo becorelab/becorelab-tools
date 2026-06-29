@@ -127,6 +127,53 @@ def save_cache(result):
             log.warning(f"Firestore 저장 실패 (로컬 캐시는 정상): {e}")
 
 
+def _save_sales_day_to_firestore(sales, db=None):
+    """단일 날짜 매출(sales dict)을 sales_daily + 로컬캐시 + sales_daily_orders에 저장 (멱등).
+    롤링 재수집 시 어제 외 과거 날짜도 이 함수로 개별 저장한다.
+    기준 금액: total_settlement(정산금액) / 참고: total_amount(판매가)."""
+    if not (sales and sales.get("date")):
+        return
+    if db is None:
+        db = fdb.db()
+    sales_date = sales["date"]
+    sales_summary = {
+        "date": sales_date,
+        "timestamp": sales.get("timestamp") or datetime.now().isoformat(),
+        "total_amount": sales.get("total_amount", 0),          # 판매가 (참고용)
+        "total_settlement": sales.get("total_settlement", 0),  # 정산금액 (기준)
+        "total_count": sales.get("total_count", 0),
+        "by_channel": sales.get("by_channel", {}),
+        "by_product": sales.get("by_product", {}),
+    }
+    db.collection("sales_daily").document(sales_date).set(sales_summary)
+    log.info(f"Firestore sales_daily/{sales_date} 저장 완료 (정산금액: {sales_summary['total_settlement']:,}원)")
+
+    # 로컬 파일 캐시 (Firestore 읽기 쿼터 절약)
+    os.makedirs(_SALES_FILE_CACHE_DIR, exist_ok=True)
+    try:
+        cache_file = os.path.join(_SALES_FILE_CACHE_DIR, f"{sales_date}.json")
+        with open(cache_file, "w", encoding="utf-8") as cf:
+            json.dump(sales_summary, cf, ensure_ascii=False)
+        _sales_cache[sales_date] = sales_summary
+        log.info(f"로컬 매출 캐시 저장: {cache_file}")
+    except Exception as ce:
+        log.warning(f"로컬 매출 캐시 저장 실패: {ce}")
+
+    # ERP용 주문 상세 (sales_daily_orders 컬렉션, 1MB 제한 → 500건 분할)
+    orders = sales.get("orders", [])
+    if orders:
+        chunk_size = 500
+        chunks = [orders[i:i + chunk_size] for i in range(0, len(orders), chunk_size)]
+        for idx, chunk in enumerate(chunks):
+            db.collection("sales_daily_orders").document(f"{sales_date}_part{idx}").set({
+                "date": sales_date,
+                "part": idx,
+                "total_parts": len(chunks),
+                "orders": chunk,
+            })
+        log.info(f"Firestore sales_daily_orders/{sales_date} 저장 완료 ({len(orders)}건, {len(chunks)}파트)")
+
+
 def _save_to_firestore(payload):
     """Firestore에 물류 데이터 저장 (logistics 컬렉션)"""
     db = fdb.db()
@@ -149,50 +196,8 @@ def _save_to_firestore(payload):
         "orders": payload["orders"],
     })
 
-    # 매출 데이터 저장 (sales_daily 컬렉션)
-    # 기준 금액: total_settlement (정산금액) — 대표님 판매현황 리포트 기준
-    # 참고 금액: total_amount (판매가/소비자가)
-    sales = payload.get("sales")
-    if sales and sales.get("date"):
-        sales_date = sales["date"]
-        # orders 필드는 너무 크므로 요약만 저장
-        sales_summary = {
-            "date": sales_date,
-            "timestamp": ts,
-            "total_amount": sales.get("total_amount", 0),         # 판매가 (참고용)
-            "total_settlement": sales.get("total_settlement", 0), # 정산금액 (기준)
-            "total_count": sales.get("total_count", 0),
-            "by_channel": sales.get("by_channel", {}),
-            "by_product": sales.get("by_product", {}),
-        }
-        db.collection("sales_daily").document(sales_date).set(sales_summary)
-        log.info(f"Firestore sales_daily/{sales_date} 저장 완료 (정산금액: {sales_summary['total_settlement']:,}원)")
-
-        # 로컬 파일 캐시에도 저장 (Firestore 읽기 쿼터 절약)
-        os.makedirs(_SALES_FILE_CACHE_DIR, exist_ok=True)
-        try:
-            cache_file = os.path.join(_SALES_FILE_CACHE_DIR, f"{sales_date}.json")
-            with open(cache_file, "w", encoding="utf-8") as cf:
-                json.dump(sales_summary, cf, ensure_ascii=False)
-            _sales_cache[sales_date] = sales_summary
-            log.info(f"로컬 매출 캐시 저장: {cache_file}")
-        except Exception as ce:
-            log.warning(f"로컬 매출 캐시 저장 실패: {ce}")
-
-        # ERP용 주문 상세 데이터 저장 (sales_daily_orders 컬렉션)
-        orders = sales.get("orders", [])
-        if orders:
-            # Firestore 문서 크기 제한(1MB)을 고려하여 500건씩 분할 저장
-            chunk_size = 500
-            chunks = [orders[i:i+chunk_size] for i in range(0, len(orders), chunk_size)]
-            for idx, chunk in enumerate(chunks):
-                db.collection("sales_daily_orders").document(f"{sales_date}_part{idx}").set({
-                    "date": sales_date,
-                    "part": idx,
-                    "total_parts": len(chunks),
-                    "orders": chunk,
-                })
-            log.info(f"Firestore sales_daily_orders/{sales_date} 저장 완료 ({len(orders)}건, {len(chunks)}파트)")
+    # 매출 데이터 저장 (sales_daily / 로컬캐시 / sales_daily_orders) — 헬퍼 재사용
+    _save_sales_day_to_firestore(payload.get("sales"), db)
 
 
 def load_cache():
@@ -217,6 +222,28 @@ def load_cache():
             log.warning(f"Firestore 로드 실패: {e}")
 
     return None
+
+
+def _load_outbound_orders():
+    """출고 이력(재고수불부 I500 = 출고+배송, 항목: {code, date, qty}) 로드.
+    latest 캐시(최근 ~90일 스냅샷) 우선, 비어있으면 최신 logistics_daily 문서로 폴백."""
+    cache = load_cache()
+    if cache and cache.get("orders"):
+        return cache["orders"]
+    if _firestore_ok:
+        try:
+            db = fdb.db()
+            best_id, best_orders = None, []
+            for d in db.collection("logistics_daily").stream():
+                dd = d.to_dict()
+                if dd.get("orders") and (best_id is None or d.id > best_id):
+                    best_id, best_orders = d.id, dd["orders"]
+            if best_orders:
+                log.info(f"출고이력 fallback: logistics_daily/{best_id} ({len(best_orders)}건)")
+                return best_orders
+        except Exception as e:
+            log.warning(f"출고이력 fallback 실패: {e}")
+    return []
 
 
 # ── macOS 알림 ──
@@ -258,8 +285,20 @@ def run_scrape(task_id=None, scheduled=False, sales_target_date=None):
                 tasks[task_id]["step"] = step
             log.info(f"[{task_id or 'scheduled'}] {step}")
 
-        result = fetch_all_data(progress=on_progress, sales_target_date=sales_target_date)
-        save_cache(result)
+        # 예약 수집(매일 크론)일 땐 매출을 최근 7일 롤링 재수집 → 취소/환불/지연주문 보정.
+        # 수동 호출(특정 날짜)이나 일반 수집은 어제 1일만.
+        sales_days = 7 if (scheduled and not sales_target_date) else 1
+        result = fetch_all_data(progress=on_progress, sales_target_date=sales_target_date,
+                                sales_days=sales_days)
+        save_cache(result)  # latest/logistics_daily + 어제 매출(payload["sales"]) 저장
+
+        # 롤링 재수집분: 어제 외 과거 날짜도 firestore/캐시에 개별 저장 (멱등)
+        if _firestore_ok:
+            for s in result.get("sales_history", [])[1:]:
+                try:
+                    _save_sales_day_to_firestore(s)
+                except Exception as e:
+                    log.warning(f"롤링 매출 저장 실패 ({s.get('date') if s else '?'}): {e}")
 
         if task_id and task_id in tasks:
             tasks[task_id]["status"] = "done"
@@ -289,8 +328,8 @@ def run_scrape(task_id=None, scheduled=False, sales_target_date=None):
 
 # ── 예약 수집 ──
 def scheduled_scrape():
-    """매일 10시 예약 수집"""
-    log.info("=== 예약 수집 시작 (10:00) ===")
+    """매일 9시 예약 수집"""
+    log.info("=== 예약 수집 시작 (09:00) ===")
     run_scrape(scheduled=True)
 
 
@@ -391,10 +430,11 @@ def api_batch_rescrape():
             for date_str, sales_data in results.items():
                 if not sales_data.get("orders"):
                     continue
-                payload = {"sales": sales_data, "timestamp": datetime.now().isoformat(),
-                           "inventory": {}, "orders": []}
+                # ⚠️ 매출만 저장 — 과거엔 _save_to_firestore(payload)를 호출해
+                # logistics/latest·logistics_daily의 inventory/orders(재고·출고 스냅샷)를
+                # 빈값으로 덮어쓰는 버그가 있었음. 매출 전용 헬퍼로 그 부작용 제거.
                 try:
-                    _save_to_firestore(payload)
+                    _save_sales_day_to_firestore(sales_data)
                     saved += 1
                 except Exception as e:
                     log.warning(f"[batch-{tid}] Firestore 저장 실패 {date_str}: {e}")
@@ -410,6 +450,42 @@ def api_batch_rescrape():
 
     threading.Thread(target=run_batch, args=(task_id,), daemon=True).start()
     return jsonify({"task_id": task_id, "start": start, "end": end})
+
+
+@app.route("/api/outbound-history")
+def api_outbound_history():
+    """기간별 상품 출고량 (재고수불부 I500 = 출고+배송).
+    쿼리: ?start=YYYY-MM-DD&end=YYYY-MM-DD 또는 ?preset=this_month|last_month|last_week
+    반환: {start, end, items:[{code, qty}](출고량 내림차순), total_qty, data_span}"""
+    from collections import defaultdict
+    start = request.args.get("start")
+    end = request.args.get("end")
+    preset = request.args.get("preset")
+    today = date.today()
+    if preset == "this_month":
+        start, end = today.replace(day=1).isoformat(), today.isoformat()
+    elif preset == "last_month":
+        prev_end = today.replace(day=1) - timedelta(days=1)
+        start, end = prev_end.replace(day=1).isoformat(), prev_end.isoformat()
+    elif preset == "last_week":
+        start, end = (today - timedelta(days=6)).isoformat(), today.isoformat()
+    if not start:
+        start = (today - timedelta(days=30)).isoformat()
+    if not end:
+        end = today.isoformat()
+
+    orders = _load_outbound_orders()
+    agg = defaultdict(int)
+    for o in orders:
+        dt = o.get("date", "")
+        if dt and start <= dt <= end:
+            agg[o.get("code", "")] += o.get("qty", 0)
+    items = [{"code": c, "qty": q} for c, q in agg.items() if c and q > 0]
+    items.sort(key=lambda x: -x["qty"])
+    all_dates = [o.get("date", "") for o in orders if o.get("date")]
+    data_span = {"min": min(all_dates), "max": max(all_dates)} if all_dates else {}
+    return jsonify({"start": start, "end": end, "preset": preset, "items": items,
+                    "total_qty": sum(i["qty"] for i in items), "data_span": data_span})
 
 
 @app.route("/api/fetch-status/<task_id>")
@@ -1716,7 +1792,7 @@ if __name__ == "__main__":
         scheduled_scrape,
         CronTrigger(hour=9, minute=0),
         id="daily_scrape",
-        name="매일 10시 이지어드민 수집",
+        name="매일 9시 이지어드민 수집",
         misfire_grace_time=3600,
     )
     scheduler.add_job(
@@ -1727,11 +1803,11 @@ if __name__ == "__main__":
         misfire_grace_time=3600,
     )
     scheduler.start()
-    log.info("APScheduler 시작 — 매일 10:00 이지어드민 / 10:30 서플라이허브 예약됨")
+    log.info("APScheduler 시작 — 매일 09:00 이지어드민 / 10:30 서플라이허브 예약됨")
 
     port = int(os.environ.get('PORT', 8082))
     print(f"\n  iLBiA 물류 대시보드")
     print(f"  http://localhost:{port}")
-    print(f"  매일 10:00 자동 수집 활성화")
+    print(f"  매일 09:00 자동 수집 활성화")
     print(f"  Ctrl+C로 종료\n")
     serve(app, host="0.0.0.0", port=port, threads=4, channel_timeout=300)
