@@ -31,6 +31,15 @@ def product_type(name, domain='insole'):
                                 '인체공학', '루파', '젤리', '밀릭스']):
             return '쿠션/메모리폼형'
         return '기타'
+    if domain == 'keyring':
+        if any(k in n for k in ['LED', 'led', '발광', '야광', '디스코', '레인보우', '무지개', '불빛', '빛나']):
+            return 'LED발광형'
+        if any(k in n for k in ['구', '버튼', '세트', '클리커', '다구']):
+            return '다구성세트형'
+        if any(k in n for k in ['식빵', '오리', '거북이', '과일', '고양이', '개구리', '곰', '동물',
+                                '캐릭터', '계란', '초콜릿', '오징어', '강아지']):
+            return '캐릭터모양형'
+        return '기본딸깍형'
     return '미분류'  # 다른 제품군은 여기에 룰 추가
 
 
