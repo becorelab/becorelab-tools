@@ -17,7 +17,7 @@ import pandas as pd
 import warnings; warnings.filterwarnings('ignore')
 
 XFER = '/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/mac window file transfer'
-ACCT = {'rocket': 'A00290275', 'gross': 'A00940134'}
+ACCT = {'rocket': 'A00290275', 'gross': 'A00940134', 'seirab': 'A01707416'}
 
 
 def cat(nm):
