@@ -1401,7 +1401,25 @@ async def list_po(
             WHERE {w} ORDER BY {order_clause} LIMIT ? OFFSET ?""",
         params + [size, (page - 1) * size],
     ).fetchall()
-    return {"items": [dict(r) for r in rows], "total": total, "page": page, "size": size, "sum_amount": sum_row["sum_amount"]}
+    items = [dict(r) for r in rows]
+    # 발주 총수량: 같은 품목(옵션/공정 [] 제거한 base)은 최대 수량만 합산 → 공정형(같은 용기를
+    # 성형·코팅·인쇄 3줄로 입력) 중복 합산 방지. 예) 용기 5,000개 ×3공정 → 15,000이 아닌 5,000.
+    if items:
+        import re as _re
+        from collections import defaultdict as _dd
+        po_ids = [it["id"] for it in items]
+        ph = ",".join("?" * len(po_ids))
+        lines = conn.execute(
+            f"SELECT po_id, product_name, qty_ordered FROM purchase_order_lines WHERE po_id IN ({ph})",
+            po_ids,
+        ).fetchall()
+        grp = _dd(lambda: _dd(int))
+        for ln in lines:
+            b = _re.sub(r"\s*\[[^\]]*\]\s*$", "", ln["product_name"] or "").strip()
+            grp[ln["po_id"]][b] = max(grp[ln["po_id"]][b], ln["qty_ordered"] or 0)
+        for it in items:
+            it["total_qty"] = sum(grp.get(it["id"], {}).values())
+    return {"items": items, "total": total, "page": page, "size": size, "sum_amount": sum_row["sum_amount"]}
 
 
 @app.get("/api/purchase-orders/{po_id}")

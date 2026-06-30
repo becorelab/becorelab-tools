@@ -967,9 +967,12 @@ async function loadSalesSummary() {
 
     const tbody = document.getElementById('summary-tbody');
     const rowTotal = data.reduce((s, r) => s + (r.total || 0), 0);
+    const drill = groupBy === 'channel';  // 채널별일 때만 클릭→상품별 펼침
     tbody.innerHTML = data.length ? data.map(r => {
-      return `<tr>
-        <td><strong>${r.label || '-'}</strong></td>
+      const chAttr = drill ? ` class="ch-row" style="cursor:pointer" data-channel="${(r.label||'').replace(/"/g,'&quot;')}" onclick="toggleChannelProducts(this)"` : '';
+      const arrow = drill ? '<span class="ch-arrow" style="display:inline-block;width:1.1em;color:var(--text-muted)">▸</span>' : '';
+      return `<tr${chAttr}>
+        <td><strong>${arrow}${r.label || '-'}</strong></td>
         <td class="text-right number">${r.qty != null ? fmt(r.qty) : (r.cnt != null ? fmt(r.cnt) + '건' : '-')}</td>
         <td class="text-right number">${fmt(r.supply)}</td>
         <td class="text-right number">${fmt(r.tax)}</td>
@@ -984,6 +987,38 @@ async function loadSalesSummary() {
 
     renderSalesSummaryChart(data, groupBy);
   } catch (e) { toast(e.message, 'error'); }
+}
+
+// 채널 행 클릭 → 해당 채널의 상품별 매출을 아래로 펼침/접기
+async function toggleChannelProducts(rowEl) {
+  const channel = rowEl.dataset.channel;
+  const arrow = rowEl.querySelector('.ch-arrow');
+  // 이미 펼쳐져 있으면 접기
+  if (rowEl.nextElementSibling && rowEl.nextElementSibling.classList.contains('ch-detail')) {
+    while (rowEl.nextElementSibling && rowEl.nextElementSibling.classList.contains('ch-detail')) rowEl.nextElementSibling.remove();
+    if (arrow) arrow.textContent = '▸';
+    return;
+  }
+  const from = document.getElementById('summary-from').value;
+  const to = document.getElementById('summary-to').value;
+  if (arrow) arrow.textContent = '▾';
+  try {
+    const resp = await api(`/api/sales/summary?date_from=${from}&date_to=${to}&group_by=product&channel=${encodeURIComponent(channel)}`);
+    const items = resp.items || [];
+    const html = items.length ? items.map(p => `
+      <tr class="ch-detail" style="background:var(--bg)">
+        <td style="padding-left:32px;font-size:12px" class="text-muted">${p.label || '-'}</td>
+        <td class="text-right number text-muted" style="font-size:12px">${p.qty != null ? fmt(p.qty) : '-'}</td>
+        <td class="text-right number text-muted" style="font-size:12px">${fmt(p.supply)}</td>
+        <td class="text-right number text-muted" style="font-size:12px">${fmt(p.tax)}</td>
+        <td class="text-right number" style="font-size:12px">₩${fmt(p.total)}</td>
+      </tr>`).join('')
+      : `<tr class="ch-detail"><td colspan="5" class="text-muted" style="padding-left:32px;font-size:12px">상품 데이터 없음</td></tr>`;
+    rowEl.insertAdjacentHTML('afterend', html);
+  } catch (e) {
+    toast(e.message, 'error');
+    if (arrow) arrow.textContent = '▸';
+  }
 }
 
 function renderSalesSummaryChart(data, groupBy) {
@@ -1059,10 +1094,11 @@ async function loadOrders(page = 1) {
         <td>${o.supplier_name || '-'}</td>
         <td class="text-muted" style="font-size:11.5px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${items}">${shortItems || '-'}</td>
         <td>${o.delivery_date || '-'}</td>
+        <td class="text-right number">${fmt(o.total_qty || 0)}</td>
         <td class="text-right number">${fmt(Math.round(o.total_amount * 1.1))}</td>
         <td><span class="badge badge-${badgeMap[o.status]}">${statusMap[o.status]}</span></td>
       </tr>`;
-    }).join('') : '<tr><td colspan="7" class="text-center text-muted" style="padding:40px">발주 데이터가 없습니다</td></tr>';
+    }).join('') : '<tr><td colspan="8" class="text-center text-muted" style="padding:40px">발주 데이터가 없습니다</td></tr>';
     document.getElementById('orders-info').textContent = `총 ${d.total}건`;
     const sumEl = document.getElementById('orders-sum');
     if (sumEl) sumEl.textContent = `합계 ₩${fmt(Math.round(d.sum_amount * 1.1))} (VAT포함)`;
