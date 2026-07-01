@@ -862,8 +862,8 @@ async function loadSales(page = 1) {
     if (d.grouped) {
       thead.innerHTML = '<tr><th>채널</th><th class="text-right">건수</th><th class="text-right">공급가</th><th class="text-right">세액</th><th class="text-right">합계</th></tr>';
       tbody.innerHTML = d.items.length ? d.items.map(s => `
-        <tr>
-          <td><strong>${s.channel || '-'}</strong></td>
+        <tr class="sales-ch-row" style="cursor:pointer" data-channel="${(s.channel||'').replace(/"/g,'&quot;')}" onclick="toggleSalesChannelProducts(this)">
+          <td><strong><span class="sales-ch-arrow" style="display:inline-block;width:1.1em;color:var(--text-muted)">▸</span>${s.channel || '-'}</strong></td>
           <td class="text-right number">${s.item_count}건</td>
           <td class="text-right number">${fmt(s.total_supply)}</td>
           <td class="text-right number">${fmt(s.total_tax)}</td>
@@ -894,6 +894,38 @@ async function loadSales(page = 1) {
     const toggleBtn = document.getElementById('sales-group-toggle');
     if (toggleBtn) toggleBtn.textContent = salesGrouped ? '상세 보기' : '합산 보기';
   } catch (e) { toast(e.message, 'error'); }
+}
+
+// 전체 내역(합산) 탭에서 채널명 클릭 → 그 채널 상품별 매출을 아래로 펼침/접기
+async function toggleSalesChannelProducts(rowEl) {
+  const channel = rowEl.dataset.channel;
+  const arrow = rowEl.querySelector('.sales-ch-arrow');
+  // 이미 펼쳐져 있으면 접기
+  if (rowEl.nextElementSibling && rowEl.nextElementSibling.classList.contains('sales-ch-detail')) {
+    while (rowEl.nextElementSibling && rowEl.nextElementSibling.classList.contains('sales-ch-detail')) rowEl.nextElementSibling.remove();
+    if (arrow) arrow.textContent = '▸';
+    return;
+  }
+  const from = document.getElementById('sales-from')?.value || '';
+  const to = document.getElementById('sales-to')?.value || '';
+  if (arrow) arrow.textContent = '▾';
+  try {
+    const resp = await api(`/api/sales/summary?date_from=${from}&date_to=${to}&group_by=product&channel=${encodeURIComponent(channel)}`);
+    const items = resp.items || [];
+    const html = items.length ? items.map(p => `
+      <tr class="sales-ch-detail" style="background:var(--bg)">
+        <td style="padding-left:32px;font-size:12px" class="text-muted">${p.label || '-'}</td>
+        <td class="text-right number text-muted" style="font-size:12px">${p.qty != null ? fmt(p.qty) : '-'}</td>
+        <td class="text-right number text-muted" style="font-size:12px">${fmt(p.supply)}</td>
+        <td class="text-right number text-muted" style="font-size:12px">${fmt(p.tax)}</td>
+        <td class="text-right number" style="font-size:12px">₩${fmt(p.total)}</td>
+      </tr>`).join('')
+      : `<tr class="sales-ch-detail"><td colspan="5" class="text-muted" style="padding-left:32px;font-size:12px">상품 데이터 없음 (로켓배송 등 총액만 집계된 채널)</td></tr>`;
+    rowEl.insertAdjacentHTML('afterend', html);
+  } catch (e) {
+    toast(e.message, 'error');
+    if (arrow) arrow.textContent = '▸';
+  }
 }
 
 async function viewSale(id) {

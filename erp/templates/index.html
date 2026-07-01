@@ -343,13 +343,13 @@
             <button class="btn btn-sm" onclick="setDateRange('7days','summary')">7일</button>
             <button class="btn btn-sm" onclick="setDateRange('thisMonth','summary')">이번달</button>
             <button class="btn btn-sm" onclick="setDateRange('lastMonth','summary')">지난달</button>
-            <select id="summary-group" style="width:140px">
+            <select id="summary-group" style="width:140px" onchange="loadSalesSummary()">
               <option value="daily">일별</option>
               <option value="weekly">주별</option>
               <option value="channel">채널별</option>
               <option value="product">품목별</option>
             </select>
-            <select id="summary-channel" style="width:180px">
+            <select id="summary-channel" style="width:180px" onchange="loadSalesSummary()">
               <option value="">전체 채널</option>
             </select>
             <input type="search" id="summary-search" placeholder="검색..." style="width:140px" onkeydown="if(event.key==='Enter')loadSalesSummary()" />
@@ -484,7 +484,7 @@
 <!-- Toast -->
 <div class="toast-container" id="toasts"></div>
 
-<script src="/static/js/app.js?v=20260626a"></script>
+<script src="/static/js/app.js?v=20260701c"></script>
 <script>
 setInterval(() => {
   const el = document.getElementById('current-time');

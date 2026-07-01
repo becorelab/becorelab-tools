@@ -103,7 +103,12 @@ def db():
 # ── 메인 페이지 ──
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    resp = templates.TemplateResponse("index.html", {"request": request})
+    # index.html은 절대 캐시 금지 — 항상 최신 app.js 버전을 물게 함(구버전 화면 고착 방지)
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
 
 
 # ── 인증 ──
@@ -567,7 +572,12 @@ async def sales_summary(
                 WHERE {w} GROUP BY sl.product_name ORDER BY total DESC""",
             params,
         ).fetchall()
-        grand_total, _ = _calc_sales_total(conn, date_from, date_to)
+        # 채널 지정 드릴다운이면 그 채널 상품 합이 곧 채널 매출.
+        # 전체 품목별이면 정산 기반 total(_calc_sales_total)로 정확 집계.
+        if channel:
+            grand_total = sum((r["total"] or 0) for r in rows)
+        else:
+            grand_total, _ = _calc_sales_total(conn, date_from, date_to)
         return {"items": [dict(r) for r in rows], "grand_total": grand_total}
     elif group_by == "weekly":
         ch_rows = conn.execute(
