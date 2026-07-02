@@ -118,3 +118,5 @@ sourcing/1688_find_result.json
 *.db-wal
 erp/erp.db.bak*
 sourcing/helpstore_api_responses.json
+.supplyhub_expired
+sourcing/1688_last_result.json
