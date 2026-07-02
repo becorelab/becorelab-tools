@@ -69,7 +69,7 @@ OUTPUT_JSON = os.path.join(DATA_DIR, "morning_data.json")
 LOG_FILE = os.path.join(DATA_DIR, "morning_collect.log")
 
 # 옵시디언 볼트 경로
-OBSIDIAN_VAULT = os.path.expanduser("~/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/앱/remotely-save/비코어랩")
+OBSIDIAN_VAULT = os.path.expanduser("~/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/remotely-save/비코어랩")
 OBSIDIAN_AD_DIR = os.path.join(OBSIDIAN_VAULT, "01. Becorelab AI Agent Team", "2️⃣ Areas", "📢 Marketing", "📢 Ad Performance")
 OBSIDIAN_SALES_DIR = os.path.join(OBSIDIAN_VAULT, "01. Becorelab AI Agent Team", "2️⃣ Areas", "📊 Operations", "📊 Sales Report", "일일")
 OBSIDIAN_STOCK_DIR = os.path.join(OBSIDIAN_VAULT, "01. Becorelab AI Agent Team", "2️⃣ Areas", "📊 Operations", "📦 Stock & Order")

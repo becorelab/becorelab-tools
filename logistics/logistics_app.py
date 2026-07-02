@@ -9,6 +9,7 @@ iLBiA 물류 대시보드 서버
 import io
 import json
 import logging
+import re
 import os
 import sys
 import subprocess
@@ -1434,6 +1435,88 @@ PRODUCTS_LIST = [
     {"code": "10378", "name": "다목적세정제", "moq": 3000},
 ]
 
+# 발주 SSOT가 구 발주대시보드(Firestore logistics/purchases) → ERP(SQLite)로 이동(2026-03~)하면서
+# Firestore가 3/18 이후 죽은 데이터가 됨 → 발주분석·재고보고서가 ERP를 직접 읽도록 이관 (2026-07-02).
+# ERP API는 로그인 인증이 있어 SQLite 읽기전용 접근 사용.
+ERP_DB = "/Users/macmini_ky/ClaudeAITeam/erp/erp.db"
+
+# 자재/부자재 발주(용기·라벨·향료 등)는 완제품 재고 예측 대상 아님 → 제외
+_MATERIAL_PAT = re.compile(r"용기|라벨|향료|박스|목형|인쇄|코팅|성형|트리거|파우치")
+
+
+def _match_product_code(name):
+    """ERP 발주라인 품명 → 물류 품목코드.
+    ERP product_id는 절반쯤 NULL + 오연결 사례(베이비크림 24차→S10357)가 있어 품명 매칭이 정답."""
+    n = (name or "").replace(" ", "")
+    if not n or _MATERIAL_PAT.search(n):
+        return None
+    if "퍼퓸시트" in n or "건조기" in n:
+        if "코튼블루" in n:
+            return "S10357"
+        if "베이비크림" in n:
+            return "S10358"
+        if "바이올렛" in n:
+            return "S13565"
+        return None
+    if "식기세척" in n:
+        return "10892" if "하트" in n or "♥" in n else "10460"
+    if "얼룩제거제" in n:
+        return "13208" if "350" in n else ("13209" if "100" in n else None)
+    if "섬유탈취제" in n:
+        return "S13590" if "400" in n else ("S13591" if "100" in n else None)
+    if "수세미" in n:
+        return "10964"
+    if "버블코튼" in n:
+        return "12594"
+    if "다목적세정" in n:
+        return "10378"
+    if "집게" in n:
+        return "S10897" if "A" in n else ("S10896" if "B" in n else None)
+    if "틴케이스" in n:
+        return "10894" if "하트" in n else ("13628" if "캡슐" in n else None)
+    return None
+
+
+def _erp_pending_purchases():
+    """ERP 진행중 발주(confirmed/partial, 미입고 잔량) → 기존 Firestore purchases 형식으로 반환."""
+    import sqlite3 as _sq
+    con = _sq.connect(f"file:{ERP_DB}?mode=ro", uri=True)
+    try:
+        rows = con.execute(
+            """SELECT pol.product_name, pol.qty_ordered, COALESCE(pol.qty_received, 0),
+                      po.delivery_date
+               FROM purchase_order_lines pol
+               JOIN purchase_orders po ON po.id = pol.po_id
+               WHERE po.status IN ('confirmed', 'partial')""").fetchall()
+    finally:
+        con.close()
+    out = []
+    for name, qty, recv, ddate in rows:
+        code = _match_product_code(name)
+        remain = (qty or 0) - (recv or 0)
+        if code and remain > 0:
+            out.append({"code": code, "qty": remain, "status": "pending",
+                        "expectedDate": ddate})
+    return out
+
+
+def _load_purchases():
+    """발주 pending 목록(ERP) + moq 오버라이드(Firestore, 설정값이라 유지)."""
+    purchases_list = []
+    try:
+        purchases_list = _erp_pending_purchases()
+    except Exception as e:
+        logging.error(f"ERP 발주 조회 실패: {e}")
+    moq_override = {}
+    if _firestore_ok:
+        try:
+            doc = fdb.db().collection("logistics").document("purchases").get()
+            if doc.exists:
+                moq_override = doc.to_dict().get("moq", {})
+        except Exception:
+            pass
+    return purchases_list, moq_override
+
 
 @app.route("/api/order-analysis")
 def api_order_analysis():
@@ -1453,17 +1536,7 @@ def api_order_analysis():
     inventory = cache.get("inventory", {})
     orders = cache.get("orders", [])
 
-    purchases_list = []
-    moq_override = {}
-    if _firestore_ok:
-        try:
-            doc = fdb.db().collection("logistics").document("purchases").get()
-            if doc.exists:
-                d = doc.to_dict()
-                purchases_list = d.get("purchases", [])
-                moq_override = d.get("moq", {})
-        except Exception:
-            pass
+    purchases_list, moq_override = _load_purchases()
 
     sales_map = {}
     for o in orders:
@@ -1573,18 +1646,8 @@ def api_inventory_report_obsidian():
     orders = cache.get("orders", [])
     cache_ts = cache.get("timestamp", "")
 
-    # 발주 데이터
-    purchases_list = []
-    moq_override = {}
-    if _firestore_ok:
-        try:
-            doc = fdb.db().collection("logistics").document("purchases").get()
-            if doc.exists:
-                d = doc.to_dict()
-                purchases_list = d.get("purchases", [])
-                moq_override = d.get("moq", {})
-        except Exception:
-            pass
+    # 발주 데이터 — ERP가 SSOT (2026-07-02 이관)
+    purchases_list, moq_override = _load_purchases()
 
     # 일별 출고량 계산
     daily_sales = {}  # code → {date → qty}

@@ -13,6 +13,10 @@
   python3 coupang_ad_summary.py --account gross --by-campaign  # 캠페인별 + SKU별 + 실제전환(교차전환)
   python3 coupang_ad_summary.py --account rocket --d14         # 14일 누적(소급반영) 기준
   python3 coupang_ad_summary.py --account rocket --by-option 코튼  # 특정 품목 옵션ID별
+  python3 coupang_ad_summary.py --account rocket --split       # 품목×검색/비검색 분리 상세(수량 포함)
+
+수량(총 판매수량) 컬럼: 주문당 수량(수/주)이 장바구니 두께 지표 — 2026-07-02 코튼블루
+하락 진단(주문 유지·수량 1.7→1.14 급감)에서 핵심이었음. 기본/분리 뷰 모두 출력.
 
 주의: GMV(판매가) ROAS임 — 정산마진은 더 낮음.
 """
@@ -54,6 +58,7 @@ def main():
     ap.add_argument('--by-campaign', action='store_true', help='캠페인별 + SKU별 + 실제전환')
     ap.add_argument('--by-option', default='', help='해당 품목키워드를 옵션ID별로 분해')
     ap.add_argument('--d14', action='store_true', help='14일 누적(소급반영) 기준 (기본 1일)')
+    ap.add_argument('--split', action='store_true', help='품목×검색/비검색 분리 상세 (수량·CVR·수/주 포함)')
     a = ap.parse_args()
 
     code = ACCT[a.account]
@@ -80,6 +85,7 @@ def main():
     per = '(14일)' if a.d14 else '(1일)'
     c_ord = col(df, f'총 주문수{per}', '총 주문수(1일)', '주문수')
     c_rev = col(df, f'총 전환매출액{per}', '총 전환매출액(1일)', '전환매출액')
+    c_qty = col(df, f'총 판매수량{per}', '총 판매수량(1일)', '판매수량')  # 구포맷엔 없을 수 있음 — 없으면 0 표기
     if not all([c_prod, c_clk, c_cost, c_ord, c_rev]):
         print('❌ 컬럼 매칭 실패. 포맷 확인:', list(df.columns)); sys.exit(3)
 
@@ -131,28 +137,55 @@ def main():
             cvr = round(x['주문'] / x['클릭'] * 100, 1) if x['클릭'] else 0
             print(f'{k[:18]:<18} {int(x["광고비"]):>7,} {int(x["클릭"]):>4} {int(x["주문"]):>3} {int(x["매출"]):>9,} {roas:>4}% {cvr:>4}%')
 
+    # ── 품목×검색/비검색 분리 상세 (--split) ──
+    elif a.split:
+        agg = {}
+        for _, r in df.iterrows():
+            jm = '비검색' if (c_jim and is_bi(r[c_jim])) else '검색'
+            x = agg.setdefault((cat(r[c_prod]), jm),
+                               {'클릭': 0, '광고비': 0, '주문': 0, '수량': 0, '매출': 0})
+            x['클릭'] += r[c_clk]; x['광고비'] += r[c_cost]; x['주문'] += r[c_ord]; x['매출'] += r[c_rev]
+            if c_qty: x['수량'] += r[c_qty]
+        tot = {}  # 품목 합계(정렬용)
+        for (k, _), x in agg.items():
+            tot[k] = tot.get(k, 0) + x['광고비']
+        print(f'{"품목":<14} {"지면":<3} {"광고비":>8} {"클릭":>4} {"주문":>4} {"수량":>4} {"매출":>9} {"ROAS":>5} {"CVR":>5} {"수/주":>4}')
+        for k in sorted(tot, key=lambda i: -tot[i]):
+            if tot[k] < 300: continue
+            for jm in ('검색', '비검색'):
+                x = agg.get((k, jm))
+                if not x or (x['광고비'] < 1 and x['매출'] < 1): continue
+                roas = round(x['매출'] / x['광고비'] * 100) if x['광고비'] else 0
+                cvr = round(x['주문'] / x['클릭'] * 100, 1) if x['클릭'] else 0
+                qpo = round(x['수량'] / x['주문'], 2) if x['주문'] else 0
+                nm = k[:14] if jm == '검색' else ''
+                print(f'{nm:<14} {jm[:3]:<3} {int(x["광고비"]):>8,} {int(x["클릭"]):>4} {int(x["주문"]):>4} {int(x["수량"]):>4} {int(x["매출"]):>9,} {roas:>4}% {cvr:>4}% {qpo:>4}')
+        print('※ 수/주 = 주문당 판매수량(장바구니 두께). 급감 시 프로모/경쟁사/월초효과 의심 (2026-07-02 코튼블루 사례).')
+
     # ── 품목별 + 검색/비검색 + 자동매칭 ──
     else:
         agg = {}
         for _, r in df.iterrows():
             k = cat(r[c_prod])
-            x = agg.setdefault(k, {'클릭': 0, '광고비': 0, '주문': 0, '매출': 0,
+            x = agg.setdefault(k, {'클릭': 0, '광고비': 0, '주문': 0, '수량': 0, '매출': 0,
                                    '검비': 0, '검매': 0, '비검비': 0, '비검매': 0, '자클': 0})
             x['클릭'] += r[c_clk]; x['광고비'] += r[c_cost]; x['주문'] += r[c_ord]; x['매출'] += r[c_rev]
+            if c_qty: x['수량'] += r[c_qty]
             if c_jim and is_bi(r[c_jim]):
                 x['비검비'] += r[c_cost]; x['비검매'] += r[c_rev]
             else:
                 x['검비'] += r[c_cost]; x['검매'] += r[c_rev]
                 if is_auto(r): x['자클'] += r[c_clk]
-        print(f'{"품목":<14} {"광고비":>8} {"클릭":>4} {"주문":>4} {"매출":>9} {"ROAS":>5} {"CVR":>5} │ {"검색":>5} {"비검":>5} 자동매칭')
+        print(f'{"품목":<14} {"광고비":>8} {"클릭":>4} {"주문":>4} {"수량":>4} {"매출":>9} {"ROAS":>5} {"CVR":>5} {"수/주":>4} │ {"검색":>5} {"비검":>5} 자동매칭')
         for k, x in sorted(agg.items(), key=lambda i: -i[1]['광고비']):
             if x['광고비'] < 300: continue
             roas = round(x['매출'] / x['광고비'] * 100) if x['광고비'] else 0
             cvr = round(x['주문'] / x['클릭'] * 100, 1) if x['클릭'] else 0
+            qpo = round(x['수량'] / x['주문'], 2) if x['주문'] else 0
             sr = round(x['검매'] / x['검비'] * 100) if x['검비'] else 0
             br = round(x['비검매'] / x['비검비'] * 100) if x['비검비'] else 0
             auto = f'클릭{int(x["자클"])}' if x['자클'] else '-'
-            print(f'{k[:14]:<14} {int(x["광고비"]):>8,} {int(x["클릭"]):>4} {int(x["주문"]):>4} {int(x["매출"]):>9,} {roas:>4}% {cvr:>4}% │ {sr:>4}% {br:>4}% {auto}')
+            print(f'{k[:14]:<14} {int(x["광고비"]):>8,} {int(x["클릭"]):>4} {int(x["주문"]):>4} {int(x["수량"]):>4} {int(x["매출"]):>9,} {roas:>4}% {cvr:>4}% {qpo:>4} │ {sr:>4}% {br:>4}% {auto}')
 
     print('※ GMV(판매가) ROAS. 1일=당일(소급 덜 됨)/14일=누적(--d14). 검색/비검색·SKU·전환발생 전수 파싱.')
 
