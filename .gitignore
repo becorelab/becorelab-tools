@@ -111,3 +111,10 @@ automation/coupang_openapi_config.py
 # 1688 Elimapi 토큰 (민감)
 sourcing/.elimapi_token.json
 sourcing/1688_find_result.json
+
+# 2026-07-02 git 위생 (하치): 로그/DB저널/DB백업/API덤프 추적 금지
+*.err
+*.db-shm
+*.db-wal
+erp/erp.db.bak*
+sourcing/helpstore_api_responses.json
