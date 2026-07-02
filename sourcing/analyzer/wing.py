@@ -258,6 +258,18 @@ def _do_full_login():
             logger.info('쿠팡윙 로그인 성공!')
         except Exception as e:
             logger.warning(f'윙 자동 로그인 실패: {e}')
+            # 실패 원인 확정용 증거 수집 (2026-07-02): xauth authenticate에 머무는 이유가
+            # 2FA/캡차/크리덴셜 오류 중 뭔지 로그만으론 판별 불가했음 → URL+본문+스크린샷 기록
+            try:
+                fail_url = _page.url
+                body_txt = ' '.join(_page.inner_text('body').split())[:400]
+                shot = f'/Users/macmini_ky/ClaudeAITeam/logs/wing_login_fail_{_time.strftime("%Y%m%d_%H%M%S")}.png'
+                _page.screenshot(path=shot)
+                logger.warning(f'윙 로그인 실패 진단 — url={fail_url}')
+                logger.warning(f'윙 로그인 실패 진단 — body[:400]={body_txt}')
+                logger.warning(f'윙 로그인 실패 진단 — screenshot={shot}')
+            except Exception as diag_err:
+                logger.warning(f'윙 로그인 진단 수집 실패: {diag_err}')
             # 수동 대기 (최대 10초만 — 서버환경에서 사람이 로그인 불가)
             for i in range(10):
                 _page.wait_for_timeout(1000)

@@ -30,13 +30,26 @@ def list_scans():
         return []
 
 
-def latest_scan_id(keyword):
-    """키워드와 일치하는 가장 최근 스캔 id."""
+def latest_scan_id(keyword, max_age_days=14):
+    """키워드와 일치하는 가장 최근 스캔 id.
+
+    신선도 가드(2026-07-02): 윙 로그인 고장으로 새 스캔이 안 생기던 6주간
+    5/20 스캔을 매일 재사용하며 '성공'으로 위장했음 → 오래된 스캔은 실패로 처리해 드러냄.
+    """
+    from datetime import datetime, timedelta
     scans = [s for s in list_scans() if (s.get("keyword") or "") == keyword]
     if not scans:
         return None
     scans.sort(key=lambda s: s.get("scanned_at", ""), reverse=True)
-    return scans[0]["id"]
+    newest = scans[0]
+    scanned_at = str(newest.get("scanned_at", ""))[:10]
+    try:
+        if scanned_at and datetime.strptime(scanned_at, "%Y-%m-%d") < datetime.now() - timedelta(days=max_age_days):
+            print(f"  [coupang] '{keyword}' 최신 스캔이 {scanned_at}로 {max_age_days}일 초과 — 동결 데이터 재사용 거부 (새 스캔 필요)")
+            return None
+    except ValueError:
+        pass
+    return newest["id"]
 
 
 def scan_products(scan_id):

@@ -179,8 +179,10 @@ def _run_scan_api(scan_id: int, keyword: str):
     )
 
     # 6. 스캔 결과 업데이트
+    # 윙 0건 스캔이 '완료(scanned)'로 위장되던 문제(2026-07-02): 상품 없으면 'partial'로 구분
+    # (윙 로그인 실패 시 조용히 0건 → 레이더가 빈 스캔 집어가고 재스캔 판단도 불가했음)
     fdb.update_scan(scan_id,
-        status='scanned',
+        status='scanned' if products else 'partial',
         category=result.main_category,
         opportunity_score=round(opp_score.total_score, 1),
         top10_avg_revenue=opp_score.top4_10_avg_revenue,
