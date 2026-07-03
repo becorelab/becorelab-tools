@@ -2,7 +2,8 @@
 """쿠팡 광고 보고서 분석 v2 — 원본 전수 파싱 (광고 하치 전용)
 
 전송폴더 키워드 보고서 xlsx를 통째로 읽어:
-- 품목별 + 검색/비검색 ROAS 분리 + 자동매칭 클릭
+- 품목별 + 검색/비검색/오디언스플러스 3분할 ROAS + 자동매칭 클릭 (오디언스 지출 30%+ 시 ⚠️ 자동경고)
+- 교차전환 자동감지 (집행 품목 ≠ 전환발생 품목 — 기본 뷰 하단 ↪ 표시)
 - 캠페인 내 SKU별(광고집행 상품명) + 광고집행 vs 전환발생 구분(스마트 교차전환)
 - 1일(당일)/14일(소급반영) 선택
 
@@ -91,6 +92,8 @@ def main():
 
     def is_bi(v):  # 비검색 영역
         return '비검색' in str(v)
+    def is_aud(v):  # 오디언스 플러스(외부 채널) — 비검색에 묻으면 과지출 출혈이 안 보임 (2026-07-04 집 하치 발견)
+        return '오디언스' in str(v)
     def is_auto(r):  # 자동매칭: 검색영역인데 키워드 없음
         return (c_jim and '검색' in str(r[c_jim]) and not is_bi(r[c_jim])
                 and c_kw and str(r[c_kw]).strip() in ('', 'nan', '-'))
@@ -141,7 +144,9 @@ def main():
     elif a.split:
         agg = {}
         for _, r in df.iterrows():
-            jm = '비검색' if (c_jim and is_bi(r[c_jim])) else '검색'
+            if c_jim and is_aud(r[c_jim]): jm = '오디+'
+            elif c_jim and is_bi(r[c_jim]): jm = '비검색'
+            else: jm = '검색'
             x = agg.setdefault((cat(r[c_prod]), jm),
                                {'클릭': 0, '광고비': 0, '주문': 0, '수량': 0, '매출': 0})
             x['클릭'] += r[c_clk]; x['광고비'] += r[c_cost]; x['주문'] += r[c_ord]; x['매출'] += r[c_rev]
@@ -152,13 +157,15 @@ def main():
         print(f'{"품목":<14} {"지면":<3} {"광고비":>8} {"클릭":>4} {"주문":>4} {"수량":>4} {"매출":>9} {"ROAS":>5} {"CVR":>5} {"수/주":>4}')
         for k in sorted(tot, key=lambda i: -tot[i]):
             if tot[k] < 300: continue
-            for jm in ('검색', '비검색'):
+            first = True
+            for jm in ('검색', '비검색', '오디+'):
                 x = agg.get((k, jm))
                 if not x or (x['광고비'] < 1 and x['매출'] < 1): continue
                 roas = round(x['매출'] / x['광고비'] * 100) if x['광고비'] else 0
                 cvr = round(x['주문'] / x['클릭'] * 100, 1) if x['클릭'] else 0
                 qpo = round(x['수량'] / x['주문'], 2) if x['주문'] else 0
-                nm = k[:14] if jm == '검색' else ''
+                nm = k[:14] if first else ''
+                first = False
                 print(f'{nm:<14} {jm[:3]:<3} {int(x["광고비"]):>8,} {int(x["클릭"]):>4} {int(x["주문"]):>4} {int(x["수량"]):>4} {int(x["매출"]):>9,} {roas:>4}% {cvr:>4}% {qpo:>4}')
         print('※ 수/주 = 주문당 판매수량(장바구니 두께). 급감 시 프로모/경쟁사/월초효과 의심 (2026-07-02 코튼블루 사례).')
 
@@ -168,15 +175,19 @@ def main():
         for _, r in df.iterrows():
             k = cat(r[c_prod])
             x = agg.setdefault(k, {'클릭': 0, '광고비': 0, '주문': 0, '수량': 0, '매출': 0,
-                                   '검비': 0, '검매': 0, '비검비': 0, '비검매': 0, '자클': 0})
+                                   '검비': 0, '검매': 0, '비검비': 0, '비검매': 0,
+                                   '오비': 0, '오매': 0, '자클': 0})
             x['클릭'] += r[c_clk]; x['광고비'] += r[c_cost]; x['주문'] += r[c_ord]; x['매출'] += r[c_rev]
             if c_qty: x['수량'] += r[c_qty]
-            if c_jim and is_bi(r[c_jim]):
+            if c_jim and is_aud(r[c_jim]):
+                x['오비'] += r[c_cost]; x['오매'] += r[c_rev]
+            elif c_jim and is_bi(r[c_jim]):
                 x['비검비'] += r[c_cost]; x['비검매'] += r[c_rev]
             else:
                 x['검비'] += r[c_cost]; x['검매'] += r[c_rev]
                 if is_auto(r): x['자클'] += r[c_clk]
-        print(f'{"품목":<14} {"광고비":>8} {"클릭":>4} {"주문":>4} {"수량":>4} {"매출":>9} {"ROAS":>5} {"CVR":>5} {"수/주":>4} │ {"검색":>5} {"비검":>5} 자동매칭')
+        print(f'{"품목":<14} {"광고비":>8} {"클릭":>4} {"주문":>4} {"수량":>4} {"매출":>9} {"ROAS":>5} {"CVR":>5} {"수/주":>4} │ {"검색":>5} {"비검":>5} {"오디+":>5} 자동매칭')
+        warn_aud = []
         for k, x in sorted(agg.items(), key=lambda i: -i[1]['광고비']):
             if x['광고비'] < 300: continue
             roas = round(x['매출'] / x['광고비'] * 100) if x['광고비'] else 0
@@ -184,8 +195,25 @@ def main():
             qpo = round(x['수량'] / x['주문'], 2) if x['주문'] else 0
             sr = round(x['검매'] / x['검비'] * 100) if x['검비'] else 0
             br = round(x['비검매'] / x['비검비'] * 100) if x['비검비'] else 0
+            ar = f'{round(x["오매"] / x["오비"] * 100):>4}%' if x['오비'] else '   -'
             auto = f'클릭{int(x["자클"])}' if x['자클'] else '-'
-            print(f'{k[:14]:<14} {int(x["광고비"]):>8,} {int(x["클릭"]):>4} {int(x["주문"]):>4} {int(x["수량"]):>4} {int(x["매출"]):>9,} {roas:>4}% {cvr:>4}% {qpo:>4} │ {sr:>4}% {br:>4}% {auto}')
+            print(f'{k[:14]:<14} {int(x["광고비"]):>8,} {int(x["클릭"]):>4} {int(x["주문"]):>4} {int(x["수량"]):>4} {int(x["매출"]):>9,} {roas:>4}% {cvr:>4}% {qpo:>4} │ {sr:>4}% {br:>4}% {ar} {auto}')
+            aud_pct = x['오비'] / x['광고비'] if x['광고비'] else 0
+            if aud_pct >= 0.3:
+                warn_aud.append((k, aud_pct, round(x['오매'] / x['오비'] * 100) if x['오비'] else 0, x['오비']))
+        for k, p, r_, c_ in warn_aud:
+            print(f'⚠️ {k}: 오디언스플러스가 지출 {p*100:.0f}%({int(c_):,}원) 흡수, ROAS {r_}% — 검/비검 %만 보면 출혈 안 보임')
+        # 교차전환 감지 (집행 품목 ≠ 전환발생 품목)
+        if c_cprod:
+            cross = {}
+            for _, r in df.iterrows():
+                if r[c_rev] > 0:
+                    ec, cc = cat(r[c_prod]), cat(r[c_cprod])
+                    if ec != cc:
+                        cross[(ec, cc)] = cross.get((ec, cc), 0) + r[c_rev]
+            for (ec, cc), v in sorted(cross.items(), key=lambda i: -i[1]):
+                if v >= 10000:
+                    print(f'↪ 교차전환: {ec} 집행 → {cc} 매출 {int(v):,}원 ({ec} 행 매출에 포함돼 있음)')
 
     print('※ GMV(판매가) ROAS. 1일=당일(소급 덜 됨)/14일=누적(--d14). 검색/비검색·SKU·전환발생 전수 파싱.')
 
