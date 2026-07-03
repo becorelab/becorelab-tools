@@ -26,7 +26,9 @@ import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
 
-XFER = '/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/mac window file transfer'
+# 전송폴더 — 윈도우(집 하치) 등 다른 환경에서는 COUPANG_XFER 환경변수로 덮어쓰기
+XFER = os.environ.get('COUPANG_XFER',
+    '/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/mac window file transfer')
 ACCT = {'rocket': 'A00290275', 'gross': 'A00940134', 'seirab': 'A01707416'}
 
 
