@@ -19,6 +19,7 @@
   - ⚠️ 진짜 정확값은 정산하치 6월 정산서(`settlement_monthly`, 5/30 설계) — 위 이지어드민 수정은 "정산 전 임시 추정" 정확도 개선.
   - ✅ 임시파일(`logistics/_tmp_june_orders.json`, `_tmp_find_filter.py`) 정리 완료 (2026-07-02).
 - [x] **재고 수불부 기간별 출고량 검색 (2026-06-29 완료)** — 재고탭에 기간 프리셋(이번달/저번달/최근1주/지정기간) + "기간 출고량" 컬럼. 데이터 = 재고수불부 I500(출고+배송) 최근 ~90일.
+- [x] **재고 수불부 모달에 일별 재고+입고 표기 (2026-07-03 완료)** — 상품 클릭 수불부 모달(`stock_sales_outbound` daily)에 ①일별 추정재고 ②입고일 📦 표기. 재고=현재고(stock.qty_on_hand) 역산(마감재고 = 다음날마감 - 다음날입고 + 다음날출고). 입고=completed/partial PO의 delivery_date 기준 qty_received. ⚠️역산이 음수 되는 시점부터 재고 null('-')로 끊음 — 과거로 갈수록 재고sync(adjust) 조정·누락입고로 부정확(최근 ~1개월만 신뢰, "추정치" 명시). 근본해결책은 stock_transactions에 inbound/outbound tx를 실제로 쌓는 것(현재 adjust만 426건). receiving_records 테이블은 존재하나 0건(미사용).
   - 신설: logistics `GET /api/outbound-history?preset=|start=|end=` (orders=latest.orders 우선·logistics_daily 폴백, code별 합산) → ERP 프록시 `GET /api/stock/outbound` → 재고탭 UI(`static/js/app.js` loadStock/renderStockTable). 매칭키 = ezadmin_code. 검증완료(이번달 25,425/저번달 18,296).
 - [x] **로켓배송(1P) 매출 크론 — 완료** — `rocket_daily.py`(launchd 8시, 입고상세→ERP sales 멱등 upsert, 40일 롤링) 가동 중. 2026-07-02: 세션 6일 만료 방치로 6/27~7/1 구멍 → 재로그인+백필 복구(36일 5,693만). **재발방지 = `supplyhub_keepalive.py` 신설**(launchd 3시간 주기, KEYCLOAK idle 만료 전 세션 연장 + 쿠키 재백업 + 만료 시 알림 1회). idle 가설 판정 = 7/3 아침 크론 생존 여부.
 - [ ] **발주서 수정 → 일정/상태 자동반영** — 발주서에서 납품예정일·상태 수정 시 일정관리 캘린더 자동 갱신.
