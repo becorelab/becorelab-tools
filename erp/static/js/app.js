@@ -1752,7 +1752,14 @@ function exportPricingExcel() {
 }
 
 // ── 선물 트렌드 (카카오 선물하기 베스트 랭킹) ──
-let _kakaoData = null, _kakaoTabIdx = 0;
+let _kakaoData = null, _kakaoTabIdx = 0, _kakaoBandIdx = 0;
+// 가격대 필터 — 수집은 전체, 화면에서 필터(카카오 API가 가격필터 미지원). 우리 시장=중저가.
+const KAKAO_BANDS = [
+  { label: '전체', min: 0, max: Infinity },
+  { label: '~2만', min: 0, max: 20000 },
+  { label: '2~4만', min: 20000, max: 40000 },
+  { label: '4만+', min: 40000, max: Infinity },
+];
 
 async function loadKakao(date) {
   try {
@@ -1773,6 +1780,12 @@ async function loadKakao(date) {
     document.getElementById('kakao-tabbar').innerHTML = data.tabs.map((t, i) =>
       `<button class="btn btn-sm ${i === _kakaoTabIdx ? 'btn-primary' : ''}" onclick="selectKakaoTab(${i})">${t.label}${t.hasOrder ? ' 📦' : ''}</button>`
     ).join('');
+    // 가격대 필터
+    document.getElementById('kakao-priceband').innerHTML =
+      '<span class="text-muted" style="font-size:12px;margin-right:2px">가격대</span>' +
+      KAKAO_BANDS.map((band, i) =>
+        `<button class="btn btn-sm ${i === _kakaoBandIdx ? 'btn-primary' : ''}" onclick="selectKakaoBand(${i})">${band.label}</button>`
+      ).join('');
 
     renderKakaoHighlight(data);
     renderKakaoCards(data.tabs[_kakaoTabIdx]);
@@ -1786,6 +1799,12 @@ function selectKakaoTab(i) {
   _kakaoTabIdx = i;
   document.querySelectorAll('#kakao-tabbar button').forEach((b, j) => b.classList.toggle('btn-primary', j === i));
   renderKakaoCards(_kakaoData.tabs[i]);
+}
+
+function selectKakaoBand(i) {
+  _kakaoBandIdx = i;
+  document.querySelectorAll('#kakao-priceband button').forEach((b, j) => b.classList.toggle('btn-primary', j === i));
+  renderKakaoCards(_kakaoData.tabs[_kakaoTabIdx]);
 }
 
 async function switchKakaoView(view) {
@@ -1869,7 +1888,13 @@ function renderKakaoCards(tab) {
     const cls = v > 0 ? 'up' : 'down';
     return `<span class="kakao-d ${cls}" title="전일 대비 ${label}">${label} ${v > 0 ? '+' : ''}${fmt(v)}${unit}</span>`;
   };
-  const cards = tab.rows.map(r => {
+  // 가격대 필터 (순위는 원래대로 유지, 해당 구간 상품만 표시)
+  const band = KAKAO_BANDS[_kakaoBandIdx];
+  const filtered = tab.rows.filter(r => {
+    const p = r.price;
+    return typeof p === 'number' && p >= band.min && p < band.max;
+  });
+  const cards = filtered.map(r => {
     const dc = r.discountRate ? `<span class="kakao-dc">${r.discountRate}%</span>` : '';
     // 핵심 판매신호: 리뷰Δ(실구매) > 주문수 > 찜Δ. 카드 하단 지표행에 모아서 표시.
     const metrics = [
@@ -1889,7 +1914,8 @@ function renderKakaoCards(tab) {
       </div>
     </a>`;
   }).join('');
-  document.getElementById('kakao-cards').innerHTML = cards || '<div class="empty-state"><p>상품 없음</p></div>';
+  document.getElementById('kakao-cards').innerHTML = cards ||
+    `<div class="empty-state"><p>${band.label} 가격대에 해당 상품이 없어요</p></div>`;
 }
 
 // ── Users (직원 관리) ──

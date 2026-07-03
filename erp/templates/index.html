@@ -506,7 +506,8 @@
         <button class="btn btn-sm" onclick="switchKakaoView('insight')" id="kv-insight">📊 인사이트</button>
       </div>
       <div id="kakao-view-ranking">
-        <div id="kakao-tabbar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+        <div id="kakao-tabbar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
+        <div id="kakao-priceband" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center"></div>
         <div id="kakao-highlight" style="margin-bottom:16px"></div>
         <div id="kakao-cards" class="kakao-grid"></div>
       </div>
@@ -547,7 +548,7 @@
 <!-- Toast -->
 <div class="toast-container" id="toasts"></div>
 
-<script src="/static/js/app.js?v=20260703d"></script>
+<script src="/static/js/app.js?v=20260703e"></script>
 <script>
 setInterval(() => {
   const el = document.getElementById('current-time');
