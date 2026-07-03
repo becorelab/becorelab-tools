@@ -52,6 +52,12 @@ def _sh_at_fp(cookies):
 
 
 def main():
+    # 이미 만료 통보한 상태(마커 존재)면 크롬도 안 띄우고 스킵 (2026-07-03).
+    # 죽은 세션에 xauth를 매시간 두드리면 Akamai 봇신호로 계정 달굼 위험 → 대표님 재로그인(마커 삭제) 대기.
+    # relogin.py 성공 시 세션이 살아나므로, 그 뒤 첫 keepalive가 OK 찍고 정상 재개.
+    if os.path.exists(EXPIRED_MARKER):
+        _log("SKIP — 만료 통보 상태(대표님 재로그인 대기). Akamai 달굼 방지로 접속 생략.")
+        return
     from playwright.sync_api import sync_playwright
     with sync_playwright() as p:
         br = p.chromium.connect_over_cdp(CDP_URL, timeout=30000)

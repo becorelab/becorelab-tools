@@ -159,6 +159,11 @@ def main():
 
     # 4) 로그인+주입 성공 시 곧바로 로켓 매출 수집 (1클릭 자동화 — 세션 살아있을 때 즉시)
     if sess_ok:
+        # 만료 마커 삭제 → keepalive 재활성 (마커 있으면 SKIP하는 가드와 짝)
+        marker = os.path.join(os.path.dirname(__file__), ".supplyhub_expired")
+        if os.path.exists(marker):
+            os.remove(marker)
+            print("✅ 만료 마커 삭제 — keepalive 재개됨", flush=True)
         import subprocess
         print("⏳ 로켓 매출 수집 시작 (로그인 직후 즉시)...", flush=True)
         subprocess.run([sys.executable,
