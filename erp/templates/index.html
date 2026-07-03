@@ -19,7 +19,13 @@
   .kakao-name { font-size:12.5px; line-height:1.35; margin:3px 0 6px; height:34px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
   .kakao-price { font-size:14px; } .kakao-price b { font-size:15px; }
   .kakao-dc { color:#e8483d; font-weight:700; font-size:13px; margin-right:2px; }
-  .kakao-meta { font-size:11.5px; color:var(--ink-3,#888); margin-top:5px; display:flex; gap:8px; flex-wrap:wrap; }
+  .kakao-base { font-size:11.5px; color:var(--ink-3,#999); margin-top:5px; }
+  .kakao-metrics { margin-top:6px; display:flex; gap:4px; flex-wrap:wrap; }
+  .kakao-first { color:#bbb; font-style:italic; font-size:11px; }
+  .kakao-d { font-size:11px; font-weight:700; padding:2px 6px; border-radius:6px; }
+  .kakao-d.up { color:#1a8f3c; background:rgba(26,143,60,.10); }
+  .kakao-d.down { color:#999; background:rgba(150,150,150,.10); }
+  .kakao-d.order { color:#2563c9; background:rgba(37,99,201,.10); }
   .kakao-mv { font-size:10.5px; font-weight:700; padding:1px 5px; border-radius:5px; }
   .kakao-mv.up { color:#1a8f3c; background:rgba(26,143,60,.10); } .kakao-mv.down { color:#c23; background:rgba(204,51,51,.09); }
   .kakao-mv.new { color:#b26; background:rgba(187,38,102,.10); } .kakao-mv.flat { color:#aaa; }
@@ -27,6 +33,15 @@
   .kakao-hl-t { font-size:12px; font-weight:700; margin-right:8px; }
   .kakao-chip { display:inline-flex; align-items:center; gap:4px; font-size:12px; padding:3px 9px; margin:2px 4px 2px 0; background:#fff; border:1px solid var(--line,#eee); border-radius:20px; text-decoration:none; color:inherit; }
   .kakao-chip:hover { border-color:#d97757; }
+  .kakao-ins-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:8px; }
+  .kakao-ins-row { display:flex; align-items:center; gap:10px; padding:8px 10px; border:1px solid var(--line,#eee); border-radius:10px; text-decoration:none; color:inherit; background:#fff; }
+  .kakao-ins-row:hover { border-color:#d97757; }
+  .ins-rank { font-weight:800; color:#d97757; min-width:20px; text-align:center; font-size:14px; }
+  .ins-thumb { width:44px; height:44px; border-radius:8px; background-size:cover; background-position:center; background-color:#f4f1ea; flex-shrink:0; }
+  .ins-main { flex:1; font-size:12.5px; line-height:1.35; overflow:hidden; }
+  .ins-metric { text-align:right; font-size:13px; white-space:nowrap; }
+  .kakao-ins-table { width:100%; font-size:13px; } .kakao-ins-table th, .kakao-ins-table td { padding:7px 10px; border-bottom:1px solid var(--line,#eee); }
+  .kakao-ins-table th.r, .kakao-ins-table td.r { text-align:right; }
 </style>
 </head>
 <body>
@@ -486,9 +501,16 @@
           <select id="kakao-date" onchange="loadKakao(this.value)" style="padding:5px 8px;border:1px solid var(--line);border-radius:6px"></select>
         </div>
       </div>
-      <div id="kakao-tabbar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
-      <div id="kakao-highlight" style="margin-bottom:16px"></div>
-      <div id="kakao-cards" class="kakao-grid"></div>
+      <div id="kakao-viewtoggle" style="display:flex;gap:6px;margin-bottom:14px">
+        <button class="btn btn-sm btn-primary" onclick="switchKakaoView('ranking')" id="kv-ranking">🏆 랭킹</button>
+        <button class="btn btn-sm" onclick="switchKakaoView('insight')" id="kv-insight">📊 인사이트</button>
+      </div>
+      <div id="kakao-view-ranking">
+        <div id="kakao-tabbar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+        <div id="kakao-highlight" style="margin-bottom:16px"></div>
+        <div id="kakao-cards" class="kakao-grid"></div>
+      </div>
+      <div id="kakao-view-insight" class="hidden"></div>
     </div>
 
     <!-- Pricing (기준판매가) -->
@@ -525,7 +547,7 @@
 <!-- Toast -->
 <div class="toast-container" id="toasts"></div>
 
-<script src="/static/js/app.js?v=20260703b"></script>
+<script src="/static/js/app.js?v=20260703d"></script>
 <script>
 setInterval(() => {
   const el = document.getElementById('current-time');

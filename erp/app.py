@@ -2351,14 +2351,17 @@ async def kakao_rank(date: str = ""):
         rows = []
         for r in tab.get("rows", []):
             pv = pmap.get(r["id"])
-            move, wish_d, order_d = "new", None, None
+            move, wish_d, order_d, rev_d = "new", None, None, None
             if pv:
                 move = pv["rank"] - r["rank"]  # +면 상승
                 if r.get("wishCount") is not None and pv.get("wishCount") is not None:
                     wish_d = r["wishCount"] - pv["wishCount"]
                 if r.get("orderCount") is not None and pv.get("orderCount") is not None:
                     order_d = r["orderCount"] - pv["orderCount"]
-            rows.append({**r, "move": move, "wishDelta": wish_d, "orderDelta": order_d})
+                if r.get("reviewTotal") is not None and pv.get("reviewTotal") is not None:
+                    rev_d = r["reviewTotal"] - pv["reviewTotal"]  # 리뷰 증분 = 실구매 프록시
+            rows.append({**r, "move": move, "wishDelta": wish_d,
+                         "orderDelta": order_d, "reviewDelta": rev_d})
         tabs.append({
             "label": label, "updatedAt": tab.get("updatedAt"),
             "hasOrder": any(r.get("orderCount") is not None for r in rows),
@@ -2366,6 +2369,77 @@ async def kakao_rank(date: str = ""):
         })
     return {"date": cur_date, "prevDate": (older[0] if older else None),
             "isFirst": prev is None, "tabs": tabs}
+
+
+@app.get("/api/kakao/insights")
+async def kakao_insights(date: str = ""):
+    """선물 트렌드 인사이트 — "무슨 제품이 잘 팔리나" 도출.
+    ① 카테고리 활발도(리뷰·찜·가격) ② 검증 상품 TOP(리뷰순) ③ 판매 급상승(리뷰증분)
+    ④ 가격대 분포. 데이터 누적될수록 ③이 강해짐(첫날은 ①②④만)."""
+    import statistics
+    dates = _kakao_snap_dates()
+    if not dates:
+        return JSONResponse({"error": "no_data"}, status_code=404)
+    cur = date if (date and date in dates) else dates[0]
+    with open(os.path.join(KAKAO_SNAPDIR, f"{cur}.json"), encoding="utf-8") as f:
+        snap = json.load(f)
+    older = [d for d in dates if d < cur]
+    prev = None
+    if older:
+        with open(os.path.join(KAKAO_SNAPDIR, f"{older[0]}.json"), encoding="utf-8") as f:
+            prev = json.load(f)
+
+    def med(xs):
+        xs = [x for x in xs if isinstance(x, (int, float))]
+        return round(statistics.median(xs)) if xs else None
+
+    categories, all_products = [], []
+    for label, tab in snap.get("tabs", {}).items():
+        rows = tab.get("rows", [])
+        reviews = [r.get("reviewTotal") for r in rows if r.get("reviewTotal") is not None]
+        wishes = [r.get("wishCount") for r in rows if r.get("wishCount") is not None]
+        prices = [r.get("price") for r in rows if isinstance(r.get("price"), (int, float))]
+        categories.append({
+            "label": label, "count": len(rows),
+            "reviewSum": sum(reviews), "reviewMedian": med(reviews),
+            "wishSum": sum(wishes), "wishMedian": med(wishes),
+            "priceMedian": med(prices),
+            "priceMin": min(prices) if prices else None,
+            "priceMax": max(prices) if prices else None,
+        })
+        for r in rows:
+            all_products.append({**r, "category": label})
+
+    # 검증 상품 TOP (리뷰 누적 최다 = 이미 많이 팔린 안전한 시장)
+    top_reviewed = sorted([p for p in all_products if p.get("reviewTotal")],
+                          key=lambda p: -p["reviewTotal"])[:20]
+
+    # 판매 급상승 (전일 대비 리뷰 증분 — 지금 가장 빨리 팔리는 것)
+    risers = []
+    if prev:
+        pmap = {}
+        for label, tab in prev.get("tabs", {}).items():
+            for r in tab.get("rows", []):
+                if r.get("reviewTotal") is not None:
+                    pmap[r["id"]] = r["reviewTotal"]
+        for p in all_products:
+            if p.get("reviewTotal") is not None and p["id"] in pmap:
+                d = p["reviewTotal"] - pmap[p["id"]]
+                if d > 0:
+                    risers.append({**p, "reviewDelta": d})
+        risers.sort(key=lambda p: -p["reviewDelta"])
+        risers = risers[:20]
+
+    trim = lambda p: {"brand": p.get("brand"), "name": p.get("name"), "category": p.get("category"),
+                      "price": p.get("price"), "reviewTotal": p.get("reviewTotal"),
+                      "reviewDelta": p.get("reviewDelta"), "wishCount": p.get("wishCount"),
+                      "productUrl": p.get("productUrl"), "imageUrl": p.get("imageUrl")}
+    return {
+        "date": cur, "prevDate": (older[0] if older else None), "hasPrev": prev is not None,
+        "categories": sorted(categories, key=lambda c: -(c["reviewSum"] or 0)),
+        "topReviewed": [trim(p) for p in top_reviewed],
+        "risers": [trim(p) for p in risers],
+    }
 
 
 # ── 시작 시 DB 초기화 ──

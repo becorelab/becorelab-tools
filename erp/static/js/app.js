@@ -1788,6 +1788,57 @@ function selectKakaoTab(i) {
   renderKakaoCards(_kakaoData.tabs[i]);
 }
 
+async function switchKakaoView(view) {
+  document.getElementById('kv-ranking').classList.toggle('btn-primary', view === 'ranking');
+  document.getElementById('kv-insight').classList.toggle('btn-primary', view === 'insight');
+  document.getElementById('kakao-view-ranking').classList.toggle('hidden', view !== 'ranking');
+  document.getElementById('kakao-view-insight').classList.toggle('hidden', view !== 'insight');
+  if (view === 'insight') loadKakaoInsight(document.getElementById('kakao-date').value);
+}
+
+async function loadKakaoInsight(date) {
+  const box = document.getElementById('kakao-view-insight');
+  box.innerHTML = '<div class="empty-state"><p>분석 중…</p></div>';
+  try {
+    const d = await api(`/api/kakao/insights${date ? `?date=${date}` : ''}`);
+    const won = v => v == null ? '-' : fmt(v) + '원';
+    // ① 판매 급상승 (리뷰증분) — 데이터 2일+ 있을 때
+    const risers = d.hasPrev && d.risers.length ? `
+      <h3 style="margin:4px 0 8px">🔥 판매 급상승 <span class="text-muted" style="font-size:12px;font-weight:400">— 어제 대비 리뷰(실구매) 증가 TOP</span></h3>
+      <div class="kakao-ins-list">${d.risers.map((p, i) => `
+        <a href="${p.productUrl}" target="_blank" class="kakao-ins-row">
+          <span class="ins-rank">${i + 1}</span>
+          <span class="ins-thumb" style="background-image:url('${p.imageUrl || ''}')"></span>
+          <span class="ins-main"><b>${p.brand}</b> <span class="text-muted">${p.category.split('>').pop()}</span><br>${p.name}</span>
+          <span class="ins-metric"><b style="color:#1a8f3c">📝 +${fmt(p.reviewDelta)}</b><br><span class="text-muted">${won(p.price)}</span></span>
+        </a>`).join('')}</div>` : `
+      <div class="kakao-hl-box" style="margin-bottom:16px">📈 <b>판매 급상승</b>은 내일부터 표시돼요 — 오늘이 첫 수집이라 어제와 비교할 데이터가 아직 없어요. 매일 쌓일수록 정확해집니다.</div>`;
+    // ② 카테고리 활발도
+    const cats = `
+      <h3 style="margin:18px 0 8px">📂 카테고리 활발도 <span class="text-muted" style="font-size:12px;font-weight:400">— 리뷰(누적판매) 많은 시장 순. 큰 시장일수록 수요 검증됨</span></h3>
+      <div class="table-scroll"><table class="kakao-ins-table">
+        <thead><tr><th>카테고리</th><th class="r">리뷰 합계</th><th class="r">찜 중앙값</th><th class="r">가격 중앙값</th><th class="r">가격대</th></tr></thead>
+        <tbody>${d.categories.map(c => `<tr>
+          <td>${c.label}</td><td class="r"><b>${fmt(c.reviewSum)}</b></td>
+          <td class="r">${fmt(c.wishMedian)}</td><td class="r">${won(c.priceMedian)}</td>
+          <td class="r text-muted">${won(c.priceMin)}~${won(c.priceMax)}</td></tr>`).join('')}</tbody>
+      </table></div>`;
+    // ③ 검증 상품 TOP (리뷰 누적 최다)
+    const top = `
+      <h3 style="margin:18px 0 8px">✅ 검증된 베스트셀러 <span class="text-muted" style="font-size:12px;font-weight:400">— 리뷰(실판매) 누적 최다. 이미 팔리는 안전한 시장</span></h3>
+      <div class="kakao-ins-list">${d.topReviewed.map((p, i) => `
+        <a href="${p.productUrl}" target="_blank" class="kakao-ins-row">
+          <span class="ins-rank">${i + 1}</span>
+          <span class="ins-thumb" style="background-image:url('${p.imageUrl || ''}')"></span>
+          <span class="ins-main"><b>${p.brand}</b> <span class="text-muted">${p.category.split('>').pop()}</span><br>${p.name}</span>
+          <span class="ins-metric"><b>📝 ${fmt(p.reviewTotal)}</b><br><span class="text-muted">${won(p.price)}</span></span>
+        </a>`).join('')}</div>`;
+    box.innerHTML = `<div class="text-muted" style="font-size:12px;margin-bottom:12px">${d.date} 기준 · 데이터가 쌓일수록 '판매 급상승'이 강력해져요</div>${risers}${cats}${top}`;
+  } catch (e) {
+    box.innerHTML = `<div class="empty-state"><p>${e.message || '데이터 없음'}</p></div>`;
+  }
+}
+
 function renderKakaoHighlight(data) {
   if (data.isFirst) { document.getElementById('kakao-highlight').innerHTML = ''; return; }
   const risers = [], news = [];
@@ -1812,19 +1863,29 @@ function renderKakaoCards(tab) {
     if (typeof r.move !== 'number' || r.move === 0) return '<span class="kakao-mv flat">―</span>';
     return r.move > 0 ? `<span class="kakao-mv up">▲${r.move}</span>` : `<span class="kakao-mv down">▼${-r.move}</span>`;
   };
+  // 증분 pill — 양수는 초록(팔림/관심↑), 음수는 회색. 값 있을 때만 표시.
+  const delta = (v, label, unit = '') => {
+    if (v == null || v === 0) return '';
+    const cls = v > 0 ? 'up' : 'down';
+    return `<span class="kakao-d ${cls}" title="전일 대비 ${label}">${label} ${v > 0 ? '+' : ''}${fmt(v)}${unit}</span>`;
+  };
   const cards = tab.rows.map(r => {
     const dc = r.discountRate ? `<span class="kakao-dc">${r.discountRate}%</span>` : '';
-    const order = r.orderCount != null ? `<span title="주문수">📦 ${fmt(r.orderCount)}</span>` : '';
-    const od = r.orderDelta ? ` <span class="text-muted">(${r.orderDelta > 0 ? '+' : ''}${r.orderDelta})</span>` : '';
-    const wd = r.wishDelta ? ` <span class="text-muted">(${r.wishDelta > 0 ? '+' : ''}${fmt(r.wishDelta)})</span>` : '';
+    // 핵심 판매신호: 리뷰Δ(실구매) > 주문수 > 찜Δ. 카드 하단 지표행에 모아서 표시.
+    const metrics = [
+      delta(r.reviewDelta, '📝', ''),                                   // 리뷰 증분 = 실구매
+      r.orderCount != null ? `<span class="kakao-d order" title="주문수(트렌딩 노출분)">📦${fmt(r.orderCount)}${r.orderDelta ? (r.orderDelta > 0 ? '+' : '') + r.orderDelta : ''}</span>` : '',
+      delta(r.wishDelta, '♡', ''),                                      // 찜 증분 = 관심
+    ].filter(Boolean).join(' ');
     return `<a href="${r.productUrl}" target="_blank" class="kakao-card">
-      <div class="kakao-rank">${r.rank}</div>
+      <div class="kakao-rank">${r.rank} ${moveBadge(r)}</div>
       <div class="kakao-img" style="background-image:url('${r.imageUrl || ''}')"></div>
       <div class="kakao-body">
-        <div class="kakao-brand">${r.brand || ''} ${moveBadge(r)}</div>
+        <div class="kakao-brand">${r.brand || ''}</div>
         <div class="kakao-name">${r.name || ''}</div>
         <div class="kakao-price">${dc} <b>${fmt(r.price)}원</b></div>
-        <div class="kakao-meta">♡ ${fmt(r.wishCount)}${wd} ${order}${od}</div>
+        <div class="kakao-base">♡ ${fmt(r.wishCount)}${r.reviewTotal != null ? ` · 📝 ${fmt(r.reviewTotal)}` : ''}</div>
+        ${metrics ? `<div class="kakao-metrics">${metrics}</div>` : '<div class="kakao-metrics kakao-first">전일 데이터 없음</div>'}
       </div>
     </a>`;
   }).join('');
