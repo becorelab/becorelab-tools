@@ -1945,23 +1945,74 @@ async def stock_history(product_id: int, conn=Depends(db)):
 @app.get("/api/stock/sales-outbound/{product_id}")
 async def stock_sales_outbound(product_id: int, days: int = 90, period: str = "daily", conn=Depends(db)):
     if period == "weekly":
-        group = "strftime('%Y-W%W', s.sale_date)"
-    else:
-        group = "s.sale_date"
-    rows = conn.execute(
-        f"""SELECT {group} as period, SUM(sl.qty) as qty, SUM(sl.line_total) as amount
-            FROM sale_lines sl JOIN sales s ON s.id=sl.sale_id
-            WHERE sl.product_id=? AND s.status='confirmed'
-            AND s.sale_date >= date('now', '-' || ? || ' days', 'localtime')
-            GROUP BY {group} ORDER BY period DESC""",
+        rows = conn.execute(
+            """SELECT strftime('%Y-W%W', s.sale_date) as period, SUM(sl.qty) as qty,
+                      SUM(sl.line_total) as amount
+               FROM sale_lines sl JOIN sales s ON s.id=sl.sale_id
+               WHERE sl.product_id=? AND s.status='confirmed'
+               AND s.sale_date >= date('now', '-' || ? || ' days', 'localtime')
+               GROUP BY period ORDER BY period DESC""",
+            (product_id, days),
+        ).fetchall()
+        total_qty = sum(r["qty"] for r in rows)
+        day_count = len(set(r["period"] for r in rows)) or 1
+        return {"items": [dict(r) for r in rows], "total_qty": total_qty,
+                "avg_daily": round(total_qty / min(days, day_count)) if total_qty else 0}
+
+    # ── 일별: 출고 + 그날 입고 + 추정 재고(현재고 역산) ── (2026-07-03 대표님 요청)
+    out_rows = conn.execute(
+        """SELECT s.sale_date as d, SUM(sl.qty) as qty, SUM(sl.line_total) as amount
+           FROM sale_lines sl JOIN sales s ON s.id=sl.sale_id
+           WHERE sl.product_id=? AND s.status='confirmed'
+           AND s.sale_date >= date('now', '-' || ? || ' days', 'localtime')
+           GROUP BY s.sale_date""",
         (product_id, days),
     ).fetchall()
-    total_qty = sum(r["qty"] for r in rows)
-    day_count = len(set(r["period"] for r in rows)) or 1
+    outbound = {r["d"]: r for r in out_rows}
+    # 입고 = 완료(또는 부분입고) 발주의 납품일 기준 실입고 수량
+    in_rows = conn.execute(
+        """SELECT po.delivery_date as d, SUM(pol.qty_received) as qty
+           FROM purchase_order_lines pol JOIN purchase_orders po ON po.id=pol.po_id
+           WHERE pol.product_id=? AND po.status IN ('completed','partial')
+           AND pol.qty_received > 0 AND po.delivery_date IS NOT NULL
+           AND po.delivery_date >= date('now', '-' || ? || ' days', 'localtime')
+           GROUP BY po.delivery_date""",
+        (product_id, days),
+    ).fetchall()
+    inbound = {r["d"]: r["qty"] for r in in_rows}
+
+    cur = conn.execute("SELECT qty_on_hand FROM stock WHERE product_id=?", (product_id,)).fetchone()
+    current_stock = cur["qty_on_hand"] if cur else None
+
+    # 출고일 ∪ 입고일 전체를 날짜 내림차순으로 (입고만 있는 날도 표기)
+    all_dates = sorted(set(outbound) | set(inbound), reverse=True)
+    items, running, broke = [], current_stock, False
+    for d in all_dates:
+        o = outbound.get(d)
+        oq = o["qty"] if o else 0
+        iq = inbound.get(d, 0)
+        # running = 해당일 '마감' 추정재고 (현재고에서 이후 흐름을 역산).
+        # 음수가 되면 그 이전은 재고 sync 조정·누락입고로 역산 신뢰불가 → 이후 전부 null로 끊음(정직).
+        if running is not None and running < 0:
+            broke = True
+        items.append({
+            "period": d,
+            "qty": oq,
+            "amount": (o["amount"] if o else 0),
+            "inbound": iq,
+            "stock": None if (broke or running is None) else running,
+        })
+        if running is not None:
+            running = running - iq + oq  # 하루 전 마감 = 오늘마감 - 오늘입고 + 오늘출고
+
+    total_qty = sum(it["qty"] for it in items)
+    day_count = len(outbound) or 1
     return {
-        "items": [dict(r) for r in rows],
+        "items": items,
         "total_qty": total_qty,
         "avg_daily": round(total_qty / min(days, day_count)) if total_qty else 0,
+        "current_stock": current_stock,
+        "stock_estimated": True,  # 현재고 역산 추정치 (외부 재고동기화 조정분은 미반영)
     }
 
 

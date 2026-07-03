@@ -78,6 +78,17 @@ def main():
                 time.sleep(5)
                 status = "RESTORED" if _session_ok(pg) else "EXPIRED"
 
+            if status == "EXPIRED":
+                # 사망 순간 증거 (2026-07-03): 어디로 리다이렉트됐는지가 원인 판별 열쇠
+                # xauth+봇체크 = 토큰갱신 차단 가설 / 로그인폼 = 서버세션 소멸
+                try:
+                    title = pg.title()
+                    _log(f"  └ 진단: url={pg.url[:150]} title={title[:60]}")
+                    body_head = ' '.join(pg.inner_text('body').split())[:200]
+                    _log(f"  └ 진단: body[:200]={body_head}")
+                except Exception:
+                    pass
+
             if status in ("OK", "RESTORED"):
                 cookies = ctx.cookies()
                 with open(COOKIE_BACKUP, "w", encoding="utf-8") as f:

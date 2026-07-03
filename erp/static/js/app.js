@@ -762,13 +762,16 @@ async function viewStockLedger(productId, productName) {
       </div>
       ${items.length ? `<div style="height:200px;margin-bottom:12px"><canvas id="chart-ledger"></canvas></div>
       <table>
-        <thead><tr><th>기간</th><th class="text-right">출고수량</th><th class="text-right">금액</th></tr></thead>
-        <tbody>${items.map(t => `<tr>
+        <thead><tr><th>날짜</th><th class="text-right">출고수량</th><th class="text-center">입고</th><th class="text-right">재고<span style="font-size:10px;font-weight:400;color:var(--ink-3)"> (추정)</span></th><th class="text-right">금액</th></tr></thead>
+        <tbody>${items.map(t => `<tr${t.inbound ? ' style="background:rgba(88,150,90,0.08)"' : ''}>
           <td>${t.period}</td>
-          <td class="text-right number">${fmt(t.qty)}</td>
-          <td class="text-right number">₩${fmt(t.amount)}</td>
+          <td class="text-right number">${t.qty ? fmt(t.qty) : '-'}</td>
+          <td class="text-center number" style="color:#4a8a4c;font-weight:600">${t.inbound ? '📦 +' + fmt(t.inbound) : ''}</td>
+          <td class="text-right number">${t.stock != null ? fmt(t.stock) : '-'}</td>
+          <td class="text-right number">${t.amount ? '₩' + fmt(t.amount) : '-'}</td>
         </tr>`).join('')}</tbody>
-      </table>` : '<div class="empty-state"><p>최근 90일 출고 이력이 없습니다</p></div>'}
+      </table>
+      <div style="font-size:11px;color:var(--ink-3);margin-top:6px">※ 재고는 현재고에서 이후 출고·입고를 역산한 <b>추정치</b>입니다 (외부 재고동기화 조정분 미반영). 📦=입고일.</div>` : '<div class="empty-state"><p>최근 90일 출고 이력이 없습니다</p></div>'}
     `;
     m.querySelector('.modal-footer').innerHTML = '<button class="btn" onclick="closeModal()">닫기</button>';
     openModal();
