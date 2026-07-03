@@ -2312,6 +2312,62 @@ async def delete_partner_contact(partner_id: int, contact_id: int, conn=Depends(
     return {"ok": True}
 
 
+# ── 카카오 선물하기 트렌드 (2026-07-03) — rank_track.py 스냅샷 서빙 ──
+KAKAO_SNAPDIR = "/Users/macmini_ky/ClaudeAITeam/kakao_gift_tracker/rank_snapshots"
+
+
+def _kakao_snap_dates():
+    if not os.path.isdir(KAKAO_SNAPDIR):
+        return []
+    return sorted((f[:-5] for f in os.listdir(KAKAO_SNAPDIR) if f.endswith(".json")), reverse=True)
+
+
+@app.get("/api/kakao/dates")
+async def kakao_dates():
+    return {"dates": _kakao_snap_dates()}
+
+
+@app.get("/api/kakao/rank")
+async def kakao_rank(date: str = ""):
+    """선물하기 베스트 랭킹 (탭별) + 전일 대비 변동. date 미지정 시 최신."""
+    dates = _kakao_snap_dates()
+    if not dates:
+        return JSONResponse({"error": "no_data", "message": "아직 수집된 랭킹이 없습니다"}, status_code=404)
+    cur_date = date if (date and date in dates) else dates[0]
+    with open(os.path.join(KAKAO_SNAPDIR, f"{cur_date}.json"), encoding="utf-8") as f:
+        snap = json.load(f)
+    # 전일 스냅샷(있으면) — 변동 계산용
+    prev = None
+    older = [d for d in dates if d < cur_date]
+    if older:
+        with open(os.path.join(KAKAO_SNAPDIR, f"{older[0]}.json"), encoding="utf-8") as f:
+            prev = json.load(f)
+
+    tabs = []
+    for label, tab in snap.get("tabs", {}).items():
+        pmap = {}
+        if prev:
+            pmap = {r["id"]: r for r in prev.get("tabs", {}).get(label, {}).get("rows", [])}
+        rows = []
+        for r in tab.get("rows", []):
+            pv = pmap.get(r["id"])
+            move, wish_d, order_d = "new", None, None
+            if pv:
+                move = pv["rank"] - r["rank"]  # +면 상승
+                if r.get("wishCount") is not None and pv.get("wishCount") is not None:
+                    wish_d = r["wishCount"] - pv["wishCount"]
+                if r.get("orderCount") is not None and pv.get("orderCount") is not None:
+                    order_d = r["orderCount"] - pv["orderCount"]
+            rows.append({**r, "move": move, "wishDelta": wish_d, "orderDelta": order_d})
+        tabs.append({
+            "label": label, "updatedAt": tab.get("updatedAt"),
+            "hasOrder": any(r.get("orderCount") is not None for r in rows),
+            "rows": rows,
+        })
+    return {"date": cur_date, "prevDate": (older[0] if older else None),
+            "isFirst": prev is None, "tabs": tabs}
+
+
 # ── 시작 시 DB 초기화 ──
 @app.on_event("startup")
 async def startup():

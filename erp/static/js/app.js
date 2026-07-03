@@ -76,6 +76,7 @@ function navigate(page) {
     orders: '발주 관리',
     pricing: '기준판매가',
     calendar: '일정 관리',
+    kakao: '🎁 선물 트렌드 — 카카오 선물하기 베스트',
     users: '사용자 관리',
   }[page] || '';
 
@@ -89,6 +90,7 @@ function navigate(page) {
     users: loadUsers,
     pricing: loadPricing,
     calendar: loadCalendar,
+    kakao: () => loadKakao(),
   };
   if (loaders[page]) loaders[page]();
 }
@@ -1747,6 +1749,86 @@ function exportPricingExcel() {
   a.click();
   URL.revokeObjectURL(url);
   toast('엑셀(CSV) 내보내기 완료');
+}
+
+// ── 선물 트렌드 (카카오 선물하기 베스트 랭킹) ──
+let _kakaoData = null, _kakaoTabIdx = 0;
+
+async function loadKakao(date) {
+  try {
+    // 날짜 셀렉트 (최초 1회)
+    const sel = document.getElementById('kakao-date');
+    if (!sel.options.length) {
+      const { dates } = await api('/api/kakao/dates');
+      sel.innerHTML = (dates || []).map(d => `<option value="${d}">${d}</option>`).join('');
+    }
+    const data = await api(`/api/kakao/rank${date ? `?date=${date}` : ''}`);
+    _kakaoData = data;
+    if (date) sel.value = date; else if (data.date) sel.value = data.date;
+    document.getElementById('kakao-updated').textContent =
+      (data.tabs[0]?.updatedAt ? `${data.tabs[0].updatedAt} 기준` : '') +
+      (data.isFirst ? ' · 첫 수집(내일부터 변동 표시)' : ` · 전일(${data.prevDate}) 대비`);
+
+    // 탭바
+    document.getElementById('kakao-tabbar').innerHTML = data.tabs.map((t, i) =>
+      `<button class="btn btn-sm ${i === _kakaoTabIdx ? 'btn-primary' : ''}" onclick="selectKakaoTab(${i})">${t.label}${t.hasOrder ? ' 📦' : ''}</button>`
+    ).join('');
+
+    renderKakaoHighlight(data);
+    renderKakaoCards(data.tabs[_kakaoTabIdx]);
+  } catch (e) {
+    document.getElementById('kakao-cards').innerHTML =
+      `<div class="empty-state"><p>${e.message || '데이터 없음'} — 내일 9:50 자동 수집됩니다</p></div>`;
+  }
+}
+
+function selectKakaoTab(i) {
+  _kakaoTabIdx = i;
+  document.querySelectorAll('#kakao-tabbar button').forEach((b, j) => b.classList.toggle('btn-primary', j === i));
+  renderKakaoCards(_kakaoData.tabs[i]);
+}
+
+function renderKakaoHighlight(data) {
+  if (data.isFirst) { document.getElementById('kakao-highlight').innerHTML = ''; return; }
+  const risers = [], news = [];
+  data.tabs.forEach(t => t.rows.forEach(r => {
+    if (r.move === 'new') news.push({ ...r, tab: t.label });
+    else if (typeof r.move === 'number' && r.move >= 3) risers.push({ ...r, tab: t.label });
+  }));
+  risers.sort((a, b) => b.move - a.move);
+  const chip = (r, badge) => `<a href="${r.productUrl}" target="_blank" class="kakao-chip" title="${r.name}">${badge} <b>${r.brand}</b> <span class="text-muted">${r.tab.split('>').pop()}</span></a>`;
+  const h = document.getElementById('kakao-highlight');
+  if (!risers.length && !news.length) { h.innerHTML = ''; return; }
+  h.innerHTML = `<div class="kakao-hl-box">
+    ${risers.length ? `<div><span class="kakao-hl-t">🔥 급상승</span> ${risers.slice(0, 6).map(r => chip(r, `▲${r.move}`)).join('')}</div>` : ''}
+    ${news.length ? `<div style="margin-top:8px"><span class="kakao-hl-t">🆕 신규진입</span> ${news.slice(0, 6).map(r => chip(r, '')).join('')}</div>` : ''}
+  </div>`;
+}
+
+function renderKakaoCards(tab) {
+  if (!tab) return;
+  const moveBadge = (r) => {
+    if (r.move === 'new') return '<span class="kakao-mv new">🆕 신규</span>';
+    if (typeof r.move !== 'number' || r.move === 0) return '<span class="kakao-mv flat">―</span>';
+    return r.move > 0 ? `<span class="kakao-mv up">▲${r.move}</span>` : `<span class="kakao-mv down">▼${-r.move}</span>`;
+  };
+  const cards = tab.rows.map(r => {
+    const dc = r.discountRate ? `<span class="kakao-dc">${r.discountRate}%</span>` : '';
+    const order = r.orderCount != null ? `<span title="주문수">📦 ${fmt(r.orderCount)}</span>` : '';
+    const od = r.orderDelta ? ` <span class="text-muted">(${r.orderDelta > 0 ? '+' : ''}${r.orderDelta})</span>` : '';
+    const wd = r.wishDelta ? ` <span class="text-muted">(${r.wishDelta > 0 ? '+' : ''}${fmt(r.wishDelta)})</span>` : '';
+    return `<a href="${r.productUrl}" target="_blank" class="kakao-card">
+      <div class="kakao-rank">${r.rank}</div>
+      <div class="kakao-img" style="background-image:url('${r.imageUrl || ''}')"></div>
+      <div class="kakao-body">
+        <div class="kakao-brand">${r.brand || ''} ${moveBadge(r)}</div>
+        <div class="kakao-name">${r.name || ''}</div>
+        <div class="kakao-price">${dc} <b>${fmt(r.price)}원</b></div>
+        <div class="kakao-meta">♡ ${fmt(r.wishCount)}${wd} ${order}${od}</div>
+      </div>
+    </a>`;
+  }).join('');
+  document.getElementById('kakao-cards').innerHTML = cards || '<div class="empty-state"><p>상품 없음</p></div>';
 }
 
 // ── Users (직원 관리) ──

@@ -67,6 +67,8 @@ def parse_product(p, rank):
         "reviewCount": rev.get("reviewCount"),
         "stamp": p.get("stamp"),                # ON_SALE 등
         "freeDelivery": bool((p.get("displayDeliveryFee") or {}).get("free")),
+        "imageUrl": (p.get("image") or {}).get("imageUrl"),
+        "productUrl": f"https://gift.kakao.com/product/{p.get('productId') or p.get('id')}",
     }
 
 

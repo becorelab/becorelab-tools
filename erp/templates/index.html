@@ -8,6 +8,26 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
 <link rel="stylesheet" href="/static/css/style.css?v=20260605d" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  .kakao-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; }
+  .kakao-card { position:relative; display:block; border:1px solid var(--line,#eee); border-radius:12px; overflow:hidden; background:#fff; text-decoration:none; color:inherit; transition:box-shadow .15s,transform .15s; }
+  .kakao-card:hover { box-shadow:0 6px 20px rgba(0,0,0,.10); transform:translateY(-2px); }
+  .kakao-rank { position:absolute; top:8px; left:8px; z-index:2; background:rgba(30,30,30,.82); color:#fff; font-weight:700; font-size:13px; min-width:24px; height:24px; border-radius:7px; display:flex; align-items:center; justify-content:center; padding:0 6px; }
+  .kakao-img { width:100%; aspect-ratio:1/1; background-size:cover; background-position:center; background-color:#f4f1ea; }
+  .kakao-body { padding:10px 11px 12px; }
+  .kakao-brand { font-size:12px; font-weight:600; color:var(--ink-2,#555); display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+  .kakao-name { font-size:12.5px; line-height:1.35; margin:3px 0 6px; height:34px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .kakao-price { font-size:14px; } .kakao-price b { font-size:15px; }
+  .kakao-dc { color:#e8483d; font-weight:700; font-size:13px; margin-right:2px; }
+  .kakao-meta { font-size:11.5px; color:var(--ink-3,#888); margin-top:5px; display:flex; gap:8px; flex-wrap:wrap; }
+  .kakao-mv { font-size:10.5px; font-weight:700; padding:1px 5px; border-radius:5px; }
+  .kakao-mv.up { color:#1a8f3c; background:rgba(26,143,60,.10); } .kakao-mv.down { color:#c23; background:rgba(204,51,51,.09); }
+  .kakao-mv.new { color:#b26; background:rgba(187,38,102,.10); } .kakao-mv.flat { color:#aaa; }
+  .kakao-hl-box { background:rgba(217,119,87,.06); border:1px solid rgba(217,119,87,.18); border-radius:10px; padding:11px 13px; }
+  .kakao-hl-t { font-size:12px; font-weight:700; margin-right:8px; }
+  .kakao-chip { display:inline-flex; align-items:center; gap:4px; font-size:12px; padding:3px 9px; margin:2px 4px 2px 0; background:#fff; border:1px solid var(--line,#eee); border-radius:20px; text-decoration:none; color:inherit; }
+  .kakao-chip:hover { border-color:#d97757; }
+</style>
 </head>
 <body>
 
@@ -123,6 +143,13 @@
       <a class="nav-item" data-page="calendar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         일정관리
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">시장조사</div>
+      <a class="nav-item" data-page="kakao">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        선물 트렌드
       </a>
     </div>
     <div class="nav-section">
@@ -450,6 +477,20 @@
       </div>
     </div>
 
+    <!-- 선물 트렌드 (카카오 선물하기 베스트 랭킹) -->
+    <div id="page-kakao" class="page hidden">
+      <div class="page-header">
+        <h2></h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="kakao-updated" class="text-muted" style="font-size:12px"></span>
+          <select id="kakao-date" onchange="loadKakao(this.value)" style="padding:5px 8px;border:1px solid var(--line);border-radius:6px"></select>
+        </div>
+      </div>
+      <div id="kakao-tabbar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+      <div id="kakao-highlight" style="margin-bottom:16px"></div>
+      <div id="kakao-cards" class="kakao-grid"></div>
+    </div>
+
     <!-- Pricing (기준판매가) -->
     <div id="page-pricing" class="page hidden">
       <div class="table-wrap">
@@ -484,7 +525,7 @@
 <!-- Toast -->
 <div class="toast-container" id="toasts"></div>
 
-<script src="/static/js/app.js?v=20260703a"></script>
+<script src="/static/js/app.js?v=20260703b"></script>
 <script>
 setInterval(() => {
   const el = document.getElementById('current-time');
