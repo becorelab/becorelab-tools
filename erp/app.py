@@ -1390,11 +1390,15 @@ async def list_po(
         params.append(date_to)
     w = " AND ".join(where)
     sort_map = {
-        "date_desc": "po.po_date DESC",
-        "date_asc": "po.po_date ASC",
-        "amount_desc": "po.total_amount DESC",
-        "amount_asc": "po.total_amount ASC",
-        "supplier": "sup.name ASC, po.po_date DESC",
+        "date_desc": "po.po_date DESC", "date_asc": "po.po_date ASC",
+        "amount_desc": "po.total_amount DESC", "amount_asc": "po.total_amount ASC",
+        "pono_desc": "po.po_number DESC", "pono_asc": "po.po_number ASC",
+        "supplier_desc": "sup.name DESC, po.po_date DESC", "supplier_asc": "sup.name ASC, po.po_date DESC",
+        # 납품예정일(입고일정) — NULL(미정)은 뒤로
+        "delivery_desc": "po.delivery_date IS NULL, po.delivery_date DESC",
+        "delivery_asc": "po.delivery_date IS NULL, po.delivery_date ASC",
+        "status_desc": "po.status DESC, po.po_date DESC", "status_asc": "po.status ASC, po.po_date DESC",
+        "supplier": "sup.name ASC, po.po_date DESC",  # 기존 호환
     }
     order_clause = sort_map.get(sort, "po.po_date DESC")
     total = conn.execute(

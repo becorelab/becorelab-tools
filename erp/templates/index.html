@@ -49,6 +49,8 @@
   .radar-add #radar-url { flex:1; min-width:280px; }
   .radar-del { color:#ccc; cursor:pointer; font-weight:700; padding:0 4px; }
   .radar-del:hover { color:#c23; }
+  table.sortable th[onclick]:hover { color:var(--accent,#b25839); }
+  .sort-ar { font-size:10px; margin-left:3px; color:var(--accent,#b25839); }
 </style>
 </head>
 <body>
@@ -439,19 +441,21 @@
             <option value="partial">부분입고</option>
             <option value="completed">완료</option>
           </select>
-          <select id="order-sort" onchange="loadOrders()" style="width:130px">
-            <option value="date_desc">최신순</option>
-            <option value="date_asc">오래된순</option>
-            <option value="amount_desc">금액 높은순</option>
-            <option value="amount_asc">금액 낮은순</option>
-            <option value="supplier">공급처순</option>
-          </select>
           <span class="text-muted" id="orders-info"></span>
           <span style="margin-left:auto;font-weight:700;color:var(--accent)" id="orders-sum"></span>
         </div>
         <div class="table-scroll">
-          <table>
-            <thead><tr><th>발주번호</th><th>발주일</th><th>공급처</th><th>품목</th><th>납품예정일</th><th class="text-right">수량</th><th class="text-right">금액</th><th>상태</th></tr></thead>
+          <table class="sortable">
+            <thead><tr>
+              <th onclick="sortOrders('pono')" style="cursor:pointer">발주번호<span class="sort-ar" data-k="pono"></span></th>
+              <th onclick="sortOrders('date')" style="cursor:pointer">발주일<span class="sort-ar" data-k="date"></span></th>
+              <th onclick="sortOrders('supplier')" style="cursor:pointer">공급처<span class="sort-ar" data-k="supplier"></span></th>
+              <th>품목</th>
+              <th onclick="sortOrders('delivery')" style="cursor:pointer">납품예정일<span class="sort-ar" data-k="delivery"></span></th>
+              <th class="text-right">수량</th>
+              <th class="text-right" onclick="sortOrders('amount')" style="cursor:pointer">금액<span class="sort-ar" data-k="amount"></span></th>
+              <th onclick="sortOrders('status')" style="cursor:pointer">상태<span class="sort-ar" data-k="status"></span></th>
+            </tr></thead>
             <tbody id="orders-tbody"></tbody>
           </table>
         </div>
@@ -577,7 +581,7 @@
 <!-- Toast -->
 <div class="toast-container" id="toasts"></div>
 
-<script src="/static/js/app.js?v=20260706c"></script>
+<script src="/static/js/app.js?v=20260706d"></script>
 <script>
 setInterval(() => {
   const el = document.getElementById('current-time');

@@ -1110,6 +1110,14 @@ function initOrderFilters() {
   if (to && !to.value) to.value = now.toISOString().slice(0,10);
 }
 
+// 발주 정렬 상태 (기본: 발주일 최신순). 같은 컬럼 재클릭 = 방향 토글.
+let _orderSort = { col: 'date', dir: 'desc' };
+function sortOrders(col) {
+  if (_orderSort.col === col) _orderSort.dir = _orderSort.dir === 'asc' ? 'desc' : 'asc';
+  else { _orderSort.col = col; _orderSort.dir = (col === 'pono' || col === 'supplier' || col === 'status') ? 'asc' : 'desc'; }
+  loadOrders(1);
+}
+
 async function loadOrders(page = 1) {
   ordersPage = page;
   initOrderFilters();
@@ -1118,7 +1126,11 @@ async function loadOrders(page = 1) {
   const from = document.getElementById('order-from')?.value || '';
   const to = document.getElementById('order-to')?.value || '';
   try {
-    const sort = document.getElementById('order-sort')?.value || 'date_desc';
+    const sort = `${_orderSort.col}_${_orderSort.dir}`;
+    // 헤더 정렬 화살표 갱신
+    document.querySelectorAll('.sort-ar').forEach(el => {
+      el.textContent = (el.dataset.k === _orderSort.col) ? (_orderSort.dir === 'asc' ? '▲' : '▼') : '';
+    });
     const d = await api(`/api/purchase-orders?status=${status}&q=${encodeURIComponent(q)}&date_from=${from}&date_to=${to}&sort=${sort}&page=${page}&size=30`);
     const tbody = document.getElementById('orders-tbody');
     const statusMap = { draft: '작성중', confirmed: '확정', partial: '부분입고', completed: '완료', cancelled: '취소' };
