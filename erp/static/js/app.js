@@ -1935,20 +1935,26 @@ async function loadRadar() {
     }
     box.innerHTML = d.groups.map((g, gi) => {
       const rows = g.items.map(it => {
-        const mine = it.isMine ? ' style="background:rgba(217,119,87,.08);font-weight:600"' : '';
-        const mark = it.isMine ? '⭐' : '';
+        const rowStyle = it.isMine ? ' style="background:rgba(217,119,87,.08);font-weight:600"'
+          : (it.isReference ? ' style="color:#aaa"' : '');
+        const mark = it.isMine ? '⭐' : (it.isReference ? '📊' : '');
+        const refTag = it.isReference ? ' <span style="font-size:10px;color:#bbb;border:1px solid #ddd;border-radius:4px;padding:0 4px">참고</span>' : '';
         const pd = it.priceDelta ? `<span class="kakao-d ${it.priceDelta < 0 ? 'up' : 'down'}">${it.priceDelta < 0 ? '▼' : '▲'}${fmt(Math.abs(it.priceDelta))}</span>` : '';
-        return `<tr${mine}>
-          <td>${mark} <a href="${it.productUrl}" target="_blank" style="color:inherit">${it.label}</a></td>
+        const rd = it.reviewDelta ? `<span class="kakao-d ${it.reviewDelta > 0 ? 'up' : 'down'}" title="전일 대비 리뷰">${it.reviewDelta > 0 ? '+' : ''}${fmt(it.reviewDelta)}</span>` : '';
+        return `<tr${rowStyle}>
+          <td>${mark} <a href="${it.productUrl}" target="_blank" style="color:inherit">${it.label}</a>${refTag}</td>
           <td class="r"><b>${fmt(it.price)}원</b> ${pd}</td>
-          <td class="r">${fmt(it.reviewCount)}</td>
+          <td class="r">${fmt(it.reviewCount)} ${rd}</td>
           <td class="r">${it.ranking != null ? it.ranking + '위' : '-'}</td>
         </tr>`;
       }).join('');
-      const hasTrend = g.items.some(it => it.history.length >= 2);
+      // 참고(대기업)는 추이 그래프에서 제외 — 추적 대상만
+      const trendItems = g.items.filter(it => !it.isReference);
+      const hasTrend = trendItems.some(it => it.history.length >= 2);
+      const compN = g.count - (g.hasMine ? 1 : 0) - (g.refCount || 0);
       return `<div class="radar-card">
         <div class="radar-head">${g.hasMine ? '⭐ ' : ''}${g.keyword}
-          <span class="text-muted" style="font-size:12px;font-weight:400">우리 1 · 경쟁 ${g.count - (g.hasMine ? 1 : 0)}</span></div>
+          <span class="text-muted" style="font-size:12px;font-weight:400">${g.hasMine ? '우리 1 · ' : ''}추적 ${compN}${g.refCount ? ` · 📊참고 ${g.refCount}` : ''}</span></div>
         <table class="kakao-ins-table" style="margin-bottom:10px">
           <thead><tr><th>상품</th><th class="r">현재가</th><th class="r">리뷰</th><th class="r">순위</th></tr></thead>
           <tbody>${rows}</tbody>
@@ -1963,8 +1969,9 @@ async function loadRadar() {
     d.groups.forEach((g, gi) => {
       const el = document.getElementById(`radar-chart-${gi}`);
       if (!el) return;
-      const allDates = [...new Set(g.items.flatMap(it => it.history.map(h => h.date)))].sort();
-      const datasets = g.items.map((it, i) => {
+      const chartItems = g.items.filter(it => !it.isReference);  // 참고(대기업) 제외
+      const allDates = [...new Set(chartItems.flatMap(it => it.history.map(h => h.date)))].sort();
+      const datasets = chartItems.map((it, i) => {
         const map = Object.fromEntries(it.history.map(h => [h.date, h.price]));
         return {
           label: (it.isMine ? '⭐' : '') + it.label.replace(/\s*\(.*\)/, ''),

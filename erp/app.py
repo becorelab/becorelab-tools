@@ -2457,6 +2457,7 @@ async def radar_groups():
     try:
         prods = con.execute(
             "SELECT * FROM products WHERE active=1 ORDER BY keyword, is_mine DESC, id").fetchall()
+        cols = {c[1] for c in con.execute("PRAGMA table_info(products)")}
         # 각 상품의 스냅샷 시계열 (가격추이)
         groups = {}
         for p in prods:
@@ -2468,24 +2469,27 @@ async def radar_groups():
             item = {
                 "id": p["id"], "label": p["label"], "brand": p["brand"],
                 "platform": p["platform"], "isMine": bool(p["is_mine"]),
+                "isReference": bool(p["is_reference"]) if "is_reference" in cols else False,
                 "productUrl": p["product_url"],
                 "price": latest["price"] if latest else None,
                 "reviewCount": latest["review_count"] if latest else None,
                 "ranking": latest["ranking"] if latest else None,
                 "salesMonthly": latest["sales_monthly"] if latest else None,
                 "priceDelta": (latest["price"] - prev["price"]) if (latest and prev and latest["price"] and prev["price"]) else None,
+                "reviewDelta": (latest["review_count"] - prev["review_count"]) if (latest and prev and latest["review_count"] is not None and prev["review_count"] is not None) else None,
                 "history": [{"date": s["snap_date"], "price": s["price"]} for s in snaps if s["price"]],
             }
             groups.setdefault(p["keyword"] or "기타", []).append(item)
     finally:
         con.close()
-    # 그룹별: 우리 상품 먼저, 경쟁은 가격순
+    # 그룹별: 우리(⭐) → 추적 경쟁(가격순) → 참고 대기업(가격순)
     out = []
     for kw, items in groups.items():
         mine = [x for x in items if x["isMine"]]
-        comp = sorted([x for x in items if not x["isMine"]], key=lambda x: (x["price"] or 9e9))
-        out.append({"keyword": kw, "items": mine + comp,
-                    "hasMine": bool(mine), "count": len(items)})
+        core = sorted([x for x in items if not x["isMine"] and not x["isReference"]], key=lambda x: (x["price"] or 9e9))
+        ref = sorted([x for x in items if not x["isMine"] and x["isReference"]], key=lambda x: (x["price"] or 9e9))
+        out.append({"keyword": kw, "items": mine + core + ref,
+                    "hasMine": bool(mine), "count": len(items), "refCount": len(ref)})
     dates = sorted({d for g in out for it in g["items"] for d in [h["date"] for h in it["history"]]})
     return {"groups": out, "snapDates": dates}
 
