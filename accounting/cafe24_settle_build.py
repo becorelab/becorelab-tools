@@ -27,14 +27,16 @@ def ci(n):
 i_nm=ci('주문상품명(옵션포함)'); i_opt=ci('옵션+판매가'); i_qty=ci('수량'); i_ship=ci('총 배송비')
 i_ord=ci('주문번호'); i_ref=ci('실제 환불금액'); i_cpn=ci('주문서 쿠폰 할인금액')
 i_app=ci('앱 상품할인 금액(최종)'); i_mil=ci('사용한 적립금액(최종)')
+# 2026-07-06 추가: 회원등급/상품별 추가할인 (5월 성락님 임직원구매 67,900 누락 발견 → 대표님 B안: 6월분부터 차감)
+i_grd=ci('회원등급 추가할인금액'); i_itm=ci('상품별 추가할인금액')
 def f(v):
     if v in (None,'','None'): return 0.0
     try: return float(str(v).replace(',',''))
     except: return 0.0
 
 prod=defaultdict(lambda:[0,0,0])  # 품명 -> [수량, 매출(결제금액), 배송비]
-oship=set(); oref=set(); ocpn=set(); omil=set()
-ref=cpn=app=mil=0.0; unmapped=[]
+oship=set(); oref=set(); ocpn=set(); omil=set(); ogrd=set()
+ref=cpn=app=mil=grd=itm=0.0; unmapped=[]
 for row in ws.iter_rows(min_row=2, values_only=True):
     if row[i_qty] in (None,'') and row[i_opt] in (None,''): continue
     rawname=str(row[i_nm] or '').strip()
@@ -55,6 +57,10 @@ for row in ws.iter_rows(min_row=2, values_only=True):
     if o and o not in omil:
         mv=f(row[i_mil])
         if mv>0: mil+=mv; omil.add(o)
+    if i_grd is not None and o and o not in ogrd:  # 주문 내 행마다 동일값 반복 → 주문당 1회
+        gv=f(row[i_grd])
+        if gv>0: grd+=gv; ogrd.add(o)
+    if i_itm is not None: itm+=f(row[i_itm])  # 상품별 할인은 행별 합산
 
 # 출력 파일
 out='/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/앱/매출 정산/26.05/05월 카페24/05월 카페24 정산.xlsx'
@@ -78,23 +84,23 @@ wso.append(['상품 소계',t_qty,t_sales,t_ship,t_cost,t_profit])
 for c in range(1,7): wso.cell(row=r,column=c).fill=tf; wso.cell(row=r,column=c).font=Font(bold=True)
 r+=1
 # 차감 행
-for label,amt in [('환불 (차감)',ref),('쿠폰 (차감)',cpn),('앱 상품할인 (차감)',app),('사용 적립금 (차감)',mil)]:
+for label,amt in [('환불 (차감)',ref),('쿠폰 (차감)',cpn),('앱 상품할인 (차감)',app),('사용 적립금 (차감)',mil),('회원등급할인 (차감)',grd),('상품별 추가할인 (차감)',itm)]:
     wso.append([label,'',-amt,'','',-amt]);
     for c in range(1,7): wso.cell(row=r,column=c).fill=mf
     r+=1
 # 최종
-final_sales=t_sales+t_ship-ref-cpn-app-mil
-final_profit=t_profit-ref-cpn-app-mil
+final_sales=t_sales+t_ship-ref-cpn-app-mil-grd-itm
+final_profit=t_profit-ref-cpn-app-mil-grd-itm
 wso.append(['최종 (정산)','',final_sales,'',t_cost,final_profit])
 for c in range(1,7): wso.cell(row=r,column=c).fill=tf; wso.cell(row=r,column=c).font=Font(bold=True,size=11)
 for row in wso.iter_rows(min_row=4,max_row=r,min_col=2,max_col=6):
     for cell in row:
         if isinstance(cell.value,(int,float)): cell.number_format='#,##0'
 for col,w in zip('ABCDEF',[40,7,12,10,11,13]): wso.column_dimensions[col].width=w
-wso.cell(row=r+2,column=1,value='※ 매출액=결제금액(옵션+판매가×수량), 이익=매출+배송비−원가. 환불/쿠폰/앱할인/적립금은 매출·이익 모두 차감.')
+wso.cell(row=r+2,column=1,value='※ 매출액=결제금액(옵션+판매가×수량), 이익=매출+배송비−원가. 환불/쿠폰/앱할인/적립금/회원등급할인/상품별할인은 매출·이익 모두 차감.')
 wbo.save(out)
 print(f'✅ 저장: {out}')
 print(f'   상품 {len(prod)}종 / 결제총액 {t_sales:,.0f} + 배송 {t_ship:,.0f}')
-print(f'   차감: 환불 {ref:,.0f} / 쿠폰 {cpn:,.0f} / 앱할인 {app:,.0f} / 적립금 {mil:,.0f}')
+print(f'   차감: 환불 {ref:,.0f} / 쿠폰 {cpn:,.0f} / 앱할인 {app:,.0f} / 적립금 {mil:,.0f} / 등급할인 {grd:,.0f} / 상품별할인 {itm:,.0f}')
 print(f'   최종 매출 {final_sales:,.0f} / 원가 {t_cost:,.0f} / 최종 이익 {final_profit:,.0f}')
 print(f'   미매핑 {len(set(unmapped))} / 원가미상 {sorted(set(miss_cost))}')
