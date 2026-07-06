@@ -5,14 +5,14 @@
 
 ## 구조 (전부 이 폴더)
 ```
-bot.py      메인. launchd가 5분마다 1회 실행 (스캔→감지→판단→전송→통지)
+bot.py      메인. launchd가 매일 10:00 1회 실행 (26-07-06 대표님 지시: 당장 소싱 품목 없어 5분→일1회. 활성 협상 시작하면 StartInterval 300으로 되돌리기) (스캔→감지→판단→전송→통지)
 brain.py    headless Claude(claude -p) 협상 판단. reply/skip/escalate JSON
 briefs.md   ★대표님이 직접 수정하는 협상 브리프. 여기 없는 숫자는 봇이 절대 제시 안 함
 notify.py   텔레그램 (레나 봇 토큰 재사용: Channel_lena/.env, 대표님 chat_id 8708718261)
 state.json  대화별 최신 메시지 해시 + 일일 전송 카운트 (자동 생성, git 제외)
 logs/       일별 로그 + launchd 로그
 ```
-launchd: `com.becorelab.alibaba-bot` (5분, DRY_RUN=0 라이브). 중지: `launchctl unload ~/Library/LaunchAgents/com.becorelab.alibaba-bot.plist`
+launchd: `com.becorelab.alibaba-bot` (매일 10:00, DRY_RUN=0 라이브). 중지: `launchctl unload ~/Library/LaunchAgents/com.becorelab.alibaba-bot.plist`
 
 ## 크리티컬 노하우 (재발견에 하루 걸린 것들 — 꼭 읽기)
 1. **로그인**: ChromeCDP 프로필(9222 헤드리스, launchd `com.becorelab.chrome-cdp`)에 알리바바 세션 저장됨 (7/6 QR 로그인).
