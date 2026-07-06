@@ -77,6 +77,7 @@ function navigate(page) {
     pricing: '기준판매가',
     calendar: '일정 관리',
     kakao: '🎁 선물 트렌드 — 카카오 선물하기 베스트',
+    radar: '📡 경쟁사 레이더 — 광고 품목 경쟁사 가격추적',
     users: '사용자 관리',
   }[page] || '';
 
@@ -91,6 +92,7 @@ function navigate(page) {
     pricing: loadPricing,
     calendar: loadCalendar,
     kakao: () => loadKakao(),
+    radar: loadRadar,
   };
   if (loaders[page]) loaders[page]();
 }
@@ -1916,6 +1918,73 @@ function renderKakaoCards(tab) {
   }).join('');
   document.getElementById('kakao-cards').innerHTML = cards ||
     `<div class="empty-state"><p>${band.label} 가격대에 해당 상품이 없어요</p></div>`;
+}
+
+// ── 경쟁사 레이더 (광고 운영품목 우리 vs 경쟁 가격추적) ──
+let _radarCharts = [];
+
+async function loadRadar() {
+  const box = document.getElementById('radar-groups');
+  box.innerHTML = '<div class="empty-state"><p>불러오는 중…</p></div>';
+  _radarCharts.forEach(c => { try { c.destroy(); } catch (e) {} });
+  _radarCharts = [];
+  try {
+    const d = await api('/api/radar/groups');
+    if (!d.groups || !d.groups.length) {
+      box.innerHTML = '<div class="empty-state"><p>등록된 추적 품목이 없어요</p></div>'; return;
+    }
+    box.innerHTML = d.groups.map((g, gi) => {
+      const rows = g.items.map(it => {
+        const mine = it.isMine ? ' style="background:rgba(217,119,87,.08);font-weight:600"' : '';
+        const mark = it.isMine ? '⭐' : '';
+        const pd = it.priceDelta ? `<span class="kakao-d ${it.priceDelta < 0 ? 'up' : 'down'}">${it.priceDelta < 0 ? '▼' : '▲'}${fmt(Math.abs(it.priceDelta))}</span>` : '';
+        return `<tr${mine}>
+          <td>${mark} <a href="${it.productUrl}" target="_blank" style="color:inherit">${it.label}</a></td>
+          <td class="r"><b>${fmt(it.price)}원</b> ${pd}</td>
+          <td class="r">${fmt(it.reviewCount)}</td>
+          <td class="r">${it.ranking != null ? it.ranking + '위' : '-'}</td>
+        </tr>`;
+      }).join('');
+      const hasTrend = g.items.some(it => it.history.length >= 2);
+      return `<div class="radar-card">
+        <div class="radar-head">${g.hasMine ? '⭐ ' : ''}${g.keyword}
+          <span class="text-muted" style="font-size:12px;font-weight:400">우리 1 · 경쟁 ${g.count - (g.hasMine ? 1 : 0)}</span></div>
+        <table class="kakao-ins-table" style="margin-bottom:10px">
+          <thead><tr><th>상품</th><th class="r">현재가</th><th class="r">리뷰</th><th class="r">순위</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        ${hasTrend ? `<div style="height:200px"><canvas id="radar-chart-${gi}"></canvas></div>`
+          : '<div class="text-muted" style="font-size:12px">📈 가격추이 그래프는 이틀 이상 쌓이면 표시돼요 (오늘 첫 수집)</div>'}
+      </div>`;
+    }).join('');
+
+    // 가격추이 차트 (그룹별)
+    const palette = ['#d97757', '#5896', '#1a8f3c', '#c23', '#2563c9', '#b26', '#888'];
+    d.groups.forEach((g, gi) => {
+      const el = document.getElementById(`radar-chart-${gi}`);
+      if (!el) return;
+      const allDates = [...new Set(g.items.flatMap(it => it.history.map(h => h.date)))].sort();
+      const datasets = g.items.map((it, i) => {
+        const map = Object.fromEntries(it.history.map(h => [h.date, h.price]));
+        return {
+          label: (it.isMine ? '⭐' : '') + it.label.replace(/\s*\(.*\)/, ''),
+          data: allDates.map(dt => map[dt] ?? null),
+          borderColor: it.isMine ? '#d97757' : palette[(i % 6) + 1],
+          borderWidth: it.isMine ? 3 : 1.5,
+          spanGaps: true, tension: .3, pointRadius: 0,
+        };
+      });
+      _radarCharts.push(new Chart(el, {
+        type: 'line',
+        data: { labels: allDates.map(x => x.slice(5)), datasets },
+        options: { responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
+          scales: { y: { ticks: { callback: v => (v / 1000) + 'k' }, grid: { color: '#f0eadf' } }, x: { grid: { display: false } } } },
+      }));
+    });
+  } catch (e) {
+    box.innerHTML = `<div class="empty-state"><p>${e.message || '데이터 없음'}</p></div>`;
+  }
 }
 
 // ── Users (직원 관리) ──

@@ -42,6 +42,8 @@
   .ins-metric { text-align:right; font-size:13px; white-space:nowrap; }
   .kakao-ins-table { width:100%; font-size:13px; } .kakao-ins-table th, .kakao-ins-table td { padding:7px 10px; border-bottom:1px solid var(--line,#eee); }
   .kakao-ins-table th.r, .kakao-ins-table td.r { text-align:right; }
+  .radar-card { border:1px solid var(--line,#eee); border-radius:12px; padding:14px 16px; margin-bottom:16px; background:#fff; }
+  .radar-head { font-size:15px; font-weight:700; margin-bottom:10px; display:flex; gap:8px; align-items:baseline; }
 </style>
 </head>
 <body>
@@ -165,6 +167,10 @@
       <a class="nav-item" data-page="kakao">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
         선물 트렌드
+      </a>
+      <a class="nav-item" data-page="radar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        경쟁사 레이더
       </a>
     </div>
     <div class="nav-section">
@@ -514,6 +520,15 @@
       <div id="kakao-view-insight" class="hidden"></div>
     </div>
 
+    <!-- 경쟁사 레이더 (광고 운영품목 우리 vs 경쟁 가격추적) -->
+    <div id="page-radar" class="page hidden">
+      <div class="page-header">
+        <h2></h2>
+        <span class="text-muted" style="font-size:12px">매일 9:40 자동 수집 · 우리(⭐) vs 경쟁 가격·리뷰·순위</span>
+      </div>
+      <div id="radar-groups"></div>
+    </div>
+
     <!-- Pricing (기준판매가) -->
     <div id="page-pricing" class="page hidden">
       <div class="table-wrap">
@@ -548,7 +563,7 @@
 <!-- Toast -->
 <div class="toast-container" id="toasts"></div>
 
-<script src="/static/js/app.js?v=20260703e"></script>
+<script src="/static/js/app.js?v=20260706a"></script>
 <script>
 setInterval(() => {
   const el = document.getElementById('current-time');
