@@ -321,25 +321,42 @@ def alibaba_reply(supplier_name: str, message: str) -> dict:
             target.click()
             time.sleep(4)
 
-            # 입력창 찾기 (다양한 후보)
+            # 입력창 찾기 — 번역 모드에선 textarea가 2개:
+            # 위 칸(new-send-textarea)은 readOnly 번역 결과 표시용이라 타이핑이 조용히 실패함.
+            # 반드시 readOnly 아닌 쪽(placeholder "Type here to translate" 등)에 입력해야 함. (2026-07-06 실측)
             input_box = None
-            for sel in ['textarea:visible', '[contenteditable="true"]',
-                        'textarea', '[class*="editor"] [class*="input"]',
-                        '[role="textbox"]']:
+            for sel in ['textarea', '[contenteditable="true"]',
+                        '[class*="editor"] [class*="input"]', '[role="textbox"]']:
                 try:
-                    el = pw_page.query_selector(sel)
-                    if el and el.is_visible():
+                    for el in pw_page.query_selector_all(sel):
+                        if not el.is_visible():
+                            continue
+                        if el.evaluate("el => el.readOnly || el.disabled || false"):
+                            continue
                         input_box = el
                         break
                 except Exception:
                     continue
+                if input_box:
+                    break
             if not input_box:
-                return {'success': False, 'error': '메시지 입력창을 찾지 못함'}
+                return {'success': False, 'error': '메시지 입력창을 찾지 못함 (쓰기 가능한 입력창 없음)'}
 
             input_box.click()
             time.sleep(1)
-            pw_page.keyboard.type(message, delay=30)
+            input_box.type(message, delay=30)
             time.sleep(1)
+
+            # 타이핑 실제 반영 검증 — 빈 메시지 전송 방지
+            try:
+                typed = input_box.evaluate(
+                    "el => el.tagName === 'TEXTAREA' ? el.value : el.innerText")
+            except Exception:
+                typed = None
+            if typed is not None and message[:20] not in typed:
+                return {'success': False,
+                        'error': f'타이핑이 입력창에 반영되지 않음 (현재값: {str(typed)[:80]!r}) — UI 변경 가능성, 전송 중단'}
+            time.sleep(2)  # 번역 모드면 번역 반영 대기
 
             # 전송 버튼 or Ctrl+Enter
             send_btn = None
