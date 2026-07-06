@@ -149,18 +149,48 @@ def _rating_avg(summary):
             or summary.get("avg") or summary.get("rating"))
 
 
+def _find_in_recent_scans(product_id, max_scans=15, max_age_days=14):
+    """productId로 최근 스캔들을 훑어 매칭 (2026-07-06).
+    우리 저순위 제품처럼 경쟁 키워드 스캔 상위40 밖이라도, 브랜드 스캔
+    ('일비아 캡슐세제' 등)에 잡혀 있으면 그 스캔에서 가격을 찾아온다.
+    → 링크만 등록하면 어떤 상품이든 추적 가능하게 하는 폴백."""
+    from datetime import datetime, timedelta
+    if not product_id:
+        return None, None
+    scans = sorted(list_scans(), key=lambda s: s.get("scanned_at", ""), reverse=True)
+    fresh = datetime.now() - timedelta(days=max_age_days)
+    checked = 0
+    for s in scans:
+        if checked >= max_scans:
+            break
+        d = str(s.get("scanned_at", ""))[:10]
+        try:
+            if d and datetime.strptime(d, "%Y-%m-%d") < fresh:
+                continue
+        except ValueError:
+            continue
+        checked += 1
+        hit = match_product(scan_products(s["id"]), product_id=product_id)
+        if hit:
+            return hit, s["id"]
+    return None, None
+
+
 def collect(product, with_reviews=False):
     """등록 제품(dict) → 스냅샷 필드. 매칭 실패 시 None.
 
     with_reviews=True 면 평점/옵션까지 리뷰 다운로드로 보강(느림).
     """
     kw = product.get("keyword") or product.get("label")
+    pid_target = product.get("product_id") or _pid(product.get("product_url"))
     sid = latest_scan_id(kw)
-    if not sid:
-        return None
-    products = scan_products(sid)
-    hit = match_product(products, product.get("product_id"),
-                        product.get("match_name"), product.get("product_url"))
+    hit = None
+    if sid:
+        hit = match_product(scan_products(sid), product.get("product_id"),
+                            product.get("match_name"), product.get("product_url"))
+    # 폴백: keyword 스캔에 없으면 productId로 최근 스캔들 훑기 (우리 저순위 제품 등)
+    if not hit and pid_target:
+        hit, sid = _find_in_recent_scans(pid_target)
     if not hit:
         return None
 
