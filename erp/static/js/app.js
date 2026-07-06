@@ -1933,6 +1933,9 @@ async function loadRadar() {
     if (!d.groups || !d.groups.length) {
       box.innerHTML = '<div class="empty-state"><p>등록된 추적 품목이 없어요</p></div>'; return;
     }
+    // 그룹(키워드) datalist 채우기
+    document.getElementById('radar-kw-list').innerHTML =
+      d.groups.map(g => `<option value="${g.keyword}">`).join('');
     box.innerHTML = d.groups.map((g, gi) => {
       const rows = g.items.map(it => {
         const rowStyle = it.isMine ? ' style="background:rgba(217,119,87,.08);font-weight:600"'
@@ -1946,6 +1949,7 @@ async function loadRadar() {
           <td class="r"><b>${fmt(it.price)}원</b> ${pd}</td>
           <td class="r">${fmt(it.reviewCount)} ${rd}</td>
           <td class="r">${it.ranking != null ? it.ranking + '위' : '-'}</td>
+          <td class="r"><span class="radar-del" title="제거" onclick="deleteRadarProduct(${it.id},'${(it.label || '').replace(/'/g, '')}')">✕</span></td>
         </tr>`;
       }).join('');
       // 참고(대기업)는 추이 그래프에서 제외 — 추적 대상만
@@ -1956,7 +1960,7 @@ async function loadRadar() {
         <div class="radar-head">${g.hasMine ? '⭐ ' : ''}${g.keyword}
           <span class="text-muted" style="font-size:12px;font-weight:400">${g.hasMine ? '우리 1 · ' : ''}추적 ${compN}${g.refCount ? ` · 📊참고 ${g.refCount}` : ''}</span></div>
         <table class="kakao-ins-table" style="margin-bottom:10px">
-          <thead><tr><th>상품</th><th class="r">현재가</th><th class="r">리뷰</th><th class="r">순위</th></tr></thead>
+          <thead><tr><th>상품</th><th class="r">현재가</th><th class="r">리뷰</th><th class="r">순위</th><th class="r"></th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
         ${hasTrend ? `<div style="height:200px"><canvas id="radar-chart-${gi}"></canvas></div>`
@@ -1992,6 +1996,37 @@ async function loadRadar() {
   } catch (e) {
     box.innerHTML = `<div class="empty-state"><p>${e.message || '데이터 없음'}</p></div>`;
   }
+}
+
+async function addRadarProduct() {
+  const url = document.getElementById('radar-url').value.trim();
+  const kw = document.getElementById('radar-kw').value.trim();
+  const msg = document.getElementById('radar-add-msg');
+  if (!url || !kw) { msg.textContent = 'URL과 그룹을 입력하세요'; msg.style.color = '#c23'; return; }
+  msg.textContent = '등록 중…'; msg.style.color = '';
+  try {
+    const r = await api('/api/radar/add', { method: 'POST', body: JSON.stringify({
+      url, keyword: kw,
+      isMine: document.getElementById('radar-mine').checked,
+      isReference: document.getElementById('radar-ref').checked,
+    }) });
+    msg.textContent = r.message || (r.ok ? '완료' : '실패');
+    msg.style.color = r.ok ? '#1a8f3c' : '#c23';
+    if (r.ok) {
+      document.getElementById('radar-url').value = '';
+      document.getElementById('radar-mine').checked = false;
+      document.getElementById('radar-ref').checked = false;
+      setTimeout(loadRadar, 800);  // 목록 새로고침 (가격은 다음 수집 때)
+    }
+  } catch (e) { msg.textContent = e.message; msg.style.color = '#c23'; }
+}
+
+async function deleteRadarProduct(id, label) {
+  if (!confirm(`'${label}'을(를) 레이더에서 제거할까요?`)) return;
+  try {
+    await api(`/api/radar/product/${id}`, { method: 'DELETE' });
+    loadRadar();
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 // ── Users (직원 관리) ──

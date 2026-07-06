@@ -2494,6 +2494,76 @@ async def radar_groups():
     return {"groups": out, "snapDates": dates}
 
 
+@app.post("/api/radar/add")
+async def radar_add(request: Request):
+    """쿠팡 URL 붙여넣기 → productId 추출 → 최근 스캔에서 상품정보 찾아 자동 등록.
+    (collector 폴백 엔진이 실제 가격 수집을 담당 — 여기선 등록만)"""
+    import sqlite3 as _sq, re as _re, requests as _rq
+    d = await request.json()
+    url = (d.get("url") or "").strip()
+    keyword = (d.get("keyword") or "").strip()
+    is_mine = 1 if d.get("isMine") else 0
+    is_ref = 1 if d.get("isReference") else 0
+    m = _re.search(r"/products/(\d+)", url)
+    if not m:
+        return JSONResponse({"error": "쿠팡 상품 URL이 아니에요 (/products/숫자 형식)"}, status_code=400)
+    pid = m.group(1)
+    if not keyword:
+        return JSONResponse({"error": "그룹(품목 키워드)을 정해주세요"}, status_code=400)
+
+    # 최근 스캔들에서 productId로 상품정보(이름·브랜드) 찾기
+    name, brand = None, None
+    try:
+        scans = _rq.get("http://localhost:8090/api/scans", timeout=15).json().get("scans", [])
+        scans.sort(key=lambda s: s.get("scanned_at", ""), reverse=True)
+        for s in scans[:15]:
+            prods = _rq.get(f"http://localhost:8090/api/scan/{s['id']}", timeout=20).json().get("products", [])
+            hit = next((p for p in prods if pid in (p.get("product_url") or "")), None)
+            if hit:
+                name = (hit.get("product_name") or "")[:60]
+                brand = hit.get("brand") or hit.get("manufacturer") or ""
+                break
+    except Exception:
+        pass
+    label = name or f"상품 {pid}"
+
+    con = _sq.connect(RADAR_DB)
+    try:
+        exists = con.execute("SELECT id FROM products WHERE product_id=?", (pid,)).fetchone()
+        if exists:
+            return {"ok": False, "message": "이미 등록된 상품이에요", "label": label}
+        cols = {c[1] for c in con.execute("PRAGMA table_info(products)")}
+        from datetime import datetime as _dt
+        if "is_reference" in cols:
+            con.execute("""INSERT INTO products(platform,label,brand,keyword,product_id,product_url,is_mine,is_reference,active,created_at)
+                           VALUES('coupang',?,?,?,?,?,?,?,1,?)""",
+                        (label, brand, keyword, pid, f"https://www.coupang.com/vp/products/{pid}",
+                         is_mine, is_ref, _dt.now().isoformat(timespec="seconds")))
+        else:
+            con.execute("""INSERT INTO products(platform,label,brand,keyword,product_id,product_url,is_mine,active,created_at)
+                           VALUES('coupang',?,?,?,?,?,?,1,?)""",
+                        (label, brand, keyword, pid, f"https://www.coupang.com/vp/products/{pid}",
+                         is_mine, _dt.now().isoformat(timespec="seconds")))
+        con.commit()
+    finally:
+        con.close()
+    found = " (스캔에서 정보 확인됨)" if name else " (다음 수집 때 가격 채워짐)"
+    return {"ok": True, "label": label, "message": f"'{label}' 등록 완료{found}"}
+
+
+@app.delete("/api/radar/product/{pid}")
+async def radar_delete(pid: int):
+    """레이더 상품 비활성화 (삭제 대신 active=0)."""
+    import sqlite3 as _sq
+    con = _sq.connect(RADAR_DB)
+    try:
+        con.execute("UPDATE products SET active=0 WHERE id=?", (pid,))
+        con.commit()
+    finally:
+        con.close()
+    return {"ok": True}
+
+
 # ── 시작 시 DB 초기화 ──
 @app.on_event("startup")
 async def startup():

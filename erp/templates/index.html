@@ -44,6 +44,11 @@
   .kakao-ins-table th.r, .kakao-ins-table td.r { text-align:right; }
   .radar-card { border:1px solid var(--line,#eee); border-radius:12px; padding:14px 16px; margin-bottom:16px; background:#fff; }
   .radar-head { font-size:15px; font-weight:700; margin-bottom:10px; display:flex; gap:8px; align-items:baseline; }
+  .radar-add { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:16px; padding:12px 14px; background:rgba(217,119,87,.05); border:1px solid rgba(217,119,87,.15); border-radius:10px; }
+  .radar-add input[type=text], .radar-add input:not([type]) { padding:6px 10px; border:1px solid var(--line,#ddd); border-radius:7px; font-size:13px; }
+  .radar-add #radar-url { flex:1; min-width:280px; }
+  .radar-del { color:#ccc; cursor:pointer; font-weight:700; padding:0 4px; }
+  .radar-del:hover { color:#c23; }
 </style>
 </head>
 <body>
@@ -526,6 +531,15 @@
         <h2></h2>
         <span class="text-muted" style="font-size:12px">매일 9:40 자동 수집 · 우리(⭐) vs 경쟁 가격·리뷰·순위</span>
       </div>
+      <div class="radar-add">
+        <input id="radar-url" placeholder="쿠팡 상품 URL 붙여넣기 (https://www.coupang.com/vp/products/...)" />
+        <input id="radar-kw" list="radar-kw-list" placeholder="그룹(품목)" style="width:130px" />
+        <datalist id="radar-kw-list"></datalist>
+        <label style="font-size:12px;white-space:nowrap"><input type="checkbox" id="radar-mine"> ⭐우리</label>
+        <label style="font-size:12px;white-space:nowrap"><input type="checkbox" id="radar-ref"> 📊참고</label>
+        <button class="btn btn-primary btn-sm" onclick="addRadarProduct()">+ 추가</button>
+        <span id="radar-add-msg" class="text-muted" style="font-size:12px"></span>
+      </div>
       <div id="radar-groups"></div>
     </div>
 
@@ -563,7 +577,7 @@
 <!-- Toast -->
 <div class="toast-container" id="toasts"></div>
 
-<script src="/static/js/app.js?v=20260706b"></script>
+<script src="/static/js/app.js?v=20260706c"></script>
 <script>
 setInterval(() => {
   const el = document.getElementById('current-time');

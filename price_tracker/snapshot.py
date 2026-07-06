@@ -1,4 +1,5 @@
 """스냅샷 수집 + 변동 감지 엔진.
+import re
 
 run_snapshot(): active 제품 전체를 수집 → snapshots 저장 → 전일 대비 변동을 alerts에 기록.
 crontab/launchd 에서 매일 1회 호출한다.
@@ -128,6 +129,11 @@ def run_snapshot(snap_date=None, with_reviews=False, only_ref=None):
             sales_monthly=data.get("sales_monthly"),
             options=data.get("options"), raw=data.get("raw"),
         )
+        # 링크 자동추가 상품('상품 12345' 임시 라벨)은 스캔에서 실제 이름 확보되면 갱신
+        real_name = (data.get("raw") or {}).get("product_name")
+        if real_name and re.match(r"^상품 \d+$", p["label"] or ""):
+            db.update_product(p["id"], label=real_name[:60],
+                              brand=(data.get("raw") or {}).get("brand") or p["brand"])
         cur, prev = db.latest_two(p["id"])
         for typ, msg, delta in detect_changes(p, cur, prev):
             db.add_alert(p["id"], snap_date, typ, msg, delta)
