@@ -6,8 +6,8 @@ from collections import defaultdict
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
-SRC = "/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/02. 매출 정산/26.06/세이랩컴퍼니"
-OUT = "/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/02. 매출 정산/26.06/26.06 로켓그로스 정산_세이랩컴퍼니.xlsx"
+SRC = "/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/02. 매출 정산/26.06/그로스/세이랩컴퍼니"
+OUT = "/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/02. 매출 정산/26.06/그로스/26.06 로켓그로스 정산_세이랩컴퍼니.xlsx"
 P1, P2 = "2026-06-01", "2026-06-30"
 
 # 옵션ID -> 원가 (세트단가, VAT별도) — 2026-06-26 대표님 원가표 (식세기 3,304 / 한장수세미 1,860)

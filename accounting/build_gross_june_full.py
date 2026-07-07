@@ -7,8 +7,8 @@ from collections import defaultdict
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
-SRC = "/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/02. 매출 정산/26.06/채움컴퍼니"
-OUT = "/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/02. 매출 정산/26.06/26.06 로켓그로스 정산_채움컴퍼니_최종.xlsx"
+SRC = "/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/02. 매출 정산/26.06/그로스/채움컴퍼니"
+OUT = "/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/02. 매출 정산/26.06/그로스/26.06 로켓그로스 정산_채움컴퍼니_최종.xlsx"
 AD  = "/Users/macmini_ky/ClaudeAITeam/marketing/coupang_data"
 P1, P2 = "2026-06-01", "2026-06-30"
 
