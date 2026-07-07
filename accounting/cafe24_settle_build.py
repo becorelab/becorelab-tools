@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-"""카페24 5월 정산 파일 생성 (품명별 + 배송비 + 차감: 환불/쿠폰/앱할인/적립금)"""
-import openpyxl, json, re
+"""카페24 월 정산 파일 생성 (품명별 + 배송비 + 차감 6종: 환불/쿠폰/앱할인/적립금/회원등급/상품별)
+사용: python3 cafe24_settle_build.py 2026-06  (기본 2026-06)"""
+import openpyxl, json, re, sys
+
+MONTH = sys.argv[1] if len(sys.argv) > 1 else "2026-06"
+MM = MONTH.split("-")[1]
+BASE = f"/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/02. 매출 정산/26.{MM}/{MM}월 카페24"
 from collections import defaultdict
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
@@ -17,7 +22,7 @@ def get_cost(p):
     if norm(p) in cost_n: return cost_n[norm(p)]
     return None
 
-raw='/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/앱/매출 정산/26.05/05월 카페24/카페24 05월 로우데이터.xlsx'
+raw=f"{BASE}/{MM}월 카페24 로우데이터.xlsx"
 wb=openpyxl.load_workbook(raw, data_only=True, read_only=True); ws=wb[wb.sheetnames[0]]
 hdr=[c.value for c in next(ws.iter_rows(max_row=1))]
 def ci(n):
@@ -63,12 +68,12 @@ for row in ws.iter_rows(min_row=2, values_only=True):
     if i_itm is not None: itm+=f(row[i_itm])  # 상품별 할인은 행별 합산
 
 # 출력 파일
-out='/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/앱/매출 정산/26.05/05월 카페24/05월 카페24 정산.xlsx'
-wbo=openpyxl.Workbook(); wso=wbo.active; wso.title='카페24 5월'
+out=f"{BASE}/{MM}월 카페24 정산.xlsx" 
+wbo=openpyxl.Workbook(); wso=wbo.active; wso.title=f'카페24 {int(MM)}월'
 thin=Side(style='thin',color='CCCCCC'); bd=Border(left=thin,right=thin,top=thin,bottom=thin)
 hf=PatternFill('solid',fgColor='4472C4'); hfont=Font(color='FFFFFF',bold=True,size=10)
 tf=PatternFill('solid',fgColor='FFF2CC'); mf=PatternFill('solid',fgColor='FCE4D6')
-wso['A1']='카페24(자사몰) 5월 정산'; wso['A1'].font=Font(bold=True,size=13)
+wso['A1']=f'카페24(자사몰) {int(MM)}월 정산'; wso['A1'].font=Font(bold=True,size=13)
 wso.append([]); wso.append(['품명','수량','매출액','배송비','원가','이익'])
 for c in range(1,7):
     cell=wso.cell(row=3,column=c); cell.fill=hf; cell.font=hfont; cell.alignment=Alignment(horizontal='center'); cell.border=bd
@@ -98,6 +103,37 @@ for row in wso.iter_rows(min_row=4,max_row=r,min_col=2,max_col=6):
         if isinstance(cell.value,(int,float)): cell.number_format='#,##0'
 for col,w in zip('ABCDEF',[40,7,12,10,11,13]): wso.column_dimensions[col].width=w
 wso.cell(row=r+2,column=1,value='※ 매출액=결제금액(옵션+판매가×수량), 이익=매출+배송비−원가. 환불/쿠폰/앱할인/적립금/회원등급할인/상품별할인은 매출·이익 모두 차감.')
+# ── 시트2: 자사몰 손익 (VAT별도 통일 + 택배·PG·광고비) 2026-07-07 신설 ──
+w2=wbo.create_sheet('자사몰 손익(VAT별도)')
+w2['A1']=f'카페24 {int(MM)}월 손익 — VAT별도 통일 / 노란 셀은 가정값(수정 시 자동 재계산)'
+w2['A1'].font=Font(bold=True,size=12)
+n_orders=len(oship)  # 배송 집계에 잡힌 unique 주문수
+rows2=[
+ ('매출(공급가) = 최종정산 ÷ 1.1', round(final_sales/1.1), ''),
+ ('원가 (VAT별도)', -t_cost, ''),
+ ('출고 택배비 = 주문수 × 단가', None, f'주문 {n_orders}건'),
+ ('PG 수수료 = 매출(포함) × 요율', None, ''),
+ ('메타 광고비 (VAT별도, 수동입력)', 0, '메타 인사이트 지출값 입력'),
+ ('영업이익', None, ''),
+]
+w2.append([]); w2.append(['항목','금액','비고'])
+for c in range(1,4):
+    cell=w2.cell(row=3,column=c); cell.fill=hf; cell.font=hfont; cell.border=bd
+ASSUME=PatternFill('solid',fgColor='FFF9C4')
+w2['E3']='가정값'; w2['E4']=3000; w2['F4']='택배 단가(원/건)'
+w2['E5']=0.034; w2['F5']='PG 요율'
+w2['E4'].fill=ASSUME; w2['E5'].fill=ASSUME
+w2['B4']=round(final_sales/1.1); w2['C4']=''
+w2.cell(row=4,column=1,value='매출(공급가)')
+w2.cell(row=5,column=1,value='원가(VAT별도)'); w2['B5']=-t_cost
+w2.cell(row=6,column=1,value=f'출고 택배비 ({n_orders}건 × 단가)'); w2['B6']=f'=-{n_orders}*E4'
+w2.cell(row=7,column=1,value='PG 수수료 (결제액 × 요율)'); w2['B7']=f'=-ROUND({final_sales}*E5,0)'
+w2.cell(row=8,column=1,value='메타 광고비 (수동입력)'); w2['B8']=0; w2['B8'].fill=ASSUME
+w2.cell(row=9,column=1,value='영업이익'); w2['B9']='=SUM(B4:B8)'
+w2.cell(row=9,column=1).font=Font(bold=True); w2['B9'].font=Font(bold=True)
+for rr in range(4,10): w2.cell(row=rr,column=2).number_format='#,##0'
+w2['E4'].number_format='#,##0'; w2['E5'].number_format='0.0%'
+for col,w in zip('ABCDEF',[30,13,20,3,10,14]): w2.column_dimensions[col].width=w
 wbo.save(out)
 print(f'✅ 저장: {out}')
 print(f'   상품 {len(prod)}종 / 결제총액 {t_sales:,.0f} + 배송 {t_ship:,.0f}')
