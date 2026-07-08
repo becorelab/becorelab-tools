@@ -44,7 +44,15 @@ def main():
     res = scrape_supplyhub(first, yesterday)
     if not res:
         print("  ❌ supplyhub 수집 실패(Akamai 403 등) — 오늘 스킵")
-        alert("로켓 매출", "로켓배송 매출을 가져오려는데 쿠팡이 막아서 오늘은 못 가져왔어요 😢 서플라이허브 세션이 풀린 것 같아요. supplyhub_relogin.py로 재로그인만 해주시면 하치가 바로 채워드릴게요!", "critical")
+        # 알림 중복 방지(2026-07-08): keepalive가 만료 시 이미 두리로 1회 알림 + 마커 생성.
+        # 마커 있으면 = 이미 대표님께 통보된 상태 → rocket_daily는 조용히 스킵(매일 도배 방지).
+        # 대표님 재로그인(relogin.py) 시 마커 삭제 → 다음 만료 때 다시 1회 알림.
+        import os as _os
+        marker = _os.path.join(_os.path.dirname(__file__), ".supplyhub_expired")
+        if not _os.path.exists(marker):
+            alert("로켓 매출", "로켓배송 매출을 가져오려는데 쿠팡이 막아서 오늘은 못 가져왔어요 😢 서플라이허브 세션이 풀린 것 같아요. supplyhub_relogin.py로 재로그인만 해주시면 하치가 바로 채워드릴게요!", "critical")
+        else:
+            print("  (만료 마커 존재 — 이미 통보됨, 중복 알림 생략)")
         sys.exit(1)
     items = res.get('items', [])
     if not items:
