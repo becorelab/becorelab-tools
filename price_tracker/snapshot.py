@@ -1,9 +1,9 @@
 """스냅샷 수집 + 변동 감지 엔진.
-import re
 
 run_snapshot(): active 제품 전체를 수집 → snapshots 저장 → 전일 대비 변동을 alerts에 기록.
 crontab/launchd 에서 매일 1회 호출한다.
 """
+import re
 import sys
 import json
 from datetime import date
