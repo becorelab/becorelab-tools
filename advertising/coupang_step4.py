@@ -55,7 +55,7 @@ def main():
 
     code = ACCT[a.account]
     import re as _re
-    files = sorted(glob.glob(f'{XFER}/{code}_pa_daily_keyword_*'))
+    files = sorted(glob.glob(f'{XFER}/**/{code}_pa_daily_keyword_*', recursive=True))
     # 1일 파일만 (파일명 시작==종료) — 기간 합산파일 제외
     def is_1day(f):
         m = _re.search(r'_(\d{8})_(\d{8})', f)

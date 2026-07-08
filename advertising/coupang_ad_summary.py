@@ -65,7 +65,8 @@ def main():
     a = ap.parse_args()
 
     code = ACCT[a.account]
-    files = sorted(glob.glob(f'{XFER}/{code}_pa_daily_keyword_*'))
+    # 재귀 검색 — 전송폴더가 01_광고데이터/{계정}/{월}/ 하위구조로 재편됨 (2026-07-09)
+    files = sorted(glob.glob(f'{XFER}/**/{code}_pa_daily_keyword_*', recursive=True))
     if not files:
         print(f'❌ 보고서 없음: {code}_pa_daily_keyword_*'); sys.exit(2)
     if a.date:
