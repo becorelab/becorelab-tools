@@ -78,6 +78,7 @@ function navigate(page) {
     calendar: '일정 관리',
     kakao: '🎁 선물 트렌드 — 카카오 선물하기 베스트',
     radar: '📡 경쟁사 레이더 — 광고 품목 경쟁사 가격추적',
+    naverad: '📇 네이버 광고 — 검색광고(SA)',
     users: '사용자 관리',
   }[page] || '';
 
@@ -93,6 +94,7 @@ function navigate(page) {
     calendar: loadCalendar,
     kakao: () => loadKakao(),
     radar: loadRadar,
+    naverad: () => loadNaverAd(),
   };
   if (loaders[page]) loaders[page]();
 }
@@ -1239,32 +1241,49 @@ async function downloadPOPdf(id) {
 async function emailPO(id) {
   try {
     const d = await api(`/api/purchase-orders/${id}`);
+    const sid = d.po.supplier_id;
     let contacts = [];
-    if (d.po.supplier_id) {
-      try { contacts = await api(`/api/partners/${d.po.supplier_id}/contacts`); } catch(e) {}
-    }
+    if (sid) { try { contacts = await api(`/api/partners/${sid}/contacts`); } catch (e) {} }
+    window._poEmailCtx = { poId: id, supplierId: sid };
     const m = document.getElementById('modal');
     const toContacts = contacts.filter(c => c.contact_type === 'to');
     const ccContacts = contacts.filter(c => c.contact_type === 'cc');
+
+    const esc = s => String(s || '').replace(/'/g, "\\'");
+    const row = c => `
+      <label style="display:flex;align-items:center;gap:8px;padding:4px 0">
+        <input type="checkbox" class="email-${c.contact_type}" value="${c.email}" checked />
+        <span style="min-width:82px">${c.name}</span>
+        <span class="text-muted" style="font-size:12px;flex:1">${c.email}</span>
+        <span onclick="editPOContact(${c.id},'${esc(c.name)}','${esc(c.email)}','${c.contact_type}')" style="cursor:pointer;font-size:13px" title="수정">✏️</span>
+        <span onclick="delPOContact(${c.id},'${esc(c.name)}')" style="cursor:pointer;color:#ccc;font-weight:700;font-size:15px" title="삭제">✕</span>
+      </label>`;
 
     m.querySelector('.modal-header span').textContent = `발주서 이메일 발송 — ${d.po.po_number}`;
     m.querySelector('.modal-body').innerHTML = `
       <div class="form-group">
         <label>수신 (To)</label>
-        ${toContacts.length ? toContacts.map(c => `
-          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer">
-            <input type="checkbox" class="email-to" value="${c.email}" checked />
-            <span>${c.name}</span> <span class="text-muted" style="font-size:12px">${c.email}</span>
-          </label>`).join('') : ''}
-        <input type="email" id="email-to-custom" placeholder="직접 입력..." style="margin-top:4px" />
+        ${toContacts.map(row).join('') || '<span class="text-muted" style="font-size:13px">없음</span>'}
       </div>
       <div class="form-group">
         <label>참조 (Cc)</label>
-        ${ccContacts.length ? ccContacts.map(c => `
-          <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer">
-            <input type="checkbox" class="email-cc" value="${c.email}" checked />
-            <span>${c.name}</span> <span class="text-muted" style="font-size:12px">${c.email}</span>
-          </label>`).join('') : '<span class="text-muted" style="font-size:13px">없음</span>'}
+        ${ccContacts.map(row).join('') || '<span class="text-muted" style="font-size:13px">없음</span>'}
+      </div>
+      ${sid ? `
+      <div class="form-group" style="border-top:1px solid var(--line,#eee);padding-top:12px">
+        <label style="font-size:12px;color:var(--ink-3,#999)">+ 연락처 추가 <span style="font-weight:400">(저장돼서 다음 발주서에도 떠요)</span></label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px">
+          <input type="text" id="new-contact-name" placeholder="이름" style="width:88px" />
+          <input type="email" id="new-contact-email" placeholder="이메일" style="flex:1;min-width:150px" />
+          <select id="new-contact-type" style="padding:6px;border:1px solid var(--line,#ddd);border-radius:6px">
+            <option value="to">수신</option><option value="cc">참조</option>
+          </select>
+          <button class="btn btn-sm" onclick="addPOContact()">추가</button>
+        </div>
+      </div>` : ''}
+      <div class="form-group">
+        <label style="font-size:12px;color:var(--ink-3,#999)">임시 수신 <span style="font-weight:400">(이번 발송만, 저장 안 함)</span></label>
+        <input type="email" id="email-to-custom" placeholder="직접 입력..." />
       </div>
       <div class="form-group">
         <label>발신</label>
@@ -1275,6 +1294,39 @@ async function emailPO(id) {
       <button class="btn" onclick="closeModal();viewOrder(${id})">취소</button>
       <button class="btn btn-primary" onclick="sendPOEmail(${id})">발송</button>`;
     openModal();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function addPOContact() {
+  const ctx = window._poEmailCtx; if (!ctx?.supplierId) return;
+  const name = document.getElementById('new-contact-name').value.trim();
+  const email = document.getElementById('new-contact-email').value.trim();
+  const type = document.getElementById('new-contact-type').value;
+  if (!name || !email) return toast('이름과 이메일을 입력하세요', 'error');
+  try {
+    await api(`/api/partners/${ctx.supplierId}/contacts`, { method: 'POST', body: { name, email, contact_type: type } });
+    toast('연락처 추가됨'); emailPO(ctx.poId);
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function editPOContact(cid, name, email, type) {
+  const ctx = window._poEmailCtx; if (!ctx?.supplierId) return;
+  const nName = prompt('이름', name); if (nName === null) return;
+  const nEmail = prompt('이메일', email); if (nEmail === null) return;
+  let nType = prompt('구분 — to(수신) / cc(참조)', type); if (nType === null) return;
+  nType = nType.trim().toLowerCase() === 'cc' ? 'cc' : 'to';
+  try {
+    await api(`/api/partners/${ctx.supplierId}/contacts/${cid}`, { method: 'PUT', body: { name: nName.trim(), email: nEmail.trim(), contact_type: nType } });
+    toast('연락처 수정됨'); emailPO(ctx.poId);
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function delPOContact(cid, name) {
+  const ctx = window._poEmailCtx; if (!ctx?.supplierId) return;
+  if (!confirm(`'${name}' 연락처를 삭제할까요?`)) return;
+  try {
+    await api(`/api/partners/${ctx.supplierId}/contacts/${cid}`, { method: 'DELETE' });
+    toast('연락처 삭제됨'); emailPO(ctx.poId);
   } catch (e) { toast(e.message, 'error'); }
 }
 
@@ -1824,9 +1876,63 @@ function selectKakaoBand(i) {
 async function switchKakaoView(view) {
   document.getElementById('kv-ranking').classList.toggle('btn-primary', view === 'ranking');
   document.getElementById('kv-insight').classList.toggle('btn-primary', view === 'insight');
+  document.getElementById('kv-hourly').classList.toggle('btn-primary', view === 'hourly');
   document.getElementById('kakao-view-ranking').classList.toggle('hidden', view !== 'ranking');
   document.getElementById('kakao-view-insight').classList.toggle('hidden', view !== 'insight');
+  document.getElementById('kakao-view-hourly').classList.toggle('hidden', view !== 'hourly');
   if (view === 'insight') loadKakaoInsight(document.getElementById('kakao-date').value);
+  if (view === 'hourly') loadKakaoHourly();
+}
+
+async function loadKakaoHourly() {
+  const box = document.getElementById('kakao-view-hourly');
+  box.innerHTML = '<div class="empty-state"><p>시간대 분석 중…</p></div>';
+  let d;
+  try { d = await api('/api/kakao/hourly'); }
+  catch (e) { box.innerHTML = '<div class="empty-state"><p>시간대 데이터를 불러오지 못했어요</p></div>'; return; }
+
+  if (d.message) {
+    box.innerHTML = `<div class="empty-state" style="padding:40px 20px">
+      <div style="font-size:32px;margin-bottom:10px">⏰</div><p>${d.message}</p></div>`;
+    return;
+  }
+
+  // ① 시간대 슬롯 평균 (막대) — 진짜 피크
+  const maxW = Math.max(1, ...d.slots.map(s => s.wishAvg));
+  const bars = d.slots.map((s, i) => {
+    const w = Math.round(s.wishAvg / maxW * 100);
+    const peak = i === 0 ? ' 🔥' : '';
+    return `<div style="display:flex;align-items:center;gap:10px;margin:6px 0">
+      <div style="width:74px;font-weight:700;font-size:13px">${s.slot}${peak}</div>
+      <div style="flex:1;background:#f4f1ea;border-radius:7px;height:24px;overflow:hidden">
+        <div style="width:${w}%;height:100%;background:linear-gradient(90deg,#ffd84d,#ff8a3d);border-radius:7px"></div>
+      </div>
+      <div style="width:170px;font-size:12px;text-align:right">찜 +${fmt(s.wishAvg)}${s.orderAvg ? ` · 주문 +${fmt(s.orderAvg)}` : ''} <span class="text-muted">(n=${s.n})</span></div>
+    </div>`;
+  }).join('');
+
+  const peakBanner = d.peak ? `
+    <div style="background:linear-gradient(135deg,#fff6e0,#ffe9cc);border-radius:12px;padding:16px 18px;margin-bottom:18px">
+      <div style="font-size:13px;color:var(--ink-2,#666);margin-bottom:3px">🎯 트래픽 피크 구간 ${d.multiDay ? '(여러 날 평균)' : '(오늘만 — 며칠 더 쌓이면 정확해져요)'}</div>
+      <div style="font-size:22px;font-weight:800">${d.peak.slot} <span style="font-size:15px;font-weight:600;color:#e8760d">찜 +${fmt(d.peak.wishAvg)}/구간</span></div>
+    </div>` : '';
+
+  // ② 최근 구간 상세 (최신순)
+  const rows = [...d.intervals].reverse().map(iv => `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line,#eee);font-size:13px">
+      <div style="width:130px;font-weight:600">${iv.from}→${iv.to}</div>
+      <div style="width:110px;color:#1a8f3c;font-weight:700">찜 +${fmt(iv.wish)}</div>
+      <div style="width:90px;color:#2563c9">${iv.order ? '주문 +' + fmt(iv.order) : ''}</div>
+      <div style="width:80px;color:var(--ink-3,#999)">↑${iv.rankUp}개</div>
+      <div style="flex:1;color:var(--ink-2,#666);font-size:12px">${iv.top ? `최고: ${iv.top.brand || ''} 찜+${fmt(iv.top.delta)}` : ''}</div>
+    </div>`).join('');
+
+  box.innerHTML = `
+    ${peakBanner}
+    <h3 style="margin:4px 0 4px">📊 시간대별 활발도 <span class="text-muted" style="font-size:12px;font-weight:400">— 찜 증분(관심 트래픽) 기준. 막대 길수록 그 시간에 사람 몰림</span></h3>
+    <div style="margin:10px 0 22px">${bars || '<span class="text-muted">아직 구간이 부족해요</span>'}</div>
+    <h3 style="margin:4px 0 4px">🕐 최근 구간 상세 <span class="text-muted" style="font-size:12px;font-weight:400">— 스냅샷 ${d.snapCount}개 · 리뷰는 시간단위로 안 변해 제외</span></h3>
+    <div style="margin-top:8px">${rows || '<span class="text-muted">구간 데이터 없음</span>'}</div>`;
 }
 
 async function loadKakaoInsight(date) {
@@ -2039,6 +2145,367 @@ async function deleteRadarProduct(id, label) {
     await api(`/api/radar/product/${id}`, { method: 'DELETE' });
     loadRadar();
   } catch (e) { toast(e.message, 'error'); }
+}
+
+// ── 네이버 SA 광고 ──
+let _nsaDays = 7;
+let _nsaKwData = null;
+let _nsaTrendChart = null;
+let _nsaBubbleChart = null;
+let _nsaKwSort = { key: 'clk', dir: -1 };
+
+function setNsaDays(days) {
+  _nsaDays = days;
+  [3, 7, 30].forEach(d => {
+    const btn = document.getElementById(`nsa-d-${d}`);
+    if (btn) btn.classList.toggle('btn-primary', d === days);
+  });
+  const kwVisible = !document.getElementById('nsa-view-kw')?.classList.contains('hidden');
+  if (kwVisible) loadNaverKw(days); else loadNaverAd(days);
+}
+
+function switchNsaView(view) {
+  ['summary', 'kw'].forEach(v => {
+    const btn = document.getElementById(`nsv-${v}`);
+    const panel = document.getElementById(`nsa-view-${v}`);
+    if (btn) btn.classList.toggle('btn-primary', v === view);
+    if (panel) panel.classList.toggle('hidden', v !== view);
+  });
+  if (view === 'summary') loadNaverAd(_nsaDays);
+  else loadNaverKw(_nsaDays);
+}
+
+async function loadNaverAd(days) {
+  if (days !== undefined) _nsaDays = days;
+  [3, 7, 30].forEach(d => {
+    const btn = document.getElementById(`nsa-d-${d}`);
+    if (btn) btn.classList.toggle('btn-primary', d === _nsaDays);
+  });
+  const sigBox = document.getElementById('nsa-signals');
+  if (sigBox) sigBox.innerHTML = '<div style="grid-column:span 4;color:#bbb;font-size:13px;padding:24px 0">로딩 중…</div>';
+  try {
+    const d = await api(`/api/naver/summary?days=${_nsaDays}`);
+    renderNsaSignals(d.signals || []);
+    renderNsaKpi(d.kpi || {}, d.prev || {});
+    loadNsaTrend(_nsaDays);
+  } catch(e) {
+    if (sigBox) sigBox.innerHTML = `<div style="grid-column:span 4;color:#bbb;font-size:13px;padding:24px 0">${e.message}</div>`;
+  }
+}
+
+function renderNsaSignals(signals) {
+  const box = document.getElementById('nsa-signals');
+  if (!box) return;
+  const kindMap = {
+    opportunity: { cls: 'green', tag: '🟢 기회' },
+    loss:        { cls: 'red',   tag: '🔴 손실' },
+    dormant:     { cls: 'gray',  tag: '⚫ 잠복' },
+    ops:         { cls: 'amber', tag: '💰 운영' },
+  };
+  if (!signals.length) {
+    box.innerHTML = '<div class="nsa-sig gray" style="grid-column:span 4;text-align:center;padding:18px">시그널 없음 — 안정 운영 중</div>';
+    return;
+  }
+  box.innerHTML = signals.map(s => {
+    const k = kindMap[s.kind] || { cls: 'gray', tag: s.kind };
+    const metaParts = [s.confidence ? '확신 ' + s.confidence : '', s.window || ''].filter(Boolean);
+    return `<div class="nsa-sig ${k.cls}">
+      <span class="nsa-tag">${k.tag}</span>
+      <div class="nsa-sig-kw">${s.title || '-'}</div>
+      <div class="nsa-fig">${s.figures || ''}</div>
+      <div class="nsa-act">→ ${s.action || ''}</div>
+      ${metaParts.length ? `<div class="nsa-meta">${metaParts.join(' · ')}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderNsaKpi(kpi, prev) {
+  const box = document.getElementById('nsa-kpi');
+  if (!box) return;
+  const roasTarget = 400;
+  const ctr = (kpi.imp && kpi.clk) ? (kpi.clk / kpi.imp * 100).toFixed(1) : (kpi.ctr != null ? Number(kpi.ctr).toFixed(1) : '0.0');
+  const convAmt = kpi.convAmt || 0;
+  const convAmtDisp = convAmt >= 1e6 ? (convAmt / 1e4).toFixed(1) + '만' : fmt(convAmt);
+  const roasVal = kpi.roas || 0;
+  const roasColor = roasVal >= roasTarget ? '#1a8f3c' : '#d63a3a';
+  const roasDelta = (prev && prev.roas != null) ? (roasVal > prev.roas ? '<small style="color:#1a8f3c"> ▲</small>' : '<small style="color:#d63a3a"> ▼</small>') : '';
+
+  function pctDelta(cur, prevV) {
+    if (cur == null || prevV == null || prevV === 0) return '';
+    const d = cur - prevV;
+    if (Math.abs(d) < 0.001) return '';
+    const pct = Math.abs(Math.round(d / prevV * 100));
+    return d > 0
+      ? `<small style="color:#1a8f3c"> ▲${pct}%</small>`
+      : `<small style="color:#d63a3a"> ▼${pct}%</small>`;
+  }
+
+  const cells = [
+    { lbl:'광고비',       val: fmt(kpi.cost || 0),                                   sub:'원',         delta: pctDelta(kpi.cost, prev?.cost) },
+    { lbl:'전환매출(실)', val: convAmtDisp,                                           sub:'구매완료',   delta: pctDelta(kpi.convAmt, prev?.convAmt) },
+    { lbl:'ROAS',         val: `<span style="color:${roasColor}">${fmt(Math.round(roasVal))}%</span>`, sub:`목표 ${roasTarget}%`, delta: roasDelta },
+    { lbl:'전환수',       val: fmt(kpi.ccnt || 0),                                   sub:'건' },
+    { lbl:'CVR',          val: (kpi.cvr != null ? Number(kpi.cvr).toFixed(1) : '0.0') + '%', sub:'전환율' },
+    { lbl:'CPC',          val: fmt(Math.round(kpi.cpc || 0)),                        sub:'클릭당' },
+    { lbl:'노출/클릭',   val: fmt(kpi.imp || 0), sub:`클릭 ${fmt(kpi.clk || 0)} · CTR ${ctr}%` },
+  ];
+  box.innerHTML = cells.map(c =>
+    `<div class="nsa-kpi-cell">
+      <div class="nsa-kpi-lbl">${c.lbl}</div>
+      <div class="nsa-kpi-val">${c.val}${c.delta || ''}</div>
+      <div class="nsa-kpi-sub">${c.sub}</div>
+    </div>`
+  ).join('');
+}
+
+async function loadNsaTrend(days) {
+  const wrap = document.querySelector('#nsa-trend-chart')?.parentElement;
+  const canvas = document.getElementById('nsa-trend-chart');
+  if (!canvas) return;
+  if (_nsaTrendChart) { _nsaTrendChart.destroy(); _nsaTrendChart = null; }
+  try {
+    const d = await api(`/api/naver/trend?days=${days}`);
+    const items = d.items || [];
+    if (!items.length) {
+      if (wrap) wrap.innerHTML = '<div style="color:#bbb;font-size:13px;text-align:center;padding:40px">추이 데이터 없음</div>';
+      return;
+    }
+    const labels = items.map(i => i.date.slice(5));
+    const roasData = items.map(i => i.roas ?? null);
+    const costData = items.map(i => i.cost ?? null);
+    _nsaTrendChart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            type: 'line',
+            label: 'ROAS (%)',
+            data: roasData,
+            borderColor: '#1a8f3c',
+            backgroundColor: 'rgba(26,143,60,0)',
+            yAxisID: 'y1',
+            tension: 0.3,
+            pointRadius: 3,
+            borderWidth: 2.5,
+            pointBackgroundColor: '#1a8f3c',
+          },
+          {
+            type: 'bar',
+            label: '광고비',
+            data: costData,
+            backgroundColor: 'rgba(178,88,57,0.5)',
+            yAxisID: 'y2',
+            borderRadius: 3,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+          legend: { position: 'top', labels: { boxWidth: 10, font: { size: 11 } } },
+          tooltip: {
+            backgroundColor: '#2a241f',
+            titleFont: { size: 12 },
+            bodyFont: { size: 13, weight: '600' },
+            padding: 10,
+            cornerRadius: 8,
+            callbacks: {
+              label: ctx => ctx.dataset.label === 'ROAS (%)'
+                ? `ROAS: ${fmt(Math.round(ctx.raw || 0))}%`
+                : `광고비: ₩${fmt(ctx.raw || 0)}`,
+            },
+          },
+        },
+        scales: {
+          y1: {
+            type: 'linear',
+            position: 'left',
+            title: { display: true, text: 'ROAS (%)', font: { size: 11 } },
+            grid: { color: '#f0eadf' },
+            ticks: { callback: v => v + '%', font: { size: 11 } },
+          },
+          y2: {
+            type: 'linear',
+            position: 'right',
+            title: { display: true, text: '광고비 (₩)', font: { size: 11 } },
+            grid: { display: false },
+            ticks: { callback: v => v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v, font: { size: 11 } },
+          },
+          x: { grid: { display: false } },
+        },
+      },
+    });
+  } catch(e) {
+    if (wrap) wrap.innerHTML = `<div style="color:#bbb;font-size:13px;text-align:center;padding:40px">${e.message}</div>`;
+  }
+}
+
+async function loadNaverKw(days) {
+  if (days === undefined) days = _nsaDays;
+  const tbody = document.getElementById('nsa-kw-tbody');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#bbb;padding:24px">로딩 중…</td></tr>';
+  // 키워드 뷰 상단 기간 레이블 업데이트
+  const kwPeriodLabel = document.getElementById('nsa-kw-period-label');
+  if (kwPeriodLabel) kwPeriodLabel.textContent = `최근 ${days}일`;
+  try {
+    const d = await api(`/api/naver/keywords?days=${days}`);
+    _nsaKwData = d.items || [];
+    renderNsaBubble(_nsaKwData, d.targetRoas);
+    renderNsaCross(d.cross || [], d.targetRoas);
+    renderNsaKwTable();
+  } catch(e) {
+    if (tbody) tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#bbb;padding:24px">${e.message}</td></tr>`;
+    const crossBox = document.getElementById('nsa-cross');
+    if (crossBox) crossBox.innerHTML = `<div style="color:#bbb;font-size:13px">${e.message}</div>`;
+  }
+}
+
+function renderNsaBubble(items, targetRoas) {
+  const canvas = document.getElementById('nsa-bubble');
+  if (!canvas) return;
+  if (_nsaBubbleChart) { _nsaBubbleChart.destroy(); _nsaBubbleChart = null; }
+  const ROAS_CAP = 2500;
+  const pts = items.map((kw, idx) => ({
+    x: kw.clk || 0,
+    y: Math.min(kw.roas || 0, ROAS_CAP),
+    r: Math.max(7, Math.min(40, Math.sqrt(kw.imp || 1) * 2.2)),
+    // extra data for tooltip / click
+    kw: kw.kw, typ: kw.typ, grp: kw.grp, roas: kw.roas || 0,
+    clk: kw.clk || 0, imp: kw.imp || 0, cost: kw.cost || 0,
+    ccnt: kw.ccnt || 0, cv: kw.convAmt || 0, cpc: kw.cpc || 0,
+    qi: kw.qi, c: kw.vcolor || '#8a8a8a', vl: kw.verdict || '-', idx,
+  }));
+  _nsaBubbleChart = new Chart(canvas, {
+    type: 'bubble',
+    data: {
+      datasets: [{
+        data: pts,
+        backgroundColor: pts.map(p => p.c + 'cc'),
+        borderColor: pts.map(p => p.c),
+        borderWidth: 1.5,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      onClick(e, els) {
+        if (!els.length) return;
+        renderNsaKwDetail(pts[els[0].index].idx);
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#2a241f',
+          callbacks: {
+            label(c) {
+              const p = c.raw;
+              return [`${p.kw} (${p.typ})`, `ROAS ${fmt(p.roas)}% · 클릭 ${p.clk} · 노출 ${p.imp}`];
+            },
+          },
+        },
+      },
+      scales: {
+        x: { title: { display: true, text: '클릭 수 →' }, min: -0.4, grid: { color: '#f0eee9' } },
+        y: { title: { display: true, text: 'ROAS (%) ↑' }, min: 0, max: 2600, grid: { color: '#f0eee9' } },
+      },
+    },
+  });
+}
+
+function renderNsaKwDetail(idx) {
+  if (!_nsaKwData || _nsaKwData[idx] == null) return;
+  const p = _nsaKwData[idx];
+  const box = document.getElementById('nsa-detail');
+  if (!box) return;
+  const c = p.vcolor || '#8a8a8a';
+  const ctr = p.imp ? (p.clk / p.imp * 100).toFixed(1) : '0.0';
+  const cell = (l, v) => `<div class="nsa-dt-cell"><div class="nsa-dt-l">${l}</div><div class="nsa-dt-v">${v}</div></div>`;
+  box.innerHTML = `
+    <div class="nsa-dt-kw">${p.kw}</div>
+    <div class="nsa-dt-tag">${p.typ} · ${p.grp || '-'} · 품질지수 ${p.qi != null ? p.qi : '-'}</div>
+    <div class="nsa-dt-badge" style="background:${c}22;color:${c}">${p.verdict || '-'}</div>
+    <div class="nsa-dt-grid">
+      ${cell('노출', fmt(p.imp || 0))}
+      ${cell('클릭', fmt(p.clk || 0) + ` (CTR ${ctr}%)`)}
+      ${cell('CPC', fmt(p.cpc || 0))}
+      ${cell('광고비', fmt(p.cost || 0))}
+      ${cell('전환수', fmt(p.ccnt || 0))}
+      ${cell('전환매출', fmt(p.convAmt || 0))}
+      <div class="nsa-dt-cell" style="grid-column:span 2">
+        <div class="nsa-dt-l">ROAS</div>
+        <div class="nsa-dt-v" style="color:${c}">${fmt(p.roas || 0)}%</div>
+      </div>
+    </div>`;
+}
+
+function renderNsaCross(cross, targetRoas) {
+  const box = document.getElementById('nsa-cross');
+  if (!box) return;
+  if (!cross.length) {
+    box.innerHTML = '<div style="color:#bbb;font-size:13px">교차 비교 데이터 없음</div>';
+    return;
+  }
+  const rColor = r => r >= (targetRoas || 400) ? '#1a8f3c' : r > 0 ? '#d63a3a' : '#8a8a8a';
+  box.innerHTML = cross.map(c => {
+    const itemsHtml = (c.entries || []).map(e =>
+      `<div class="nsa-cc-item" style="border-color:${rColor(e.roas || 0)}55">
+        <div class="nsa-cc-typ">${e.typ} · ${e.grp || '-'}</div>
+        <div class="nsa-cc-roas" style="color:${rColor(e.roas || 0)}">${fmt(e.roas || 0)}%</div>
+        <div class="nsa-cc-sub">클릭 ${fmt(e.clk || 0)} · 광고비 ${fmt(e.cost || 0)} · 전환 ${fmt(e.ccnt || 0)}</div>
+      </div>`
+    ).join('');
+    return `<div class="nsa-cc-card"><div class="nsa-cc-kw">🔗 ${c.kw}</div><div class="nsa-cc-row">${itemsHtml}</div></div>`;
+  }).join('');
+}
+
+function sortNsaKw(key) {
+  if (_nsaKwSort.key === key) _nsaKwSort.dir *= -1;
+  else { _nsaKwSort.key = key; _nsaKwSort.dir = key === 'kw' ? 1 : -1; }
+  renderNsaKwTable();
+}
+
+function renderNsaKwTable() {
+  const tbody = document.getElementById('nsa-kw-tbody');
+  if (!tbody || !_nsaKwData) return;
+  const q = (document.getElementById('nsa-kw-search')?.value || '').toLowerCase();
+  const typ = document.getElementById('nsa-kw-typ')?.value || '';
+  let rows = _nsaKwData.slice();
+  if (q) rows = rows.filter(r => (r.kw || '').toLowerCase().includes(q));
+  if (typ) rows = rows.filter(r => (r.typ || '') === typ);
+  const { key, dir } = _nsaKwSort;
+  rows.sort((a, b) => {
+    const av = a[key] ?? (key === 'kw' ? '' : 0);
+    const bv = b[key] ?? (key === 'kw' ? '' : 0);
+    if (typeof av === 'string') return av.localeCompare(bv, 'ko') * dir;
+    return (av - bv) * dir;
+  });
+  // 정렬 화살표 갱신
+  document.querySelectorAll('#nsa-kw-table .sort-ar').forEach(el => {
+    el.textContent = el.dataset.k === key ? (dir > 0 ? '▲' : '▼') : '';
+  });
+  tbody.innerHTML = rows.length ? rows.map(r => {
+    const origIdx = _nsaKwData.indexOf(r);
+    const vc = r.vcolor || '#8a8a8a';
+    const roasTxt = (r.roas > 0)
+      ? `<span style="color:${vc};font-weight:700">${fmt(r.roas)}%</span>`
+      : '<span class="text-muted">-</span>';
+    const qiCls = (r.qi >= 5) ? 'nsa-qi-hi' : (r.qi >= 3) ? 'nsa-qi-mid' : 'nsa-qi-lo';
+    return `<tr style="cursor:pointer" onclick="renderNsaKwDetail(${origIdx})">
+      <td>${r.kw}</td>
+      <td><span class="nsa-typ">${r.typ || '-'}</span></td>
+      <td class="text-right number">${fmt(r.imp || 0)}</td>
+      <td class="text-right number">${fmt(r.clk || 0)}</td>
+      <td class="text-right number">${r.cpc > 0 ? fmt(r.cpc) : '<span class="text-muted">-</span>'}</td>
+      <td class="text-right number">${r.cost > 0 ? fmt(r.cost) : '<span class="text-muted">-</span>'}</td>
+      <td class="text-right number">${fmt(r.ccnt || 0)}</td>
+      <td class="text-right">${roasTxt}</td>
+      <td class="text-right"><span class="nsa-qi ${qiCls}">${r.qi != null ? r.qi : '-'}</span></td>
+      <td><span class="nsa-badge" style="background:${vc}22;color:${vc}">${r.verdict || '-'}</span></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="10" style="text-align:center;color:#bbb;padding:24px">키워드 없음</td></tr>';
 }
 
 // ── Users (직원 관리) ──

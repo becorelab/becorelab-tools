@@ -2309,6 +2309,17 @@ async def add_partner_contact(partner_id: int, request: Request, conn=Depends(db
     return {"ok": True}
 
 
+@app.put("/api/partners/{partner_id}/contacts/{contact_id}")
+async def update_partner_contact(partner_id: int, contact_id: int, request: Request, conn=Depends(db)):
+    d = await request.json()
+    conn.execute(
+        "UPDATE partner_contacts SET name=?, email=?, contact_type=? WHERE id=? AND partner_id=?",
+        (d["name"], d["email"], d.get("contact_type", "to"), contact_id, partner_id),
+    )
+    conn.commit()
+    return {"ok": True}
+
+
 @app.delete("/api/partners/{partner_id}/contacts/{contact_id}")
 async def delete_partner_contact(partner_id: int, contact_id: int, conn=Depends(db)):
     conn.execute("UPDATE partner_contacts SET is_active=0 WHERE id=? AND partner_id=?", (contact_id, partner_id))
@@ -2446,6 +2457,93 @@ async def kakao_insights(date: str = ""):
     }
 
 
+KAKAO_HOURLY_DIR = os.path.join(KAKAO_SNAPDIR, "hourly")
+
+
+@app.get("/api/kakao/hourly")
+async def kakao_hourly(days: int = 7):
+    """선물하기 시간대 트래픽 실측 — hourly 스냅샷의 연속 시각 쌍 증분(찜·주문·순위) 집계.
+    지표: 찜증분(관심 주지표)+주문수증분(트렌딩 실구매)+순위상승. 리뷰는 시간단위 무변→제외.
+    여러 날 누적되면 시간대 슬롯 평균 = 진짜 피크."""
+    import datetime as _dt
+    from collections import defaultdict
+    if not os.path.isdir(KAKAO_HOURLY_DIR):
+        return {"snapCount": 0, "intervals": [], "slots": [], "peak": None, "multiDay": False,
+                "message": "시간대 수집이 아직 시작 전이에요. 오늘 15시부터 하루 8회 자동으로 쌓여요 🥰"}
+    snaps = []
+    for f in sorted(os.listdir(KAKAO_HOURLY_DIR)):
+        if not f.endswith(".json"):
+            continue
+        try:
+            dt = _dt.datetime.strptime(f[:-5], "%Y-%m-%d_%H%M")
+        except ValueError:
+            continue
+        snaps.append((dt, os.path.join(KAKAO_HOURLY_DIR, f)))
+    if snaps:
+        cutoff = snaps[-1][0].date() - _dt.timedelta(days=days - 1)
+        snaps = [(dt, p) for dt, p in snaps if dt.date() >= cutoff]
+    if len(snaps) < 2:
+        return {"snapCount": len(snaps), "intervals": [], "slots": [], "peak": None, "multiDay": False,
+                "message": f"시간대 스냅샷이 {len(snaps)}개예요. 2개 이상 쌓이면 그래프가 떠요 (하루 8회, 15시부터 누적)"}
+
+    def _flat(snap):
+        m = {}
+        for tab in snap.get("tabs", {}).values():
+            for r in tab.get("rows", []):
+                pid = r.get("id")
+                if pid is None:
+                    continue
+                c = m.get(pid)
+                if c is None or (r.get("rank") or 999) < c["rank"]:
+                    m[pid] = {"wish": r.get("wishCount"), "order": r.get("orderCount"),
+                              "rank": r.get("rank") or 999, "name": r.get("name"), "brand": r.get("brand")}
+        return m
+
+    def _load(p):
+        with open(p, encoding="utf-8") as fp:
+            return json.load(fp)
+
+    intervals = []
+    slot_wish, slot_order = defaultdict(list), defaultdict(list)
+    prev_dt, prev_snap = snaps[0][0], _load(snaps[0][1])
+    for dt, path in snaps[1:]:
+        cur_snap = _load(path)
+        if (dt - prev_dt).total_seconds() / 3600 <= 6:  # 6h 이내만 = 같은 날 연속 구간(밤→아침 공백 제외)
+            a, b = _flat(prev_snap), _flat(cur_snap)
+            wish_d = order_d = rank_up = 0
+            top, top_w = None, 0
+            for pid, cur in b.items():
+                pv = a.get(pid)
+                if not pv:
+                    continue
+                if cur["wish"] is not None and pv["wish"] is not None:
+                    d = cur["wish"] - pv["wish"]
+                    if d > 0:
+                        wish_d += d
+                        if d > top_w:
+                            top_w, top = d, {"name": cur["name"], "brand": cur["brand"], "delta": d}
+                if cur["order"] is not None and pv["order"] is not None:
+                    od = cur["order"] - pv["order"]
+                    if od > 0:
+                        order_d += od
+                if cur["rank"] < pv["rank"]:
+                    rank_up += 1
+            slot = f"{prev_dt.hour:02d}~{dt.hour:02d}시"
+            intervals.append({"from": prev_dt.strftime("%m/%d %H시"), "to": dt.strftime("%H시"),
+                              "slot": slot, "wish": wish_d, "order": order_d, "rankUp": rank_up, "top": top})
+            slot_wish[slot].append(wish_d)
+            slot_order[slot].append(order_d)
+        prev_dt, prev_snap = dt, cur_snap
+
+    slots = [{"slot": s, "wishAvg": round(sum(v) / len(v)),
+              "orderAvg": round(sum(slot_order[s]) / len(slot_order[s])), "n": len(v)}
+             for s, v in slot_wish.items()]
+    slots.sort(key=lambda x: -x["wishAvg"])
+    return {"snapCount": len(snaps), "intervals": intervals[-24:], "slots": slots,
+            "peak": slots[0] if slots else None,
+            "multiDay": any(s["n"] > 1 for s in slots), "message": None}
+
+
 # ── 경쟁사 레이더 (2026-07-06) — price_tracker/radar.db 서빙 ──
 RADAR_DB = "/Users/macmini_ky/ClaudeAITeam/price_tracker/data/radar.db"
 
@@ -2566,6 +2664,282 @@ async def radar_delete(pid: int):
     finally:
         con.close()
     return {"ok": True}
+
+
+# ── 네이버 SA 광고 (2026-07-08) — naver_sa.db 서빙 ──
+NAVER_SA_DB = "/Users/macmini_ky/ClaudeAITeam/advertising/naver_sa.db"
+NAVER_TARGET_ROAS = 400  # 임시 목표ROAS. 정산 하치 확정값으로 교체 예정
+
+
+@app.get("/api/naver/summary")
+async def naver_summary(days: int = 7):
+    """네이버 SA 광고 요약 KPI + 시그널"""
+    import sqlite3 as _sq
+    from datetime import datetime as _dt, timedelta as _td
+    if not os.path.exists(NAVER_SA_DB):
+        return JSONResponse({"error": "no_naver_sa_db"}, status_code=404)
+    con = _sq.connect(f"file:{NAVER_SA_DB}?mode=ro", uri=True)
+    con.row_factory = _sq.Row
+    try:
+        to_row = con.execute("SELECT MAX(stat_date) FROM daily_stats").fetchone()
+        to_date = to_row[0] or _dt.today().strftime("%Y-%m-%d")
+        from_date = (_dt.strptime(to_date, "%Y-%m-%d") - _td(days=days - 1)).strftime("%Y-%m-%d")
+        prev_to = (_dt.strptime(from_date, "%Y-%m-%d") - _td(days=1)).strftime("%Y-%m-%d")
+        prev_from = (_dt.strptime(prev_to, "%Y-%m-%d") - _td(days=days - 1)).strftime("%Y-%m-%d")
+
+        def _agg(fd, td):
+            row = con.execute("""
+                SELECT SUM(cost) as cost, SUM(conv_amt) as conv_amt,
+                       SUM(ccnt) as ccnt, SUM(clk) as clk, SUM(imp) as imp
+                FROM daily_stats WHERE stat_date>=? AND stat_date<=?""", (fd, td)).fetchone()
+            cost = row["cost"] or 0
+            conv_amt = row["conv_amt"] or 0
+            ccnt = row["ccnt"] or 0
+            clk = row["clk"] or 0
+            imp = row["imp"] or 0
+            return {
+                "cost": int(cost), "convAmt": int(conv_amt),
+                "roas": round(conv_amt / cost * 100, 1) if cost else 0,
+                "ccnt": int(ccnt), "clk": int(clk), "imp": int(imp),
+                "ctr": round(clk / imp * 100, 2) if imp else 0,
+                "cvr": round(ccnt / clk * 100, 2) if clk else 0,
+                "cpc": round(cost / clk, 0) if clk else 0,
+            }
+
+        kpi = _agg(from_date, to_date)
+        prev_full = _agg(prev_from, prev_to)
+        prev = {"cost": prev_full["cost"], "convAmt": prev_full["convAmt"], "roas": prev_full["roas"]}
+
+        # 엔티티별 기간 합산 (시그널 계산용)
+        ent_rows = con.execute("""
+            SELECT e.id, e.name, e.ad_type,
+                   SUM(d.cost) as cost, SUM(d.conv_amt) as conv_amt,
+                   SUM(d.ccnt) as ccnt, SUM(d.clk) as clk, SUM(d.imp) as imp
+            FROM entities e JOIN daily_stats d ON e.id=d.entity_id
+            WHERE d.stat_date>=? AND d.stat_date<=?
+            GROUP BY e.id""", (from_date, to_date)).fetchall()
+
+        signals = []
+
+        # opportunity: roas>=목표 & conv_amt 최대 1개
+        opp_candidates = [
+            r for r in ent_rows
+            if (r["cost"] or 0) > 0
+            and (r["conv_amt"] or 0) / (r["cost"] or 1) * 100 >= NAVER_TARGET_ROAS
+            and (r["conv_amt"] or 0) > 0
+        ]
+        if opp_candidates:
+            best = max(opp_candidates, key=lambda r: r["conv_amt"] or 0)
+            roas_val = round((best["conv_amt"] or 0) / (best["cost"] or 1) * 100)
+            conv_man = (best["conv_amt"] or 0) / 10000
+            ccnt_v = int(best["ccnt"] or 0)
+            conf = "높음" if ccnt_v >= 5 else ("중간" if ccnt_v >= 2 else "낮음")
+            signals.append({
+                "kind": "opportunity",
+                "title": best["name"],
+                "figures": f"ROAS {roas_val:,}% · 전환매출 {conv_man:.1f}만",
+                "action": "→ 노출 확대 여지",
+                "confidence": conf,
+                "window": f"{days}일"
+            })
+
+        # loss: ccnt==0 & cost>=3000, cost 최대 1개
+        loss_candidates = [r for r in ent_rows if (r["ccnt"] or 0) == 0 and (r["cost"] or 0) >= 3000]
+        if loss_candidates:
+            worst = max(loss_candidates, key=lambda r: r["cost"] or 0)
+            signals.append({
+                "kind": "loss",
+                "title": worst["name"],
+                "figures": f"비용 {int(worst['cost'] or 0):,}원 · 전환0",
+                "action": "→ CPC 과다·입찰 재점검",
+                "confidence": "높음",
+                "window": f"{days}일"
+            })
+
+        # dormant: imp>=50 & clk==0
+        dormant_list = [r for r in ent_rows if (r["imp"] or 0) >= 50 and (r["clk"] or 0) == 0]
+        if dormant_list:
+            rep = max(dormant_list, key=lambda r: r["imp"] or 0)
+            signals.append({
+                "kind": "dormant",
+                "title": f"노출만 {len(dormant_list)}개 (대표: {rep['name']})",
+                "figures": f"최고노출 {int(rep['imp'] or 0):,}회",
+                "action": "→ 순위·소재 점검",
+                "confidence": "중간",
+                "window": f"{days}일"
+            })
+
+        # ops: 비즈머니 잔액 확인
+        bizmoney = None
+        try:
+            import sys as _sys, json as _json
+            _sys.path.insert(0, "/Users/macmini_ky/ClaudeAITeam/automation")
+            import naver_ad_to_sheet as _nv
+            cred = _nv.load_sa_credentials()
+            raw = _nv._sa_get(cred, "/billing/bizmoney")
+            bm_data = _json.loads(raw)
+            bizmoney = bm_data.get("bizmoney", bm_data.get("mny", None))
+            if bizmoney is not None and int(bizmoney) < 50000:
+                signals.append({
+                    "kind": "ops",
+                    "title": "비즈머니 잔액 부족",
+                    "figures": f"잔액 {int(bizmoney):,}원",
+                    "action": "→ 비즈머니 충전 필요",
+                    "confidence": "높음",
+                    "window": "현재"
+                })
+        except Exception:
+            bizmoney = None
+
+    finally:
+        con.close()
+
+    return {
+        "days": days, "from": from_date, "to": to_date,
+        "kpi": kpi, "prev": prev,
+        "signals": signals,
+        "bizmoney": bizmoney
+    }
+
+
+@app.get("/api/naver/keywords")
+async def naver_keywords(days: int = 30):
+    """네이버 SA 키워드별 성과 + 파워링크·쇼핑 크로스 분석"""
+    import sqlite3 as _sq
+    from datetime import datetime as _dt, timedelta as _td
+    from collections import defaultdict as _dd
+    if not os.path.exists(NAVER_SA_DB):
+        return JSONResponse({"error": "no_naver_sa_db"}, status_code=404)
+    con = _sq.connect(f"file:{NAVER_SA_DB}?mode=ro", uri=True)
+    con.row_factory = _sq.Row
+    try:
+        to_row = con.execute("SELECT MAX(stat_date) FROM daily_stats").fetchone()
+        to_date = to_row[0] or _dt.today().strftime("%Y-%m-%d")
+        from_date = (_dt.strptime(to_date, "%Y-%m-%d") - _td(days=days - 1)).strftime("%Y-%m-%d")
+
+        rows = con.execute("""
+            SELECT e.id, e.name, e.ad_type, e.adgroup_name, e.qi,
+                   SUM(d.imp) as imp, SUM(d.clk) as clk, SUM(d.cost) as cost,
+                   SUM(d.ccnt) as ccnt, SUM(d.conv_amt) as conv_amt
+            FROM entities e JOIN daily_stats d ON e.id=d.entity_id
+            WHERE d.stat_date>=? AND d.stat_date<=?
+            GROUP BY e.id
+            HAVING SUM(d.imp)>0
+            ORDER BY SUM(d.conv_amt) DESC, SUM(d.cost) DESC""", (from_date, to_date)).fetchall()
+
+        def _verdict(clk, roas, cost, ccnt):
+            if clk == 0:
+                return "⚫ 노출만", "#8a8a8a"
+            if roas >= NAVER_TARGET_ROAS and clk >= 3:
+                return "🟢 스케일업", "#1a8f3c"
+            if roas >= NAVER_TARGET_ROAS:
+                return "💎 숨은보석", "#2563c9"
+            if cost >= 3000 and ccnt == 0:
+                return "🔴 손실", "#d63a3a"
+            return "🟡 관찰", "#e08a00"
+
+        items = []
+        for r in rows:
+            imp = int(r["imp"] or 0)
+            clk = int(r["clk"] or 0)
+            cost = int(r["cost"] or 0)
+            ccnt = int(r["ccnt"] or 0)
+            conv_amt = int(r["conv_amt"] or 0)
+            roas = round(conv_amt / cost * 100) if cost > 0 else 0
+            cpc = round(cost / clk) if clk > 0 else 0
+            typ = r["ad_type"] or ""
+            grp = r["adgroup_name"] if typ == "파워링크" else "쇼핑검색"
+            verdict, vcolor = _verdict(clk, roas, cost, ccnt)
+            items.append({
+                "id": r["id"], "kw": r["name"], "typ": typ, "grp": grp,
+                "imp": imp, "clk": clk, "cpc": cpc, "cost": cost,
+                "ccnt": ccnt, "convAmt": conv_amt, "roas": roas,
+                "qi": r["qi"], "verdict": verdict, "vcolor": vcolor
+            })
+
+        # cross: 같은 kw가 파워링크·쇼핑 양쪽에 있고 둘 중 하나라도 clk>0인 것만
+        kw_map = _dd(list)
+        for it in items:
+            norm = it["kw"].replace(" ", "").lower()
+            kw_map[norm].append(it)
+
+        cross = []
+        for norm_kw, entries in kw_map.items():
+            typs = {e["typ"] for e in entries}
+            if "파워링크" in typs and "쇼핑검색" in typs:
+                if any(e["clk"] > 0 for e in entries):
+                    cross.append({
+                        "kw": entries[0]["kw"],
+                        "entries": [
+                            {"typ": e["typ"], "grp": e["grp"],
+                             "roas": e["roas"], "clk": e["clk"],
+                             "cost": e["cost"], "ccnt": e["ccnt"]}
+                            for e in entries
+                        ]
+                    })
+
+    finally:
+        con.close()
+
+    return {
+        "days": days, "from": from_date, "to": to_date,
+        "targetRoas": NAVER_TARGET_ROAS,
+        "items": items, "cross": cross
+    }
+
+
+@app.get("/api/naver/trend")
+async def naver_trend(days: int = 30, entity_id: str = ""):
+    """네이버 SA 일별 트렌드 (전체 or 특정 엔티티)"""
+    import sqlite3 as _sq
+    from datetime import datetime as _dt, timedelta as _td
+    if not os.path.exists(NAVER_SA_DB):
+        return JSONResponse({"error": "no_naver_sa_db"}, status_code=404)
+    con = _sq.connect(f"file:{NAVER_SA_DB}?mode=ro", uri=True)
+    con.row_factory = _sq.Row
+    try:
+        to_row = con.execute("SELECT MAX(stat_date) FROM daily_stats").fetchone()
+        to_date = to_row[0] or _dt.today().strftime("%Y-%m-%d")
+        from_date = (_dt.strptime(to_date, "%Y-%m-%d") - _td(days=days - 1)).strftime("%Y-%m-%d")
+
+        if entity_id:
+            rows = con.execute("""
+                SELECT stat_date, SUM(cost) as cost, SUM(conv_amt) as conv_amt,
+                       SUM(clk) as clk, SUM(ccnt) as ccnt
+                FROM daily_stats WHERE entity_id=? AND stat_date>=? AND stat_date<=?
+                GROUP BY stat_date ORDER BY stat_date""", (entity_id, from_date, to_date)).fetchall()
+        else:
+            rows = con.execute("""
+                SELECT stat_date, SUM(cost) as cost, SUM(conv_amt) as conv_amt,
+                       SUM(clk) as clk, SUM(ccnt) as ccnt
+                FROM daily_stats WHERE stat_date>=? AND stat_date<=?
+                GROUP BY stat_date ORDER BY stat_date""", (from_date, to_date)).fetchall()
+
+        data_map = {}
+        for r in rows:
+            cost = int(r["cost"] or 0)
+            conv_amt = int(r["conv_amt"] or 0)
+            clk = int(r["clk"] or 0)
+            ccnt = int(r["ccnt"] or 0)
+            roas = round(conv_amt / cost * 100, 1) if cost > 0 else 0
+            data_map[r["stat_date"]] = {
+                "cost": cost, "convAmt": conv_amt, "roas": roas,
+                "clk": clk, "ccnt": ccnt
+            }
+
+        # 기간 내 모든 날짜 포함 (없는 날 0)
+        items = []
+        cur = _dt.strptime(from_date, "%Y-%m-%d")
+        end = _dt.strptime(to_date, "%Y-%m-%d")
+        while cur <= end:
+            d = cur.strftime("%Y-%m-%d")
+            items.append({"date": d, **data_map.get(d, {"cost": 0, "convAmt": 0, "roas": 0, "clk": 0, "ccnt": 0})})
+            cur += _td(days=1)
+
+    finally:
+        con.close()
+
+    return {"items": items}
 
 
 # ── 시작 시 DB 초기화 ──

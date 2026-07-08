@@ -51,6 +51,60 @@
   .radar-del:hover { color:#c23; }
   table.sortable th[onclick]:hover { color:var(--accent,#b25839); }
   .sort-ar { font-size:10px; margin-left:3px; color:var(--accent,#b25839); }
+
+  /* ─── 네이버 SA 광고 ─── */
+  .nsa-sec-t { font-size:15px; font-weight:700; margin:24px 0 12px; display:flex; align-items:center; gap:8px; }
+  .nsa-sec-t small { font-size:12px; font-weight:400; color:#999; }
+  .nsa-signals { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .nsa-sig { border-radius:14px; padding:15px 16px; border:1px solid; position:relative; }
+  .nsa-tag { font-size:11px; font-weight:800; padding:2px 9px; border-radius:20px; display:inline-block; margin-bottom:9px; }
+  .nsa-sig-kw { font-size:16px; font-weight:800; margin-bottom:3px; }
+  .nsa-fig { font-size:13px; color:#444; margin-bottom:8px; }
+  .nsa-act { font-size:13px; font-weight:700; }
+  .nsa-meta { font-size:11px; color:#aaa; margin-top:7px; }
+  .nsa-sig.green { background:linear-gradient(135deg,#eafaef,#dff5e6); border-color:#bce7c9; }
+  .nsa-sig.green .nsa-tag { background:#1a8f3c; color:#fff; } .nsa-sig.green .nsa-act { color:#1a8f3c; }
+  .nsa-sig.red { background:linear-gradient(135deg,#fdecec,#fbe0e0); border-color:#f2c2c2; }
+  .nsa-sig.red .nsa-tag { background:#d63a3a; color:#fff; } .nsa-sig.red .nsa-act { color:#d63a3a; }
+  .nsa-sig.gray { background:linear-gradient(135deg,#f4f3f1,#eceae6); border-color:#ddd9d3; }
+  .nsa-sig.gray .nsa-tag { background:#8a8a8a; color:#fff; } .nsa-sig.gray .nsa-act { color:#666; }
+  .nsa-sig.amber { background:linear-gradient(135deg,#fff7e6,#ffefcc); border-color:#f2dca0; }
+  .nsa-sig.amber .nsa-tag { background:#e08a00; color:#fff; } .nsa-sig.amber .nsa-act { color:#c47700; }
+  .nsa-kpi-wrap { background:#fff; border:1px solid var(--line,#eceae6); border-radius:14px; padding:16px 18px; }
+  .nsa-kpi-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:10px; }
+  .nsa-kpi-cell { text-align:center; border-right:1px solid #f0eee9; }
+  .nsa-kpi-cell:last-child { border-right:none; }
+  .nsa-kpi-lbl { font-size:11px; color:#999; margin-bottom:5px; }
+  .nsa-kpi-val { font-size:18px; font-weight:800; }
+  .nsa-kpi-val small { font-size:12px; font-weight:700; }
+  .nsa-kpi-sub { font-size:10px; color:#bbb; margin-top:2px; }
+  .nsa-warn { background:#fff8ec; border:1px solid #f2dca0; border-radius:10px; padding:9px 14px; font-size:12px; color:#a06600; margin-top:8px; }
+  .nsa-grid { display:grid; grid-template-columns:1.6fr 1fr; gap:14px; align-items:start; margin-top:4px; }
+  .nsa-chartwrap { background:#fff; border:1px solid var(--line,#eceae6); border-radius:14px; padding:16px 18px; height:320px; position:relative; }
+  .nsa-detail { background:#fff; border:1px solid var(--line,#eceae6); border-radius:14px; padding:18px 20px; min-height:290px; }
+  .nsa-ph { color:#bbb; font-size:13px; text-align:center; padding-top:95px; }
+  .nsa-dt-kw { font-size:19px; font-weight:800; margin-bottom:2px; }
+  .nsa-dt-tag { font-size:12px; color:#888; margin-bottom:12px; }
+  .nsa-dt-badge { display:inline-block; font-size:12px; font-weight:800; padding:3px 10px; border-radius:8px; margin-bottom:13px; }
+  .nsa-dt-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .nsa-dt-cell { background:#f9f8f5; border-radius:9px; padding:8px 11px; }
+  .nsa-dt-l { font-size:11px; color:#999; }
+  .nsa-dt-v { font-size:16px; font-weight:800; margin-top:2px; }
+  .nsa-legend { display:flex; gap:14px; font-size:12px; margin-bottom:8px; flex-wrap:wrap; }
+  .nsa-cc-wrap { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  .nsa-cc-card { background:#fff; border:1px solid var(--line,#eceae6); border-radius:12px; padding:13px 15px; }
+  .nsa-cc-kw { font-size:14px; font-weight:800; margin-bottom:9px; }
+  .nsa-cc-row { display:flex; gap:9px; flex-wrap:wrap; }
+  .nsa-cc-item { flex:1; min-width:115px; border:1.5px solid; border-radius:10px; padding:8px 10px; }
+  .nsa-cc-typ { font-size:11px; color:#888; margin-bottom:2px; }
+  .nsa-cc-roas { font-size:18px; font-weight:800; }
+  .nsa-cc-sub { font-size:11px; color:#999; margin-top:2px; }
+  .nsa-typ { font-size:11px; color:#888; background:#f2f0eb; padding:1px 7px; border-radius:5px; }
+  .nsa-badge { font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px; }
+  .nsa-qi { font-size:11px; font-weight:800; padding:1px 7px; border-radius:5px; }
+  .nsa-qi-hi { background:rgba(26,143,60,.14); color:#1a8f3c; }
+  .nsa-qi-mid { background:rgba(224,138,0,.14); color:#c47700; }
+  .nsa-qi-lo { background:rgba(214,58,58,.14); color:#d63a3a; }
 </style>
 </head>
 <body>
@@ -178,6 +232,10 @@
       <a class="nav-item" data-page="radar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
         경쟁사 레이더
+      </a>
+      <a class="nav-item" data-page="naverad">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        네이버 광고
       </a>
     </div>
     <div class="nav-section">
@@ -519,6 +577,7 @@
       <div id="kakao-viewtoggle" style="display:flex;gap:6px;margin-bottom:14px">
         <button class="btn btn-sm btn-primary" onclick="switchKakaoView('ranking')" id="kv-ranking">🏆 랭킹</button>
         <button class="btn btn-sm" onclick="switchKakaoView('insight')" id="kv-insight">📊 인사이트</button>
+        <button class="btn btn-sm" onclick="switchKakaoView('hourly')" id="kv-hourly">⏰ 시간대</button>
       </div>
       <div id="kakao-view-ranking">
         <div id="kakao-tabbar" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
@@ -527,6 +586,7 @@
         <div id="kakao-cards" class="kakao-grid"></div>
       </div>
       <div id="kakao-view-insight" class="hidden"></div>
+      <div id="kakao-view-hourly" class="hidden"></div>
     </div>
 
     <!-- 경쟁사 레이더 (광고 운영품목 우리 vs 경쟁 가격추적) -->
@@ -565,6 +625,88 @@
       </div>
     </div>
 
+    <!-- 네이버 SA 광고 -->
+    <div id="page-naverad" class="page hidden">
+      <div class="page-header">
+        <h2></h2>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn btn-sm" id="nsa-d-3" onclick="setNsaDays(3)">3일</button>
+          <button class="btn btn-sm btn-primary" id="nsa-d-7" onclick="setNsaDays(7)">7일</button>
+          <button class="btn btn-sm" id="nsa-d-30" onclick="setNsaDays(30)">30일</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:14px">
+        <button class="btn btn-sm btn-primary" id="nsv-summary" onclick="switchNsaView('summary')">📊 종합</button>
+        <button class="btn btn-sm" id="nsv-kw" onclick="switchNsaView('kw')">🔑 키워드</button>
+      </div>
+
+      <!-- 종합 뷰 -->
+      <div id="nsa-view-summary">
+        <div class="nsa-sec-t">🎯 오늘의 시그널 <small>— 자동 판정 엔진 (목표 ROAS 400% 기준)</small></div>
+        <div id="nsa-signals" class="nsa-signals">
+          <div style="grid-column:span 4;color:#bbb;font-size:13px;padding:24px 0">로딩 중…</div>
+        </div>
+        <div class="nsa-sec-t">📊 KPI 요약 <small>— 기간 합계 · 구매완료 실매출 기준 (총전환매출과 구분)</small></div>
+        <div class="nsa-kpi-wrap">
+          <div id="nsa-kpi" class="nsa-kpi-grid"></div>
+        </div>
+        <div class="nsa-warn">⚠️ 애드부스트(GFA) 매출은 정상가·중복 집계로 부풀려짐 → SA(쇼핑검색·파워링크)만 실매출로 신뢰</div>
+        <div class="nsa-sec-t">📈 기간 추이 <small>— 일자별 ROAS 라인 + 광고비 막대 · 목표 400% 기준</small></div>
+        <div style="background:#fff;border:1px solid var(--line,#eceae6);border-radius:14px;padding:20px 22px">
+          <div style="height:200px;position:relative"><canvas id="nsa-trend-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- 키워드 뷰 -->
+      <div id="nsa-view-kw" class="hidden">
+        <div class="nsa-sec-t">🎯 키워드 포트폴리오 맵 <small>— X 클릭 · Y ROAS · 크기 노출</small> <span id="nsa-kw-period-label" style="font-size:12px;font-weight:600;color:#2563c9;background:#e8f0fe;border-radius:6px;padding:2px 9px;margin-left:6px">최근 7일</span></div>
+        <div class="nsa-legend">
+          <span>🟢 <b style="background:#1a8f3c;color:#fff;padding:2px 8px;border-radius:6px">스케일업</b></span>
+          <span>💎 <b style="background:#2563c9;color:#fff;padding:2px 8px;border-radius:6px">숨은보석</b></span>
+          <span>🔴 <b style="background:#d63a3a;color:#fff;padding:2px 8px;border-radius:6px">손실</b></span>
+          <span>🟡 <b style="background:#e08a00;color:#fff;padding:2px 8px;border-radius:6px">관찰</b></span>
+          <span>⚫ <b style="background:#8a8a8a;color:#fff;padding:2px 8px;border-radius:6px">노출만</b></span>
+        </div>
+        <div class="nsa-grid">
+          <div class="nsa-chartwrap"><canvas id="nsa-bubble"></canvas></div>
+          <div class="nsa-detail" id="nsa-detail">
+            <div class="nsa-ph">👆 버블이나 표의 키워드를<br>클릭하면 상세가 여기 떠요</div>
+          </div>
+        </div>
+        <div style="background:#f0f4ff;border:1px solid #b8caf0;color:#3a5aa0;border-radius:10px;padding:9px 14px;font-size:12px;margin-top:10px">
+          💡 자사키워드(브랜드) ROAS는 축 상한(2,500%)에 표시 — 실제는 이보다 높을 수 있어요.
+        </div>
+        <div class="nsa-sec-t">🔗 교차 비교 <small>— 같은 키워드가 쇼핑 vs 파워링크에서 어떻게 다른가</small></div>
+        <div id="nsa-cross" class="nsa-cc-wrap"></div>
+        <div class="nsa-sec-t">📋 전체 키워드 <small>— 헤더 클릭 정렬 · 검색 · 유형 필터</small></div>
+        <div class="table-toolbar" style="margin-bottom:8px">
+          <input type="search" id="nsa-kw-search" placeholder="키워드 검색..." style="width:160px" oninput="renderNsaKwTable()" />
+          <select id="nsa-kw-typ" onchange="renderNsaKwTable()" style="width:140px">
+            <option value="">전체 유형</option>
+            <option value="파워링크">파워링크</option>
+            <option value="쇼핑검색">쇼핑검색</option>
+          </select>
+        </div>
+        <div class="table-scroll">
+          <table id="nsa-kw-table" class="sortable">
+            <thead><tr>
+              <th onclick="sortNsaKw('kw')" style="cursor:pointer">키워드<span class="sort-ar" data-k="kw"></span></th>
+              <th>유형</th>
+              <th onclick="sortNsaKw('imp')" style="cursor:pointer" class="text-right">노출<span class="sort-ar" data-k="imp"></span></th>
+              <th onclick="sortNsaKw('clk')" style="cursor:pointer" class="text-right">클릭<span class="sort-ar" data-k="clk"></span></th>
+              <th onclick="sortNsaKw('cpc')" style="cursor:pointer" class="text-right">CPC<span class="sort-ar" data-k="cpc"></span></th>
+              <th onclick="sortNsaKw('cost')" style="cursor:pointer" class="text-right">광고비<span class="sort-ar" data-k="cost"></span></th>
+              <th onclick="sortNsaKw('ccnt')" style="cursor:pointer" class="text-right">전환<span class="sort-ar" data-k="ccnt"></span></th>
+              <th onclick="sortNsaKw('roas')" style="cursor:pointer" class="text-right">ROAS<span class="sort-ar" data-k="roas"></span></th>
+              <th onclick="sortNsaKw('qi')" style="cursor:pointer" class="text-right">QI<span class="sort-ar" data-k="qi"></span></th>
+              <th>판정</th>
+            </tr></thead>
+            <tbody id="nsa-kw-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 </div><!-- /app -->
@@ -581,7 +723,7 @@
 <!-- Toast -->
 <div class="toast-container" id="toasts"></div>
 
-<script src="/static/js/app.js?v=20260706d"></script>
+<script src="/static/js/app.js?v=20260708d"></script>
 <script>
 setInterval(() => {
   const el = document.getElementById('current-time');

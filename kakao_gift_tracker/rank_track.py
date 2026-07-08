@@ -62,9 +62,13 @@ TARGETS = [
     ("trending-tab", 10003, None, "트렌딩>단독"),
 ]
 
-TOPN = int(sys.argv[1]) if len(sys.argv) > 1 else 40
+HOURLY = "--hourly" in sys.argv    # 시간대 실측 모드: 리뷰상세 생략(랭킹만 ~10초) + 파일명에 시각(HHMM)
+_args = [a for a in sys.argv[1:] if not a.startswith("--")]
+TOPN = int(_args[0]) if _args else 40
+if HOURLY:
+    REVIEW_DETAIL_TOPN = 0         # 리뷰는 구매 며칠 뒤 작성 → 시간단위론 안 변함. 시간대 측정엔 찜·주문수 증분만.
 DIR = os.path.dirname(os.path.abspath(__file__))
-SNAPDIR = os.path.join(DIR, "rank_snapshots")
+SNAPDIR = os.path.join(DIR, "rank_snapshots", "hourly") if HOURLY else os.path.join(DIR, "rank_snapshots")
 os.makedirs(SNAPDIR, exist_ok=True)
 
 _review_cache = {}  # pid → reviewTotal (같은 상품 여러 탭 등장 시 상세 1회만 호출)
@@ -140,8 +144,9 @@ def snapshot(date_str):
     return {"date": date_str, "topn": TOPN, "reviewTopn": REVIEW_DETAIL_TOPN, "tabs": tabs}
 
 
-def load_prev(date_str):
-    files = sorted(f for f in os.listdir(SNAPDIR) if f.endswith(".json") and f[:10] < date_str)
+def load_prev(cur_key):
+    # cur_key: daily=YYYY-MM-DD, hourly=YYYY-MM-DD_HHMM. 파일명(확장자 제외)이 더 이른 것 중 최신 = 직전 스냅샷.
+    files = sorted(f for f in os.listdir(SNAPDIR) if f.endswith(".json") and f[:-5] < cur_key)
     if not files:
         return None
     with open(os.path.join(SNAPDIR, files[-1]), encoding="utf-8") as fp:
@@ -149,13 +154,16 @@ def load_prev(date_str):
 
 
 def main():
-    today = datetime.now().strftime("%Y-%m-%d")
-    print(f"\n🎁 카카오 선물하기 랭킹 수집 — {today} (TOP{TOPN}, {len(TARGETS)}개 탭)")
-    snap = snapshot(today)
-    prev = load_prev(today)
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
+    stamp = now.strftime("%Y-%m-%d_%H%M") if HOURLY else today
+    mode = "시간대 실측(리뷰생략)" if HOURLY else "일일(리뷰포함)"
+    print(f"\n🎁 카카오 선물하기 랭킹 수집 — {stamp} [{mode}] (TOP{TOPN}, {len(TARGETS)}개 탭)")
+    snap = snapshot(stamp)
+    prev = load_prev(stamp)
     prev_tabs = prev.get("tabs", {}) if prev else {}
 
-    path = os.path.join(SNAPDIR, f"{today}.json")
+    path = os.path.join(SNAPDIR, f"{stamp}.json")
     with open(path, "w", encoding="utf-8") as fp:
         json.dump(snap, fp, ensure_ascii=False, indent=2)
 
