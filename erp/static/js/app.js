@@ -1221,21 +1221,10 @@ async function copyPO(id) {
   } catch (e) { toast(e.message, 'error'); }
 }
 
-async function downloadPOPdf(id) {
-  try {
-    const resp = await fetch(`/api/purchase-orders/${id}/pdf`);
-    if (!resp.ok) throw new Error('PDF 생성 실패 (' + resp.status + ')');
-    const blob = await resp.blob();
-    let fname = `발주서_${id}.pdf`;
-    const cd = resp.headers.get('Content-Disposition');
-    if (cd) { const m = cd.match(/filename="?([^"]+)"?/); if (m) fname = decodeURIComponent(m[1]); }
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = fname;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast('PDF 다운로드 완료');
-  } catch (e) { toast(e.message, 'error'); }
+function downloadPOPdf(id) {
+  // 새 탭에서 PDF 뷰어로 열기 (HTTP 사이트의 blob/attachment 다운로드를 크롬이 차단하는 문제 회피).
+  // 뷰어에서 저장/인쇄 가능. 강제 저장이 필요하면 ?dl=1.
+  window.open(`/api/purchase-orders/${id}/pdf`, '_blank');
 }
 
 async function emailPO(id) {
@@ -2366,6 +2355,9 @@ async function loadNaverKw(days) {
 function renderNsaBubble(items, targetRoas) {
   const canvas = document.getElementById('nsa-bubble');
   if (!canvas) return;
+  // 줌 플러그인 등록 (UMD 로드 후 1회)
+  const zp = window.ChartZoom || (window['chartjs-plugin-zoom']);
+  if (zp && Chart.registry && !Chart.registry.plugins.get('zoom')) { try { Chart.register(zp); } catch (e) {} }
   if (_nsaBubbleChart) { _nsaBubbleChart.destroy(); _nsaBubbleChart = null; }
   const ROAS_CAP = 2500;
   const pts = items.map((kw, idx) => ({
@@ -2402,9 +2394,13 @@ function renderNsaBubble(items, targetRoas) {
           callbacks: {
             label(c) {
               const p = c.raw;
-              return [`${p.kw} (${p.typ})`, `ROAS ${fmt(p.roas)}% · 클릭 ${p.clk} · 노출 ${p.imp}`];
+              return [`${p.kw} (${p.typ})`, `${p.grp}`, `ROAS ${fmt(p.roas)}% · 클릭 ${p.clk} · 노출 ${p.imp}`];
             },
           },
+        },
+        zoom: {
+          zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' },
+          pan: { enabled: true, mode: 'xy' },
         },
       },
       scales: {
@@ -2423,10 +2419,14 @@ function renderNsaKwDetail(idx) {
   const c = p.vcolor || '#8a8a8a';
   const ctr = p.imp ? (p.clk / p.imp * 100).toFixed(1) : '0.0';
   const cell = (l, v) => `<div class="nsa-dt-cell"><div class="nsa-dt-l">${l}</div><div class="nsa-dt-v">${v}</div></div>`;
+  const bidTxt = p.bid ? ` · 입찰 ${fmt(p.bid)}원` : '';
   box.innerHTML = `
-    <div class="nsa-dt-kw">${p.kw}</div>
-    <div class="nsa-dt-tag">${p.typ} · ${p.grp || '-'} · 품질지수 ${p.qi != null ? p.qi : '-'}</div>
-    <div class="nsa-dt-badge" style="background:${c}22;color:${c}">${p.verdict || '-'}</div>
+    <div class="nsa-dt-head">
+      <div class="nsa-dt-kw">${p.kw}</div>
+      <div class="nsa-dt-badge" style="background:${c}22;color:${c}">${p.verdict || '-'}</div>
+    </div>
+    <div class="nsa-dt-path">📁 캠페인 <b>${p.campaign || '-'}</b> › 그룹 <b>${p.adgroup || p.grp || '-'}</b></div>
+    <div class="nsa-dt-tag" style="margin-bottom:12px">${p.typ}${p.qi != null ? ` · 품질지수 ${p.qi}` : ''}${bidTxt}</div>
     <div class="nsa-dt-grid">
       ${cell('노출', fmt(p.imp || 0))}
       ${cell('클릭', fmt(p.clk || 0) + ` (CTR ${ctr}%)`)}
@@ -2434,11 +2434,13 @@ function renderNsaKwDetail(idx) {
       ${cell('광고비', fmt(p.cost || 0))}
       ${cell('전환수', fmt(p.ccnt || 0))}
       ${cell('전환매출', fmt(p.convAmt || 0))}
-      <div class="nsa-dt-cell" style="grid-column:span 2">
-        <div class="nsa-dt-l">ROAS</div>
-        <div class="nsa-dt-v" style="color:${c}">${fmt(p.roas || 0)}%</div>
-      </div>
+      ${cell('ROAS', `<span style="color:${c}">${fmt(p.roas || 0)}%</span>`)}
+      ${cell('목표대비', p.roas >= 400 ? '✅ 달성' : `${fmt(p.roas || 0)}/400%`)}
     </div>`;
+}
+
+function resetNsaZoom() {
+  if (_nsaBubbleChart && _nsaBubbleChart.resetZoom) _nsaBubbleChart.resetZoom();
 }
 
 function renderNsaCross(cross, targetRoas) {

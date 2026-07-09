@@ -1549,7 +1549,7 @@ async def copy_po(po_id: int, conn=Depends(db)):
 
 
 @app.get("/api/purchase-orders/{po_id}/pdf")
-async def download_po_pdf(po_id: int, conn=Depends(db)):
+async def download_po_pdf(po_id: int, request: Request, conn=Depends(db)):
     from fastapi.responses import Response
     from fpdf import FPDF
 
@@ -1588,10 +1588,11 @@ async def download_po_pdf(po_id: int, conn=Depends(db)):
                 break
         return "".join(reversed(result)) + "원"
 
-    FONT_PATH = "/System/Library/Fonts/AppleSDGothicNeo.ttc"
+    # 나눔고딕 단일 TTF (TTC 임베딩 깨짐 방지 — 다운로드 후 외부 뷰어에서도 정상 표시)
+    _FONT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
     pdf = FPDF(orientation="P", unit="mm", format="A4")
-    pdf.add_font("gothic", "", FONT_PATH)
-    pdf.add_font("gothic", "B", FONT_PATH)
+    pdf.add_font("gothic", "", os.path.join(_FONT_DIR, "NanumGothic-Regular.ttf"))
+    pdf.add_font("gothic", "B", os.path.join(_FONT_DIR, "NanumGothic-Bold.ttf"))
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
     pw = pdf.w - pdf.l_margin - pdf.r_margin
@@ -1669,21 +1670,44 @@ async def download_po_pdf(po_id: int, conn=Depends(db)):
     pdf.ln()
 
     pdf.set_font("gothic", "", 8)
+    LH = 4.5  # 품목명 줄 높이
+    nw = cols[1][1]  # 품목명 컬럼 폭
     for l in lines:
         unit = l.get("unit") or "EA"
         supply = l["amount"]
         vat = round(supply * 0.1)
-        row_data = [
+        name = f" {(l.get('product_name') or '').strip()} "
+        # 품목명 폭에 맞춰 필요한 줄 수 계산 → 행 높이 가변
+        try:
+            nlines = max(1, len(pdf.multi_cell(nw, LH, name, dry_run=True, output="LINES")))
+        except Exception:
+            nlines = max(1, int(pdf.get_string_width(name) // (nw - 2)) + 1)
+        rh = max(7, LH * nlines + 3)
+        x0, y0 = pdf.get_x(), pdf.get_y()
+        if y0 + rh > pdf.h - pdf.b_margin:  # 페이지 넘침 방지
+            pdf.add_page()
+            x0, y0 = pdf.get_x(), pdf.get_y()
+        row_rest = [
             (l.get("product_code") or "", cols[0][1], "C"),
-            (l.get("product_name") or "", cols[1][1], "L"),
+            None,  # 품목명 자리
             (f"{l['qty_ordered']:,} {unit}", cols[2][1], "R"),
             (f"{l['unit_price']:,.0f}", cols[3][1], "R"),
             (f"{supply:,.0f}", cols[4][1], "R"),
             (f"{vat:,.0f}", cols[5][1], "R"),
         ]
-        for txt, w, align in row_data:
-            pdf.cell(w, 7, f" {txt} ", border=1, align=align)
-        pdf.ln()
+        cx = x0
+        for idx, item in enumerate(row_rest):
+            if idx == 1:  # 품목명: 테두리 + 세로중앙 줄바꿈
+                pdf.rect(cx, y0, nw, rh)
+                pdf.set_xy(cx, y0 + (rh - LH * nlines) / 2)
+                pdf.multi_cell(nw, LH, name, border=0, align="L")
+                cx += nw
+            else:
+                txt, w, align = item
+                pdf.set_xy(cx, y0)
+                pdf.cell(w, rh, f" {txt} ", border=1, align=align)
+                cx += w
+        pdf.set_xy(x0, y0 + rh)
 
     pdf.set_font("gothic", "B", 8)
     pdf.set_fill_color(*BG)
@@ -1704,10 +1728,13 @@ async def download_po_pdf(po_id: int, conn=Depends(db)):
 
     pdf_bytes = pdf.output()
     filename = f"PO_{po['po_number']}.pdf"
+    # inline: 새 탭 PDF 뷰어로 표시 → HTTP 사이트의 attachment 다운로드 차단(크롬) 회피.
+    # dl=1 쿼리면 강제 다운로드(attachment)도 지원.
+    disp = "attachment" if request.query_params.get("dl") == "1" else "inline"
     return Response(
         content=bytes(pdf_bytes),
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={"Content-Disposition": f'{disp}; filename="{filename}"'},
     )
 
 
@@ -1745,6 +1772,8 @@ async def email_po(po_id: int, request: Request, conn=Depends(db)):
 
     import smtplib
     from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.application import MIMEApplication
 
     total_qty = sum(l["qty_ordered"] for l in lines)
     total_supply = sum(l["amount"] for l in lines)
@@ -1847,7 +1876,17 @@ async def email_po(po_id: int, request: Request, conn=Depends(db)):
 <p style="color:#888;margin-top:24px;font-size:11px;text-align:center">— 주식회사 비코어랩 · info@becorelab.kr —</p>
 </body></html>"""
 
-    msg = MIMEText(body, "html", "utf-8")
+    msg = MIMEMultipart()
+    msg.attach(MIMEText(body, "html", "utf-8"))
+    # 발주서 PDF 자동 첨부 (download_po_pdf 로직 재사용 — 나눔고딕 정상 임베딩)
+    try:
+        _pdf_resp = await download_po_pdf(po_id, request, conn)
+        _part = MIMEApplication(bytes(_pdf_resp.body), _subtype="pdf")
+        _part.add_header("Content-Disposition", "attachment",
+                         filename=f"PO_{po['po_number']}.pdf")
+        msg.attach(_part)
+    except Exception as _pe:
+        print(f"[email_po] PDF 첨부 실패(본문만 발송): {_pe}")
     msg["Subject"] = f"[비코어랩] 발주서 {po['po_number']}"
     msg["From"] = "info@becorelab.kr"
     msg["To"] = ", ".join(to_list)
@@ -2818,7 +2857,7 @@ async def naver_keywords(days: int = 30):
         from_date = (_dt.strptime(to_date, "%Y-%m-%d") - _td(days=days - 1)).strftime("%Y-%m-%d")
 
         rows = con.execute("""
-            SELECT e.id, e.name, e.ad_type, e.adgroup_name, e.qi,
+            SELECT e.id, e.name, e.ad_type, e.adgroup_name, e.campaign_name, e.bid, e.qi,
                    SUM(d.imp) as imp, SUM(d.clk) as clk, SUM(d.cost) as cost,
                    SUM(d.ccnt) as ccnt, SUM(d.conv_amt) as conv_amt
             FROM entities e JOIN daily_stats d ON e.id=d.entity_id
@@ -2852,6 +2891,7 @@ async def naver_keywords(days: int = 30):
             verdict, vcolor = _verdict(clk, roas, cost, ccnt)
             items.append({
                 "id": r["id"], "kw": r["name"], "typ": typ, "grp": grp,
+                "campaign": r["campaign_name"], "adgroup": r["adgroup_name"], "bid": r["bid"],
                 "imp": imp, "clk": clk, "cpc": cpc, "cost": cost,
                 "ccnt": ccnt, "convAmt": conv_amt, "roas": roas,
                 "qi": r["qi"], "verdict": verdict, "vcolor": vcolor

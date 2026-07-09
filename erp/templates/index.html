@@ -8,6 +8,8 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
 <link rel="stylesheet" href="/static/css/style.css?v=20260605d" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <style>
   .kakao-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; }
   .kakao-card { position:relative; display:block; border:1px solid var(--line,#eee); border-radius:12px; overflow:hidden; background:#fff; text-decoration:none; color:inherit; transition:box-shadow .15s,transform .15s; }
@@ -79,14 +81,18 @@
   .nsa-kpi-val small { font-size:12px; font-weight:700; }
   .nsa-kpi-sub { font-size:10px; color:#bbb; margin-top:2px; }
   .nsa-warn { background:#fff8ec; border:1px solid #f2dca0; border-radius:10px; padding:9px 14px; font-size:12px; color:#a06600; margin-top:8px; }
-  .nsa-grid { display:grid; grid-template-columns:1.6fr 1fr; gap:14px; align-items:start; margin-top:4px; }
-  .nsa-chartwrap { background:#fff; border:1px solid var(--line,#eceae6); border-radius:14px; padding:16px 18px; height:320px; position:relative; }
-  .nsa-detail { background:#fff; border:1px solid var(--line,#eceae6); border-radius:14px; padding:18px 20px; min-height:290px; }
-  .nsa-ph { color:#bbb; font-size:13px; text-align:center; padding-top:95px; }
-  .nsa-dt-kw { font-size:19px; font-weight:800; margin-bottom:2px; }
-  .nsa-dt-tag { font-size:12px; color:#888; margin-bottom:12px; }
+  .nsa-grid { display:block; margin-top:4px; }
+  .nsa-chartwrap { background:#fff; border:1px solid var(--line,#eceae6); border-radius:14px; padding:16px 18px; height:600px; position:relative; }
+  .nsa-detail { background:#fff; border:1px solid var(--line,#eceae6); border-radius:14px; padding:18px 20px; min-height:auto; margin-top:14px; }
+  .nsa-ph { color:#bbb; font-size:13px; text-align:center; padding:40px 0; }
+  .nsa-dt-head { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:4px; }
+  .nsa-dt-kw { font-size:22px; font-weight:800; }
+  .nsa-dt-path { font-size:13px; color:#666; margin-bottom:10px; }
+  .nsa-dt-path b { color:#2563c9; }
+  .nsa-dt-tag { font-size:12px; color:#888; }
   .nsa-dt-badge { display:inline-block; font-size:12px; font-weight:800; padding:3px 10px; border-radius:8px; margin-bottom:13px; }
-  .nsa-dt-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .nsa-dt-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:9px; }
+  .nsa-zoom-hint { font-size:11px; color:#aaa; }
   .nsa-dt-cell { background:#f9f8f5; border-radius:9px; padding:8px 11px; }
   .nsa-dt-l { font-size:11px; color:#999; }
   .nsa-dt-v { font-size:16px; font-weight:800; margin-top:2px; }
@@ -659,7 +665,7 @@
 
       <!-- 키워드 뷰 -->
       <div id="nsa-view-kw" class="hidden">
-        <div class="nsa-sec-t">🎯 키워드 포트폴리오 맵 <small>— X 클릭 · Y ROAS · 크기 노출</small> <span id="nsa-kw-period-label" style="font-size:12px;font-weight:600;color:#2563c9;background:#e8f0fe;border-radius:6px;padding:2px 9px;margin-left:6px">최근 7일</span></div>
+        <div class="nsa-sec-t">🎯 키워드 포트폴리오 맵 <small>— X 클릭 · Y ROAS · 크기 노출 · <span class="nsa-zoom-hint">🖱️ 휠 확대/축소 · 드래그 이동 · 버블 클릭 상세</span></small> <span id="nsa-kw-period-label" style="font-size:12px;font-weight:600;color:#2563c9;background:#e8f0fe;border-radius:6px;padding:2px 9px;margin-left:6px">최근 7일</span> <button class="btn btn-sm" onclick="resetNsaZoom()" style="margin-left:8px;font-size:12px;padding:3px 10px">🔄 줌 리셋</button></div>
         <div class="nsa-legend">
           <span>🟢 <b style="background:#1a8f3c;color:#fff;padding:2px 8px;border-radius:6px">스케일업</b></span>
           <span>💎 <b style="background:#2563c9;color:#fff;padding:2px 8px;border-radius:6px">숨은보석</b></span>
@@ -723,7 +729,7 @@
 <!-- Toast -->
 <div class="toast-container" id="toasts"></div>
 
-<script src="/static/js/app.js?v=20260708d"></script>
+<script src="/static/js/app.js?v=20260709b"></script>
 <script>
 setInterval(() => {
   const el = document.getElementById('current-time');
