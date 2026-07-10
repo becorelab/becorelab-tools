@@ -80,6 +80,7 @@ function navigate(page) {
     kakao: '🎁 선물 트렌드 — 카카오 선물하기 베스트',
     radar: '📡 경쟁사 레이더 — 광고 품목 경쟁사 가격추적',
     naverad: '📇 네이버 광고 — 검색광고(SA)',
+    sourcing: '🔍 소싱박스',
     users: '사용자 관리',
   }[page] || '';
 

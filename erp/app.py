@@ -2989,6 +2989,24 @@ async def startup():
         init_db()
 
 
+# ── 소싱앱(Flask) 마운트 — ERP 허브 통합 (2026-07-11) ──
+# 소싱박스를 /sourcing 경로로 업어와 ERP 한 서버에서 서빙. 실패해도 ERP 본체는 계속 뜨게 try로 격리.
+try:
+    import importlib.util as _ilu, sys as _sys
+    _SRC_DIR = "/Users/macmini_ky/ClaudeAITeam/sourcing/analyzer"
+    if _SRC_DIR not in _sys.path:
+        _sys.path.insert(0, _SRC_DIR)
+    _spec = _ilu.spec_from_file_location("sourcing_app_mod", f"{_SRC_DIR}/app.py")
+    _sourcing_mod = _ilu.module_from_spec(_spec)
+    _sys.modules["sourcing_app_mod"] = _sourcing_mod  # Flask가 templates/static 경로를 자기 폴더로 인식하게(미등록 시 cwd로 오인)
+    _spec.loader.exec_module(_sourcing_mod)
+    from starlette.middleware.wsgi import WSGIMiddleware
+    app.mount("/sourcing", WSGIMiddleware(_sourcing_mod.app))
+    print("[ERP] 소싱앱 마운트 성공 → /sourcing")
+except Exception as _e:
+    print(f"[ERP] 소싱앱 마운트 실패(ERP는 정상 가동): {_e}")
+
+
 if __name__ == "__main__":
     import uvicorn
     init_db()
