@@ -61,6 +61,7 @@ function fmt(n) {
 // ── Navigation ──
 function navigate(page) {
   currentPage = page;
+  try { localStorage.setItem('erp_page', page); } catch (e) {}
   document.querySelectorAll('.nav-item').forEach(el => {
     el.classList.toggle('active', el.dataset.page === page);
   });
@@ -2612,6 +2613,13 @@ async function resetUserPw(id) {
 }
 
 // ── Login ──
+function enterApp() {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('user-name').textContent = currentUser.name;
+  navigate(localStorage.getItem('erp_page') || 'dashboard');
+}
+
 async function doLogin() {
   const username = document.getElementById('login-user').value;
   const password = document.getElementById('login-pass').value;
@@ -2626,10 +2634,8 @@ async function doLogin() {
 
   try {
     currentUser = await api('/api/auth/login', { method: 'POST', body: { username, password } });
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
-    document.getElementById('user-name').textContent = currentUser.name;
-    navigate('dashboard');
+    localStorage.setItem('erp_user', JSON.stringify(currentUser));
+    enterApp();
   } catch (e) {
     errEl.textContent = e.message;
     errEl.classList.add('show');
@@ -2684,12 +2690,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('logout-btn').addEventListener('click', () => {
     currentUser = null;
+    localStorage.removeItem('erp_user');
     document.getElementById('app').classList.add('hidden');
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('login-user').value = '';
     document.getElementById('login-pass').value = '';
     document.getElementById('login-error').classList.remove('show');
   });
+
+  // 새로고침해도 로그인 유지 (localStorage 복원)
+  try {
+    const saved = localStorage.getItem('erp_user');
+    if (saved) { currentUser = JSON.parse(saved); enterApp(); }
+  } catch (e) { localStorage.removeItem('erp_user'); }
 
   loadLoginStats();
 });
