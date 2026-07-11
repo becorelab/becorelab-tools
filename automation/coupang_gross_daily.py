@@ -168,18 +168,29 @@ def main():
         rows = fetch_options_for(date_str)
     except RuntimeError as e:
         if "세션 만료" in str(e):
-            print(f"  ⚠️ {e} → 무인 재로그인 시도")
-            from gross_auto_relogin import auto_relogin
-            if not auto_relogin():
-                print("  ❌ 무인 재로그인 실패 — gross_relogin.sh 수동 필요")
-                alert("그로스 매출", "그로스가 로그인이 완전히 풀려서 자동복구도 실패했어요 😢 gross_relogin.sh로 재로그인 한 번만 해주시면 하치가 바로 매출 채워드릴게요!", "critical")
-                sys.exit(1)
+            recovered = False
+            # ① 브릿지 우선 — 대표님 평소 크롬 쿠키 빌리기 (봇차단·계정잠김 위험 없음, 2026-07-12 검증)
+            print(f"  ⚠️ {e} → ① 브릿지(대표님 크롬 쿠키) 시도")
             try:
-                rows = fetch_options_for(date_str)
-            except Exception as e2:
-                print(f"  ❌ 재시도 실패: {e2}")
-                alert("그로스 매출", f"재로그인은 됐는데 그 다음 수집이 또 막혔어요 ㅠㅠ 저녁에 하치랑 같이 봐요! ({str(e2)[:50]})", "critical")
-                sys.exit(1)
+                from gross_cookie_bridge import refresh_from_user_chrome
+                if refresh_from_user_chrome(verbose=True):
+                    rows = fetch_options_for(date_str); recovered = True
+            except Exception as be:
+                print(f"  브릿지 실패: {be}")
+            # ② 브릿지 실패 시 stealth 무인 재로그인 (Akamai 달굼 위험 → 2순위)
+            if not recovered:
+                print("  ⚠️ 브릿지 실패 → ② 무인 재로그인(stealth) 시도")
+                from gross_auto_relogin import auto_relogin
+                if not auto_relogin():
+                    print("  ❌ 자동복구 모두 실패 — 수동 필요")
+                    alert("그로스 매출", "그로스 자동복구가 다 실패했어요 😢 맥미니 '일반 크롬'에 wing.coupang.com 로그인만 살아있게 해주시면(브릿지가 자동으로 읽어요), 아니면 gross_relogin.sh로 재로그인 한 번만 해주세요!", "critical")
+                    sys.exit(1)
+                try:
+                    rows = fetch_options_for(date_str)
+                except Exception as e2:
+                    print(f"  ❌ 재시도 실패: {e2}")
+                    alert("그로스 매출", f"재로그인은 됐는데 그 다음 수집이 또 막혔어요 ㅠㅠ 저녁에 하치랑 같이 봐요! ({str(e2)[:50]})", "critical")
+                    sys.exit(1)
         else:
             alert("그로스 매출", f"그로스 매출을 가져오다 문제가 생겼어요 😢 ({str(e)[:50]}) 저녁에 하치가 확인할게요!", "critical"); print(f"  ❌ 수집 실패: {e}"); sys.exit(1)
     except Exception as e:
