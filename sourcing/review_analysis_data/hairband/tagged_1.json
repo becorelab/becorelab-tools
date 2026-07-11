@@ -1,0 +1,8312 @@
+[
+ {
+  "id": 5579,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "사이즈핏",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5586,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5591,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5592,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5593,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "너무조임두통"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 5594,
+  "r": 4,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5600,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5601,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5604,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5608,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5613,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "쿨링시원함",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5615,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5618,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5623,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5629,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 5633,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5656,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "쿨링시원함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5683,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "착용감편함",
+   "통기성",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5685,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5690,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5691,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5707,
+  "r": 4,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5710,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5718,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5732,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함",
+   "통기성"
+  ],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 5735,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "흘러내림방지고정력",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5743,
+  "r": 4,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5744,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함",
+   "사이즈핏",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5750,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5773,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5791,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5794,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5799,
+  "r": 4,
+  "usage": "헬스웨이트",
+  "needs": [],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 5806,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5828,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5830,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5844,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "땀흡수안됨"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 5846,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [
+   "소재불량거침"
+  ],
+  "repeat": true
+ },
+ {
+  "id": 5847,
+  "r": 4,
+  "usage": "머리고정앞머리",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5848,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5849,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5859,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5862,
+  "r": 4,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5890,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5905,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5919,
+  "r": 4,
+  "usage": "등산아웃도어",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5929,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5941,
+  "r": 3,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [
+   "너무조임두통"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 5946,
+  "r": 4,
+  "usage": "구기스포츠",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5961,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "땀흡수안됨",
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 5980,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5992,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 5997,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6007,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6012,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6024,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6025,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6041,
+  "r": 4,
+  "usage": "등산아웃도어",
+  "needs": [
+   "쿨링시원함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6046,
+  "r": 4,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6052,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6060,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6067,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6073,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6081,
+  "r": 4,
+  "usage": "헬스웨이트",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6090,
+  "r": 4,
+  "usage": "선물",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6098,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6118,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6119,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6136,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6148,
+  "r": 2,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "흘러내림방지고정력",
+   "디자인"
+  ],
+  "pain": [
+   "너무조임두통"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 6149,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6153,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6161,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6163,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6178,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6182,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6188,
+  "r": 4,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6192,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6195,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6205,
+  "r": 2,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 6206,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6216,
+  "r": 2,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 6218,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6234,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6250,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6251,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6267,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6275,
+  "r": 4,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6278,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6284,
+  "r": 4,
+  "usage": "헬스웨이트",
+  "needs": [
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6292,
+  "r": 4,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6300,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6305,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 6320,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 6328,
+  "r": 4,
+  "usage": "일상패션",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6329,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6331,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6336,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "소재불량거침",
+   "내구성실밥",
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 6337,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6342,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6346,
+  "r": 5,
+  "usage": "선물",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6347,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6348,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6351,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6357,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6372,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6373,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥",
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 6374,
+  "r": 4,
+  "usage": "헬스웨이트",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6384,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6387,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "너무조임두통"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 6393,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6412,
+  "r": 4,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6413,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6415,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6451,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6455,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6464,
+  "r": 3,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "땀흡수안됨",
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 6469,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 6470,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 6485,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 6487,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6509,
+  "r": 2,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "소재불량거침"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 6514,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6520,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6521,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6524,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6526,
+  "r": 4,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6537,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 6551,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6554,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6555,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6569,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6574,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6580,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6581,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6609,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6614,
+  "r": 2,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [
+   "너무헐렁"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 6626,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6627,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6634,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6637,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 6645,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6662,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6703,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6721,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6728,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6733,
+  "r": 4,
+  "usage": "구기스포츠",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6738,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6751,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6752,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6755,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "흘러내림벗겨짐",
+   "너무헐렁"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 6757,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6775,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6783,
+  "r": 4,
+  "usage": "선물",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6785,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6789,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6802,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6805,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6828,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6849,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6854,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6866,
+  "r": 5,
+  "usage": "선물",
+  "needs": [
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6880,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6884,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6893,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6903,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6907,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6908,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6909,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6920,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6926,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6929,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6945,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6973,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6977,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6987,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 6995,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "너무조임두통",
+   "너무헐렁"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7001,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7009,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "사이즈핏",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7013,
+  "r": 4,
+  "usage": "구기스포츠",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7031,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7035,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7052,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7070,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "흘러내림방지고정력",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7084,
+  "r": 2,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7089,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7102,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7105,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7108,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7113,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7121,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7124,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7130,
+  "r": 5,
+  "usage": "선물",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 7136,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 7137,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7138,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7143,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "흘러내림벗겨짐"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7146,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7148,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7169,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7175,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "쿨링시원함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7176,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥",
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7208,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7217,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7227,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7228,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 7235,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7240,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 7244,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7245,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7248,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7251,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 7268,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7275,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7282,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7283,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "흘러내림방지고정력",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7298,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 7299,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7304,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7306,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7311,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7314,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7316,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7330,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7333,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 7343,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7348,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7349,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "착용감편함",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7350,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7366,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7371,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함",
+   "디자인",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7386,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7387,
+  "r": 4,
+  "usage": "등산아웃도어",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7389,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7390,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7400,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7402,
+  "r": 4,
+  "usage": "구기스포츠",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7409,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7420,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7426,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7441,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 7443,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7455,
+  "r": 3,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7461,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7462,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7472,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7473,
+  "r": 4,
+  "usage": "등산아웃도어",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7475,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7482,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함",
+   "사이즈핏",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7492,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "착용감편함",
+   "통기성",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7494,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7496,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7511,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7519,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7524,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "흘러내림방지고정력",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 7527,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함",
+   "디자인",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7530,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7542,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7545,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7550,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7561,
+  "r": 4,
+  "usage": "선물",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7568,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7569,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7583,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7594,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7610,
+  "r": 2,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "너무헐렁"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7620,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7624,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7632,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "사이즈핏"
+  ],
+  "pain": [
+   "너무헐렁"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7634,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7643,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7655,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7658,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7661,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7669,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7672,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7684,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7690,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7697,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함",
+   "디자인",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7703,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7715,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7723,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7728,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 7729,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7731,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7737,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "너무헐렁"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7745,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7762,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7763,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7765,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7801,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7804,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7836,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 7840,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7845,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7851,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7861,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7867,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7869,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7870,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7872,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 7896,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7898,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7917,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7923,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7925,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "착용감편함",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7932,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7935,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7936,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7942,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7944,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7951,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7959,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7962,
+  "r": 5,
+  "usage": "선물",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7966,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 7969,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8008,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8011,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "사이즈핏",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8030,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8035,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8036,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8038,
+  "r": 4,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8040,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8042,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8046,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8055,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8063,
+  "r": 2,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8065,
+  "r": 1,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [
+   "땀흡수안됨"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8068,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 8085,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8086,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8087,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8092,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8108,
+  "r": 4,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8112,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8119,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8121,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8126,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [
+   "너무조임두통",
+   "너무헐렁"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8136,
+  "r": 4,
+  "usage": "일상패션",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8141,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8158,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8163,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "내구성실밥",
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8168,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8174,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8178,
+  "r": 2,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8180,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8183,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8189,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8193,
+  "r": 4,
+  "usage": "헬스웨이트",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8196,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8199,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8202,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8205,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8206,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8228,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8232,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8238,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8240,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함",
+   "디자인",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8249,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8252,
+  "r": 2,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "땀흡수안됨",
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8255,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8265,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8269,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8270,
+  "r": 4,
+  "usage": "선물",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8313,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8321,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "사이즈핏",
+   "디자인",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8322,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8330,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8331,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8332,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8333,
+  "r": 1,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [
+   "소재불량거침",
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8336,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8341,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8347,
+  "r": 4,
+  "usage": "구기스포츠",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8352,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함",
+   "디자인",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8357,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8359,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8366,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8379,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8394,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "땀흡수안됨",
+   "소재불량거침",
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8400,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8404,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8408,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8411,
+  "r": 4,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8429,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8435,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8441,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8443,
+  "r": 2,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8445,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8452,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8453,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8460,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8464,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8472,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8473,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8475,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8482,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8488,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8491,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8494,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8499,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [
+   "너무조임두통"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8503,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8504,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8506,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8510,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8545,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8563,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8576,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "착용감편함",
+   "디자인",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8582,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8598,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8601,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8605,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "사이즈핏",
+   "디자인",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 8621,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8623,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8624,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8625,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8633,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8652,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8654,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8656,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8692,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "땀흡수안됨"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8694,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8704,
+  "r": 2,
+  "usage": "구기스포츠",
+  "needs": [
+   "흘러내림방지고정력",
+   "통기성"
+  ],
+  "pain": [
+   "흘러내림벗겨짐",
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8706,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8713,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8720,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8722,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8727,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8731,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8735,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "너무조임두통"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8736,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8741,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8747,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8757,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8768,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8774,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8775,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8783,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8792,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8796,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8797,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8803,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8814,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8819,
+  "r": 3,
+  "usage": "일상패션",
+  "needs": [
+   "땀흡수",
+   "디자인"
+  ],
+  "pain": [
+   "너무조임두통"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8820,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8822,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "소재불량거침"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8823,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8827,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8830,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8842,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "땀흡수안됨"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 8851,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8861,
+  "r": 4,
+  "usage": "구기스포츠",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8870,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8879,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8884,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "쿨링시원함",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8892,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8894,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8899,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8905,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8933,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8941,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8946,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8961,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8972,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8979,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8986,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 8995,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "땀흡수안됨"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9003,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9004,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9031,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "흘러내림방지고정력",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 9034,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9036,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함",
+   "사이즈핏",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9038,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9042,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9047,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9048,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9051,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9057,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9068,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9069,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9073,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9075,
+  "r": 5,
+  "usage": "선물",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9079,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9098,
+  "r": 4,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9104,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 9108,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9114,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9115,
+  "r": 3,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9147,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9153,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9155,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9160,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9162,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9165,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9166,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9167,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9182,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "사이즈핏",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9185,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "디자인",
+   "통기성",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9192,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9195,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9203,
+  "r": 4,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9207,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 9210,
+  "r": 4,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9226,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9240,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9243,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9253,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9256,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9260,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9277,
+  "r": 4,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9282,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9283,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9284,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9289,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9300,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9310,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9321,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9326,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9328,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9330,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [
+   "땀흡수안됨"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9339,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9340,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9343,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9347,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9357,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9361,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9381,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9388,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9393,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9403,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9418,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "흘러내림벗겨짐"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9419,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "디자인"
+  ],
+  "pain": [
+   "땀흡수안됨",
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9431,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "땀흡수",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9438,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9445,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9452,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9455,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9459,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9463,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9491,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9493,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9497,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9507,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "흘러내림방지고정력",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9516,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "소재불량거침"
+  ],
+  "repeat": true
+ },
+ {
+  "id": 9529,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9536,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9547,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9557,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9561,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9574,
+  "r": 4,
+  "usage": "선물",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9575,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9578,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9584,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9590,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9591,
+  "r": 2,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "너무조임두통"
+  ],
+  "repeat": true
+ },
+ {
+  "id": 9592,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9597,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9601,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9609,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9610,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9617,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9622,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9627,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9641,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9644,
+  "r": 2,
+  "usage": "불명",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9645,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9646,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9648,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9657,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9658,
+  "r": 2,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9665,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9679,
+  "r": 4,
+  "usage": "일상패션",
+  "needs": [
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9691,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9710,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "흘러내림벗겨짐"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9712,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9713,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9718,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9720,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9732,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9742,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9761,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9765,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9767,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "쿨링시원함",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9773,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9779,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "너무헐렁"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9791,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9806,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9807,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함",
+   "통기성",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9811,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "쿨링시원함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9821,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9822,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "쿨링시원함",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9834,
+  "r": 4,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9842,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9844,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9850,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9854,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9868,
+  "r": 2,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [
+   "너무헐렁"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9876,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9877,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9881,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9885,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9887,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9895,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9898,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9906,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9923,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9926,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9936,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 9946,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9949,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "착용감편함",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9958,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 9960,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9979,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [
+   "흘러내림벗겨짐",
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 9989,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9990,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "쿨링시원함",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 9997,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10011,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "땀흡수안됨"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10013,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10014,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10019,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10025,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10030,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10037,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10041,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10046,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 10071,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10081,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "너무조임두통"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10082,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10086,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10091,
+  "r": 4,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10095,
+  "r": 5,
+  "usage": "선물",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10101,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10118,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10123,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10129,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10132,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10141,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10145,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10151,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10153,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10168,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10171,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10178,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10181,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10186,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10187,
+  "r": 4,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10188,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 10189,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10190,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10193,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "소재불량거침"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10213,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10215,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10220,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10227,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 10229,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10254,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [
+   "소재불량거침"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10256,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10258,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10266,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10288,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "디자인",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10295,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10301,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10310,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "흘러내림방지고정력",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10324,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10345,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10352,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10366,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10369,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "소재불량거침"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10371,
+  "r": 4,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10374,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10378,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "사이즈핏",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10380,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10383,
+  "r": 4,
+  "usage": "등산아웃도어",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10386,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10392,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "사이즈핏",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 10395,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10400,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10403,
+  "r": 2,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [
+   "너무헐렁"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10417,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10435,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10436,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "너무조임두통"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10441,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10447,
+  "r": 2,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": true
+ },
+ {
+  "id": 10450,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 10451,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10471,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "소재불량거침"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10473,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10478,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10488,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10502,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10511,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10518,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10519,
+  "r": 2,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "흘러내림벗겨짐"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10520,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10522,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10528,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10530,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10531,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10539,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10541,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10543,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10553,
+  "r": 4,
+  "usage": "일상패션",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10555,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10556,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "사이즈핏",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10566,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10567,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10573,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10596,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10597,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 10607,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10608,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10617,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10621,
+  "r": 4,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10625,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10641,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "소재불량거침",
+   "내구성실밥",
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10647,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "땀흡수안됨"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10648,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10654,
+  "r": 4,
+  "usage": "등산아웃도어",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10658,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10663,
+  "r": 5,
+  "usage": "선물",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10670,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10676,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [
+   "소재불량거침",
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10686,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10687,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "사이즈핏",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10696,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10709,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10716,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "소재불량거침"
+  ],
+  "repeat": true
+ },
+ {
+  "id": 10726,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10731,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10732,
+  "r": 3,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10740,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10745,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함",
+   "사이즈핏",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10761,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10762,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10766,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "너무헐렁"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10778,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10782,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10784,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10789,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함"
+  ],
+  "pain": [
+   "기대이하"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10795,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10800,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10805,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 10818,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": true
+ },
+ {
+  "id": 10832,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10838,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10844,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "착용감편함",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10846,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10852,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "소재불량거침"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10854,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10855,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10860,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10882,
+  "r": 5,
+  "usage": "구기스포츠",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10893,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10911,
+  "r": 3,
+  "usage": "일상패션",
+  "needs": [
+   "땀흡수",
+   "디자인"
+  ],
+  "pain": [
+   "너무조임두통"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10936,
+  "r": 2,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력"
+  ],
+  "pain": [
+   "너무헐렁"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10941,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10966,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [
+   "쿨링시원함",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10973,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10986,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10991,
+  "r": 5,
+  "usage": "헬스웨이트",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10996,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 10998,
+  "r": 3,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 10999,
+  "r": 1,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "너무헐렁"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 11001,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "너무조임두통"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 11002,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11037,
+  "r": 5,
+  "usage": "머리고정앞머리",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11047,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11051,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11055,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "흘러내림방지고정력",
+   "사이즈핏",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11061,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11067,
+  "r": 3,
+  "usage": "불명",
+  "needs": [],
+  "pain": [
+   "너무조임두통"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 11073,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11080,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11084,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11093,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "흘러내림방지고정력",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11095,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11098,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11114,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11125,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "쿨링시원함",
+   "착용감편함",
+   "통기성"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11145,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11146,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "흘러내림방지고정력",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11155,
+  "r": 4,
+  "usage": "선물",
+  "needs": [
+   "땀흡수"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11179,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함",
+   "착용감편함",
+   "통기성",
+   "브랜드"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11185,
+  "r": 4,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11191,
+  "r": 5,
+  "usage": "일상패션",
+  "needs": [
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11196,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11210,
+  "r": 5,
+  "usage": "등산아웃도어",
+  "needs": [
+   "땀흡수",
+   "쿨링시원함"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11214,
+  "r": 4,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11216,
+  "r": 5,
+  "usage": "불명",
+  "needs": [],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11217,
+  "r": 5,
+  "usage": "불명",
+  "needs": [
+   "착용감편함",
+   "사이즈핏"
+  ],
+  "pain": [],
+  "repeat": false
+ },
+ {
+  "id": 11221,
+  "r": 1,
+  "usage": "불명",
+  "needs": [
+   "브랜드"
+  ],
+  "pain": [
+   "소재불량거침",
+   "내구성실밥"
+  ],
+  "repeat": false
+ },
+ {
+  "id": 11222,
+  "r": 5,
+  "usage": "러닝조깅",
+  "needs": [
+   "땀흡수",
+   "착용감편함",
+   "디자인"
+  ],
+  "pain": [],
+  "repeat": false
+ }
+]

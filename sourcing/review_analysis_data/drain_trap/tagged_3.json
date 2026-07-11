@@ -1,0 +1,18334 @@
+[
+{
+"id": 16042,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"냄새안막힘",
+"사이즈안맞음",
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 16047,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16048,
+"r": 2,
+"usage_place": null,
+"needs": [
+"내구성"
+],
+"pain": [
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 16050,
+"r": 4,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16051,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16053,
+"r": 5,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16056,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16063,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16068,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 16070,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16072,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16073,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16084,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16089,
+"r": 4,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16090,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16094,
+"r": 4,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16102,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16104,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16107,
+"r": 3,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16108,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16111,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 16112,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16116,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 16119,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16120,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16125,
+"r": 4,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16132,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16137,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16140,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16141,
+"r": 4,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16143,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16146,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 16153,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘",
+"사이즈안맞음"
+],
+"repeat": true
+},
+{
+"id": 16154,
+"r": 4,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16163,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16168,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16171,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16173,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16175,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 16178,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16180,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16185,
+"r": 1,
+"usage_place": null,
+"needs": [
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"설치어려움헐거움"
+],
+"repeat": true
+},
+{
+"id": 16186,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16188,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16190,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16193,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16196,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16198,
+"r": 4,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16200,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16205,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16213,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16215,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16216,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16218,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16222,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16228,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16230,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16232,
+"r": 4,
+"usage_place": "베란다다용도실",
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16234,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16243,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16247,
+"r": 2,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"사이즈안맞음",
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 16252,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 16258,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16259,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16261,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16262,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 16265,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16266,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16267,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16270,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16271,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16275,
+"r": 1,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16276,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16277,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"벌레차단"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 16279,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"사이즈호환"
+],
+"pain": [
+"기대이하",
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 16282,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16283,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16284,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16287,
+"r": 4,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16291,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16294,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16300,
+"r": 4,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16301,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16303,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16307,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [
+"기대이하",
+"사이즈안맞음",
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 16309,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16310,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘",
+"물빠짐느림역류",
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 16312,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16314,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16319,
+"r": 3,
+"usage_place": null,
+"needs": [
+"디자인",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 16330,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16346,
+"r": 3,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16350,
+"r": 3,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16353,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16354,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16355,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16361,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16365,
+"r": 3,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16368,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16374,
+"r": 4,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16376,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16381,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16382,
+"r": 1,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 16383,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16385,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 16387,
+"r": 1,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단"
+],
+"pain": [
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 16389,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16391,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16392,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16393,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 16394,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16396,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16400,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16401,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16404,
+"r": 3,
+"usage_place": null,
+"needs": [
+"사이즈호환"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16405,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"사이즈안맞음",
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 16407,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16413,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16419,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"냄새안막힘",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 16426,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16429,
+"r": 2,
+"usage_place": null,
+"needs": [
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"기대이하",
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 16431,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16439,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16443,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16446,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16450,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16452,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 16453,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16455,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16456,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16458,
+"r": 3,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류",
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 16460,
+"r": 5,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16461,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16464,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16468,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16481,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16482,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 16483,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16485,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16493,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16498,
+"r": 4,
+"usage_place": null,
+"needs": [
+"내구성"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16500,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"내구성",
+"냄새차단",
+"디자인",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16501,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"냄새안막힘",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 16502,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16506,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16508,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16511,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16514,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16517,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16523,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16525,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16526,
+"r": 1,
+"usage_place": null,
+"needs": [
+"디자인"
+],
+"pain": [
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 16527,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16530,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16532,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16538,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16542,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16545,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16551,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 16552,
+"r": 2,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16557,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16562,
+"r": 4,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16565,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16567,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16568,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"디자인",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16569,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16570,
+"r": 5,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16574,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16583,
+"r": 2,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16584,
+"r": 2,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16585,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16588,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16599,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류",
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 16604,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16606,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16609,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16614,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16615,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16621,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16629,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16640,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 16645,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16647,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 16648,
+"r": 5,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16651,
+"r": 4,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16654,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16658,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16662,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16664,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16666,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16667,
+"r": 1,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16668,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16671,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16672,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 16675,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16679,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16680,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16687,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16689,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16691,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16693,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16696,
+"r": 3,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16701,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16705,
+"r": 4,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16708,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 16709,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16716,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16717,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16720,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16721,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16722,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16723,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16730,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 16733,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16738,
+"r": 5,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16741,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16742,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16744,
+"r": 5,
+"usage_place": "세면대",
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16749,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16751,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16752,
+"r": 1,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류",
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 16765,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16767,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16768,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16775,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16778,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16779,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16782,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"디자인",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16783,
+"r": 5,
+"usage_place": "세면대",
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16784,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16792,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16797,
+"r": 2,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16798,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16799,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16810,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16813,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16820,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16824,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16829,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16832,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16833,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16840,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16841,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16842,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16843,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16847,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16848,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16851,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16852,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16857,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16866,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16871,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16879,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [
+"기대이하",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 16880,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 16881,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 16885,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16895,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16896,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 16899,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16900,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"디자인",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16904,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16906,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16912,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16913,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16914,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16922,
+"r": 4,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16924,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16925,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16926,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16936,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16939,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16945,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16949,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16952,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16954,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16955,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16960,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16962,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16963,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16967,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 16969,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16970,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16974,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16977,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"배송파손",
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 16978,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16979,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16980,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16982,
+"r": 5,
+"usage_place": null,
+"needs": [
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16985,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 16986,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 16989,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [
+"기대이하",
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 16994,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 17000,
+"r": 3,
+"usage_place": "베란다다용도실",
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17001,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17003,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17004,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17005,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17010,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17012,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17013,
+"r": 4,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17014,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17015,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17019,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17020,
+"r": 3,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17022,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17026,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17030,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17032,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17034,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17035,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17037,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 17038,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17039,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17042,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17043,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17044,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17045,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17047,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17048,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17050,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17053,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17055,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17057,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17060,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17068,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17071,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17073,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17074,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17076,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17077,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17079,
+"r": 5,
+"usage_place": "욕실샤워",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 17085,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17087,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17088,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17093,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17095,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17102,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 17105,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"배송파손",
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 17110,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17116,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17121,
+"r": 5,
+"usage_place": null,
+"needs": [
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17122,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17125,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17126,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17127,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17131,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17134,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 17145,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17147,
+"r": 1,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"내구성"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17148,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17156,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17160,
+"r": 4,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17165,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17166,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17168,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17172,
+"r": 1,
+"usage_place": null,
+"needs": [
+"디자인"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17173,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17176,
+"r": 1,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17184,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17185,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17190,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17191,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17192,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17193,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17194,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17196,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17203,
+"r": 3,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"벌레차단",
+"사이즈호환"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17205,
+"r": 5,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17212,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17213,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17217,
+"r": 2,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 17220,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17222,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17224,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17226,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17228,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17230,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17232,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [
+"사이즈호환"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17235,
+"r": 3,
+"usage_place": "베란다다용도실",
+"needs": [
+"디자인",
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류",
+"배송파손",
+"사이즈안맞음",
+"설치어려움헐거움",
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 17236,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17240,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17250,
+"r": 1,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"내구성",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류",
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 17260,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17267,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17268,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17272,
+"r": 5,
+"usage_place": "세면대",
+"needs": [
+"디자인",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17280,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [
+"기대이하",
+"물빠짐느림역류",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 17283,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17286,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17288,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17291,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17293,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 17302,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17306,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17309,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17313,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17316,
+"r": 3,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단"
+],
+"pain": [
+"거름망불편",
+"냄새안막힘",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17318,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17319,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17321,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17323,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17324,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17328,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [
+"냄새안막힘",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17332,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17338,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17344,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17345,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17347,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17348,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17350,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17355,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17356,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17357,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17360,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [
+"사이즈호환"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17366,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17368,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17369,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17370,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17373,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17379,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17382,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17389,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17392,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17393,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 17396,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"디자인"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17397,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17400,
+"r": 4,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17404,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17408,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17411,
+"r": 5,
+"usage_place": null,
+"needs": [
+"디자인",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 17413,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17414,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17417,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17426,
+"r": 2,
+"usage_place": "싱크대",
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17429,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17435,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"냄새안막힘",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17437,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17438,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17441,
+"r": 4,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17443,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17444,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17446,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17450,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17461,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17471,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17472,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17476,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17483,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17499,
+"r": 1,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"기대이하",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17500,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17501,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"내구성",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17504,
+"r": 3,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [
+"냄새안막힘",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17505,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17507,
+"r": 3,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17508,
+"r": 1,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [
+"기대이하",
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 17512,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17514,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17518,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17520,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17524,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17526,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17527,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17528,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17529,
+"r": 2,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17532,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17535,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17537,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17540,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17541,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17545,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17546,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17550,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17551,
+"r": 1,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17553,
+"r": 4,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17556,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17557,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17560,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17566,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17571,
+"r": 3,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17572,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17580,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17584,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17587,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"설치편의"
+],
+"pain": [
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 17589,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"거름망머리카락",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17592,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17595,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 17601,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17611,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17614,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17616,
+"r": 4,
+"usage_place": null,
+"needs": [
+"내구성",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17618,
+"r": 4,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17623,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17627,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17629,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17632,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17635,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17638,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17642,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17644,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17651,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17652,
+"r": 2,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [
+"냄새안막힘",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17658,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17660,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17662,
+"r": 1,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17663,
+"r": 3,
+"usage_place": "주방",
+"needs": [
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17666,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17675,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17676,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17678,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17679,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17684,
+"r": 3,
+"usage_place": "세면대",
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17685,
+"r": 2,
+"usage_place": null,
+"needs": [
+"거름망머리카락"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17686,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17687,
+"r": 1,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17688,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17689,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 17692,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17693,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17711,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 17712,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17718,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17726,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17727,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17736,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 17741,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17744,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17745,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17748,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17749,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17751,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17752,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17754,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17755,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17760,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17765,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류",
+"배송파손",
+"사이즈안맞음",
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 17773,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17775,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17781,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"내구성",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17785,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"벌레차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17787,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17792,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17794,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17797,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17798,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17801,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 17802,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17803,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17805,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 17807,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17819,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17820,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17824,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17832,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17835,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17836,
+"r": 5,
+"usage_place": null,
+"needs": [
+"디자인"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17838,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17843,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17845,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17852,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17853,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17854,
+"r": 4,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17860,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17862,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17863,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17864,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17866,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17869,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17871,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17873,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17885,
+"r": 1,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17889,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17890,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17891,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17896,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17900,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17902,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17903,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17905,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"내구성",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17910,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17912,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17919,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17922,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [
+"사이즈호환"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17924,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17927,
+"r": 4,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17929,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류",
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 17931,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17932,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17933,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17935,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17938,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17939,
+"r": 3,
+"usage_place": null,
+"needs": [
+"사이즈호환"
+],
+"pain": [
+"물빠짐느림역류",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 17942,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17944,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17945,
+"r": 1,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17948,
+"r": 2,
+"usage_place": null,
+"needs": [
+"거름망머리카락"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 17950,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17952,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17957,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 17958,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17961,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 17967,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17973,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 17980,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17985,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17986,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 17988,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"거름망머리카락",
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17991,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 17999,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18008,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18009,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18010,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18012,
+"r": 5,
+"usage_place": null,
+"needs": [
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18014,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18017,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 18019,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18021,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18026,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18035,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18041,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18047,
+"r": 4,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18054,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18055,
+"r": 5,
+"usage_place": "세면대",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18056,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18058,
+"r": 2,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 18061,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18062,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18063,
+"r": 1,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18064,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18067,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18068,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18070,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18072,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18076,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18077,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18084,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18088,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18091,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18096,
+"r": 4,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18100,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18102,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18106,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18112,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18113,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 18114,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18120,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18121,
+"r": 5,
+"usage_place": null,
+"needs": [
+"디자인"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18125,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18126,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18127,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18135,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18141,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18142,
+"r": 2,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18143,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18144,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18147,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18148,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18149,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18152,
+"r": 5,
+"usage_place": "욕실샤워",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18153,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18157,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18159,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 18163,
+"r": 3,
+"usage_place": null,
+"needs": [
+"사이즈호환"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18166,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18167,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 18169,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18172,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18174,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18175,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18181,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18184,
+"r": 2,
+"usage_place": null,
+"needs": [
+"사이즈호환"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18186,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18188,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18190,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18198,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 18215,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18218,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18226,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18227,
+"r": 5,
+"usage_place": "세면대",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18228,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18232,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18233,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18241,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18247,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18250,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18260,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18261,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18262,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환"
+],
+"pain": [
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 18266,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18269,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18274,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18281,
+"r": 1,
+"usage_place": null,
+"needs": [
+"내구성"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18286,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18287,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18290,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18293,
+"r": 1,
+"usage_place": null,
+"needs": [
+"내구성"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18294,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18295,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18298,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18304,
+"r": 1,
+"usage_place": null,
+"needs": [
+"내구성"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 18305,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18309,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18310,
+"r": 3,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 18313,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18315,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18322,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18323,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18324,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18327,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18335,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18336,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18344,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18345,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18346,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18348,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18350,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18352,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18353,
+"r": 2,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18357,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18358,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18361,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18362,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18366,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18367,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18371,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18372,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18376,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18378,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18379,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18381,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18384,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18385,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18387,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18391,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18396,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18397,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18398,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18405,
+"r": 3,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 18414,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18415,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18417,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18418,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18419,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18424,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18434,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18441,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18442,
+"r": 1,
+"usage_place": "세면대",
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 18447,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18448,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18450,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18453,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18454,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18460,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 18461,
+"r": 4,
+"usage_place": "베란다다용도실",
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18463,
+"r": 2,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 18466,
+"r": 1,
+"usage_place": null,
+"needs": [
+"디자인",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18469,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18471,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18473,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18476,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18483,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18484,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18486,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 18488,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18501,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18511,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18514,
+"r": 5,
+"usage_place": "세면대",
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18515,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18517,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18520,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18523,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18526,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18529,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18544,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18545,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 18550,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18551,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18552,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18554,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18558,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18564,
+"r": 1,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"기대이하",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18565,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18568,
+"r": 4,
+"usage_place": null,
+"needs": [
+"거름망머리카락"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18570,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18573,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18578,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 18582,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18585,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18592,
+"r": 2,
+"usage_place": null,
+"needs": [
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 18595,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18598,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18599,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18601,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18602,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18608,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18614,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 18618,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18622,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18624,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18627,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18628,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18630,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18631,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 18632,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18633,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18639,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18640,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18645,
+"r": 3,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18648,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18650,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18657,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18661,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18665,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [
+"냄새안막힘",
+"물빠짐느림역류",
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 18666,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 18668,
+"r": 4,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18678,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18682,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 18685,
+"r": 4,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18687,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18688,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18690,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18693,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18697,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18699,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18702,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18710,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18715,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18717,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18719,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18722,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18723,
+"r": 2,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 18730,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18733,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 18734,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18740,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18742,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18743,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18749,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18750,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18751,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18754,
+"r": 3,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"기대이하",
+"배송파손",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 18759,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18760,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18764,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18767,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"벌레차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18769,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18771,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18772,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18775,
+"r": 2,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18778,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18781,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18782,
+"r": 4,
+"usage_place": "욕실샤워",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18791,
+"r": 3,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 18792,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18796,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18802,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18805,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18808,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18810,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18812,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18814,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18823,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18830,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18840,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18848,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18851,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18855,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18857,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18858,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18863,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18870,
+"r": 2,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18871,
+"r": 4,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18881,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18893,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18898,
+"r": 4,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18902,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18908,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18913,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18916,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18917,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18919,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18926,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18927,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18931,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"내구성",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18935,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18940,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18942,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18945,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18950,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 18954,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18956,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18957,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18961,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18964,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18969,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18971,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18974,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18976,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18980,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18982,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 18983,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18986,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"설치편의"
+],
+"pain": [
+"기대이하",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 18988,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"디자인"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 18995,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19003,
+"r": 3,
+"usage_place": null,
+"needs": [
+"사이즈호환"
+],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 19005,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19006,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19007,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19009,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19011,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19012,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19015,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19016,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19021,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19024,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19025,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19034,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19036,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 19038,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19039,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19042,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19050,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19051,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19055,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19060,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19062,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19063,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19065,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19074,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19078,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19079,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19082,
+"r": 4,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19083,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19090,
+"r": 4,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19097,
+"r": 3,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19098,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19105,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19108,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19115,
+"r": 3,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19116,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19120,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19121,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19122,
+"r": 2,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19123,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19127,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19129,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19131,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19132,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19141,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19143,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19144,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19147,
+"r": 2,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [
+"냄새안막힘",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 19149,
+"r": 4,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19150,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19154,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19155,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19164,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19171,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19173,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19177,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19186,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19189,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19193,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19195,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19199,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19200,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19204,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19210,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19214,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19215,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19219,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19222,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19225,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19227,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19228,
+"r": 5,
+"usage_place": null,
+"needs": [
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19229,
+"r": 4,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19233,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19236,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19237,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19239,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19241,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19243,
+"r": 2,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환"
+],
+"pain": [
+"사이즈안맞음",
+"설치어려움헐거움"
+],
+"repeat": true
+},
+{
+"id": 19248,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19249,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19251,
+"r": 3,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19252,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19254,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19255,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19257,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19258,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19259,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19260,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19263,
+"r": 4,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19265,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19266,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19268,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19273,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19274,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19276,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19278,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19279,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19288,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19291,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19293,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19298,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"거름망머리카락",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19299,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19301,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19302,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19303,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19304,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19306,
+"r": 4,
+"usage_place": "싱크대",
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19312,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19317,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19320,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19322,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19325,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [
+"사이즈호환"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19330,
+"r": 2,
+"usage_place": "베란다다용도실",
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19333,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19339,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19340,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19342,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19343,
+"r": 4,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19344,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19345,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19354,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19359,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 19363,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19364,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": true
+},
+{
+"id": 19365,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19367,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19369,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19372,
+"r": 3,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19373,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19375,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19377,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19380,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19383,
+"r": 3,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"냄새안막힘",
+"물빠짐느림역류",
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 19385,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19388,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19390,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19391,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19395,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19396,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19404,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환"
+],
+"pain": [
+"냄새안막힘",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 19405,
+"r": 5,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19410,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19414,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19418,
+"r": 1,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19419,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19421,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19424,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19425,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19428,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19433,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19436,
+"r": 1,
+"usage_place": "베란다다용도실",
+"needs": [
+"사이즈호환"
+],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 19440,
+"r": 5,
+"usage_place": "세면대",
+"needs": [
+"디자인",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19441,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19442,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19443,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19448,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19452,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19453,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19454,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19457,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19458,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19460,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19464,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19465,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 19474,
+"r": 1,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"사이즈호환"
+],
+"pain": [
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 19476,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19477,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19478,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19480,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19482,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19488,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19494,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19495,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19498,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19503,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19506,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19508,
+"r": 4,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19511,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19512,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19513,
+"r": 3,
+"usage_place": null,
+"needs": [
+"사이즈호환"
+],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 19516,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19517,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19521,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19526,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19528,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19539,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19547,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19551,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19553,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19556,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19557,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19560,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19564,
+"r": 3,
+"usage_place": null,
+"needs": [
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"냄새안막힘",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 19568,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19570,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19574,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19575,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19581,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19582,
+"r": 3,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19591,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19592,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19598,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19601,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19602,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19603,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19608,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19609,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19610,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19622,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19625,
+"r": 1,
+"usage_place": null,
+"needs": [
+"거름망머리카락"
+],
+"pain": [
+"냄새안막힘",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19627,
+"r": 2,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 19628,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19637,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19638,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19639,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19641,
+"r": 2,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19644,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19647,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19652,
+"r": 4,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19653,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19661,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19662,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19663,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19664,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19665,
+"r": 2,
+"usage_place": null,
+"needs": [
+"거름망머리카락"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19666,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19671,
+"r": 3,
+"usage_place": null,
+"needs": [
+"거름망머리카락"
+],
+"pain": [
+"물빠짐느림역류",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 19675,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"내구성",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19679,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19680,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19684,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19685,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19693,
+"r": 1,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19697,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19701,
+"r": 1,
+"usage_place": "베란다다용도실",
+"needs": [
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 19702,
+"r": 4,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19703,
+"r": 3,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19705,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19716,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19718,
+"r": 5,
+"usage_place": "세면대",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19727,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19728,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19730,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [
+"냄새안막힘",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19732,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19733,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19735,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19754,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19756,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19760,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19766,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19776,
+"r": 1,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19778,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19779,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19781,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19785,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19788,
+"r": 3,
+"usage_place": null,
+"needs": [
+"거름망머리카락"
+],
+"pain": [
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 19789,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19796,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19803,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19815,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19817,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19827,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19828,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19835,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19838,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19839,
+"r": 4,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19842,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": true
+},
+{
+"id": 19848,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19849,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19852,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19853,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19856,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19857,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19859,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19863,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19869,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19878,
+"r": 3,
+"usage_place": "베란다다용도실",
+"needs": [
+"벌레차단"
+],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 19880,
+"r": 4,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19883,
+"r": 3,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19889,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19892,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"내구성",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19893,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19894,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19895,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19897,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19900,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19911,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19918,
+"r": 5,
+"usage_place": null,
+"needs": [
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19924,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 19927,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19929,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"디자인",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19931,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19935,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19938,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"벌레차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19941,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 19947,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19948,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19951,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19955,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19957,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19962,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19964,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19966,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19968,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 19980,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 19985,
+"r": 4,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19987,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 19988,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19991,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 19997,
+"r": 2,
+"usage_place": "베란다다용도실",
+"needs": [
+"설치편의"
+],
+"pain": [
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 20002,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20003,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20005,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20007,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20008,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20009,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20010,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20013,
+"r": 1,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"냄새안막힘",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 20015,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20017,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"디자인",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20018,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20021,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20022,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20028,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20029,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20037,
+"r": 4,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20040,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20042,
+"r": 4,
+"usage_place": null,
+"needs": [
+"내구성"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20044,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20045,
+"r": 5,
+"usage_place": null,
+"needs": [
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20046,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20048,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20053,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20060,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20063,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20074,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 20075,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20080,
+"r": 3,
+"usage_place": null,
+"needs": [
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": true
+},
+{
+"id": 20081,
+"r": 1,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"기대이하",
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 20082,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20083,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20094,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20095,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20096,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20100,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20103,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 20106,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20115,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20127,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20128,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20133,
+"r": 4,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20134,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20143,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [
+"거름망불편",
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20145,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20148,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"내구성"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20150,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20154,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20156,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20158,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20160,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20161,
+"r": 1,
+"usage_place": "베란다다용도실",
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20166,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20167,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20168,
+"r": 1,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20169,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20171,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20173,
+"r": 2,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 20178,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20180,
+"r": 5,
+"usage_place": null,
+"needs": [
+"디자인",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20185,
+"r": 4,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20186,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20187,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20191,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20192,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20193,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20197,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20198,
+"r": 1,
+"usage_place": "베란다다용도실",
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20205,
+"r": 1,
+"usage_place": null,
+"needs": [
+"거름망머리카락"
+],
+"pain": [
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 20208,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류",
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 20210,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20211,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20214,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20215,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20217,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20218,
+"r": 2,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20224,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20228,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20230,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20231,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20232,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20234,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20243,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20247,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 20249,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 20250,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20251,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20255,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20257,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20262,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20264,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20266,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20268,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20273,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20276,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20279,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20283,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20284,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20289,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20297,
+"r": 1,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"기대이하",
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20299,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20300,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20305,
+"r": 4,
+"usage_place": "베란다다용도실",
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20306,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20313,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20319,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20322,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20323,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20328,
+"r": 3,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20332,
+"r": 5,
+"usage_place": null,
+"needs": [
+"디자인",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20333,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20334,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20339,
+"r": 4,
+"usage_place": "세면대",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20342,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20346,
+"r": 2,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20347,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20348,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20349,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20354,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20357,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20370,
+"r": 2,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20371,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20375,
+"r": 3,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20376,
+"r": 5,
+"usage_place": "세면대",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20377,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20379,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20386,
+"r": 5,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 20387,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20393,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20395,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20399,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20402,
+"r": 1,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"설치편의"
+],
+"pain": [
+"기대이하",
+"물빠짐느림역류",
+"배송파손"
+],
+"repeat": false
+},
+{
+"id": 20411,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20415,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20417,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"내구성",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20419,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20420,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20422,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20425,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20435,
+"r": 5,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20437,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20438,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": true
+},
+{
+"id": 20441,
+"r": 2,
+"usage_place": null,
+"needs": [
+"거름망머리카락"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20443,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20444,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20446,
+"r": 5,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20449,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20452,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20456,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20459,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20460,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20462,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20467,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20468,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20469,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"디자인",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20471,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20474,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20476,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20479,
+"r": 3,
+"usage_place": null,
+"needs": [
+"내구성",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20481,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20483,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20485,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20488,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20493,
+"r": 1,
+"usage_place": "베란다다용도실",
+"needs": [],
+"pain": [
+"물빠짐느림역류",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 20495,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20500,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20502,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20507,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20510,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 20517,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20518,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20522,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20531,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20533,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20535,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20538,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20539,
+"r": 1,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": true
+},
+{
+"id": 20545,
+"r": 3,
+"usage_place": null,
+"needs": [
+"내구성",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"설치어려움헐거움",
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 20546,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20551,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20552,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20561,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20567,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20571,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20574,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20575,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20578,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20587,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20589,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20591,
+"r": 4,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20594,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20598,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20602,
+"r": 1,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20605,
+"r": 4,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20608,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20612,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20615,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20616,
+"r": 5,
+"usage_place": "세면대",
+"needs": [
+"냄새차단",
+"디자인",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20618,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20624,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20628,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"사이즈호환"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20634,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20637,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 20640,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20647,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20650,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20653,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20654,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20658,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20664,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20665,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20666,
+"r": 1,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 20667,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20669,
+"r": 3,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20671,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20672,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20673,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20677,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20678,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20679,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 20686,
+"r": 2,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20691,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20697,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20700,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20702,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 20709,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"디자인"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20711,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20715,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20716,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20721,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20725,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20726,
+"r": 5,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20727,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20730,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20731,
+"r": 2,
+"usage_place": null,
+"needs": [
+"거름망머리카락"
+],
+"pain": [
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 20733,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20735,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20740,
+"r": 4,
+"usage_place": "싱크대",
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20741,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20743,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20744,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘"
+],
+"repeat": true
+},
+{
+"id": 20747,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20750,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20756,
+"r": 4,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20761,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20762,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20767,
+"r": 1,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20769,
+"r": 3,
+"usage_place": "베란다다용도실",
+"needs": [
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"냄새안막힘",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20773,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 20778,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [
+"설치편의"
+],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 20781,
+"r": 4,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20801,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20806,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20811,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20812,
+"r": 1,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"배송파손",
+"사이즈안맞음",
+"설치어려움헐거움"
+],
+"repeat": false
+},
+{
+"id": 20817,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20821,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20822,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 20823,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20825,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20827,
+"r": 1,
+"usage_place": "주방",
+"needs": [],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 20836,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20838,
+"r": 2,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20841,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20850,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"사이즈호환"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20852,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20853,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20854,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20859,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"거름망머리카락",
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20860,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"디자인",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20862,
+"r": 3,
+"usage_place": "화장실바닥",
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20865,
+"r": 4,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20867,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 20879,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20880,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20881,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20882,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20896,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20905,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20906,
+"r": 3,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20909,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20913,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20914,
+"r": 1,
+"usage_place": null,
+"needs": [
+"벌레차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20916,
+"r": 5,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20918,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20920,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20921,
+"r": 3,
+"usage_place": null,
+"needs": [
+"내구성",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"냄새안막힘",
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 20923,
+"r": 2,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"설치편의"
+],
+"pain": [
+"냄새안막힘",
+"소재불량악취"
+],
+"repeat": false
+},
+{
+"id": 20924,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20926,
+"r": 5,
+"usage_place": "싱크대",
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20932,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"냄새안막힘",
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 20933,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 20934,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20935,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20936,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 20939,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20940,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20944,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20945,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20946,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": true
+},
+{
+"id": 20947,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20949,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20953,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20955,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20961,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20964,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 20965,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20966,
+"r": 3,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20967,
+"r": 3,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [
+"사이즈안맞음"
+],
+"repeat": false
+},
+{
+"id": 20969,
+"r": 5,
+"usage_place": null,
+"needs": [
+"거름망머리카락",
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20970,
+"r": 5,
+"usage_place": null,
+"needs": [
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20974,
+"r": 5,
+"usage_place": "베란다다용도실",
+"needs": [
+"냄새차단",
+"디자인",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20976,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 20979,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20989,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20990,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 20996,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 21002,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21005,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21009,
+"r": 5,
+"usage_place": null,
+"needs": [
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21010,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"디자인",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21016,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21018,
+"r": 3,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 21019,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21023,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"내구성",
+"냄새차단",
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21029,
+"r": 5,
+"usage_place": null,
+"needs": [],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21031,
+"r": 5,
+"usage_place": null,
+"needs": [
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21041,
+"r": 5,
+"usage_place": "주방",
+"needs": [
+"냄새차단",
+"물빠짐소음",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21046,
+"r": 4,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21048,
+"r": 1,
+"usage_place": null,
+"needs": [
+"사이즈호환",
+"설치편의"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+},
+{
+"id": 21051,
+"r": 5,
+"usage_place": null,
+"needs": [
+"내구성"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21052,
+"r": 1,
+"usage_place": null,
+"needs": [
+"냄새차단"
+],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 21053,
+"r": 1,
+"usage_place": null,
+"needs": [
+"디자인",
+"설치편의"
+],
+"pain": [
+"냄새안막힘"
+],
+"repeat": false
+},
+{
+"id": 21054,
+"r": 5,
+"usage_place": null,
+"needs": [
+"냄새차단",
+"벌레차단",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21060,
+"r": 5,
+"usage_place": null,
+"needs": [
+"물빠짐소음",
+"설치편의"
+],
+"pain": [],
+"repeat": true
+},
+{
+"id": 21062,
+"r": 5,
+"usage_place": "화장실바닥",
+"needs": [
+"거름망머리카락",
+"냄새차단",
+"물빠짐소음",
+"사이즈호환",
+"설치편의"
+],
+"pain": [],
+"repeat": false
+},
+{
+"id": 21063,
+"r": 1,
+"usage_place": null,
+"needs": [],
+"pain": [
+"기대이하"
+],
+"repeat": false
+},
+{
+"id": 21069,
+"r": 1,
+"usage_place": "화장실바닥",
+"needs": [
+"벌레차단"
+],
+"pain": [
+"물빠짐느림역류"
+],
+"repeat": false
+}
+]
