@@ -79,9 +79,9 @@ def _agg(sheet,tag,cAB,seen):
                 except: pass
         w.close()
 _agg('입출고비','입출고비 정산',24,set()); _agg('배송비','배송비 정산',23,set())
-# 그로스 이익 = 정산대상 − 원가 − 물류
+# 그로스 이익 = 정산대상 − 원가 − 물류 (원 단위 확정 — 소수점 반올림 차이 방지)
 for nm,v in data['쿠팡(로켓그로스)'].items():
-    io,sp=GLOGI.get(nm,[0,0]); v[2]=v[1]-v[3]-(io+sp)
+    io,sp=GLOGI.get(nm,[0,0]); v[2]=round(v[1]-v[3]-(io+sp))
 # 라이플로우 (일비아+클린햇)
 cost=json.load(open('/Users/macmini_ky/ClaudeAITeam/accounting/cost_master_2026.json'))
 CMAP={'하트 식기세척기 세제':'하트식세기','캡슐 표백제':'캡슐표백제','건조기시트':'건조기시트','캡슐세제':'캡슐세제','섬유탈취제 400ml':'섬유탈취제 400','섬유탈취제 100ml':'섬유탈취제 100','얼룩제거제 100ml':'얼룩제거제100','수세미':'수세미'}
@@ -311,4 +311,4 @@ for row in FEE:
 ws6.cell(row=r+1,column=1,value='※ 수수료율·정산일정은 대표님 확인값으로 수정. 그로스 물류·광고는 별도(시트2/4).')
 for col,w in zip('ABCDEF',[18,12,16,16,20,20]): ws6.column_dimensions[col].width=w
 
-OUT=f"{B}/[시안] 2026.06 온라인 매출정산_종합.xlsx"; wb.save(OUT); print("\n✅ 저장 v5")
+OUT=f"{B}/[확정] 2026.06 온라인 매출정산_종합.xlsx"; wb.save(OUT); print("\n✅ 저장 (2026-07-14 마감 확정본)")
