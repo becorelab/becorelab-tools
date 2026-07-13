@@ -119,7 +119,7 @@ for mn in MONTHS:
     ws2.cell(row=r,column=3).number_format='0.0%'; ws2.cell(row=r,column=5).number_format='0.0%'
     prev=rv; r+=1
 for col,w in zip('ABCDE',[8,14,10,14,8]): ws2.column_dimensions[col].width=w
-ws2.cell(row=r+1,column=1,value='※ 매출=매출+배송(총). 5월 이익은 시트3 기준(79.48M); 마감 확정 77.24M(별도 보고서). 6월 그로스 물류 반영.')
+ws2.cell(row=r+1,column=1,value='※ 매출=매출+배송(총). 5월 이익 77,235,458 마감확정 반영(2026-07-06, 카페24·PG 조정). 6월 그로스 물류 반영, 쏘핑수수료·11번가광고비 미확정.')
 
 OUT=f"{B}/[마스터] 2026 온라인 매출정산_통합.xlsx"
 wb.save(OUT)
