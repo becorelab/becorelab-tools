@@ -84,7 +84,7 @@ for nm,v in data['쿠팡(로켓그로스)'].items():
     io,sp=GLOGI.get(nm,[0,0]); v[2]=v[1]-v[3]-(io+sp)
 # 라이플로우 (일비아+클린햇)
 cost=json.load(open('/Users/macmini_ky/ClaudeAITeam/accounting/cost_master_2026.json'))
-CMAP={'하트 식기세척기 세제':'하트식세기','캡슐 표백제':'캡슐표백제','건조기시트':'건조기시트','캡슐세제':'캡슐세제','섬유탈취제 400ml':'섬유탈취제 400','섬유탈취제 100ml':'섬유탈취제 100','얼룩제거제 100ml':'얼룩제거제 100','수세미':'수세미'}
+CMAP={'하트 식기세척기 세제':'하트식세기','캡슐 표백제':'캡슐표백제','건조기시트':'건조기시트','캡슐세제':'캡슐세제','섬유탈취제 400ml':'섬유탈취제 400','섬유탈취제 100ml':'섬유탈취제 100','얼룩제거제 100ml':'얼룩제거제100','수세미':'수세미'}
 CHC={'변기세정제 케이스형 2개입':4180,'변기세정제 코인형 12개입':4180,'숯 제습제 10개입':6380}
 P="/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/02. 매출 정산/26.06/06월 라이플로우/06월 라이플로우_260610.xlsx"
 wb=openpyxl.load_workbook(P,read_only=True,data_only=True)
@@ -106,10 +106,13 @@ GROUPS=OrderedDict([("자사몰",["카페24"]),("네이버",["스마트스토어
  ("오픈마켓",["지마켓","옥션","11번가"]),("종합몰",["SSG","GS샵","오늘의집","에이블리","카카오선물하기","카카오쇼핑하기"]),
  ("수동발주",["라이플로우","PG컴퍼니","두버","에드가"])])
 SHIP={"카페24":1326000,"스마트스토어":1578000,"지마켓":37713,"라이플로우":537000,"PG컴퍼니":57000,"두버":153000,"에드가":6000}
-AD={"카페24":13030612,"쿠팡(로켓배송)":16000000,"쿠팡(로켓그로스)":3600061}
-MAY5={'카페24':(28487162,18915330.6),'스마트스토어':(12666380,9216508.3),'카카오선물하기':(105920,73184),'쿠팡(로켓배송)':(70192906,35768629.2),'옥션':(696962,461422.3),'지마켓':(2561213,1683646.4),'11번가':(1724963,1063669.4),'SSG':(122185,90832.8),'오늘의집':(125172,95497.1),'GS샵':(66720,40770),'에이블리':(21606,0),'에드가':(117840,54450),'두버':(908420,335208),'PG컴퍼니':(1324720,1212927),'라이플로우':(845335,309672.8),'쿠팡(로켓그로스)':(19303923,10110963),'카카오쇼핑하기':(0,0)}
+# 광고비 (2026-07-14 마감 확정, 대표님 제공): 로켓 14,263,512 / 메타 13,030,612 / 스스 = 쏘핑수수료 8,300,292 + 애드부스트 1,292,283 + 검색광고 1,280,511
+AD={"카페24":13030612,"쿠팡(로켓배송)":14263512,"쿠팡(로켓그로스)":3600061,"스마트스토어":8300292+1292283+1280511,"11번가":157409}
+# 5월 확정값 (2026-07-06 마감: 카페24 차감4행·사은품·샘플키트·마케팅허수 / PG 수량 292 정정 반영)
+MAY5={'카페24':(28487162,17773951),'스마트스토어':(12666380,9216508.3),'카카오선물하기':(105920,73184),'쿠팡(로켓배송)':(70192906,35768629.2),'옥션':(696962,461422.3),'지마켓':(2561213,1683646.4),'11번가':(1724963,1063669.4),'SSG':(122185,90832.8),'오늘의집':(125172,95497.1),'GS샵':(66720,40770),'에이블리':(21606,0),'에드가':(117840,54450),'두버':(908420,335208),'PG컴퍼니':(1324720,109164),'라이플로우':(845335,309672.8),'쿠팡(로켓그로스)':(19303923,10110963),'카카오쇼핑하기':(0,0)}
 rev_=lambda ch:sum(v[1] for v in data.get(ch,{}).values())
-prof_=lambda ch:sum(v[2] for v in data.get(ch,{}).values())
+# 이익 = 채널파일 이익 + 배송수익 (총매출과 대칭, 2026-07-14 대표님 확정. 카페24는 파일 이익에 배송 기포함이라 제외)
+prof_=lambda ch:sum(v[2] for v in data.get(ch,{}).values())+(SHIP.get(ch,0) if ch!='카페24' else 0)
 cost_=lambda ch:sum(v[3] for v in data.get(ch,{}).values())
 ship_=lambda ch:SHIP.get(ch,0)
 tot_=lambda ch:rev_(ch)+ship_(ch)   # 총매출=매출+배송
@@ -158,16 +161,20 @@ for gp,chs in GROUPS.items():
         for c in range(1,11): ws2.cell(row=r,column=c).fill=SUB; ws2.cell(row=r,column=c).font=Font(bold=True)
         for c in [5,6,7,8,9]: m(ws2.cell(row=r,column=c))
         pc(ws2.cell(row=r,column=10)); r+=1
-ws2.append(['','■ 비코어랩 종합','','',sum(rev_(c) for chs in GROUPS.values() for c in chs),sum(SHIP.values()),GTr,sum(cost_(c) for chs in GROUPS.values() for c in chs),GTp,(GTp/GTr)])
+ws2.append(['','■ 비코어랩 종합','','',sum(rev_(c) for chs in GROUPS.values() for c in chs),'',sum(SHIP.values()),sum(cost_(c) for chs in GROUPS.values() for c in chs),GTp,(GTp/GTr)])
 for c in range(1,11): ws2.cell(row=r,column=c).fill=TOT; ws2.cell(row=r,column=c).font=Font(bold=True,size=11)
 for c in [5,6,7,8,9]: m(ws2.cell(row=r,column=c))
-pc(ws2.cell(row=r,column=10)); r+=2
+pc(ws2.cell(row=r,column=10)); r+=1
+ws2.append(['','   총매출 (매출+배송)','','','','',GTr,'','',''])
+ws2.cell(row=r,column=2).font=Font(bold=True); m(ws2.cell(row=r,column=7)); ws2.cell(row=r,column=7).font=Font(bold=True); r+=2
 ws2.cell(row=r,column=1,value='◆ 전체 이익 차감 (물류 운임 — 대표님 기입)').font=Font(bold=True,size=11); r+=1
 ws2.cell(row=r,column=2,value='항목'); ws2.cell(row=r,column=3,value='금액(직접입력)')
 for c in [2,3]: ws2.cell(row=r,column=c).fill=HF; ws2.cell(row=r,column=c).font=HFONT
 r+=1; ts=r
-for it in ['바이피엘 운임','밀크런 운임','스타배송 운임','기타']:
-    ws2.cell(row=r,column=2,value=it); ws2.cell(row=r,column=3).fill=AS_; m(ws2.cell(row=r,column=3)); r+=1
+# 6월 운임 확정 (대표님 2026-07-14): 바이피엘 9,475,160+140,250 / 밀크런 311,600 / 스타배송 149,820
+FREIGHT={'바이피엘 운임':9615410,'밀크런 운임':311600,'스타배송 운임':149820,'기타':None}
+for it,fv in FREIGHT.items():
+    ws2.cell(row=r,column=2,value=it); ws2.cell(row=r,column=3,value=fv); ws2.cell(row=r,column=3).fill=AS_; m(ws2.cell(row=r,column=3)); r+=1
 ws2.cell(row=r,column=2,value='운임 차감 합계').font=Font(bold=True); ws2.cell(row=r,column=3,value=f'=SUM(C{ts}:C{r-1})').font=Font(bold=True); m(ws2.cell(row=r,column=3)); r+=1
 ws2.cell(row=r,column=2,value='최종 이익 (종합−운임)').font=Font(bold=True); ws2.cell(row=r,column=3,value=f'={GTp:.0f}-C{r-1}').font=Font(bold=True); m(ws2.cell(row=r,column=3))
 for col,w in zip('ABCDEFGHIJ',[9,17,32,6,12,10,12,11,11,7]): ws2.column_dimensions[col].width=w
@@ -215,6 +222,7 @@ ws4.append(['■ 종합',GTr,GTp,adT,(adT/GTr),GTp-adT,((GTp-adT)/GTr)])
 for c in range(1,8): ws4.cell(row=r,column=c).fill=TOT; ws4.cell(row=r,column=c).font=Font(bold=True)
 for c in [2,3,4,6]: m(ws4.cell(row=r,column=c))
 pc(ws4.cell(row=r,column=5)); pc(ws4.cell(row=r,column=7))
+ws4.cell(row=r+2,column=1,value='※ 스스 광고비 = 쏘핑 공구 수수료 8,300,292(대표님 지시로 광고비 처리) + 애드부스트 1,292,283 + 검색광고 1,280,511. 11번가 = 후불광고비. 로켓 14,263,512 = 대표님 확정(7/14).')
 for col,w in zip('ABCDEFG',[18,13,12,12,8,13,10]): ws4.column_dimensions[col].width=w
 # 시트5 증감: 6월 매출 내림차순 정렬 + 그래프 2종
 ws5=wb.create_sheet('채널별 증감'); ws5['A1']='채널별 5월 → 6월 증감'; ws5['A1'].font=Font(bold=True,size=13)

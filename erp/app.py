@@ -1070,7 +1070,7 @@ async def start_auto_sync():
 # 이 월(포함)까지는 "완전 정산월" = settlement_monthly만 사용 (기존 동작 보존).
 # 이후 월은 "채널별 정산" = 정산 있는 채널은 settlement, 나머지는 이지어드민+보정.
 # (로켓그로스 등 일부 채널만 정산되는 부분정산월 대응)
-FULLY_SETTLED_THROUGH = "2026-04"
+FULLY_SETTLED_THROUGH = "2026-06"  # 2026-07-14 6월 마감 (5·6월 전채널 settlement 적재 완료)
 
 # 정산 채널명 ↔ 이지어드민 채널명 별칭 (정산 있으면 같은 이지어드민 채널은 중복계상 방지로 스킵)
 SETTLEMENT_EZADMIN_ALIAS = {
