@@ -80,6 +80,7 @@ function navigate(page) {
     kakao: '🎁 선물 트렌드 — 카카오 선물하기 베스트',
     radar: '📡 경쟁사 레이더 — 광고 품목 경쟁사 가격추적',
     naverad: '📇 네이버 광고 — 검색광고(SA)',
+    salesanalysis: '📈 매출 분석 — 정산 확정 기준 (1~6월)',
     sourcing: '🔍 소싱박스',
     users: '사용자 관리',
   }[page] || '';
@@ -97,6 +98,7 @@ function navigate(page) {
     kakao: () => loadKakao(),
     radar: loadRadar,
     naverad: () => loadNaverAd(),
+    salesanalysis: () => loadSalesAnalysis(),
   };
   if (loaders[page]) loaders[page]();
 }
@@ -2707,3 +2709,122 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadLoginStats();
 });
+
+
+// ── 매출 분석 (2026-07-15) — /api/analysis/* · 정산 확정 데이터 ──
+let _saMonthlyChart=null,_saGroupChart=null,_saDrillChart=null,_saData=null,_saDrillState={};
+const _saWon=v=>v==null?'-':Math.round(v).toLocaleString();
+const _saMan=v=>(v/10000).toLocaleString(undefined,{maximumFractionDigits:0})+'만';
+
+async function loadSalesAnalysis(){
+  const d=await api('/api/analysis/monthly');
+  _saData=d;
+  renderSaOverview();
+  // 드릴다운 월 셀렉터
+  const sel=document.getElementById('sa-drill-ym');
+  sel.innerHTML=d.months.map(m=>`<option value="${m.ym}">${m.ym}</option>`).join('');
+  sel.value=d.months[d.months.length-1].ym;
+}
+
+function switchSaView(v){
+  ['overview','drill','plan'].forEach(x=>{
+    document.getElementById('sa-view-'+x).classList.toggle('hidden',x!==v);
+    document.getElementById('sav-'+x).classList.toggle('btn-primary',x===v);
+  });
+  if(v==='drill') saDrillChannels();
+  if(v==='plan') loadSaPlan();
+}
+
+function renderSaOverview(){
+  const ms=_saData.months;
+  // 콤보차트: 매출 막대 + 순마진율 라인
+  const c1=document.getElementById('sa-monthly-chart');
+  if(_saMonthlyChart){_saMonthlyChart.destroy();}
+  _saMonthlyChart=new Chart(c1,{type:'bar',
+    data:{labels:ms.map(m=>m.ym.slice(5)+'월'),datasets:[
+      {label:'총매출',data:ms.map(m=>m.revenue),backgroundColor:'#5b8def',borderRadius:6,yAxisID:'y'},
+      {label:'순이익(VAT별도)',data:ms.map(m=>m.profit_net),backgroundColor:'#8fd19e',borderRadius:6,yAxisID:'y'},
+      {label:'순마진율(%)',data:ms.map(m=>m.margin_net),type:'line',borderColor:'#e08a00',backgroundColor:'#e08a00',yAxisID:'y2',tension:.3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      scales:{y:{ticks:{callback:v=>_saMan(v)}},y2:{position:'right',grid:{display:false},min:0,max:70,ticks:{callback:v=>v+'%'}}},
+      plugins:{tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.dataset.yAxisID==='y2'?ctx.raw+'%':_saWon(ctx.raw)+'원')}}}}});
+  // 그룹 스택
+  const groups=_saData.groups;const yms=ms.map(m=>m.ym);
+  const palette={'자사몰':'#e58f8f','네이버':'#4caf7d','쿠팡':'#f0b35a','오픈마켓':'#8fa8e0','종합몰':'#b79ad1','수동발주':'#9aa5ad','기타':'#ccc'};
+  const c2=document.getElementById('sa-group-chart');
+  if(_saGroupChart){_saGroupChart.destroy();}
+  _saGroupChart=new Chart(c2,{type:'bar',
+    data:{labels:yms.map(y=>y.slice(5)+'월'),datasets:Object.keys(groups).map(g=>({label:g,data:yms.map(y=>groups[g][y]||0),backgroundColor:palette[g]||'#ccc',stack:'s'}))},
+    options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:v=>_saMan(v)}}},
+      plugins:{tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+_saWon(ctx.raw)+'원'}}}}});
+  // 월별 표
+  let html='';let prev=null;
+  ms.forEach(m=>{
+    const mom=prev?((m.revenue-prev)/prev*100):null;
+    html+=`<tr><td>${m.ym}</td><td class="text-right">${_saWon(m.revenue)}</td><td class="text-right">${_saWon(m.profit_gross)}</td><td class="text-right"><b>${_saWon(m.profit_net)}</b></td><td class="text-right">${m.margin_net}%</td><td class="text-right" style="color:${mom==null?'#999':mom>=0?'#1a8f3c':'#d63a3a'}">${mom==null?'-':(mom>=0?'+':'')+mom.toFixed(1)+'%'}</td></tr>`;
+    prev=m.revenue;
+  });
+  document.getElementById('sa-monthly-tbody').innerHTML=html;
+}
+
+async function saDrillChannels(){
+  const ym=document.getElementById('sa-drill-ym').value;
+  _saDrillState={level:'channels',ym};
+  const d=await api('/api/analysis/drill?ym='+ym);
+  document.getElementById('sa-drill-crumb').textContent=ym+' · 채널별';
+  document.getElementById('sa-drill-back').classList.add('hidden');
+  document.getElementById('sa-drill-chartwrap').classList.add('hidden');
+  document.getElementById('sa-drill-thead').innerHTML='<tr><th>채널</th><th>그룹</th><th class="text-right">수량</th><th class="text-right">총매출</th><th class="text-right">이익</th><th class="text-right">마진율</th><th class="text-right">전월 대비</th></tr>';
+  document.getElementById('sa-drill-tbody').innerHTML=d.items.map(i=>
+    `<tr style="cursor:pointer" onclick="saDrillProducts('${i.channel.replace(/'/g,"\\'")}')"><td><b>${i.channel}</b></td><td>${i.group}</td><td class="text-right">${_saWon(i.qty)}</td><td class="text-right">${_saWon(i.revenue)}</td><td class="text-right">${_saWon(i.profit)}</td><td class="text-right">${i.margin}%</td><td class="text-right" style="color:${i.rev_diff>=0?'#1a8f3c':'#d63a3a'}">${(i.rev_diff>=0?'+':'')+_saWon(i.rev_diff)}</td></tr>`).join('');
+}
+
+async function saDrillProducts(channel){
+  const ym=_saDrillState.ym||document.getElementById('sa-drill-ym').value;
+  _saDrillState={level:'products',ym,channel};
+  const d=await api('/api/analysis/drill?ym='+ym+'&channel='+encodeURIComponent(channel));
+  document.getElementById('sa-drill-crumb').textContent=ym+' · '+channel+' · 품목별';
+  document.getElementById('sa-drill-back').classList.remove('hidden');
+  document.getElementById('sa-drill-chartwrap').classList.add('hidden');
+  document.getElementById('sa-drill-thead').innerHTML='<tr><th>품목</th><th class="text-right">수량</th><th class="text-right">매출</th><th class="text-right">원가</th><th class="text-right">이익</th><th class="text-right">마진율</th><th class="text-right">전월 대비</th></tr>';
+  document.getElementById('sa-drill-tbody').innerHTML=d.items.map(i=>
+    `<tr style="cursor:pointer" onclick="saDrillProduct('${i.product.replace(/'/g,"\\'")}')"><td>${i.product}</td><td class="text-right">${_saWon(i.qty)}</td><td class="text-right">${_saWon(i.revenue)}</td><td class="text-right">${_saWon(i.cost)}</td><td class="text-right">${_saWon(i.profit)}</td><td class="text-right">${i.margin}%</td><td class="text-right" style="color:${i.rev_diff>=0?'#1a8f3c':'#d63a3a'}">${(i.rev_diff>=0?'+':'')+_saWon(i.rev_diff)}</td></tr>`).join('');
+}
+
+async function saDrillProduct(product){
+  _saDrillState={level:'product',ym:_saDrillState.ym,channel:_saDrillState.channel,product};
+  const d=await api('/api/analysis/drill?product='+encodeURIComponent(product));
+  document.getElementById('sa-drill-crumb').textContent='📦 '+product+' · 월×채널 추적';
+  document.getElementById('sa-drill-back').classList.remove('hidden');
+  document.getElementById('sa-drill-thead').innerHTML='<tr><th>월</th><th>채널</th><th class="text-right">수량</th><th class="text-right">매출</th><th class="text-right">이익</th></tr>';
+  document.getElementById('sa-drill-tbody').innerHTML=d.items.map(i=>
+    `<tr><td>${i.ym}</td><td>${i.channel}</td><td class="text-right">${_saWon(i.qty)}</td><td class="text-right">${_saWon(i.revenue)}</td><td class="text-right">${_saWon(i.profit)}</td></tr>`).join('');
+  // 월합 차트
+  const byYm={};d.items.forEach(i=>{byYm[i.ym]=(byYm[i.ym]||0)+i.revenue;});
+  const yms=Object.keys(byYm).sort();
+  document.getElementById('sa-drill-chartwrap').classList.remove('hidden');
+  const cv=document.getElementById('sa-drill-chart');
+  if(_saDrillChart){_saDrillChart.destroy();}
+  _saDrillChart=new Chart(cv,{type:'bar',data:{labels:yms.map(y=>y.slice(5)+'월'),datasets:[{label:product+' 매출(전채널)',data:yms.map(y=>byYm[y]),backgroundColor:'#5b8def',borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>_saMan(v)}}},plugins:{tooltip:{callbacks:{label:ctx=>_saWon(ctx.raw)+'원'}}}}});
+}
+
+function saDrillBack(){
+  if(_saDrillState.level==='product'&&_saDrillState.channel) saDrillProducts(_saDrillState.channel);
+  else saDrillChannels();
+}
+
+async function loadSaPlan(){
+  const f=await api('/api/analysis/forecast');
+  const p=await api('/api/analysis/products');
+  const card=(t,v,sub)=>`<div style="background:#fff;border:1px solid var(--line,#eceae6);border-radius:14px;padding:16px 18px"><div style="font-size:12px;color:#888">${t}</div><div style="font-size:22px;font-weight:700;margin:4px 0">${v}</div><div style="font-size:11px;color:#aaa">${sub||''}</div></div>`;
+  const prog=(f.day/f.days_in_month*100).toFixed(0);
+  document.getElementById('sa-plan-cards').innerHTML=
+    card(`${f.ym} 누적 (잠정)`, _saMan(f.mtd)+'원', `${f.day}/${f.days_in_month}일 경과 (${prog}%)`)+
+    card('월말 런레이트 전망', _saMan(f.runrate)+'원', '단순 일평균 × 월일수')+
+    card(`최근 확정월 (${f.last_confirmed.ym})`, _saMan(f.last_confirmed.revenue)+'원', '순이익 '+_saMan(f.last_confirmed.profit_net)+'원')+
+    card('전망 vs 전월 확정', ((f.runrate/f.last_confirmed.revenue-1)*100).toFixed(1)+'%', f.note);
+  document.getElementById('sa-plan-tbody').innerHTML=p.items.slice(0,15).map(i=>
+    `<tr style="cursor:pointer" onclick="switchSaView('drill');saDrillProduct('${i.product.replace(/'/g,"\\'")}')"><td>${i.product}</td><td class="text-right">${_saWon(i.qty)}</td><td class="text-right">${_saWon(i.revenue)}</td><td class="text-right">${_saWon(i.profit)}</td><td class="text-right">${i.revenue?(i.profit/i.revenue*100).toFixed(1):0}%</td></tr>`).join('');
+}

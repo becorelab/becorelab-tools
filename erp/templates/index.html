@@ -216,6 +216,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         매출
       </a>
+      <a class="nav-item" data-page="salesanalysis">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 3 5-6"/></svg>
+        매출 분석
+      </a>
       <a class="nav-item" data-page="orders">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         발주
@@ -641,6 +645,56 @@
     </div>
 
     <!-- 네이버 SA 광고 -->
+    <div id="page-salesanalysis" class="page hidden">
+      <div class="page-header">
+        <h2></h2>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm btn-primary" id="sav-overview" onclick="switchSaView('overview')">📊 종합</button>
+          <button class="btn btn-sm" id="sav-drill" onclick="switchSaView('drill')">🔍 드릴다운</button>
+          <button class="btn btn-sm" id="sav-plan" onclick="switchSaView('plan')">🎯 계획</button>
+        </div>
+      </div>
+
+      <!-- 종합 뷰 -->
+      <div id="sa-view-overview">
+        <div class="nsa-sec-t">📈 월별 매출 · 순이익률 <small>— 정산 확정 기준 · 순이익=부가세 제외(광고·운임 전)</small></div>
+        <div style="background:#fff;border:1px solid var(--line,#eceae6);border-radius:14px;padding:20px 22px;margin-bottom:16px">
+          <div style="height:240px;position:relative"><canvas id="sa-monthly-chart"></canvas></div>
+        </div>
+        <div class="nsa-sec-t">🧩 채널그룹별 매출 구성 <small>— 월별 스택</small></div>
+        <div style="background:#fff;border:1px solid var(--line,#eceae6);border-radius:14px;padding:20px 22px;margin-bottom:16px">
+          <div style="height:220px;position:relative"><canvas id="sa-group-chart"></canvas></div>
+        </div>
+        <div class="table-scroll">
+          <table><thead><tr><th>월</th><th class="text-right">총매출</th><th class="text-right">이익(표시)</th><th class="text-right">순이익(VAT별도)</th><th class="text-right">순마진율</th><th class="text-right">매출 MoM</th></tr></thead>
+          <tbody id="sa-monthly-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- 드릴다운 뷰 -->
+      <div id="sa-view-drill" class="hidden">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+          <select id="sa-drill-ym" onchange="saDrillChannels()" style="width:120px"></select>
+          <span id="sa-drill-crumb" style="font-size:13px;color:#666"></span>
+          <button class="btn btn-sm hidden" id="sa-drill-back" onclick="saDrillBack()">← 뒤로</button>
+        </div>
+        <div id="sa-drill-hint" style="font-size:12px;color:#999;margin-bottom:8px">채널 행을 클릭하면 품목별로, 품목 행을 클릭하면 월별 추이로 들어가요.</div>
+        <div class="table-scroll"><table><thead id="sa-drill-thead"></thead><tbody id="sa-drill-tbody"></tbody></table></div>
+        <div id="sa-drill-chartwrap" class="hidden" style="background:#fff;border:1px solid var(--line,#eceae6);border-radius:14px;padding:20px 22px;margin-top:14px">
+          <div style="height:220px;position:relative"><canvas id="sa-drill-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- 계획 뷰 -->
+      <div id="sa-view-plan" class="hidden">
+        <div class="nsa-sec-t">🎯 이번 달 진행 <small>— 이지어드민 잠정치 (정산 전)</small></div>
+        <div id="sa-plan-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px"></div>
+        <div class="nsa-sec-t">🏆 품목 누적 TOP 15 <small>— 1~6월 정산 확정 · 행 클릭 시 월별 추적</small></div>
+        <div class="table-scroll"><table><thead><tr><th>품목</th><th class="text-right">수량</th><th class="text-right">매출</th><th class="text-right">이익</th><th class="text-right">마진율</th></tr></thead>
+        <tbody id="sa-plan-tbody"></tbody></table></div>
+      </div>
+    </div>
+
     <div id="page-naverad" class="page hidden">
       <div class="page-header">
         <h2></h2>

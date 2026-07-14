@@ -2982,6 +2982,121 @@ async def naver_trend(days: int = 30, entity_id: str = ""):
     return {"items": items}
 
 
+# ── 매출 분석 (2026-07-15) — settlement_lines/profit_monthly 기반, 정산 확정 데이터 ──
+ANALYSIS_GROUPS = {
+    "자사몰": ["카페24 / 네이버페이"],
+    "네이버": ["스마트스토어"],
+    "쿠팡": ["쿠팡(로켓배송)", "쿠팡 그로스", "쿠팡"],
+    "오픈마켓": ["지마켓", "옥션", "11번가"],
+    "종합몰": ["신세계몰 (에스에스지닷컴)", "GS샵", "오늘의집", "에이블리", "카카오선물하기", "카카오쇼핑하기", "삼성카드"],
+    "수동발주": ["라이플로우", "PG컴퍼니", "두버", "에드가", "굿트리", "지엠홀딩스", "고그로우"],
+}
+
+
+def _ch_group(ch: str) -> str:
+    for g, chs in ANALYSIS_GROUPS.items():
+        if ch in chs:
+            return g
+    return "기타"
+
+
+@app.get("/api/analysis/monthly")
+async def analysis_monthly(conn=Depends(db)):
+    """월별 매출·이익·이익률 (확정 정산 기준) + 채널그룹별 매출"""
+    months = []
+    for r in conn.execute("SELECT year_month, revenue_total, profit_gross, profit_net, note FROM profit_monthly ORDER BY year_month"):
+        months.append({
+            "ym": r["year_month"], "revenue": r["revenue_total"],
+            "profit_gross": r["profit_gross"], "profit_net": r["profit_net"],
+            "margin_net": round(r["profit_net"] / (r["revenue_total"] / 1.1) * 100, 1) if r["revenue_total"] else 0,
+            "note": r["note"],
+        })
+    groups = {}
+    for r in conn.execute("SELECT year_month, channel, amount FROM settlement_monthly ORDER BY year_month"):
+        g = _ch_group(r["channel"])
+        groups.setdefault(g, {})
+        groups[g][r["year_month"]] = groups[g].get(r["year_month"], 0) + r["amount"]
+    return {"months": months, "groups": groups}
+
+
+@app.get("/api/analysis/drill")
+async def analysis_drill(ym: str = "", channel: str = "", product: str = "", conn=Depends(db)):
+    """드릴다운: ym → 채널별 / ym+channel → 품목별 / product → 월×채널별. 전월 증감 포함"""
+    def prev_ym(y):
+        yy, mm = int(y[:4]), int(y[5:7])
+        mm -= 1
+        if mm == 0:
+            yy, mm = yy - 1, 12
+        return f"{yy:04d}-{mm:02d}"
+
+    if product:
+        rows = conn.execute(
+            """SELECT year_month, channel, SUM(qty) q, SUM(revenue+shipping) rv, SUM(profit) pf
+               FROM settlement_lines WHERE product_name=? GROUP BY year_month, channel ORDER BY year_month, rv DESC""",
+            (product,)).fetchall()
+        return {"mode": "product", "product": product,
+                "items": [{"ym": r["year_month"], "channel": r["channel"], "qty": r["q"], "revenue": r["rv"], "profit": r["pf"]} for r in rows]}
+
+    if ym and channel:
+        cur = {r["product_name"]: r for r in conn.execute(
+            """SELECT product_name, SUM(qty) q, SUM(revenue+shipping) rv, SUM(cost) co, SUM(profit) pf
+               FROM settlement_lines WHERE year_month=? AND channel=? GROUP BY product_name""", (ym, channel))}
+        prv = {r["product_name"]: r for r in conn.execute(
+            """SELECT product_name, SUM(revenue+shipping) rv, SUM(profit) pf
+               FROM settlement_lines WHERE year_month=? AND channel=? GROUP BY product_name""", (prev_ym(ym), channel))}
+        items = []
+        for nm, r in cur.items():
+            p = prv.get(nm)
+            items.append({"product": nm, "qty": r["q"], "revenue": r["rv"], "cost": r["co"], "profit": r["pf"],
+                          "margin": round(r["pf"] / r["rv"] * 100, 1) if r["rv"] else 0,
+                          "rev_prev": p["rv"] if p else 0, "rev_diff": r["rv"] - (p["rv"] if p else 0)})
+        items.sort(key=lambda x: -x["revenue"])
+        return {"mode": "products", "ym": ym, "channel": channel, "items": items}
+
+    if ym:
+        cur = {r["channel"]: r for r in conn.execute(
+            """SELECT channel, SUM(qty) q, SUM(revenue+shipping) rv, SUM(profit) pf
+               FROM settlement_lines WHERE year_month=? GROUP BY channel""", (ym,))}
+        prv = {r["channel"]: r for r in conn.execute(
+            """SELECT channel, SUM(revenue+shipping) rv FROM settlement_lines WHERE year_month=? GROUP BY channel""", (prev_ym(ym),))}
+        items = []
+        for ch, r in cur.items():
+            p = prv.get(ch)
+            items.append({"channel": ch, "group": _ch_group(ch), "qty": r["q"], "revenue": r["rv"], "profit": r["pf"],
+                          "margin": round(r["pf"] / r["rv"] * 100, 1) if r["rv"] else 0,
+                          "rev_prev": p["rv"] if p else 0, "rev_diff": r["rv"] - (p["rv"] if p else 0)})
+        items.sort(key=lambda x: -x["revenue"])
+        return {"mode": "channels", "ym": ym, "items": items}
+
+    return {"error": "ym 또는 product 필요"}
+
+
+@app.get("/api/analysis/products")
+async def analysis_products(conn=Depends(db)):
+    """품목별 전 기간 요약 (매출 상위순) — 드릴다운 진입용"""
+    rows = conn.execute(
+        """SELECT product_name, SUM(qty) q, SUM(revenue+shipping) rv, SUM(profit) pf, COUNT(DISTINCT year_month) mcnt
+           FROM settlement_lines WHERE product_name NOT IN ('[마감조정]','[배송수익]')
+           GROUP BY product_name ORDER BY rv DESC LIMIT 100""").fetchall()
+    return {"items": [{"product": r["product_name"], "qty": r["q"], "revenue": r["rv"], "profit": r["pf"], "months": r["mcnt"]} for r in rows]}
+
+
+@app.get("/api/analysis/forecast")
+async def analysis_forecast(conn=Depends(db)):
+    """이번 달 진행 현황(이지어드민 잠정) + 런레이트 전망 + 최근 확정월 대비"""
+    import calendar
+    today = datetime.now()
+    ym = today.strftime("%Y-%m")
+    day = today.day
+    cur = conn.execute("SELECT SUM(total_amount) FROM sales WHERE sale_date LIKE ?", (f"{ym}%",)).fetchone()[0] or 0
+    dim = calendar.monthrange(today.year, today.month)[1]
+    runrate = cur / max(day - 1, 1) * dim if day > 1 else cur
+    last = conn.execute("SELECT year_month, revenue_total, profit_net FROM profit_monthly ORDER BY year_month DESC LIMIT 1").fetchone()
+    return {"ym": ym, "day": day, "days_in_month": dim, "mtd": cur, "runrate": round(runrate),
+            "last_confirmed": {"ym": last["year_month"], "revenue": last["revenue_total"], "profit_net": last["profit_net"]} if last else None,
+            "note": "이번 달 = 이지어드민 잠정치(정산 전). 확정은 월 마감 후."}
+
+
 # ── 시작 시 DB 초기화 ──
 @app.on_event("startup")
 async def startup():
