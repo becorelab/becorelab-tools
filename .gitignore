@@ -121,3 +121,7 @@ sourcing/helpstore_api_responses.json
 .supplyhub_expired
 sourcing/1688_last_result.json
 config.py.bak.*
+# ACG 교육영상·whisper 모델 (대용량 — 전사 txt만 커밋)
+logistics/acg_docs/*.mp4
+logistics/acg_docs/models/
+logistics/acg_docs/frames/
