@@ -293,19 +293,26 @@ def clear_popups(page):
     판매처 테이블 등 본문은 z-index 낮아 보존됨."""
     page.evaluate("try { $('.blockUI').remove(); } catch(e) {}")
     page.evaluate("""
-        // ① 알려진 팝업 클래스/ID
-        document.querySelectorAll('.dim, .modal-pop, .modal-dialog, [id^=modalRequired]')
+        // ① 광고/공지 팝업만 콕 집어 제거 (⚠️ .modal-dialog 통째 제거 금지 — 업로드 모달도 그 클래스라 죽음, 2026-07-16 교훈)
+        document.querySelectorAll('#pagecode-popup, .pagecode-popup-cont, [id^=modalRequired]')
             .forEach(el => el.remove());
-        // ② 화면을 크게 덮는 z-index 높은 fixed/absolute 오버레이 (광고 팝업 포함)
+        // dim 오버레이는 위 광고팝업이 남긴 것만 (업로드 모달의 dim은 보존 위해 光告 제거 후에만)
+        document.querySelectorAll('.dim').forEach(el => {
+            // 업로드 모달(modal-dialog)이 살아있으면 그 dim은 건드리지 않음
+            if (!document.querySelector('.modal-dialog')) el.remove();
+        });
+        // ② 광고/공지 팝업의 '닫기' 버튼을 실제 클릭 (DOM 제거로 안 죽는 GLOBOX/우체국 광고 대응)
+        document.querySelectorAll('.popup-close, .page-close, .aside-close, [class*=popup-close], [class*=btn-close]')
+            .forEach(el => { try { if (el.offsetWidth > 0) el.click(); } catch(e) {} });
+        // ③ 화면을 크게 덮는 z-index 높은 fixed/absolute 오버레이 제거
         document.querySelectorAll('div, iframe').forEach(el => {
             const s = getComputedStyle(el);
             const r = el.getBoundingClientRect();
             const z = parseInt(s.zIndex) || 0;
             const covers = r.width > 250 && r.height > 200;
             const floating = (s.position === 'fixed' || s.position === 'absolute');
-            // 광고 iframe / 높은 z-index 부유 오버레이만 (본문 테이블은 position:static이라 안 걸림)
             if (covers && floating && z >= 1000) el.remove();
-            if (el.tagName === 'IFRAME' && /ad|banner|promo|epost|notice/i.test(el.src || '')) el.remove();
+            if (el.tagName === 'IFRAME' && /ad|banner|promo|epost|notice|globox/i.test(el.src || '')) el.remove();
         });
         document.body.style.overflow = 'auto';
     """)
