@@ -22,8 +22,10 @@ WING_AUTH_URL = "https://advertising.coupang.com/user/login?_cap_client=WING&ret
 REPORT_PAGE_URL = f"{AD_CENTER_URL}/marketing-reporting/billboard/reports/pa"
 
 
-def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10):
-    """로그인 → 보고서 목록 스캔 → 전체 다운로드"""
+def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10,
+                           create_first=False, create_date_from=None, create_date_to=None):
+    """로그인 → (옵션: 보고서 생성) → 보고서 목록 스캔 → 전체 다운로드
+    create_first=True: 같은 로그인 세션으로 어제자(또는 지정기간) 보고서를 먼저 생성 (논스톱 파이프라인)"""
     acct = ACCOUNTS[account_key]
     print(f"[{acct['name']}] 쿠팡 광고 보고서 자동 다운로드")
     print(f"  headless={headless}, max_reports={max_reports}")
@@ -116,6 +118,18 @@ def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10
             return []
 
         print(f"  ✅ 로그인 성공 → {page.url}")
+
+        # 1.5) (옵션) 보고서 생성 — 같은 세션 재활용 (2026-07-16, 생성→다운→분석 논스톱)
+        if create_first:
+            from coupang_ad_create import create_in_page
+            from datetime import date as _date, timedelta as _td
+            _yday = (_date.today() - _td(days=1)).isoformat()
+            _from = create_date_from or _yday
+            _to = create_date_to or _yday
+            print(f"\n[1.5/3] 보고서 생성: {_from} ~ {_to} (일별/전체캠페인)")
+            ok, msg = create_in_page(page, _from, _to, wait_done=True)
+            print(("  ✅ " if ok else "  ⚠️ ") + msg)
+            # 생성 실패해도 기존 보고서 다운로드는 계속 진행
 
         # 2) 보고서 페이지
         print(f"\n[2/3] 보고서 페이지...")
@@ -232,6 +246,7 @@ def excel_to_json(xlsx_path, output_dir=None):
 if __name__ == "__main__":
     headless = "--headed" not in sys.argv
     convert = "--convert" in sys.argv or "--json" in sys.argv
+    create_first = "--create" in sys.argv  # 어제자 보고서 생성 후 다운로드 (논스톱)
     account = "chaewoom"
     for arg in sys.argv[1:]:
         if not arg.startswith("-"):
@@ -239,11 +254,11 @@ if __name__ == "__main__":
             break
 
     print(f"=== 쿠팡 광고 보고서 자동화 ===")
-    print(f"    계정: {account}, headless: {headless}")
+    print(f"    계정: {account}, headless: {headless}, create: {create_first}")
     print(f"    시간: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
 
-    downloaded = login_and_download_all(account, headless=headless)
+    downloaded = login_and_download_all(account, headless=headless, create_first=create_first)
 
     if downloaded and convert:
         print(f"\n=== JSON 변환 ===")
