@@ -10,6 +10,7 @@ import os
 import base64
 import tempfile
 import io
+import requests
 from datetime import date, timedelta
 from playwright.sync_api import sync_playwright
 
@@ -63,50 +64,68 @@ def ezadmin_login(page):
     return True
 
 
-def _read_captcha_with_vision(screenshot_path, max_retries=2):
-    """스크린샷에서 보안코드 숫자를 Gemini Vision으로 읽기"""
-    try:
-        import google.generativeai as genai
-        from PIL import Image
-    except ImportError as e:
-        log.error(f"Gemini/Pillow 모듈 없음: {e}")
-        return None
-
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
+def _find_anthropic_key():
+    """클로드 키 탐색: 환경변수 → logistics/.env → sourcing/analyzer/.env (2026-07-16 Gemini 유출로 전환)"""
+    key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if key:
+        return key
+    for env_path in (
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"),
+        "/Users/macmini_ky/ClaudeAITeam/sourcing/analyzer/.env",
+    ):
         try:
-            env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
             if os.path.exists(env_path):
                 with open(env_path, "r", encoding="utf-8") as f:
                     for line in f:
-                        if line.startswith("GEMINI_API_KEY="):
-                            api_key = line.split("=", 1)[1].strip()
-                            break
+                        if line.startswith("ANTHROPIC_API_KEY="):
+                            return line.split("=", 1)[1].strip()
         except Exception as e:
-            log.warning(f".env에서 GEMINI_API_KEY 탐색 실패: {e}")
+            log.warning(f".env 탐색 실패({env_path}): {e}")
+    return ""
 
+
+def _read_captcha_with_vision(screenshot_path, max_retries=2):
+    """스크린샷에서 보안코드 숫자를 Claude Vision으로 읽기 (Gemini 키 유출로 2026-07-16 전환)"""
+    import base64
+    api_key = _find_anthropic_key()
     if not api_key:
-        log.error("GEMINI_API_KEY를 찾을 수 없음")
+        log.error("ANTHROPIC_API_KEY를 찾을 수 없음")
         return None
 
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.5-flash")
+    try:
+        with open(screenshot_path, "rb") as f:
+            img_b64 = base64.standard_b64encode(f.read()).decode()
+    except Exception as e:
+        log.error(f"캡차 이미지 읽기 실패: {e}")
+        return None
 
+    body = {
+        "model": "claude-haiku-4-5-20251001",
+        "max_tokens": 10,
+        "messages": [
+            {"role": "user", "content": [
+                {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": img_b64}},
+                {"type": "text", "text": "이 이미지의 보안코드 숫자 4자리를 읽어라. 설명 없이 숫자 4개만."},
+            ]},
+            {"role": "assistant", "content": "보안코드:"},  # prefill — 설명 못 붙이게 강제 (끝 공백 금지)
+        ],
+    }
     for attempt in range(max_retries):
         try:
-            with Image.open(screenshot_path) as img:
-                response = model.generate_content([
-                    "이 이미지에 보안코드 숫자 4자리가 보입니다. 숫자만 정확히 알려주세요. 숫자 4자리만 출력하세요. 예: 1234",
-                    img,
-                ])
-            code = (response.text or "").strip()
+            r = requests.post("https://api.anthropic.com/v1/messages",
+                headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
+                         "content-type": "application/json"},
+                json=body, timeout=30)
+            if r.status_code != 200:
+                log.error(f"Claude Vision API {r.status_code}: {r.text[:120]} (시도 {attempt+1})")
+                continue
+            code = r.json()["content"][0]["text"].strip()
             digits = ''.join(c for c in code if c.isdigit())
             if len(digits) >= 4:
                 return digits[:4]
             log.warning(f"보안코드 인식 결과 부족: '{code}' (시도 {attempt+1})")
         except Exception as e:
-            log.error(f"Gemini Vision API 호출 실패 (시도 {attempt+1}): {e}")
-
+            log.error(f"Claude Vision 호출 실패 (시도 {attempt+1}): {e}")
     return None
 
 
@@ -162,8 +181,12 @@ def wait_for_captcha(page, progress=None, timeout_sec=120):
             (() => {
                 const blocks = document.querySelectorAll('.blockUI.blockMsg');
                 for (const b of blocks) {
-                    if (b.offsetWidth > 0 && b.offsetHeight > 0
-                        && !b.querySelector('#wrap')) return true;
+                    if (b.offsetWidth <= 0 || b.offsetHeight <= 0) continue;
+                    if (b.querySelector('#wrap')) continue;
+                    // 진짜 캡차 판별: '보안코드' 텍스트 + 입력필드 존재 (우체국 광고 팝업 오탐 방지 2026-07-16)
+                    const t = b.innerText || '';
+                    const hasInput = b.querySelector('input:not([type=hidden])');
+                    if ((t.includes('보안코드') || t.includes('인증')) && hasInput) return true;
                 }
                 return false;
             })()
@@ -183,10 +206,31 @@ def wait_for_captcha(page, progress=None, timeout_sec=120):
         progress("captcha_input")
 
     for attempt in range(3):
-        # 스크린샷 촬영
+        # 스크린샷 촬영 — 캡차 블록 요소만 크롭 (전체화면이면 숫자가 작아 인식률↓)
         screenshot_path = os.path.join(tempfile.gettempdir(), f"captcha_{attempt}.png")
-        page.screenshot(path=screenshot_path)
-        log.info(f"스크린샷 촬영 완료: {screenshot_path}")
+        shot = False
+        try:
+            handle = page.evaluate_handle(
+                """
+                (() => {
+                    const blocks = document.querySelectorAll('.blockUI.blockMsg');
+                    for (const b of blocks) {
+                        if (b.offsetWidth > 0 && b.offsetHeight > 0 && !b.querySelector('#wrap'))
+                            return b;
+                    }
+                    return null;
+                })()
+                """
+            )
+            el = handle.as_element()
+            if el:
+                el.screenshot(path=screenshot_path)
+                shot = True
+        except Exception as e:
+            log.warning(f"캡차 크롭 실패, 전체화면으로 폴백: {e}")
+        if not shot:
+            page.screenshot(path=screenshot_path)
+        log.info(f"스크린샷 촬영 완료: {screenshot_path} (크롭={shot})")
 
         # Claude Vision으로 읽기
         code = _read_captcha_with_vision(screenshot_path)
@@ -245,9 +289,26 @@ def wait_for_captcha(page, progress=None, timeout_sec=120):
 
 
 def clear_popups(page):
-    """blockUI 팝업 + dim 레이어 전체 제거 (매일 다른 팝업도 대응)"""
+    """화면을 덮는 팝업/광고 오버레이 전부 제거 (이지어드민이 순차로 여러 광고를 띄움 — 2026-07-16 공격적 버전).
+    판매처 테이블 등 본문은 z-index 낮아 보존됨."""
     page.evaluate("try { $('.blockUI').remove(); } catch(e) {}")
-    page.evaluate("document.querySelectorAll('.dim').forEach(el => el.remove())")
+    page.evaluate("""
+        // ① 알려진 팝업 클래스/ID
+        document.querySelectorAll('.dim, .modal-pop, .modal-dialog, [id^=modalRequired]')
+            .forEach(el => el.remove());
+        // ② 화면을 크게 덮는 z-index 높은 fixed/absolute 오버레이 (광고 팝업 포함)
+        document.querySelectorAll('div, iframe').forEach(el => {
+            const s = getComputedStyle(el);
+            const r = el.getBoundingClientRect();
+            const z = parseInt(s.zIndex) || 0;
+            const covers = r.width > 250 && r.height > 200;
+            const floating = (s.position === 'fixed' || s.position === 'absolute');
+            // 광고 iframe / 높은 z-index 부유 오버레이만 (본문 테이블은 position:static이라 안 걸림)
+            if (covers && floating && z >= 1000) el.remove();
+            if (el.tagName === 'IFRAME' && /ad|banner|promo|epost|notice/i.test(el.src || '')) el.remove();
+        });
+        document.body.style.overflow = 'auto';
+    """)
     page.wait_for_timeout(500)
 
 

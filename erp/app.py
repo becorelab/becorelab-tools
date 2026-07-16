@@ -1902,8 +1902,14 @@ async def email_po(po_id: int, request: Request, conn=Depends(db)):
     try:
         mail_pw = os.environ.get("NAVERWORKS_PASSWORD", "")
         if not mail_pw:
+            # 절대경로로 erp/config.py 직접 로드 — sys.path 오염(automation/sourcing 삽입) 시
+            # `import config`가 automation/config.py를 잡아 '미설정' 오류 나던 버그 수정 (2026-07-16)
             try:
-                import config as _cfg
+                import importlib.util as _ilu
+                _spec = _ilu.spec_from_file_location(
+                    "erp_config", "/Users/macmini_ky/ClaudeAITeam/erp/config.py")
+                _cfg = _ilu.module_from_spec(_spec)
+                _spec.loader.exec_module(_cfg)
                 mail_pw = getattr(_cfg, "NAVERWORKS_PASSWORD", "")
             except Exception:
                 mail_pw = ""
