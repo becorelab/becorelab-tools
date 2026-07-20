@@ -1202,6 +1202,8 @@ async function viewOrder(id) {
       <button class="btn" onclick="downloadPOPdf(${id})">📄 PDF</button>
       <button class="btn" onclick="emailPO(${id})">이메일 발송</button>
       ${d.po.status === 'draft' ? `<button class="btn btn-primary" onclick="confirmPO(${id})">발주 확정</button>` : ''}
+      ${(d.po.status === 'confirmed' || d.po.status === 'partial') ? `<button class="btn btn-primary" onclick="completePO(${id})">✅ 입고 완료</button>` : ''}
+      ${d.po.status === 'completed' ? `<button class="btn" onclick="reopenPO(${id})">↩️ 완료 취소</button>` : ''}
     `;
     openModal();
   } catch (e) { toast(e.message, 'error'); }
@@ -1212,6 +1214,27 @@ async function confirmPO(id) {
     await api(`/api/purchase-orders/${id}/status`, { method: 'PUT', body: { status: 'confirmed' } });
     toast('발주가 확정되었습니다');
     await viewOrder(id);   // 모달 유지 — 확정 상태로 갱신해 다시 표시 (X로만 닫힘)
+    loadOrders(ordersPage);
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function completePO(id) {
+  // 입고 완료 = 발주 상태만 completed로 (재고 진실은 이지어드민/물류서버, 2026-07-20 대표님 확정)
+  if (!confirm('이 발주를 입고 완료 처리할까요?')) return;
+  try {
+    await api(`/api/purchase-orders/${id}/status`, { method: 'PUT', body: { status: 'completed' } });
+    toast('입고 완료 처리되었습니다');
+    await viewOrder(id);
+    loadOrders(ordersPage);
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function reopenPO(id) {
+  if (!confirm('완료를 취소하고 확정 상태로 되돌릴까요?')) return;
+  try {
+    await api(`/api/purchase-orders/${id}/status`, { method: 'PUT', body: { status: 'confirmed' } });
+    toast('완료가 취소되었습니다 (확정 상태)');
+    await viewOrder(id);
     loadOrders(ordersPage);
   } catch (e) { toast(e.message, 'error'); }
 }
