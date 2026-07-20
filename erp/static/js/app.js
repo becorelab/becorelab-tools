@@ -1289,8 +1289,8 @@ async function emailPO(id) {
       <div class="form-group" style="border-top:1px solid var(--line,#eee);padding-top:12px">
         <label style="font-size:12px;color:var(--ink-3,#999)">+ 연락처 추가 <span style="font-weight:400">(저장돼서 다음 발주서에도 떠요)</span></label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px">
-          <input type="text" id="new-contact-name" placeholder="이름" style="width:88px" />
-          <input type="email" id="new-contact-email" placeholder="이메일" style="flex:1;min-width:150px" />
+          <input type="text" id="new-contact-name" placeholder="이름(선택)" style="width:88px" />
+          <input type="text" id="new-contact-email" placeholder="이메일 (이름 함께 붙여넣어도 OK)" style="flex:1;min-width:150px" />
           <select id="new-contact-type" style="padding:6px;border:1px solid var(--line,#ddd);border-radius:6px">
             <option value="to">수신</option><option value="cc">참조</option>
           </select>
@@ -1315,10 +1315,20 @@ async function emailPO(id) {
 
 async function addPOContact() {
   const ctx = window._poEmailCtx; if (!ctx?.supplierId) return;
-  const name = document.getElementById('new-contact-name').value.trim();
-  const email = document.getElementById('new-contact-email').value.trim();
+  let name = document.getElementById('new-contact-name').value.trim();
+  let email = document.getElementById('new-contact-email').value.trim();
   const type = document.getElementById('new-contact-type').value;
-  if (!name || !email) return toast('이름과 이메일을 입력하세요', 'error');
+  // 유연 파싱(2026-07-20): 이메일 칸에 "이상형 차장 xxx@naver.com"처럼 통째로 넣어도 자동 분리
+  const m = email.match(/[\w.+-]+@[\w.-]+\.\w+/);
+  if (m) {
+    const addr = m[0];
+    if (!name) {
+      const rest = email.replace(addr, '').replace(/[<>,;]/g, '').trim();
+      name = rest || addr.split('@')[0];   // 앞 텍스트를 이름으로, 없으면 이메일 아이디
+    }
+    email = addr;
+  }
+  if (!email) return toast('이메일을 입력하세요', 'error');
   try {
     await api(`/api/partners/${ctx.supplierId}/contacts`, { method: 'POST', body: { name, email, contact_type: type } });
     toast('연락처 추가됨'); emailPO(ctx.poId);
