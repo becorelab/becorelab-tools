@@ -11,7 +11,7 @@
   단독 실행(쿠키 갱신+백업): python3 gross_cookie_bridge.py
   코드에서:               from gross_cookie_bridge import refresh_from_user_chrome
 """
-import json, sys
+import json, sys, os
 from playwright.sync_api import sync_playwright
 
 CDP_URL = "http://127.0.0.1:9222"
@@ -57,6 +57,7 @@ def refresh_from_user_chrome(verbose=True):
         print("  [브릿지] ⚠️ Wing 로그인 세션 쿠키 없음 — 대표님 크롬에 Wing 로그인 필요")
         return False
 
+    SALES_URL = "https://wing.coupang.com/tenants/business-insight/sales-analysis"
     with sync_playwright() as p:
         b = p.chromium.connect_over_cdp(CDP_URL, timeout=30000)
         ctx = b.contexts[0]
@@ -69,11 +70,32 @@ def refresh_from_user_chrome(verbose=True):
                 pass
         if verbose:
             print(f"  [브릿지] CDP 크롬에 {ok}/{len(cookies)}개 주입")
-        # 주입 후 컨텍스트 쿠키를 백업파일에 저장(다음 무인 실행용)
-        json.dump(ctx.cookies(), open(COOKIE_BACKUP, "w", encoding="utf-8"),
+        # ⭐ 실제 Wing 세션 유효성 검증 (2026-07-20 버그픽스, GPT 하치 지적):
+        #    쿠키 '이름'만 보고 성공 판정하면 죽은 쿠키로 정상 백업을 덮어씀 → 매일 실패의 진짜 원인.
+        #    Wing 페이지 열어 xauth/login 리다이렉트 없을 때만 = 살아있는 세션.
+        pg = ctx.new_page()
+        try:
+            pg.goto(SALES_URL, wait_until="domcontentloaded", timeout=60000)
+            alive = not ("xauth" in pg.url or "login" in pg.url.lower())
+        except Exception:
+            alive = False
+        finally:
+            pg.close()
+        if not alive:
+            if verbose:
+                print("  [브릿지] ❌ 주입했으나 세션 무효(로그인 페이지로 튕김) — 백업 보존, 대표님 재로그인 필요")
+            return False
+        # 살아있는 세션만 백업파일에 원자적 저장(임시파일 → rename)
+        tmp = COOKIE_BACKUP + ".tmp"
+        json.dump(ctx.cookies(), open(tmp, "w", encoding="utf-8"),
                   ensure_ascii=False, indent=2)
+        os.replace(tmp, COOKIE_BACKUP)
+        try:
+            os.chmod(COOKIE_BACKUP, 0o600)  # 평문 쿠키 권한 축소(GPT 보안 지적)
+        except Exception:
+            pass
     if verbose:
-        print("  [브릿지] ✅ 백업파일 갱신 완료")
+        print("  [브릿지] ✅ 세션 유효 확인 + 백업 갱신 완료")
     return True
 
 
