@@ -5,7 +5,7 @@
 - 기간: 지정일 (기본 = 어제 하루)
 - 기간 단위: 일별(daily)
 - 캠페인: 전체선택
-- 보고서 구조: [일별] 캠페인 > 광고그룹 > 상품 > 키워드 (광고센터 기본 구조)
+- 보고서 구조: [일별] 키워드 (반드시 명시 선택; 기본값은 캠페인이라 분석에 사용 불가)
 
 사용:
   python3 coupang_ad_create.py                       # 채움, 어제
@@ -24,9 +24,76 @@ from playwright_stealth import Stealth
 from coupang_ad_config import ACCOUNTS, REPORT_LIST_URL
 
 WING_AUTH_URL = "https://advertising.coupang.com/user/login?_cap_client=WING&returnUrl=%2Fdashboard"
+KEYWORD_STRUCTURE_LABEL = "캠페인 > 광고그룹 > 상품 > 키워드"
 
 
-def _login(page, acct, max_tries=3):
+def _select_keyword_level(page):
+    """보고서 구조를 '키워드'로 명시 선택하고 실제 체크 상태까지 검증한다."""
+    # 구조 선택지는 캠페인 선택을 확정한 뒤에만 렌더링된다.
+    try:
+        exact = page.get_by_role("radio", name=KEYWORD_STRUCTURE_LABEL, exact=True)
+        exact.wait_for(state="visible", timeout=10000)
+        exact.check(force=True)
+        if not exact.is_checked():
+            raise RuntimeError("키워드 단위 선택이 적용되지 않음")
+        print(f"  키워드 단위 선택 ✓ ({KEYWORD_STRUCTURE_LABEL})")
+        return
+    except Exception:
+        pass
+
+    value_matches = []
+    label_matches = []
+    for radio in page.query_selector_all("input[type=radio]"):
+        if not radio.is_visible():
+            continue
+        value = (radio.get_attribute("value") or "").strip().lower()
+        label = radio.evaluate(
+            "el => el.closest('label')?.innerText || "
+            "el.closest('.ant-radio-wrapper')?.innerText || "
+            "el.nextElementSibling?.innerText || ''"
+        ).strip()
+        candidate = (radio, value, label)
+        if value in {"keyword", "keywords"}:
+            value_matches.append(candidate)
+        elif label.replace(" ", "") == KEYWORD_STRUCTURE_LABEL.replace(" ", ""):
+            label_matches.append(candidate)
+
+    candidates = value_matches or label_matches
+    if not candidates:
+        raise RuntimeError("키워드 단위 라디오를 찾지 못함 — 캠페인 보고서 생성 방지를 위해 중단")
+
+    radio, value, label = candidates[0]
+    radio.click(force=True)
+    time.sleep(1)
+    if not radio.is_checked():
+        raise RuntimeError("키워드 단위 선택이 적용되지 않음 — 보고서 생성 중단")
+    print(f"  키워드 단위 선택 ✓ (value={value or '-'}, label={label or '-'})")
+
+
+def _select_clicked_keywords_only(page):
+    """기존 일일보고서 표준인 '클릭 발생 키워드만 포함'을 명시 적용한다."""
+    label = "클릭이 발생한 키워드만 보고서에 포함"
+    checkbox = page.get_by_role("checkbox", name=label, exact=True)
+    checkbox.wait_for(state="visible", timeout=10000)
+    checkbox.check(force=True)
+    if not checkbox.is_checked():
+        raise RuntimeError("클릭 발생 키워드만 포함 설정이 적용되지 않음")
+    print(f"  {label} ✓")
+
+
+def _completed_keyword_row_text(page, date_from, date_to):
+    """AG-grid 전체 행에서 요청한 기간·구조의 완료 보고서를 찾는다."""
+    expected_range = f"{date_from} ~ {date_to}"
+    expected_structure = f"[일별] {KEYWORD_STRUCTURE_LABEL}"
+    for row in page.query_selector_all('div[role="row"][row-id]'):
+        text = row.inner_text().replace("\n", " ")
+        if (expected_range in text and expected_structure in text
+                and "생성 완료" in text):
+            return text
+    return ""
+
+
+def _login(page, acct, max_tries=1):
     for i in range(max_tries):
         page.goto(WING_AUTH_URL, wait_until="domcontentloaded", timeout=60000)
         time.sleep(3)
@@ -51,7 +118,7 @@ def _login(page, acct, max_tries=3):
            or "wing.coupang.com" in page.url or "dashboard" in page.url:
             return
         time.sleep(3)
-    raise RuntimeError(f"로그인 실패({max_tries}회): {page.url[:80]}")
+    raise RuntimeError(f"로그인 실패({max_tries}회) — 최소 30분 쿨다운 필요: {page.url[:80]}")
 
 
 def create_in_page(page, date_from, date_to, wait_done=True, wait_timeout_sec=600):
@@ -94,13 +161,16 @@ def create_in_page(page, date_from, date_to, wait_done=True, wait_timeout_sec=60
         return False, "전체선택 체크박스 못 찾음"
     all_cb.click(force=True); time.sleep(1)
     page.get_by_role("button", name="확인").click(); time.sleep(2)
-    # ④ 생성
+    # ④ 캠페인 확정 뒤 렌더링되는 보고서 구조에서 키워드 선택
+    _select_keyword_level(page)
+    _select_clicked_keywords_only(page)
+    # ⑤ 생성
     make = page.get_by_role("button", name="보고서 만들기")
     if not make.is_enabled():
         page.screenshot(path="/tmp/create_error.png")
         return False, "보고서 만들기 버튼 비활성 (입력 미반영)"
     make.click(); time.sleep(4)
-    # ⑤ 완료 폴링
+    # ⑥ 완료 폴링
     if wait_done:
         deadline = time.time() + wait_timeout_sec
         while time.time() < deadline:
@@ -110,9 +180,8 @@ def create_in_page(page, date_from, date_to, wait_done=True, wait_timeout_sec=60
             except Exception:
                 time.sleep(10); continue
             time.sleep(3)
-            first_row = page.query_selector("table tbody tr")
-            row_text = first_row.inner_text().replace("\n", " ") if first_row else ""
-            if date_from in row_text and "생성 완료" in row_text:
+            row_text = _completed_keyword_row_text(page, date_from, date_to)
+            if row_text:
                 return True, f"생성 완료: {row_text[:80]}"
             time.sleep(20)
         return False, "생성 대기 타임아웃 (요청은 됨)"
@@ -201,7 +270,11 @@ def create_report(account_key="chaewoom", date_from=None, date_to=None,
             time.sleep(2)
             print("  캠페인 전체선택 + 확인 ✓")
 
-            # ④ 생성
+            # ④ 캠페인 확정 뒤 렌더링되는 보고서 구조에서 키워드 선택
+            _select_keyword_level(page)
+            _select_clicked_keywords_only(page)
+
+            # ⑤ 생성
             before = len(page.query_selector_all("table tr"))
             page.get_by_role("button", name="보고서 만들기").click()
             time.sleep(4)
@@ -211,16 +284,15 @@ def create_report(account_key="chaewoom", date_from=None, date_to=None,
                 raise RuntimeError("생성 후 상태 확인 실패")
             print("  보고서 만들기 클릭 ✓")
 
-            # ⑤ (옵션) 생성 완료 폴링
+            # ⑥ (옵션) 생성 완료 폴링
             if wait_done:
                 deadline = time.time() + wait_timeout_sec
                 while time.time() < deadline:
                     page.reload(wait_until="domcontentloaded")
                     page.wait_for_selector("text=보고서 만들기", timeout=30000)
                     time.sleep(3)
-                    first_row = page.query_selector("table tbody tr")
-                    row_text = first_row.inner_text().replace("\n", " ") if first_row else ""
-                    if date_from in row_text and "생성 완료" in row_text:
+                    row_text = _completed_keyword_row_text(page, date_from, date_to)
+                    if row_text:
                         print(f"  ✅ 생성 완료: {row_text[:100]}")
                         browser.close()
                         return True, "생성 완료"

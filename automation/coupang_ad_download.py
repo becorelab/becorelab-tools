@@ -20,6 +20,32 @@ from coupang_ad_config import ACCOUNTS, AD_CENTER_URL, DOWNLOAD_DIR, DATA_DIR
 
 WING_AUTH_URL = "https://advertising.coupang.com/user/login?_cap_client=WING&returnUrl=%2Fdashboard"
 REPORT_PAGE_URL = f"{AD_CENTER_URL}/marketing-reporting/billboard/reports/pa"
+KEYWORD_REQUIRED_HEADERS = {
+    "날짜", "캠페인명", "노출수", "클릭수", "광고비", "총 전환매출액(14일)",
+    "광고그룹", "광고집행 상품명", "광고집행 옵션ID",
+    "광고 노출 지면", "키워드",
+}
+KEYWORD_STRUCTURE_LABEL = "캠페인 > 광고그룹 > 상품 > 키워드"
+
+
+def validate_keyword_report(xlsx_path):
+    """키워드 분석용 보고서인지 파일명과 실제 열을 함께 검증한다."""
+    filename = os.path.basename(xlsx_path)
+    if "_pa_daily_keyword_" not in filename:
+        return False, f"파일명이 키워드 보고서가 아님: {filename}"
+    try:
+        import openpyxl
+        wb = openpyxl.load_workbook(xlsx_path, read_only=True, data_only=True)
+        ws = wb.active
+        first_row = next(ws.iter_rows(min_row=1, max_row=1, values_only=True), ())
+        headers = {str(v).strip() for v in first_row if v is not None}
+        wb.close()
+    except Exception as e:
+        return False, f"XLSX 열 검증 실패: {e}"
+    missing = sorted(KEYWORD_REQUIRED_HEADERS - headers)
+    if missing:
+        return False, f"키워드 필수열 누락: {', '.join(missing)}"
+    return True, f"키워드 필수열 {len(KEYWORD_REQUIRED_HEADERS)}개 확인"
 
 
 def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10,
@@ -80,56 +106,46 @@ def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10
         time.sleep(1)
 
         login_success = False
-        for attempt in range(3):
-            if attempt > 0:
-                print(f"  🔄 로그인 재시도 ({attempt+1}/3) — 30초 대기...")
-                time.sleep(30)
-                page.goto(WING_AUTH_URL, wait_until="domcontentloaded", timeout=60000)
-                time.sleep(3)
-                try:
-                    page.wait_for_selector('input[name="username"]', timeout=15000)
-                except Exception:
-                    continue
-                page.fill('input[name="username"]', acct["id"])
-                page.fill('input[name="password"]', acct["pw"])
-                time.sleep(1)
+        try:
+            with page.expect_navigation(timeout=30000, wait_until="load"):
+                page.click('input[name="login"]')
+            time.sleep(3)
+        except Exception:
+            time.sleep(3)
 
-            try:
-                with page.expect_navigation(timeout=30000, wait_until="load"):
-                    page.click('input[name="login"]')
-                time.sleep(3)
-            except Exception:
-                time.sleep(3)
-
-            if "xauth" in page.url and "advertising.coupang.com" not in page.url:
-                body_text = page.inner_text('body')[:100]
-                if "Access Denied" in body_text:
-                    print(f"  ⚠️ Akamai 차단 (attempt {attempt+1})")
-                else:
-                    print(f"  ⚠️ 로그인 실패 (attempt {attempt+1})")
-                continue
+        if "xauth" in page.url and "advertising.coupang.com" not in page.url:
+            body_text = page.inner_text('body')[:100]
+            if "Access Denied" in body_text:
+                print("  ⚠️ Akamai 차단 — 추가 로그인 없이 즉시 중단")
             else:
-                login_success = True
-                break
+                print("  ⚠️ 로그인 실패 — 추가 로그인 없이 즉시 중단")
+        else:
+            login_success = True
 
         if not login_success:
-            print("  ❌ 로그인 실패 (3회 재시도 후 포기)")
+            print("  ❌ 로그인 실패 — 최소 30분 쿨다운 후 재실행 필요")
             browser.close()
             return []
 
         print(f"  ✅ 로그인 성공 → {page.url}")
 
         # 1.5) (옵션) 보고서 생성 — 같은 세션 재활용 (2026-07-16, 생성→다운→분석 논스톱)
+        target_from = None
+        target_to = None
         if create_first:
             from coupang_ad_create import create_in_page
             from datetime import date as _date, timedelta as _td
             _yday = (_date.today() - _td(days=1)).isoformat()
             _from = create_date_from or _yday
             _to = create_date_to or _yday
+            target_from, target_to = _from, _to
             print(f"\n[1.5/3] 보고서 생성: {_from} ~ {_to} (일별/전체캠페인)")
             ok, msg = create_in_page(page, _from, _to, wait_done=True)
             print(("  ✅ " if ok else "  ⚠️ ") + msg)
-            # 생성 실패해도 기존 보고서 다운로드는 계속 진행
+            if not ok:
+                print("  ❌ 생성 검증 실패 — 과거/다른 구조 보고서 다운로드를 막고 중단")
+                browser.close()
+                return []
 
         # 2) 보고서 페이지
         print(f"\n[2/3] 보고서 페이지...")
@@ -149,10 +165,33 @@ def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10
 
         # 3) 다운로드
         print(f"\n[3/3] 다운로드 시작...")
-        dl_buttons = page.query_selector_all('button:has-text("다운로드")')
+        if create_first:
+            expected_range = f"{target_from} ~ {target_to}"
+            expected_structure = f"[일별] {KEYWORD_STRUCTURE_LABEL}"
+            target_rows = []
+            for row in rows:
+                text = row.inner_text().replace("\n", " ")
+                if (expected_range in text and expected_structure in text
+                        and "생성 완료" in text):
+                    target_rows.append(row)
+            if not target_rows:
+                print(f"  ❌ 대상 보고서 행 없음: {expected_range} / {expected_structure}")
+                browser.close()
+                return []
+            dl_buttons = []
+            for row in target_rows[:1]:
+                btn = row.query_selector('button:has-text("다운로드")')
+                if btn:
+                    dl_buttons.append(btn)
+            if not dl_buttons:
+                print("  ❌ 대상 키워드 보고서 행에서 다운로드 버튼을 찾지 못함")
+                browser.close()
+                return []
+        else:
+            dl_buttons = page.query_selector_all('button:has-text("다운로드")')[:max_reports]
         downloaded = []
 
-        for i, btn in enumerate(dl_buttons[:max_reports]):
+        for i, btn in enumerate(dl_buttons):
             # 모달이 열려 있으면 닫기
             modal_close = page.query_selector('.ant-modal-wrap .ant-modal-close, .ant-modal-wrap button:has-text("닫기")')
             if modal_close:
@@ -171,8 +210,12 @@ def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10
                 save_path = os.path.join(DOWNLOAD_DIR, filename)
                 download.save_as(save_path)
                 size = os.path.getsize(save_path)
-                print(f"  ✅ [{i+1}/{len(dl_buttons)}] {filename} ({size:,} bytes)")
-                downloaded.append(save_path)
+                valid, reason = validate_keyword_report(save_path)
+                if valid:
+                    print(f"  ✅ [{i+1}/{len(dl_buttons)}] {filename} ({size:,} bytes) — {reason}")
+                    downloaded.append(save_path)
+                else:
+                    print(f"  ⚠️ [{i+1}/{len(dl_buttons)}] 분석 제외: {filename} — {reason}")
                 time.sleep(2)
             except Exception as e:
                 # 모달 닫기 재시도
@@ -186,8 +229,12 @@ def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10
                     save_path = os.path.join(DOWNLOAD_DIR, filename)
                     download.save_as(save_path)
                     size = os.path.getsize(save_path)
-                    print(f"  ✅ [{i+1}/{len(dl_buttons)}] {filename} ({size:,} bytes) (재시도)")
-                    downloaded.append(save_path)
+                    valid, reason = validate_keyword_report(save_path)
+                    if valid:
+                        print(f"  ✅ [{i+1}/{len(dl_buttons)}] {filename} ({size:,} bytes) (재시도) — {reason}")
+                        downloaded.append(save_path)
+                    else:
+                        print(f"  ⚠️ [{i+1}/{len(dl_buttons)}] 분석 제외: {filename} — {reason}")
                     time.sleep(2)
                 except Exception as e2:
                     print(f"  ❌ [{i+1}/{len(dl_buttons)}] 실패: {e2}")
@@ -204,6 +251,10 @@ def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10
 
 def excel_to_json(xlsx_path, output_dir=None):
     """엑셀 보고서 → JSON 변환"""
+    valid, reason = validate_keyword_report(xlsx_path)
+    if not valid:
+        print(f"  변환 중단: {reason}")
+        return None
     try:
         import openpyxl
     except ImportError:

@@ -201,7 +201,7 @@ cat "$HOME/ClaudeAITeam/advertising/parking_lot.md"   # 예: 광고
 
 ## 🛠️ 공용 도구 (하치·GPT 하치 공용)
 - **쿠팡 광고 보고서 논스톱**: `/usr/bin/python3 ~/ClaudeAITeam/automation/coupang_ad_download.py chaewoom --create --convert`
-  - 로그인 1회로 생성(어제/일별/전체캠페인)→완료대기→다운로드→JSON 변환. 계정: `chaewoom`(그로스)/`becorelab`(로켓)
+  - 로그인 1회로 생성(어제/일별/전체캠페인/**키워드 구조**/클릭발생 키워드만)→완료대기→대상 행 다운로드→필수열 검증→JSON 변환. 계정: `chaewoom`(그로스)/`becorelab`(로켓)
   - ⚠️ **로그인 연타 금지** (쿠팡 소프트차단·계정잠김 위험). 실패 시 30분 이상 쿨다운 후 재시도, 07:00 크론 시간대 피하기
   - ⚠️ 이 작업공간의 기본 `python3`는 `mcp-server/.venv`를 가리켜 Playwright가 없다. 반드시 `/usr/bin/python3` 사용.
   - `--create` 없이 실행하면 기존 보고서 다운로드만 (매일 07:00 크론과 동일 동작)
