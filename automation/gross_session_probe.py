@@ -47,6 +47,9 @@ def probe():
     age = _login_age_hours()
     age_str = f"{age:.1f}h" if age is not None else "?(마커없음)"
     status, url = "DEAD", ""
+    # ⭐ 세션 갱신 = 실제 매출 조회 (2026-07-21, 대표님 관찰: goto 아니라 진짜 업무 동작이 세션 연장).
+    #    coupang_gross_daily.fetch_options_for가 vi-detail-search(인증 매출 API)를 실제 호출 → 세션 활동.
+    #    ①먼저 goto로 살았나 확인 → ②살았으면 실제 조회로 세션 갱신(ALIVE+).
     try:
         with sync_playwright() as p:
             b = p.chromium.connect_over_cdp(CDP_URL, timeout=20000)
@@ -54,12 +57,22 @@ def probe():
             pg = ctx.new_page()
             pg.goto(SALES_URL, wait_until="domcontentloaded", timeout=45000)
             url = pg.url
-            if not ("xauth" in url or "login" in url.lower()):
-                status = "ALIVE"
+            alive = not ("xauth" in url or "login" in url.lower())
             pg.close()
     except Exception as e:
-        url = f"err:{str(e)[:40]}"
-    line = f"{_now()} {status} 로그인후={age_str} url={url[:60]}\n"
+        alive = False; url = f"err:{str(e)[:40]}"
+    if alive:
+        status = "ALIVE"
+        try:
+            from datetime import date, timedelta
+            import coupang_gross_daily as _cg
+            yday = (date.today() - timedelta(days=1)).isoformat()
+            rows = _cg.fetch_options_for(yday)   # 실제 vi-detail-search 조회 = 세션 활동
+            if rows is not None:
+                status = "ALIVE+"; url = f"조회옵션={len(rows)}"
+        except Exception as e:
+            url = f"조회err:{str(e)[:35]}"  # 페이지는 살았는데 조회 실패
+    line = f"{_now()} {status} 로그인후={age_str} {url[:60]}\n"
     os.makedirs(os.path.dirname(LOG), exist_ok=True)
     open(LOG, "a").write(line)
     print(line.strip())
