@@ -60,6 +60,21 @@ def ezadmin_login(page):
     page.evaluate("login_check(null)")
     page.wait_for_timeout(8000)
     log.info(f"로그인 전송 완료 — 현재 URL: {page.url}")
+
+    # ── 작업서버 자동 추출 (2026-07-22, ACG 이전 대응) ──
+    # 이지어드민은 도메인(업체)마다 물리서버가 다름: bypl=ka04, ACG(annexcombine)=ga69.
+    # BASE를 하드코딩하면 서버 이전 시 "mysqli 연결 불가"로 전 데이터 0건이 됨(7/15~ 매출 ₩0 원인).
+    # 로그인 후 실제 origin으로 BASE를 갱신 → 서버가 또 바뀌어도 자동 대응.
+    global BASE
+    try:
+        origin = page.evaluate("() => location.origin")
+        if origin and origin.startswith("https://") and "ezadmin.co.kr" in origin:
+            if origin != BASE:
+                log.info(f"작업서버 자동갱신: {BASE} → {origin}")
+            BASE = origin
+    except Exception as e:
+        log.warning(f"작업서버 origin 추출 실패, BASE 유지({BASE}): {e}")
+
     log.info("보안코드 대기...")
     return True
 

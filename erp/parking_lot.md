@@ -1,5 +1,13 @@
 # ERP 작업 파킹랏
 
+## 2026-07-22 🟡 매출 ₩0 복구 — 원인2개 확정, ①고침 ②대표님 컬럼세팅 대기
+어제(7/21) "이지어드민 이전이 원인"에서 더 파고들어 **진짜 원인 2개 실측 확정**:
+- **원인① 서버주소 하드코딩 (✅ 고침, 커밋)**: 코드 `BASE=ka04`(bypl 서버) → ACG 실제 작업서버는 **ga69**. ka04로 DS00 열면 "mysqli 연결 불가"→0건. `ezadmin_login`이 **로그인 후 `location.origin`으로 BASE 자동갱신**하도록 수정(`logistics/ezadmin_scraper.py:59~`). 이제 화면 조회 **67행 정상**(대표님 "ACG 연동됨" 실증).
+- **원인② DS00 화면에 금액 컬럼 없음 (⏳ 대표님 출근해 세팅 예정)**: ACG 계정 확장주문검색2 그리드 컬럼 = 주문/배송정보 위주(shop_id·order_id·name·qty·trans_no·o_options·수령자…). **판매가(amount)·정산금액(supply_price)·상품코드(product_id)·현재고 없음.** bypl엔 있었음(옛 코드가 읽던 컬럼: product_name_options·p_options·amount·supply_price·collect_date·product_id·stock).
+- **A안(다운로드 양식) 폐기 — reCAPTCHA**: "판매데이터 확인용"(download_field=DS00_file_13) 양식 존재하나, `#download`(다운로드F6)→`download_check_invisible.htm` 팝업 `exe()` 실행 시 **이미지 reCAPTCHA("자전거 선택")** 뜸 → 자동크론 불가. 화면 조회는 캡차 없음(로그인만).
+- ▶ **B안 확정(대표님 7/22 출근해 직접 세팅)**: ACG 이지어드민 항목설정(DS01)에서 **안 쓰는 조회항목(예:12번)에 판매가·정산금액·상품코드·옵션·현재고 컬럼 추가**(ACG 기존 조회항목1 등은 손대지 말 것). ⚠️ACG 공유계정이라 ACG 양해 후. 세팅되면 다음 하치가 `scrape_sales`에서 ①해당 조회항목 선택(select_field) ②컬럼 aria매핑을 ACG 헤더에 맞게 갱신 → `/api/sales/resync`로 7/15~ 재동기화. 볼트·ERP 동시 복구.
+- 참고 aria(ACG 현재 화면): grid1_shop_id/order_id/name/order_products_qty/qty/trans_no/product_name/o_options/order_name/recv_name… (금액 붙으면 amount/supply_price 계열 추가될 것 — 세팅 후 재확인 필수)
+
 ## 2026-07-21 🔴 매출 ₩0 원인 확정 — 이지어드민 ACG 이전(7/15) DS00 스크랩 중단
 **뿌리 하나:** 볼트 매출보고서·ERP sales가 **같은 우물**을 씀 → `물류서버:8082/api/sales-daily-orders`(=이지어드민 DS00 스크랩). `app.py:797` `_sync_sales_day`가 이 API 호출.
 - **직접 검증(curl):** `/api/sales-daily-orders?date=` → 7/13 정상(by_option에 스스·G마켓·카페24 채널별 정산), **7/20 완전 빈 응답**. 7/15 ACG 이전 시점부터 끊김.
