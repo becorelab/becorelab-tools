@@ -1199,6 +1199,7 @@ async function viewOrder(id) {
       <button class="btn" onclick="closeModal()">닫기</button>
       <button class="btn" onclick="editOrder(${id})">✏️ 수정</button>
       <button class="btn" onclick="copyPO(${id})">복사</button>
+      ${(d.po.status !== 'received' && d.po.status !== 'partial') ? `<button class="btn btn-danger" onclick="deletePO(${id}, '${(d.po.po_number || '').replace(/'/g, "")}')">🗑️ 삭제</button>` : ''}
       <button class="btn" onclick="downloadPOPdf(${id})">📄 PDF</button>
       <button class="btn" onclick="emailPO(${id})">이메일 발송</button>
       ${d.po.status === 'draft' ? `<button class="btn btn-primary" onclick="confirmPO(${id})">발주 확정</button>` : ''}
@@ -1244,6 +1245,17 @@ async function copyPO(id) {
     const r = await api(`/api/purchase-orders/${id}/copy`, { method: 'POST' });
     toast(`발주서 복사 완료: ${r.po_number}`);
     await viewOrder(r.id);   // 모달 유지 — 복사된 새 발주서로 전환 (X로만 닫힘)
+    loadOrders();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function deletePO(id, poNumber) {
+  // 되돌리기 불가 — 이중 확인
+  if (!confirm(`발주서 ${poNumber || id} 를 삭제할까요?\n\n삭제하면 되돌릴 수 없습니다.`)) return;
+  try {
+    const r = await api(`/api/purchase-orders/${id}`, { method: 'DELETE' });
+    toast(`발주서 삭제 완료: ${r.deleted || poNumber}`);
+    closeModal();
     loadOrders();
   } catch (e) { toast(e.message, 'error'); }
 }

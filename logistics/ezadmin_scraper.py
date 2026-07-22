@@ -679,22 +679,280 @@ def scrape_outbound(page, days=90, progress=None, collect_inbound=False):
     return result
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# DS00 매출 = "다운로드 방식" (2026-07-22, ACG 이전 대응 최종 해결)
+# ─────────────────────────────────────────────────────────────────────────────
+# 배경: ACG(annexcombine) 이지어드민 계정은 확장주문검색2(DS00) '화면 그리드'에
+#   판매가·정산금액·상품코드 컬럼이 없다(주문/배송 정보만). 금액은 오직 '다운로드
+#   양식'(판매데이터 확인용 = DS00_file_13)에만 있다. → 화면 스크랩 불가, 다운로드 필수.
+# reCAPTCHA: save_file_go()가 function.htm에 template=recaptcha&action=check_log_web
+#   POST → 서버가 {"error":0|1} 반환. error==1일 때만 이미지 캡차(download_check_invisible).
+#   error==0(정상 다운로드 빈도)이면 캡차 없이 바로 진행. "매번 뜬다"는 오해였음(2026-07-22 실측).
+# 다운로드 흐름: ins_download_worklist(작업큐 등록) → get_download_worklist 폴링(status==2)
+#   → file_name(https://.../*.xls, HTML테이블 형식) 다운로드 → pandas.read_html 파싱.
+# 캡차 회피 설계: 다운로드 1회당 error 판정 → 날짜별 개별 대신 "범위 1회 다운로드 후
+#   주문일 그룹핑"으로 다운로드 횟수 최소화(일일 롤링·배치 모두 1회).
+
+DS00_DOWNLOAD_FIELD = "DS00_file_13"  # '판매데이터 확인용' 양식(금액 포함). 바뀌면 이 값만 갱신.
+
+
+class CaptchaRequired(Exception):
+    """다운로드 시 서버가 reCAPTCHA를 요구(check_log_web error=1). 봇 의심/과다 다운로드."""
+
+
+def _ds00_search(page, date_from, date_to):
+    """DS00 페이지 열고 주문일 기준 date_from~date_to 검색 (myform에 비코어랩 판매처 필터 세팅)."""
+    page.goto(f"{BASE}/template35.htm?template=DS00", timeout=30000, wait_until="domcontentloaded")
+    page.wait_for_timeout(5000)
+    clear_popups(page)
+    # 날짜타입 → 주문일
+    page.evaluate(
+        """() => { for (const sel of document.querySelectorAll('select')) {
+            const o=[...sel.options].find(o=>o.text.includes('주문일'));
+            if(o){sel.value=o.value;sel.dispatchEvent(new Event('change',{bubbles:true}));return;} } }"""
+    )
+    page.wait_for_timeout(800)
+    page.evaluate(
+        f"""() => {{ const s=document.getElementById('start_date'), e=document.getElementById('end_date');
+            if(s)s.value='{date_from}'; if(e)e.value='{date_to}'; }}"""
+    )
+    click_search(page)
+    page.wait_for_timeout(8000)
+    clear_popups(page)
+
+
+def _worklist_max_seq(page):
+    """현재 다운로드 워크리스트의 최대 seq (신규 작업 식별용)."""
+    try:
+        wl = page.evaluate(
+            """async () => new Promise(r=>{ $.post("main35_func.php",
+                {action:"get_download_worklist", timeFlag: Date()}, function(d){ r(d); }); })"""
+        )
+        import json as _json
+        data = _json.loads(wl).get("data", [])
+        return max((int(d.get("seq", 0)) for d in data), default=0)
+    except Exception:
+        return 0
+
+
+def _queue_ds00_download(page):
+    """검색된 상태에서 판매데이터 확인용(DS00_file_13) 다운로드 작업을 큐에 등록하고
+    생성 완료된 파일 URL을 반환. reCAPTCHA 요구 시 CaptchaRequired 발생."""
+    # 다운로드 양식/타입 선택
+    page.evaluate(
+        f"""() => {{ const df=document.getElementById('download_field');
+            if(df){{df.value='{DS00_DOWNLOAD_FIELD}';df.dispatchEvent(new Event('change',{{bubbles:true}}));}}
+            const dt=document.getElementById('download_type');
+            if(dt){{dt.value='0';dt.dispatchEvent(new Event('change',{{bubbles:true}}));}} }}"""
+    )
+    page.wait_for_timeout(700)
+
+    prev_max = _worklist_max_seq(page)
+
+    # save_file_go() 로직 재현 → download_form 채우기
+    page.evaluate(
+        """() => {
+            const df = document.forms['download_form']; df.reset();
+            df.par.value = $("#myform").serialize();
+            df.panel_open.value = (typeof panel_open!=='undefined')?panel_open:'true';
+            df.download_type.value = $("#download_type").val();
+            df.download_field.value = $("#download_field").val();
+            if(df.seq_list) df.seq_list.value = "";
+            if(df.include_sum) df.include_sum.value = "0";
+            if(df.include_img_url) df.include_img_url.value = "0";
+            if(df.include_pw) df.include_pw.value = "0";
+            df.action.value = "save_file_DS00";
+            df.bck_search.value = "0";
+        }"""
+    )
+    # reCAPTCHA 필요 여부 판정
+    chk = page.evaluate(
+        """async () => new Promise(r=>{ $.post("function.htm",
+            {template:"recaptcha", action:"check_log_web", check_template:"DS00",
+             download_form: $("#download_form").serialize()}, function(d){ r(d); }); })"""
+    )
+    if '"error":1' in str(chk) or str(chk).strip() == "1":
+        raise CaptchaRequired(f"check_log_web 응답: {chk}")
+    log.info(f"다운로드 캡차판정 통과(error=0): {chk}")
+
+    # 작업 큐 등록
+    page.evaluate(
+        """async () => new Promise(r=>{ $.post("/function.htm",
+            {template:"download", action:"ins_download_worklist",
+             work_template:"DS00", work_func:"save_file_DS00", par: $("#download_form").serialize()},
+            function(d){ r(d); }); })"""
+    )
+
+    # 워크리스트 폴링 — prev_max보다 큰 seq의 status==2(완료) DS00 작업
+    import json as _json
+    for i in range(40):  # 최대 ~120초
+        time.sleep(3)
+        wl = page.evaluate(
+            """async () => new Promise(r=>{ $.post("main35_func.php",
+                {action:"get_download_worklist", timeFlag: Date()}, function(d){ r(d); }); })"""
+        )
+        try:
+            data = _json.loads(wl).get("data", [])
+        except Exception:
+            continue
+        news = [d for d in data if int(d.get("seq", 0)) > prev_max
+                and d.get("work_template") == "DS00"
+                and str(d.get("file_name", "")).startswith("http")]
+        done = [d for d in news if d.get("status") == "2"]
+        if done:
+            done.sort(key=lambda d: int(d.get("seq", 0)), reverse=True)
+            f = done[0]
+            log.info(f"다운로드 파일 생성완료: rows={f.get('total_rows')} {f.get('file_name')}")
+            return f["file_name"], int(f.get("total_rows", 0) or 0)
+        if news and any(d.get("status") in ("3", "9") for d in news):  # 실패/오류 상태 방어
+            raise RuntimeError(f"다운로드 작업 실패 상태: {[d.get('status') for d in news]}")
+    raise TimeoutError("다운로드 파일 생성 대기 시간 초과(120초)")
+
+
+# 다운로드 xls(HTML테이블) 헤더 → 표준 필드 매핑
+_DS00_COL = {
+    "주문번호": "orderId", "상품코드": "code", "상품명": "name", "판매처": "shop",
+    "판매처 상품명": "nameOpt", "판매처 옵션": "option", "주문수량": "orderQty",
+    "상품수량": "productQty", "상품별판매금액": "amount", "정산금액": "settlement",
+    "주문일": "date",
+}
+
+
+def _parse_ds00_file(path):
+    """다운로드된 HTML테이블 .xls 파싱 → 표준 order dict 리스트."""
+    import pandas as pd
+    raw = pd.read_html(path, header=None)[0]
+    header = [str(x).strip() for x in raw.iloc[0]]
+    body = raw.iloc[1:]
+    idx = {name: i for i, name in enumerate(header)}
+
+    def cell(row, colname, numeric=False):
+        i = idx.get(colname)
+        if i is None:
+            return 0 if numeric else ""
+        v = row.iloc[i]
+        if numeric:
+            try:
+                return int(float(str(v).replace(",", "").replace("₩", "").strip() or 0))
+            except (ValueError, TypeError):
+                return 0
+        s = str(v).strip()
+        return "" if s == "nan" else s
+
+    orders = []
+    for _, row in body.iterrows():
+        code = cell(row, "상품코드")
+        if not code:
+            continue
+        orders.append({
+            "orderId": cell(row, "주문번호"),
+            "code": code,
+            "name": cell(row, "상품명"),
+            "shop": cell(row, "판매처"),
+            "nameOpt": cell(row, "판매처 상품명") or cell(row, "상품명"),
+            "option": cell(row, "판매처 옵션") or cell(row, "옵션명"),
+            "orderQty": cell(row, "주문수량", numeric=True),
+            "productQty": cell(row, "상품수량", numeric=True) or cell(row, "주문수량", numeric=True),
+            "amount": cell(row, "상품별판매금액", numeric=True) or cell(row, "판매가", numeric=True),
+            "settlement": cell(row, "정산금액", numeric=True),
+            "date": cell(row, "주문일"),
+            "stock": 0,
+        })
+    return orders
+
+
+def _summarize_day(orders, target_date):
+    """하루치 order 리스트 → 채널/상품별 집계 요약 dict (기존 scrape_sales 반환구조와 동일)."""
+    channel_summary, product_summary = {}, {}
+    total_amount = total_settlement = 0
+    for row in orders:
+        shop, code = row["shop"], row["code"]
+        cs = channel_summary.setdefault(shop, {"count": 0, "qty": 0, "amount": 0, "settlement": 0})
+        cs["count"] += 1
+        cs["qty"] += row["productQty"]
+        cs["amount"] += row["amount"]
+        cs["settlement"] += row["settlement"]
+        ps = product_summary.setdefault(code, {"name": row["nameOpt"] or row["name"],
+                                               "qty": 0, "amount": 0, "settlement": 0})
+        ps["qty"] += row["productQty"]
+        ps["amount"] += row["amount"]
+        ps["settlement"] += row["settlement"]
+        total_amount += row["amount"]
+        total_settlement += row["settlement"]
+    log.info(f"=== {target_date} 매출 요약 (다운로드) ===")
+    log.info(f"  총 판매금액: {total_amount:,}원 / 정산: {total_settlement:,}원 ({len(orders)}건)")
+    for shop, d in sorted(channel_summary.items(), key=lambda x: -x[1]["amount"]):
+        log.info(f"  {shop}: {d['count']}건, 수량 {d['qty']}, 판매 {d['amount']:,}원, 정산 {d['settlement']:,}원")
+    return {
+        "date": target_date,
+        "total_amount": total_amount,
+        "total_settlement": total_settlement,
+        "total_count": len(orders),
+        "by_channel": channel_summary,
+        "by_product": product_summary,
+        "orders": orders,
+    }
+
+
+def scrape_sales_range(page, date_from, date_to, progress=None):
+    """주문일 date_from~date_to를 '다운로드 1회'로 수집 → {날짜: 요약dict} 반환.
+    다운로드 파일은 이미 주문단위로 dedup되어 있어 화면 스크랩의 4~7배 중복 제거가 불필요."""
+    if progress:
+        progress("scraping_sales_download")
+    log.info(f"DS00 매출 다운로드 — 주문일 {date_from} ~ {date_to}")
+    _ds00_search(page, date_from, date_to)
+    url, total_rows = _queue_ds00_download(page)
+    save_path = os.path.join(tempfile.gettempdir(), f"ds00_{date_from}_{date_to}.xls")
+    resp = page.context.request.get(url)
+    if resp.status != 200:
+        raise RuntimeError(f"파일 다운로드 실패 HTTP {resp.status}: {url}")
+    with open(save_path, "wb") as f:
+        f.write(resp.body())
+    orders = _parse_ds00_file(save_path)
+    log.info(f"파싱 {len(orders)}건 (파일 total_rows={total_rows})")
+
+    # 주문일 그룹핑 (파일 날짜가 요청범위를 벗어나면 방어적으로 필터)
+    by_date = {}
+    for o in orders:
+        d = o.get("date", "")
+        if not re.match(r"\d{4}-\d{2}-\d{2}", d):
+            continue
+        if d < date_from or d > date_to:
+            continue
+        by_date.setdefault(d, []).append(o)
+
+    results = {}
+    cur = date.fromisoformat(date_from)
+    end = date.fromisoformat(date_to)
+    while cur <= end:
+        ds = cur.isoformat()
+        results[ds] = _summarize_day(by_date.get(ds, []), ds)
+        cur += timedelta(days=1)
+    return results
+
+
 def scrape_sales(page, target_date=None, date_end=None, progress=None):
-    """확장주문검색2 (DS00) — 판매처별 주문 + 매출 데이터 수집
-    컬럼 매핑 (검증 완료):
-      grid1_shop_id = 판매처
-      grid1_collect_date = 발주일
-      grid1_product_id = 상품코드
-      grid1_name = 상품명
-      grid1_product_name_options = 상품명+옵션
-      grid1_p_options = 옵션명
-      grid1_qty = 주문수량
-      grid1_order_products_qty = 상품수량
-      grid1_amount = 판매가
-      grid1_supply_price = 정산금액
-      grid1_stock = 현재고
-    검색 기준: 주문일 (고객 실제 주문일 — 발주일은 이지어드민 수집일이라 주말이 뭉침)
-    """
+    """확장주문검색2(DS00) 매출 수집 — 다운로드 방식(2026-07-22~).
+    단일 날짜(target_date)면 그날, date_end 지정 시 범위 전체를 '다운로드 1회'로 수집.
+    반환: date_end 없으면 target_date 하루치 요약dict(기존 호출부 호환).
+          date_end 있으면 범위 전체를 하나로 합친 요약dict(date=target_date)."""
+    if target_date is None:
+        target_date = (date.today() - timedelta(days=1)).isoformat()
+    if date_end is None:
+        date_end = target_date
+    results = scrape_sales_range(page, target_date, date_end, progress=progress)
+    if date_end == target_date:
+        return results.get(target_date, _summarize_day([], target_date))
+    merged = []
+    for ds in sorted(results):
+        merged.extend(results[ds]["orders"])
+    return _summarize_day(merged, target_date)
+
+
+def _scrape_sales_screen_DEPRECATED(page, target_date=None, date_end=None, progress=None):
+    """[폐기 2026-07-22] 화면 그리드 스크랩 방식. ACG 계정은 화면에 금액컬럼이 없어 사용 불가.
+    참고용으로 보존. 실제 매출 수집은 scrape_sales_range(다운로드) 사용.
+    (구 컬럼 매핑: grid1_shop_id=판매처 / grid1_amount=판매가 / grid1_supply_price=정산금액 등)"""
     if progress:
         progress("scraping_sales")
     if target_date is None:
@@ -936,14 +1194,17 @@ def fetch_all_data(progress=None, sales_target_date=None, sales_days=1):
 
             # 매출: 롤링 재수집 — 취소/환불/지연주문은 며칠에 걸쳐 발생하므로
             # 최근 sales_days일을 매번 다시 긁어 덮어써야 오차가 누적되지 않음.
-            # (로그인 1번 세션 내에서 날짜만 바꿔 반복 → 캡챠 추가 없음)
+            # 다운로드 방식(2026-07-22~): 범위 '1회 다운로드' 후 날짜 그룹핑(캡차 위험 최소화).
             sales_history = []
             if sales_target_date is not None:
-                sales_history.append(scrape_sales(page, target_date=sales_target_date, progress=progress))
+                date_from = date_to = sales_target_date
             else:
-                for i in range(1, sales_days + 1):
-                    ds = (date.today() - timedelta(days=i)).isoformat()
-                    sales_history.append(scrape_sales(page, target_date=ds, progress=progress))
+                date_to = (date.today() - timedelta(days=1)).isoformat()
+                date_from = (date.today() - timedelta(days=sales_days)).isoformat()
+            day_results = scrape_sales_range(page, date_from, date_to, progress=progress)
+            # 최신 날짜가 sales[0]에 오도록 역순 정렬(기존: 어제부터)
+            for ds in sorted(day_results, reverse=True):
+                sales_history.append(day_results[ds])
             sales = sales_history[0] if sales_history else None
 
             if progress:
@@ -964,47 +1225,33 @@ def fetch_all_data(progress=None, sales_target_date=None, sales_days=1):
 
 
 def batch_rescrape_sales(start_date, end_date, progress=None):
-    """주문일 기준으로 날짜별 매출 재수집 (한번 로그인, 날짜별 루프)
+    """주문일 기준 매출 재수집 — '다운로드 1회'로 범위 전체 수집 후 날짜 그룹핑.
+    (기존 날짜별 루프 = 다운로드 N회 → reCAPTCHA 위험. 범위 1회로 개선 2026-07-22)
 
     Returns: dict of {date_str: sales_data}
     """
-    from datetime import datetime
-    results = {}
-    current = date.fromisoformat(start_date)
-    end = date.fromisoformat(end_date)
-    total_days = (end - current).days + 1
-
     with sync_playwright() as p:
         browser, context, page = get_browser(p)
         try:
             if progress:
-                progress(f"batch_login")
+                progress("batch_login")
             ezadmin_login(page)
             clear_popups(page)
             wait_for_captcha(page, progress=progress, timeout_sec=300)
             clear_popups(page)
 
-            day_num = 0
-            while current <= end:
-                day_num += 1
-                ds = current.isoformat()
-                if progress:
-                    progress(f"batch_sales_{day_num}/{total_days}_{ds}")
-                log.info(f"=== 배치 재수집 {day_num}/{total_days}: {ds} ===")
-                try:
-                    sales = scrape_sales(page, target_date=ds, progress=None)
-                    results[ds] = sales
-                    log.info(f"  → {ds}: {sales['total_count']}건, 정산 {sales['total_settlement']:,}원")
-                except Exception as e:
-                    log.error(f"  → {ds} 수집 실패: {e}")
-                    results[ds] = {"date": ds, "total_amount": 0, "total_settlement": 0,
-                                   "total_count": 0, "by_channel": {}, "by_product": {}, "orders": []}
-                current += timedelta(days=1)
+            if progress:
+                progress(f"batch_download_{start_date}~{end_date}")
+            results = scrape_sales_range(page, start_date, end_date, progress=progress)
 
             if progress:
                 progress("batch_done")
-            log.info(f"배치 재수집 완료: {len(results)}일, 총 {sum(r['total_count'] for r in results.values())}건")
+            log.info(f"배치 재수집 완료: {len(results)}일, "
+                     f"총 {sum(r['total_count'] for r in results.values())}건")
             return results
+        except CaptchaRequired as e:
+            log.error(f"배치 재수집 reCAPTCHA 차단: {e}")
+            raise
         except Exception as e:
             log.error(f"배치 재수집 오류: {e}")
             raise

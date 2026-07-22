@@ -1,6 +1,17 @@
 # ERP 작업 파킹랏
 
-## 2026-07-22 🟡 매출 ₩0 복구 — 원인2개 확정, ①고침 ②대표님 컬럼세팅 대기
+## 2026-07-22 저녁 ✅ 매출 ₩0 완전 해결 — 다운로드 방식으로 전환 성공 (7/15~7/21 복구완료)
+**결론: ACG DS00 화면엔 금액컬럼이 아예 없음(B안 사망 확정). 금액은 '다운로드 양식'에만 → 다운로드 자동화로 최종 해결.**
+- **reCAPTCHA "매번 뜬다"는 전 하치 오판**: `save_file_go()`가 `function.htm`에 `template=recaptcha&action=check_log_web&check_template=DS00` POST → 서버가 `{"error":0|1}` 반환. **error==1일 때만** 이미지캡차(`download_check_invisible.htm`). 정상 다운로드 빈도면 **error=0 = 캡차 없음**(실측 확인). JS: `if(obj.error==1){openwin25(캡차)}else{popup_download_info()→ins_download_worklist()}`.
+- **다운로드 흐름(자동화)**: DS00 검색(주문일) → `download_field=DS00_file_13`('판매데이터 확인용', 금액포함) → `ins_download_worklist(work_template=DS00, work_func=save_file_DS00, par=$("#download_form").serialize())` → `main35_func.php?action=get_download_worklist` 폴링(status==2) → `file_name`(https://ga90.../*.xls, **HTML테이블 형식**) → `page.context.request.get(url)` 다운로드 → `pandas.read_html` 파싱.
+- **파일 컬럼(헤더 row0)**: 주문번호·상품코드·공급처·상품명·판매처·주문수량·상품수량·판매가·상품별판매금액·**상품별정산금액**·결제금액·**정산금액**·**주문일**... **이미 주문단위 dedup됨**(화면 4~7배 중복 없음). 쿠팡은 정산금액=0(별도정산, 기존과 동일).
+- **캡차 회피 설계**: 다운로드 1회당 error 판정 → 날짜별 개별(N회) 대신 **범위 1회 다운로드 후 주문일 그룹핑**. 일일롤링·배치 모두 다운로드 1회.
+- **코드(`logistics/ezadmin_scraper.py`)**: 신설 `scrape_sales_range(page,from,to)`·`_queue_ds00_download`·`_parse_ds00_file`·`_summarize_day`·`CaptchaRequired`. `scrape_sales`·`batch_rescrape_sales`·`fetch_all_data` 전부 다운로드 방식으로 교체. 구 화면스크랩 = `_scrape_sales_screen_DEPRECATED`로 보존. `DS00_DOWNLOAD_FIELD="DS00_file_13"`(양식 바뀌면 이 상수만 갱신).
+- **복구 실행완료**: 물류서버 재시작(새코드) → `POST 8082/api/batch-rescrape {7/15~7/21}`(7일 다운로드1회, Firestore저장 7일) → `POST 8085/api/sales/resync {7/15~7/21}`(313행 반영). **ERP 일간보고 7/21 = 정산₩2,252,676/139건 정상, 7월누적 ₩33,868,317 복구.**
+- **검증값(주문일별 정산)**: 7/15=3,276,413 / 7/16=2,685,356 / 7/17=2,612,496 / 7/18=3,687,481 / 7/19=5,819,207(카카오기획전) / 7/20=3,273,083 / 7/21=2,252,676. 합 1,110건 23,606,712원.
+- ⏳ **남은 것**: ①내일 아침 예약수집 크론(`run_scrape scheduled=True`, sales_days=7=1회다운로드)이 새코드로 정상 도는지 로그 확인. ②볼트 매출보고서 7/15~7/21 재생성(데이터는 이제 흐름, 매출하치 정기산출물). ③reCAPTCHA error=1 발생 시 폴백(현재 CaptchaRequired 발생+로그만 — 필요시 Vision/반자동 추가).
+
+## 2026-07-22 🟡 매출 ₩0 복구 — 원인2개 확정, ①고침 ②대표님 컬럼세팅 대기 (↑위에서 해결됨)
 어제(7/21) "이지어드민 이전이 원인"에서 더 파고들어 **진짜 원인 2개 실측 확정**:
 - **원인① 서버주소 하드코딩 (✅ 고침, 커밋)**: 코드 `BASE=ka04`(bypl 서버) → ACG 실제 작업서버는 **ga69**. ka04로 DS00 열면 "mysqli 연결 불가"→0건. `ezadmin_login`이 **로그인 후 `location.origin`으로 BASE 자동갱신**하도록 수정(`logistics/ezadmin_scraper.py:59~`). 이제 화면 조회 **67행 정상**(대표님 "ACG 연동됨" 실증).
 - **원인② DS00 화면에 금액 컬럼 없음 (⏳ 대표님 출근해 세팅 예정)**: ACG 계정 확장주문검색2 그리드 컬럼 = 주문/배송정보 위주(shop_id·order_id·name·qty·trans_no·o_options·수령자…). **판매가(amount)·정산금액(supply_price)·상품코드(product_id)·현재고 없음.** bypl엔 있었음(옛 코드가 읽던 컬럼: product_name_options·p_options·amount·supply_price·collect_date·product_id·stock).

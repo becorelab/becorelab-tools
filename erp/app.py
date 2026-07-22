@@ -1522,6 +1522,26 @@ async def update_po_status(po_id: int, request: Request, conn=Depends(db)):
     return {"ok": True}
 
 
+@app.delete("/api/purchase-orders/{po_id}")
+async def delete_po(po_id: int, conn=Depends(db)):
+    """발주서 삭제 (품목라인 함께 삭제). 잘못 만든 발주서·중복 복사본 정리용.
+    입고완료(received)·부분입고(partial) 발주서는 재고/입고 이력과 얽혀 있으므로 삭제 차단."""
+    po = conn.execute(
+        "SELECT id, po_number, status, total_amount FROM purchase_orders WHERE id=?", (po_id,)
+    ).fetchone()
+    if not po:
+        raise HTTPException(404, "발주서를 찾을 수 없습니다")
+    if po["status"] in ("received", "partial"):
+        raise HTTPException(
+            400, f"입고 이력이 있는 발주서({po['status']})는 삭제할 수 없습니다. "
+                 f"먼저 상태를 draft/confirmed로 되돌리거나 입고를 취소하세요."
+        )
+    conn.execute("DELETE FROM purchase_order_lines WHERE po_id=?", (po_id,))
+    conn.execute("DELETE FROM purchase_orders WHERE id=?", (po_id,))
+    conn.commit()
+    return {"ok": True, "deleted": po["po_number"]}
+
+
 @app.post("/api/purchase-orders/{po_id}/copy")
 async def copy_po(po_id: int, conn=Depends(db)):
     po = conn.execute("SELECT * FROM purchase_orders WHERE id=?", (po_id,)).fetchone()
