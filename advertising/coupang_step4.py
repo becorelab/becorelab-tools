@@ -16,7 +16,8 @@ import argparse, glob, os, sys
 import pandas as pd
 import warnings; warnings.filterwarnings('ignore')
 
-XFER = '/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/mac window file transfer'
+XFER = os.environ.get('COUPANG_XFER',
+    '/Users/macmini_ky/Library/CloudStorage/GoogleDrive-cky2833@gmail.com/내 드라이브/Claude AI work space/mac window file transfer')
 ACCT = {'rocket': 'A00290275', 'gross': 'A00940134', 'seirab': 'A01707416'}
 
 

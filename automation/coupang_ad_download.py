@@ -26,6 +26,8 @@ KEYWORD_REQUIRED_HEADERS = {
     "광고 노출 지면", "키워드",
 }
 KEYWORD_STRUCTURE_LABEL = "캠페인 > 광고그룹 > 상품 > 키워드"
+LAST_GROSS_INSIGHTS_PATH = None
+LAST_GROSS_INSIGHTS_ERROR = None
 
 
 def validate_keyword_report(xlsx_path):
@@ -52,6 +54,9 @@ def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10
                            create_first=False, create_date_from=None, create_date_to=None):
     """로그인 → (옵션: 보고서 생성) → 보고서 목록 스캔 → 전체 다운로드
     create_first=True: 같은 로그인 세션으로 어제자(또는 지정기간) 보고서를 먼저 생성 (논스톱 파이프라인)"""
+    global LAST_GROSS_INSIGHTS_PATH, LAST_GROSS_INSIGHTS_ERROR
+    LAST_GROSS_INSIGHTS_PATH = None
+    LAST_GROSS_INSIGHTS_ERROR = None
     acct = ACCOUNTS[account_key]
     print(f"[{acct['name']}] 쿠팡 광고 보고서 자동 다운로드")
     print(f"  headless={headless}, max_reports={max_reports}")
@@ -239,6 +244,21 @@ def login_and_download_all(account_key="chaewoom", headless=True, max_reports=10
                 except Exception as e2:
                     print(f"  ❌ [{i+1}/{len(dl_buttons)}] 실패: {e2}")
 
+        # 4) 채움컴퍼니는 같은 인증 세션으로 그로스 상품별 판매 리포트까지 수집한다.
+        #    별도 로그인/쿠키 브릿지를 만들지 않아 Akamai 접촉을 최소화한다.
+        if account_key == "chaewoom":
+            print("\n[4/4] 그로스 오가닉 포함 전체판매 리포트...")
+            try:
+                from coupang_gross_insights_download import download_report_in_page
+                data_date = datetime.now().date() - timedelta(days=1)
+                LAST_GROSS_INSIGHTS_PATH = str(
+                    download_report_in_page(page, data_date, force=True)
+                )
+                print(f"  ✅ {os.path.basename(LAST_GROSS_INSIGHTS_PATH)}")
+            except Exception as e:
+                LAST_GROSS_INSIGHTS_ERROR = f"{type(e).__name__}: {e}"
+                print(f"  ❌ 그로스 전체판매 다운로드 실패: {LAST_GROSS_INSIGHTS_ERROR}")
+
         # 쿠키 저장
         cookies = context.cookies()
         with open(os.path.join(DOWNLOAD_DIR, "cookies.json"), "w") as f:
@@ -319,3 +339,6 @@ if __name__ == "__main__":
 
     if not downloaded:
         sys.exit(1)
+    if account == "chaewoom" and LAST_GROSS_INSIGHTS_ERROR:
+        # 광고 XLSX/JSON은 보존하되 전체판매 누락을 성공으로 숨기지 않는다.
+        sys.exit(2)

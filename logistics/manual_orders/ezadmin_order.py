@@ -9,10 +9,10 @@
 사용:
   python3 ezadmin_order.py <xls파일경로>                    # 수동판매처(10287)에 발주
   python3 ezadmin_order.py <파일> --seller-code 10287       # 판매처 코드 지정
-  python3 ezadmin_order.py <파일> --dry-run                 # 업로드만(step1) 하고 완주 안 함
+  python3 ezadmin_order.py <파일> --upload-only             # 업로드만(step1) 하고 완주 안 함
 
 핵심 노하우 (2026-07-16 하루 종일 뚫은 것):
-  - 캡차: Claude Vision (ezadmin_scraper._read_captcha_with_vision)
+  - 보안코드: OpenAI Vision → 기존 Anthropic Vision → 브라우저 수동입력 순서
   - 발주페이지 진입: move_page35('DC10') JS함수 (URL 직접=mysqli에러)
   - 광고팝업: #pagecode-popup 등 MutationObserver 실시간 차단 (하나 닫으면 또 뜸)
   - 업로드 모달: .upload_file[rowid=N] span 클릭 → 모달 → input[type=file] set → '업로드'
@@ -22,8 +22,11 @@
 
 ⚠️ 실제 물류 출고가 나감. 파일 내용(수취인·주소·수량) 반드시 사전 검수.
 """
-import sys, os, time, argparse
-sys.path.insert(0, "/Users/macmini_ky/ClaudeAITeam/logistics")
+import sys, os, time, argparse, tempfile
+from pathlib import Path
+
+LOGISTICS_DIR = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(LOGISTICS_DIR))
 from playwright.sync_api import sync_playwright
 import ezadmin_scraper as ez
 
@@ -52,7 +55,7 @@ def place_order(xls_path, seller_code="10287", dry_run=False, headless=False):
 
     dialogs = []
     with sync_playwright() as p:
-        browser, ctx, page = ez.get_browser(p)
+        browser, ctx, page = ez.get_browser(p, headless=headless)
         page.on("dialog", lambda d: (dialogs.append(d.message), d.accept()))
         try:
             ez.ezadmin_login(page)
@@ -105,7 +108,11 @@ def place_order(xls_path, seller_code="10287", dry_run=False, headless=False):
             done = any("완료" in d for d in dialogs)
             return done, ("발주 완료" if done else f"완주 후 완료 미확인. dialogs={dialogs[-2:]}"), ("done" if done else "error")
         except Exception as e:
-            page.screenshot(path="/tmp/ezadmin_order_err.png")
+            screenshot_path = Path(tempfile.gettempdir()) / "ezadmin_order_err.png"
+            try:
+                page.screenshot(path=str(screenshot_path))
+            except Exception:
+                pass
             return False, f"예외: {str(e)[:80]}", "error"
         finally:
             time.sleep(1); browser.close()
@@ -115,9 +122,18 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("xls_path")
     ap.add_argument("--seller-code", default="10287")
-    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument(
+        "--upload-only", action="store_true",
+        help="파일을 이지어드민에 업로드(step1)만 하고 실제 발주 완료는 하지 않음",
+    )
+    ap.add_argument(
+        "--dry-run", action="store_true",
+        help="하위 호환 별칭. 로컬 검수 전용이 아니라 step1 업로드까지 수행함",
+    )
     ap.add_argument("--headless", action="store_true")
     a = ap.parse_args()
-    ok, msg, state = place_order(a.xls_path, a.seller_code, a.dry_run, a.headless)
+    ok, msg, state = place_order(
+        a.xls_path, a.seller_code, a.upload_only or a.dry_run, a.headless
+    )
     print(("✅ " if ok else "❌ ") + f"[{state}] {msg}")
     sys.exit(0 if ok else 1)

@@ -10,28 +10,63 @@ import os
 import base64
 import tempfile
 import io
+import platform
 import requests
 from datetime import date, timedelta
+from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-from config import EZADMIN
+try:
+    from config import EZADMIN as _LEGACY_EZADMIN
+except (ImportError, ModuleNotFoundError):
+    _LEGACY_EZADMIN = {}
+
+
+def _load_local_env() -> None:
+    """Load logistics/.env without adding a python-dotenv dependency."""
+    env_path = Path(__file__).resolve().with_name(".env")
+    if not env_path.exists():
+        return
+    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+_load_local_env()
+EZADMIN = {
+    "url": os.environ.get("EZADMIN_URL", _LEGACY_EZADMIN.get("url", "")),
+    "domain": os.environ.get("EZADMIN_DOMAIN", _LEGACY_EZADMIN.get("domain", "")),
+    "id": os.environ.get("EZADMIN_ID", _LEGACY_EZADMIN.get("id", "")),
+    "pw": os.environ.get("EZADMIN_PASSWORD", _LEGACY_EZADMIN.get("pw", "")),
+}
 
 log = logging.getLogger(__name__)
 
 BASE = "https://ka04.ezadmin.co.kr"
 
 
-def get_browser(p):
-    browser = p.chromium.launch(
-        headless=False,
-        args=["--disable-blink-features=AutomationControlled"],
-    )
-    context = browser.new_context(
-        user_agent=(
+def get_browser(p, headless=False):
+    if platform.system() == "Windows":
+        user_agent = (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/131.0.0.0 Safari/537.36"
+        )
+    else:
+        user_agent = (
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "
             "Chrome/131.0.0.0 Safari/537.36"
-        ),
+        )
+    browser = p.chromium.launch(
+        headless=headless,
+        args=["--disable-blink-features=AutomationControlled"],
+    )
+    context = browser.new_context(
+        user_agent=user_agent,
         viewport={"width": 1440, "height": 900},
     )
     page = context.new_page()
@@ -43,6 +78,12 @@ def get_browser(p):
 
 def ezadmin_login(page):
     """로그인 + 보안코드 대기 (www.ezadmin.co.kr 메인 로그인)"""
+    missing = [key for key, value in EZADMIN.items() if not value]
+    if missing:
+        raise RuntimeError(
+            "이지어드민 로그인 설정이 없습니다: " + ", ".join(missing)
+            + ". logistics/.env 또는 Windows 환경변수를 설정하세요."
+        )
     log.info("이지어드민 로그인 중...")
     page.goto(EZADMIN["url"], timeout=30000, wait_until="domcontentloaded")
     page.wait_for_timeout(3000)
@@ -80,31 +121,64 @@ def ezadmin_login(page):
 
 
 def _find_anthropic_key():
-    """클로드 키 탐색: 환경변수 → logistics/.env → sourcing/analyzer/.env (2026-07-16 Gemini 유출로 전환)"""
-    key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if key:
-        return key
-    for env_path in (
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"),
-        "/Users/macmini_ky/ClaudeAITeam/sourcing/analyzer/.env",
-    ):
+    return os.environ.get("ANTHROPIC_API_KEY", "")
+
+
+def _read_captcha_with_openai(screenshot_path, max_retries=2):
+    """Read the captcha with OpenAI Vision when an API key is configured."""
+    api_key = os.environ.get("OPENAI_API_KEY", "")
+    if not api_key:
+        return None
+    try:
+        img_b64 = base64.standard_b64encode(Path(screenshot_path).read_bytes()).decode()
+    except Exception as e:
+        log.error(f"캡차 이미지 읽기 실패: {e}")
+        return None
+
+    body = {
+        "model": os.environ.get("OPENAI_VISION_MODEL", "gpt-5.6"),
+        "messages": [{
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "이미지의 보안코드 숫자 4자리만 출력하세요."},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/png;base64,{img_b64}"},
+                },
+            ],
+        }],
+        "max_completion_tokens": 20,
+    }
+    for attempt in range(max_retries):
         try:
-            if os.path.exists(env_path):
-                with open(env_path, "r", encoding="utf-8") as f:
-                    for line in f:
-                        if line.startswith("ANTHROPIC_API_KEY="):
-                            return line.split("=", 1)[1].strip()
+            response = requests.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json=body,
+                timeout=30,
+            )
+            if response.status_code != 200:
+                log.error(f"OpenAI Vision API {response.status_code} (시도 {attempt + 1})")
+                continue
+            payload = response.json()
+            output_text = payload["choices"][0]["message"]["content"]
+            digits = "".join(char for char in output_text if char.isdigit())
+            if len(digits) >= 4:
+                return digits[:4]
         except Exception as e:
-            log.warning(f".env 탐색 실패({env_path}): {e}")
-    return ""
+            log.error(f"OpenAI Vision 호출 실패 (시도 {attempt + 1}): {e}")
+    return None
 
 
 def _read_captcha_with_vision(screenshot_path, max_retries=2):
-    """스크린샷에서 보안코드 숫자를 Claude Vision으로 읽기 (Gemini 키 유출로 2026-07-16 전환)"""
+    """Use OpenAI first, then legacy Anthropic; return None for manual entry."""
+    openai_code = _read_captcha_with_openai(screenshot_path, max_retries=max_retries)
+    if openai_code:
+        return openai_code
     import base64
     api_key = _find_anthropic_key()
     if not api_key:
-        log.error("ANTHROPIC_API_KEY를 찾을 수 없음")
+        log.info("Vision API 키 없음 — 브라우저 수동 보안코드 입력으로 전환")
         return None
 
     try:
@@ -247,7 +321,7 @@ def wait_for_captcha(page, progress=None, timeout_sec=120):
             page.screenshot(path=screenshot_path)
         log.info(f"스크린샷 촬영 완료: {screenshot_path} (크롭={shot})")
 
-        # Claude Vision으로 읽기
+        # 설정된 Vision provider로 읽기 (없으면 이후 수동 입력으로 폴백)
         code = _read_captcha_with_vision(screenshot_path)
         if not code:
             log.warning(f"보안코드 인식 실패 (시도 {attempt+1}/3)")
