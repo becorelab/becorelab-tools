@@ -403,7 +403,8 @@ def clear_popups(page):
             if (covers && floating && z >= 1000) el.remove();
             if (el.tagName === 'IFRAME' && /ad|banner|promo|epost|notice|globox/i.test(el.src || '')) el.remove();
         });
-        document.body.style.overflow = 'auto';
+        // ⚠️ document.body는 로그인 리다이렉트 직후 DOM 미완료 시 null일 수 있음(2026-07-23 크론 크래시)
+        if (document.body) document.body.style.overflow = 'auto';
     """)
     page.wait_for_timeout(500)
 
